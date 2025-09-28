@@ -3,6 +3,7 @@ export * from "./src/lib/hooks";
 export * from "./src/lib/apiSlice";
 export * from "./src/features/auth/authReducer";
 export * from "./src/features/auth/authApiSlice";
+export * from "./src/features/auth/authActions";
 export * from "./src/features/enums/enumReducer";
 export * from "./src/features/enums/enumsApiSlice";
 export * from "./src/features/books/booksApiSlice";

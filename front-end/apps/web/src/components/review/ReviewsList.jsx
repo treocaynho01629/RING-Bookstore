@@ -10,7 +10,7 @@ import { useGetMyReviewsQuery } from "../../features/reviews/reviewsApiSlice";
 import { Message, Title } from "@ring/ui/Components";
 import { Link } from "react-router";
 import { debounce } from "lodash-es";
-import useAuth from "@ring/auth/useAuth";
+import useAuth from "../../hooks/useAuth";
 import {
   LoadContainer,
   MessageContainer,

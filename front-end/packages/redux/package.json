@@ -33,6 +33,10 @@
       "import": "./dist/src/features/auth/authApiSlice.js",
       "require": "./dist/src/features/auth/authApiSlice.cjs"
     },
+    "./authActions": {
+      "import": "./dist/src/features/auth/authActions.js",
+      "require": "./dist/src/features/auth/authActions.cjs"
+    },
     "./enumReducer": {
       "import": "./dist/src/features/enums/enumReducer.js",
       "require": "./dist/src/features/enums/enumReducer.cjs"
@@ -92,7 +96,11 @@
   "peerDependencies": {
     "@reduxjs/toolkit": "^2.8.2",
     "lodash-es": "^4.17.21",
+    "next": "^15.1.6",
     "react-redux": "^9.2.0",
     "redux-persist": "^6.0.0"
+  },
+  "dependencies": {
+    "async-mutex": "^0.5.0"
   }
 }

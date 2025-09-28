@@ -3,10 +3,9 @@ import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import useReachable from "@ring/shared/useReachable";
 import useGetEnums from "@ring/shared/useGetEnums";
-import RequireAuth from "@ring/auth/RequireAuth";
-import PersistLogin from "@ring/auth/PersistLogin";
 import FallbackLogo from "@ring/ui/FallbackLogo";
-import Layout from "@ring/ui/Layout";
+import RequireAuth from "./components/authorize/RequireAuth";
+import PersistLogin from "./components/authorize/PersistLogin";
 import PageLayout from "./components/layout/PageLayout";
 import "react-multi-carousel/lib/styles.css";
 import "simplebar-react/dist/simplebar.min.css";
@@ -19,7 +18,6 @@ function App() {
     [
       {
         path: "/",
-        element: <Layout />,
         hydrateFallbackElement: <FallbackLogo />,
         children: [
           {
@@ -32,14 +30,14 @@ function App() {
           {
             path: "unauthorized",
             lazy: async () => {
-              let Unauthorized = await import("@ring/ui/Unauthorized");
+              let Unauthorized = await import("./pages/Unauthorized");
               return { Component: Unauthorized.default };
             },
           },
           {
             path: "*",
             lazy: async () => {
-              let Missing = await import("@ring/ui/Missing");
+              let Missing = await import("./pages/Missing");
               return { Component: Missing.default };
             },
           },

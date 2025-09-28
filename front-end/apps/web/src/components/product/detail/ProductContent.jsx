@@ -5,7 +5,7 @@ import { currencyFormat, numFormat } from "@ring/shared/utils/convert";
 import { getBookType } from "@ring/shared/enums/book";
 import { getImageSize } from "@ring/shared/enums/image";
 import { useGetMyAddressQuery } from "../../../features/addresses/addressesApiSlice";
-import useAuth from "@ring/auth/useAuth";
+import useAuth from "../../../hooks/useAuth";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import Skeleton from "@mui/material/Skeleton";

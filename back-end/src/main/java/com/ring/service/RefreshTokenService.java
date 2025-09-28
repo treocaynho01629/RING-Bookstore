@@ -12,10 +12,10 @@ public interface RefreshTokenService {
     /**
      * Refreshes the authentication token using the refresh token from the HTTP request.
      *
-     * @param request The HTTP request containing the refresh token (typically in a cookie or header).
+     * @param token Refresh token value.
      * @return The updated {@link Account} with a new authentication token.
      */
-    Account refreshToken(HttpServletRequest request);
+    Account refreshToken(String token);
 
     /**
      * Generates a response cookie containing a refresh token for the given user account.
@@ -29,7 +29,6 @@ public interface RefreshTokenService {
      * Clears the refresh token cookie by generating an empty cookie.
      */
     void clearRefreshToken(String token);
-
 
     /**
      * Clears the refresh token cookie by generating an empty cookie.

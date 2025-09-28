@@ -8,10 +8,10 @@ import { Link, useNavigate, useSearchParams, useParams } from "react-router";
 import { useCreatePaymentLinkMutation } from "../features/orders/ordersApiSlice";
 import { AuthTitle, ConfirmButton } from "@ring/ui/AuthComponents";
 import { Instruction } from "@ring/ui/Components";
-import SimpleNavbar from "@ring/ui/SimpleNavbar";
 import HighlightOff from "@mui/icons-material/HighlightOff";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import TaskAlt from "@mui/icons-material/TaskAlt";
+import SimpleNavbar from "../components/navbar/SimpleNavbar";
 
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
 const ReCaptcha = lazy(() => import("@ring/auth/ReCaptcha"));

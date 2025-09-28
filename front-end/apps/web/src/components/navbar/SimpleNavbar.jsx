@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router";
-import { useColorScheme } from "@mui/material";
+import { useColorScheme } from "@mui/material/styles";
 import ContactSupportOutlined from "@mui/icons-material/ContactSupportOutlined";
 import ContrastOutlined from "@mui/icons-material/ContrastOutlined";
 import LightModeOutlined from "@mui/icons-material/LightModeOutlined";

@@ -6,7 +6,6 @@ import {
   memo,
   useCallback,
 } from "react";
-import { Box, Skeleton, useMediaQuery, Grid } from "@mui/material";
 import {
   useParams,
   Navigate,
@@ -15,10 +14,14 @@ import {
   useNavigate,
 } from "react-router";
 import { useGetShopQuery } from "../features/shops/shopsApiSlice";
-import useTitle from "@ring/shared/useTitle";
 import { booksAmount, pageSizes, sortBooksBy } from "../utils/filters";
 import { useGetBooksQuery } from "../features/books/booksApiSlice";
 import { debounce, isEqual } from "lodash-es";
+import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import Grid from "@mui/material/Grid";
+import useTitle from "@ring/shared/useTitle";
 import CustomBreadcrumbs from "../components/custom/CustomBreadcrumbs";
 import ShopDetailComponent from "../components/shop/ShopDetailComponent";
 import FilterDrawer from "../components/product/filter/FilterDrawer";

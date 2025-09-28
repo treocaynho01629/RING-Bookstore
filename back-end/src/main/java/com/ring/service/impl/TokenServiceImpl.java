@@ -3,8 +3,11 @@ package com.ring.service.impl;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
 import com.google.common.hash.Hashing;
+import com.ring.common.AppConstants;
 import com.ring.config.security.TokenSettings;
 import com.ring.dto.projection.images.IImage;
+import com.ring.exception.HttpResponseException;
+import com.ring.exception.TokenRefreshException;
 import com.ring.model.entity.Account;
 import com.ring.repository.ImageRepository;
 import com.ring.service.TokenService;
@@ -17,6 +20,9 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,6 +40,7 @@ import java.util.function.Function;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TokenServiceImpl implements TokenService {
 
     private final TokenSettings tokenSettings;
@@ -242,7 +249,7 @@ public class TokenServiceImpl implements TokenService {
      */
     public ResponseCookie generateRefreshCookie(String value) {
         return ResponseCookie
-                .from("refreshToken", value)
+                .from(AppConstants.REFRESH_TOKEN, value)
                 .path("/api/auth")
                 .maxAge(tokenSettings.getRefreshTokenExpiration())
                 .httpOnly(true)
@@ -254,12 +261,34 @@ public class TokenServiceImpl implements TokenService {
     /**
      * Extracts the refresh token value from an HTTP request's cookies.
      *
-     * @param request The HTTP request containing the cookies.
+     * @param request The HTTP request.
      * @return The refresh token value, or null if not found.
      */
-    public String getRefreshTokenFromCookie(HttpServletRequest request) {
-        Cookie cookie = WebUtils.getCookie(request, "refreshToken");
-        return cookie != null ? cookie.getValue() : null;
+    public String extractRefreshToken(HttpServletRequest request) {
+
+        // Cookie
+        Cookie cookie = WebUtils.getCookie(request, AppConstants.REFRESH_TOKEN);
+        if (cookie != null && !cookie.getValue().isEmpty()) {
+            log.debug("Using refresh token from cookie");
+            return cookie.getValue();
+        }
+
+        // Custom header
+        String customHeaderToken = request.getHeader("X-Refresh-Token");
+        if (customHeaderToken != null && !customHeaderToken.isEmpty()) {
+            log.debug("Using refresh token from X-Refresh-Token header");
+            return customHeaderToken;
+        }
+
+        // Authorization header
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith(AppConstants.TOKEN_PREFIX)) {
+            String token = authHeader.substring(AppConstants.TOKEN_PREFIX.length());
+            log.debug("Using refresh token from Authorization header");
+            return token;
+        }
+
+        return null;
     }
 
     /**
@@ -269,7 +298,7 @@ public class TokenServiceImpl implements TokenService {
      */
     public ResponseCookie clearRefreshCookie() {
         return ResponseCookie
-                .from("refreshToken", null)
+                .from(AppConstants.REFRESH_TOKEN, null)
                 .path("/api/auth")
                 .build();
     }

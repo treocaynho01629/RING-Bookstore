@@ -13,25 +13,9 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./PersistLogin": {
-      "import": "./dist/src/components/PersistLogin.js",
-      "require": "./dist/src/components/PersistLogin.cjs"
-    },
-    "./RequireAuth": {
-      "import": "./dist/src/components/RequireAuth.js",
-      "require": "./dist/src/components/RequireAuth.cjs"
-    },
     "./ReCaptcha": {
       "import": "./dist/src/components/ReCaptcha.js",
       "require": "./dist/src/components/ReCaptcha.cjs"
-    },
-    "./useAuth": {
-      "import": "./dist/src/hooks/useAuth.js",
-      "require": "./dist/src/hooks/useAuth.cjs"
-    },
-    "./useLogout": {
-      "import": "./dist/src/hooks/useLogout.js",
-      "require": "./dist/src/hooks/useLogout.cjs"
     },
     "./useReCaptcha": {
       "import": "./dist/src/hooks/useReCaptcha.js",
@@ -44,11 +28,7 @@
     "lint": "eslint \"**/*.{ts,tsx,js,jsx}\"",
     "update-dependencies": "npx npm-check-updates -u"
   },
-  "dependencies": {
-    "@ring/redux": "*",
-    "@ring/ui": "*",
-    "jwt-decode": "^4.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@ring/eslint-config": "*",
     "@types/react": "^19.1.9",
@@ -58,9 +38,7 @@
   },
   "peerDependencies": {
     "@mui/material": "^7.2.0",
-    "notistack": "^3.0.2",
     "react": "^18.0.0 || ^19.0.0",
-    "react-router": "^7.6.3",
     "react-redux": "^9.2.0"
   }
 }

@@ -7,7 +7,6 @@ import com.ring.repository.AccountRepository;
 import com.ring.repository.RefreshTokenRepository;
 import com.ring.service.RefreshTokenService;
 import com.ring.service.TokenService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
@@ -25,11 +24,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 	/**
 	 * Refreshes the authentication token using the refresh token from the HTTP request.
 	 *
-	 * @param request The HTTP request containing the refresh token in the cookie.
+	 * @param token Refresh token value.
 	 * @return The updated {@link Account} with a new authentication token.
 	 */
-	public Account refreshToken(HttpServletRequest request) {
-		String token = tokenService.getRefreshTokenFromCookie(request);
+	public Account refreshToken(String token) {
 		if (token == null || token.isEmpty()) throw new TokenRefreshException(null, "Missing refresh token!");
 
 		//Find token

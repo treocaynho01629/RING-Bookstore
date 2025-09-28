@@ -20,7 +20,7 @@ import {
 } from "../custom/TableComponents";
 import { StyledCheckbox } from "../custom/CartComponents";
 import useDeepEffect from "@ring/shared/useDeepEffect";
-import useAuth from "@ring/auth/useAuth";
+import useAuth from "../../hooks/useAuth";
 import Button from "@mui/material/Button";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";

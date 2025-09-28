@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useRef, useState, lazy, Suspense } from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
-import { Skeleton } from "@mui/material";
+import Skeleton from "@mui/material/Skeleton";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import Carousel from "react-multi-carousel";

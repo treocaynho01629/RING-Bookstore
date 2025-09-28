@@ -4,6 +4,7 @@ import com.ring.dto.request.AuthenticationRequest;
 import com.ring.dto.request.RegisterRequest;
 import com.ring.dto.request.ResetPassRequest;
 import com.ring.dto.response.AuthenticationResponse;
+import com.ring.exception.HttpResponseException;
 import com.ring.model.entity.Account;
 import com.ring.service.AuthenticationService;
 import com.ring.service.RefreshTokenService;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -77,13 +79,19 @@ public class AuthenticationController {
 	/**
 	 * Refreshes the authentication token using the refresh token from the HTTP request.
 	 *
-	 * @param request The HTTP request containing the refresh token in the cookie.
+	 * @param request 		The HTTP request containing the refresh token in the cookie.
+	 * @param refreshToken  The refresh token value.
 	 * @return a {@link ResponseEntity} containing the new {@link AuthenticationResponse} with the refreshed JWT token.
 	 */
 	@GetMapping("/refresh-token")
-	public ResponseEntity<AuthenticationResponse> refreshToken(HttpServletRequest request) {
+	public ResponseEntity<AuthenticationResponse> refreshToken(HttpServletRequest request,
+		   @RequestParam(required = false) String refreshToken) {
+
 		//Generate new token
-		Account auth = refreshService.refreshToken(request);
+		String token = refreshToken != null ? refreshToken : tokenService.extractRefreshToken(request);
+		if (token == null) throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Phải bao gồm refresh token");
+
+		Account auth = refreshService.refreshToken(token);
 		String jwtToken = tokenService.generateAccessToken(auth);
 
 		return ResponseEntity.ok().body(new AuthenticationResponse(jwtToken));

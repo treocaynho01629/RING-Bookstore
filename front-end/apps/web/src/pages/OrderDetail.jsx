@@ -8,7 +8,7 @@ import {
 } from "react-router";
 import { TabContentContainer } from "../components/custom/ProfileComponents";
 import { useGetOrderDetailQuery } from "../features/orders/ordersApiSlice";
-import { Dialog } from "@mui/material";
+import Dialog from "@mui/material/Dialog";
 import { useState } from "react";
 import OrderDetailComponent from "../components/order/OrderDetailComponent";
 

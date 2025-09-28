@@ -1,14 +1,17 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { clearAuth, setAuth } from "../features/auth/authReducer";
+import { clearAuth, setAuth } from "../features/auth/authActions";
 import type {
   FetchArgs,
   BaseQueryApi,
   BaseQueryFn,
   FetchBaseQueryError,
   FetchBaseQueryMeta,
+  FetchBaseQueryArgs,
 } from "@reduxjs/toolkit/query";
 import type { RootState } from "./store";
+import { Mutex } from "async-mutex";
 
+const mutex = new Mutex();
 const baseQuery: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -16,21 +19,24 @@ const baseQuery: BaseQueryFn<
   {},
   FetchBaseQueryMeta
 > = async (args, api, extraOptions) => {
+  let baseQueryParams: FetchBaseQueryArgs = {};
+
   // Get base url
   const baseUrl = (api.getState() as RootState).baseUrl;
+  if (baseUrl) {
+    baseQueryParams.baseUrl = baseUrl;
+  }
 
-  // Call fetchBaseQuery with dynamic baseUrl and credentials
-  return fetchBaseQuery({
-    baseUrl,
-    credentials: "include",
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth.token;
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
+  // Token
+  const token = (api.getState() as RootState).auth.token;
+  if (token) {
+    baseQueryParams.prepareHeaders = (headers, { getState }) => {
+      headers.set("Authorization", `Bearer ${token}`);
       return headers;
-    },
-  })(args, api, extraOptions);
+    };
+  }
+
+  return fetchBaseQuery(baseQueryParams)(args, api, extraOptions);
 };
 
 const baseQueryWithRefresh = async (
@@ -38,32 +44,64 @@ const baseQueryWithRefresh = async (
   api: BaseQueryApi,
   extraOptions: {}
 ) => {
+  // Wait until the mutex is available without locking it
+  await mutex.waitForUnlock();
+
   let result = await baseQuery(args, api, extraOptions);
 
+  //Token expired
   if (result?.meta?.response?.status === 401) {
-    //Token expired
-    const refreshResult = await baseQuery(
-      "/api/auth/refresh-token",
-      api,
-      extraOptions
-    );
+    // Checking whether the mutex is locked
+    if (!mutex.isLocked()) {
+      const release = await mutex.acquire();
+      try {
+        //Auto refresh
+        const refreshResult = await baseQuery(
+          {
+            url: "/api/auth/refresh-token",
+            method: "GET",
+            credentials: "include",
+          },
+          api,
+          extraOptions
+        );
+        const { data, error } = refreshResult;
 
-    //Auto refresh
-    const { data, error } = refreshResult;
+        // Refresh succeed
+        if (data) {
+          // Set new auth token
+          const { token } = data as { token: string };
+          api.dispatch(setAuth(token));
+          result = await baseQuery(args, api, extraOptions); // Refetch
 
-    if (data) {
-      const { token } = data as { token: string };
-      api.dispatch(setAuth(token)); //Re-auth
-      result = await baseQuery(args, api, extraOptions); //Refetch
-    } else if (error) {
-      console.error(error);
+          // Refresh failed
+        } else if (error) {
+          console.error(error);
 
-      //Logout
-      await baseQuery("/api/auth/logout", api, extraOptions);
-      api.dispatch(clearAuth());
-      api.dispatch(apiSlice.util.resetApiState());
+          //Logout
+          await baseQuery(
+            {
+              url: "/api/auth/logout",
+              method: "DELETE",
+              credentials: "include",
+            },
+            api,
+            extraOptions
+          );
+          api.dispatch(clearAuth());
+          api.dispatch(apiSlice.util.resetApiState());
 
-      return refreshResult;
+          console.log("LOGOUT");
+          return refreshResult;
+        }
+      } finally {
+        // Release must be called once the mutex should be released again.
+        release();
+      }
+    } else {
+      // Wait until the mutex is available without locking it
+      await mutex.waitForUnlock();
+      result = await baseQuery(args, api, extraOptions);
     }
   }
 

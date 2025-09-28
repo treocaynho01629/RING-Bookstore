@@ -6,7 +6,7 @@ import { Grow } from "@mui/material";
 import { TransitionGroup } from "react-transition-group";
 import useTitle from "@ring/shared/useTitle";
 import useReCaptcha from "@ring/auth/useReCaptcha";
-import SimpleNavbar from "@ring/ui/SimpleNavbar";
+import SimpleNavbar from "../components/navbar/SimpleNavbar";
 
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
 const RegisterTab = lazy(() => import("../components/authorize/RegisterTab"));

@@ -20,7 +20,7 @@ import { getPaymentType } from "@ring/shared/enums/payment";
 import { getShippingType } from "@ring/shared/enums/shipping";
 import useTitle from "@ring/shared/useTitle";
 import useDeepEffect from "@ring/shared/useDeepEffect";
-import useAuth from "@ring/auth/useAuth";
+import useAuth from "../../hooks/useAuth";
 import useReCaptcha from "@ring/auth/useReCaptcha";
 import Button from "@mui/material/Button";
 import Table from "@mui/material/Table";

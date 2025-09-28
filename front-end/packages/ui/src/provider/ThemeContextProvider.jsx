@@ -2,8 +2,8 @@ import {
   ThemeProvider as MUIThemeProvider,
   StyledEngineProvider,
 } from "@mui/material/styles";
-import { CssBaseline } from "@mui/material";
 import { theme as baseTheme } from "../lib/theme";
+import CssBaseline from "@mui/material/CssBaseline";
 
 export default function ThemeContextProvider({ theme, children }) {
   return (

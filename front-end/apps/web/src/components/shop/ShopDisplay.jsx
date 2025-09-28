@@ -4,7 +4,7 @@ import {
 } from "../../features/shops/shopsApiSlice";
 import { Link, useLocation, useNavigate } from "react-router";
 import { numFormat } from "@ring/shared/utils/convert";
-import useAuth from "@ring/auth/useAuth";
+import useAuth from "../../hooks/useAuth";
 import {
   ShopContainer,
   ShopInfo,

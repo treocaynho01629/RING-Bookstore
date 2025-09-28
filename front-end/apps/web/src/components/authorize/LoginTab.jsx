@@ -9,8 +9,8 @@ import {
 } from "@ring/ui/AuthComponents";
 import { useAuthenticateMutation } from "@ring/redux/authApiSlice";
 import { Instruction } from "@ring/ui/Components";
-import useAuth from "@ring/auth/useAuth";
-import useLogout from "@ring/auth/useLogout";
+import useAuth from "../../hooks/useAuth";
+import useLogout from "../../hooks/useLogout";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -28,7 +28,7 @@ const LoginTab = ({
   generateReCaptchaToken,
 }) => {
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-  const { persist, username: loginedUser, setAuth, setPersist } = useAuth();
+  const { persist, username: loginedUser, setPersist } = useAuth();
   const [authenticate, { isLoading, isSuccess, isUninitialized }] =
     useAuthenticateMutation();
   const signOut = useLogout();
@@ -75,10 +75,7 @@ const LoginTab = ({
     })
       .unwrap()
       .then((data) => {
-        const { token } = data;
-
-        //Store access token to auth
-        setAuth(token);
+        // Set auth persist
         if (currPersist) setPersist(true);
 
         //Queue snack

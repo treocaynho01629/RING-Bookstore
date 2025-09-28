@@ -5,7 +5,7 @@ import { MobileExtendButton } from "@ring/ui/Components";
 import { numFormat } from "@ring/shared/utils/convert";
 import { getOrderStatus } from "@ring/shared/enums/order";
 import { getUserRole } from "@ring/shared/enums/user";
-import useAuth from "@ring/auth/useAuth";
+import useAuth from "../../hooks/useAuth";
 import List from "@mui/material/List";
 import Collapse from "@mui/material/Collapse";
 import Avatar from "@mui/material/Avatar";

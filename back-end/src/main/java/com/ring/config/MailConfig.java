@@ -51,16 +51,16 @@ public class MailConfig {
      */
     @Bean
     public JavaMailSender javaMailSender() {
+
         try {
             if (mailHost == null || mailPort == null || mailUsername == null || mailPassword == null) {
-                System.err
-                        .println("Mail configuration is invalid or missing. Mail functionality will not be available.");
+                System.err.println("Mail configuration is invalid or missing. Mail functionality will not be available.");
                 return new JavaMailSenderImpl(); // Return default
             }
 
-            JavaMailSenderImpl mailSender = getJavaMailSender();
-            return mailSender;
+            return getJavaMailSender();
         } catch (Exception e) {
+
             System.err.println("Error initializing JavaMailSender: " + e.getMessage());
             return new JavaMailSenderImpl(); // Return default
         }

@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { useState, lazy, Suspense } from "react";
 import { useParams } from "react-router";
 import useReCaptcha from "@ring/auth/useReCaptcha";
-import SimpleNavbar from "@ring/ui/SimpleNavbar";
+import SimpleNavbar from "../components/navbar/SimpleNavbar";
 
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
 const ForgotTab = lazy(() => import("../components/authorize/ForgotTab"));

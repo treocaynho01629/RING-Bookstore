@@ -54,7 +54,6 @@ const reducers = {
   coupon: persistReducer(couponPersistConfig, couponReducer), //COUPON
 };
 
-const baseUrl = import.meta.env.VITE_API_URL;
 const devTools = import.meta.env.VITE_NODE_ENV === "development";
 
 export default function ViteStoreProvider({ children }) {
@@ -62,7 +61,6 @@ export default function ViteStoreProvider({ children }) {
     <StoreProvider
       {...{
         reducers,
-        baseUrl,
         devTools,
       }}
     >

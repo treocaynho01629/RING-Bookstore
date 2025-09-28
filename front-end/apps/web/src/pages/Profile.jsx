@@ -1,16 +1,17 @@
 import styled from "@emotion/styled";
+import Dialog from "@mui/material/Dialog";
+import Skeleton from "@mui/material/Skeleton";
 import { lazy, Suspense } from "react";
-import { Dialog, Skeleton } from "@mui/material";
 import {
   StyledDialogTitle,
   TabContentContainer,
 } from "../components/custom/ProfileComponents";
 import { useNavigate, useOutletContext, useParams } from "react-router";
-import useTitle from "@ring/shared/useTitle";
 import {
   useRefreshMutation,
   useSignOutMutation,
 } from "@ring/redux/authApiSlice";
+import useTitle from "@ring/shared/useTitle";
 import Placeholder from "@ring/ui/Placeholder";
 
 const ProfileDetail = lazy(() => import("../components/profile/ProfileDetail"));

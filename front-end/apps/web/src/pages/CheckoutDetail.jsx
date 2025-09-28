@@ -8,7 +8,7 @@ import {
 } from "react-router";
 import { TabContentContainer } from "../components/custom/ProfileComponents";
 import { useGetReceiptDetailQuery } from "../features/orders/ordersApiSlice";
-import { Dialog } from "@mui/material";
+import Dialog from "@mui/material/Dialog";
 import { useState } from "react";
 import CheckoutDetailComponent from "../components/order/CheckoutDetailComponent";
 

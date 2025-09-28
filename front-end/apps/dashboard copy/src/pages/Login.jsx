@@ -22,7 +22,7 @@ const ReCaptcha = lazy(() => import("@ring/auth/ReCaptcha"));
 
 const Login = () => {
   const [pending, setPending] = useState(false);
-  const { persist, username: loginedUser, setAuth, setPersist } = useAuth();
+  const { persist, username: loginedUser, setPersist } = useAuth();
   const [authenticate, { isLoading, isSuccess, isUninitialized }] =
     useAuthenticateMutation();
   const signOut = useLogout();
@@ -71,10 +71,7 @@ const Login = () => {
     })
       .unwrap()
       .then((data) => {
-        const { token } = data;
-
-        //Store access token to auth
-        setAuth(token);
+        // Set auth persist
         if (currPersist) setPersist(true);
 
         //Queue snack

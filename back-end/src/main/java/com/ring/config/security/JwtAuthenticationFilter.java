@@ -1,11 +1,13 @@
 package com.ring.config.security;
 
+import com.ring.common.AppConstants;
 import com.ring.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.websocket.Constants;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -105,9 +107,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String parseJwt(HttpServletRequest request) {
-        String headerAuth = request.getHeader("Authorization");
-        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7);
+        String headerAuth = request.getHeader(Constants.AUTHORIZATION_HEADER_NAME);
+        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith(AppConstants.TOKEN_PREFIX)) {
+            return headerAuth.substring(AppConstants.TOKEN_PREFIX.length());
         }
         return null;
     }

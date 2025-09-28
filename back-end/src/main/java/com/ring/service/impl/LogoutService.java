@@ -36,8 +36,8 @@ public class LogoutService implements LogoutHandler { //Logout from security con
             HttpServletResponse response,
             Authentication authentication
     ) {
-        //Overwrite refresh cookie + invalidate refresh token
-        String refreshToken = tokenService.getRefreshTokenFromCookie(request);
+        // Overwrite refresh cookie + invalidate refresh token
+        String refreshToken = tokenService.extractRefreshToken(request);
         if (refreshToken != null) refreshService.clearRefreshToken(refreshToken);
         response.setHeader(HttpHeaders.SET_COOKIE, tokenService.clearRefreshCookie().toString());
 

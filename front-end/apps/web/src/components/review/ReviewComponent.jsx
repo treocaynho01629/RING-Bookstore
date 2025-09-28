@@ -12,7 +12,7 @@ import {
 } from "@ring/ui/Components";
 import { numFormat } from "@ring/shared/utils/convert";
 import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
-import useAuth from "@ring/auth/useAuth";
+import useAuth from "../../hooks/useAuth";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
 import DialogTitle from "@mui/material/DialogTitle";

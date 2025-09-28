@@ -53,37 +53,13 @@
       "import": "./dist/src/layout/FallbackLogo.js",
       "require": "./dist/src/layout/FallbackLogo.cjs"
     },
-    "./LoadingProgress": {
-      "import": "./dist/src/layout/LoadingProgress.js",
-      "require": "./dist/src/layout/LoadingProgress.cjs"
-    },
     "./PendingModal": {
       "import": "./dist/src/layout/PendingModal.js",
       "require": "./dist/src/layout/PendingModal.cjs"
     },
-    "./Layout": {
-      "import": "./dist/src/layout/Layout.js",
-      "require": "./dist/src/layout/Layout.cjs"
-    },
-    "./SimpleNavbar": {
-      "import": "./dist/src/layout/SimpleNavbar.js",
-      "require": "./dist/src/layout/SimpleNavbar.cjs"
-    },
-    "./ScrollToTop": {
-      "import": "./dist/src/layout/ScrollToTop.js",
-      "require": "./dist/src/layout/ScrollToTop.cjs"
-    },
     "./theme": {
       "import": "./dist/src/theme/theme.js",
       "require": "./dist/src/theme/theme.cjs"
-    },
-    "./Missing": {
-      "import": "./dist/src/pages/Missing.js",
-      "require": "./dist/src/pages/Missing.cjs"
-    },
-    "./Unauthorized": {
-      "import": "./dist/src/pages/Unauthorized.js",
-      "require": "./dist/src/pages/Unauthorized.cjs"
     },
     "./SnackbarProvider": {
       "import": "./dist/src/provider/SnackbarProvider.js",
@@ -121,8 +97,6 @@
     "@mui/material": "^7.2.0",
     "notistack": "^3.0.2",
     "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0",
-    "react-multi-carousel": "^2.8.6",
-    "react-router": "^7.6.3"
+    "react-multi-carousel": "^2.8.6"
   }
 }

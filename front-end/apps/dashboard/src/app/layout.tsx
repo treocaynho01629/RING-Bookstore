@@ -3,8 +3,11 @@ import type { Metadata } from "next";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { ThemeContextProvider } from "@ring/ui";
 import { theme } from "../lib/theme";
+import { getServerSession, Session } from "next-auth";
 import localFont from "next/font/local";
 import NextStoreProvider from "./NextStoreProvider";
+import PageLayout from "../components/layout/PageLayout";
+import AuthProvider from "./context/AuthProvider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -20,20 +23,24 @@ export const metadata: Metadata = {
   description: "Manage your book store",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = (await getServerSession()) as Session;
+
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <NextStoreProvider>
-          <AppRouterCacheProvider>
-            <ThemeContextProvider theme={theme}>
-              {children}
-            </ThemeContextProvider>
-          </AppRouterCacheProvider>
+          <AuthProvider session={session}>
+            <AppRouterCacheProvider>
+              <ThemeContextProvider theme={theme}>
+                <PageLayout>{children}</PageLayout>
+              </ThemeContextProvider>
+            </AppRouterCacheProvider>
+          </AuthProvider>
         </NextStoreProvider>
       </body>
     </html>

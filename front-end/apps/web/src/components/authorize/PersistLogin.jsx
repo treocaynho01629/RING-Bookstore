@@ -1,12 +1,12 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Navigate, Outlet, useLocation } from "react-router";
-import { Button } from "@mui/material";
 import {
   useRefreshMutation,
   useSignOutMutation,
 } from "@ring/redux/authApiSlice";
-import useAuth from "../hooks/useAuth";
-import useLogout from "../hooks/useLogout";
+import Button from "@mui/material/Button";
+import useAuth from "../../hooks/useAuth";
+import useLogout from "../../hooks/useLogout";
 
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
 
@@ -20,27 +20,35 @@ const PersistLogin = () => {
   const signOut = useLogout();
 
   useEffect(() => {
-    let isMounted = true;
-    const currentTime = Math.floor(Date.now() / 1000);
-    const checkBuffer = 5 * 60;
+    let isMounted = true; // Run only once
 
     const verifyRefreshToken = async () => {
       try {
+        // Refresh token
         await refresh().unwrap();
       } catch (error) {
-        //Log user out if fail to refresh
+        // Error messages
         if (error?.status === 500) {
           setErrorMsg("Đã xảy ra lỗi xác thực, vui lòng đăng nhập lại!");
         } else if (error?.status === 400 || error?.status === 403) {
           setErrorMsg("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
         }
+
+        // Log user out if fail to refresh
         await logout().unwrap();
       } finally {
         isMounted && setPending(false);
       }
     };
 
-    if (persist && (!token || (exp && currentTime > exp - checkBuffer))) {
+    // Refresh on time buffer
+    // Prevent refresh from multiple endpoints if token expired
+    const currentTime = Math.floor(Date.now());
+    const checkBuffer = 30 * 1000; // 30 seconds
+    const expireSoon = exp && currentTime > exp - checkBuffer;
+
+    // Refresh token if persist and token is expired
+    if (persist && (!token || expireSoon)) {
       verifyRefreshToken();
     } else {
       setPending(false);
@@ -50,12 +58,12 @@ const PersistLogin = () => {
 
   return (
     <>
-      {isError && errorMsg && !pending ? (
+      {isError && errorMsg && !pending ? ( //To login page if error
         <Navigate
           to="/auth/login"
           state={{ from: location, errorMsg }}
           replace
-        /> //To login page if error
+        />
       ) : !persist || token ? (
         <Outlet />
       ) : isLoading || pending ? (

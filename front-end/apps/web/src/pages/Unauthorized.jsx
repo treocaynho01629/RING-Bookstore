@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { Link } from "react-router";
 import Button from "@mui/material/Button";
 import Block from "@mui/icons-material/Block";
-import SimpleNavbar from "../layout/SimpleNavbar";
+import SimpleNavbar from "../components/navbar/SimpleNavbar";
 
 //#region styled
 const Wrapper = styled.div`

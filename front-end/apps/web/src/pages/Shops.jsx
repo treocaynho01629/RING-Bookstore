@@ -27,7 +27,7 @@ import {
   sortShopsBy,
 } from "../utils/filters";
 import { Wrapper } from "../components/custom/SortComponents";
-import useAuth from "@ring/auth/useAuth";
+import useAuth from "../../hooks/useAuth";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import useMediaQuery from "@mui/material/useMediaQuery";

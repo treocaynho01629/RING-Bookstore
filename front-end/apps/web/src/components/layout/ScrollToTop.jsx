@@ -1,5 +1,4 @@
-import { useCallback } from "react";
-import { useLayoutEffect } from "yet-another-react-lightbox";
+import { useCallback, useLayoutEffect } from "react";
 import { useLocation } from "react-router";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
 import useScrollTrigger from "@mui/material/useScrollTrigger";

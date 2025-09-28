@@ -50,11 +50,13 @@ public class SetupDataLoader implements
     @Override
     @Transactional
     public void onApplicationEvent(ContextRefreshedEvent event) {
+
         if (alreadySetup)
             return;
 
         // Check
         if (privilegeRepo.count() != PrivilegeType.values().length) {
+
             // Create initial privileges
             List<Privilege> privileges = new ArrayList<>();
             for (PrivilegeGroupType groupType : PrivilegeGroupType.values()) {
@@ -69,6 +71,7 @@ public class SetupDataLoader implements
             // Create initial roles
             Map<UserRole, Role> roles = new HashMap<>();
             for (UserRole userRole : UserRole.values()) {
+
                 List<Privilege> rolePrivileges = new ArrayList<>();
 
                 for (Privilege privilege : privileges) {
@@ -96,38 +99,49 @@ public class SetupDataLoader implements
 
     @Transactional
     public Privilege createPrivilegeIfNotFound(PrivilegeType privilegeType, PrivilegeGroup group) {
+
         Privilege privilege = privilegeRepo.findByPrivilegeType(privilegeType).orElse(null);
+
         if (privilege == null) {
+
             privilege = new Privilege();
             privilege.setLabel(privilegeType.getLabel());
             privilege.setPrivilegeType(privilegeType);
             privilege.setGroup(group);
             privilegeRepo.save(privilege);
         }
+
         return privilege;
     }
 
     @Transactional
     public PrivilegeGroup createPrivilegeGroupIfNotFound(PrivilegeGroupType groupType) {
+
         PrivilegeGroup group = groupRepo.findByGroupName(groupType.getLabel()).orElse(null);
+
         if (group == null) {
+
             group = new PrivilegeGroup();
             group.setGroupName(groupType.getLabel());
             groupRepo.save(group);
         }
+
         return group;
     }
 
     @Transactional
     public Role createRoleIfNotFound(UserRole userRole, Collection<Privilege> privileges) {
+
         Role role = roleRepo.findByRoleName(userRole).orElse(null);
         if (role == null) {
             role = new Role();
             role.setLabel(userRole.getLabel());
             role.setRoleName(userRole);
         }
+
         role.setPrivileges(privileges);
         roleRepo.save(role);
+
         return role;
     }
 
@@ -136,8 +150,10 @@ public class SetupDataLoader implements
             final String username,
             final String password,
             final Collection<Role> roles) {
+
         Account user = accountRepo.findByUsername(username).orElse(null);
         if (user == null) {
+
             user = new Account();
             user.setUsername(username);
             user.setEmail(email);
@@ -146,6 +162,7 @@ public class SetupDataLoader implements
             user.setRoles(roles);
             user = accountRepo.save(user);
         }
+
         return user;
     }
 }

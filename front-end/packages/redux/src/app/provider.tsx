@@ -33,7 +33,7 @@ export default function StoreProvider({
   }
 
   // Change baseUrl in reducers
-  if (reducers) {
+  if (reducers && baseUrl) {
     staticReducer.baseUrl = () => baseUrl;
   }
 

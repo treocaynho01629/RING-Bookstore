@@ -1,8 +1,8 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router";
-import { Button } from "@mui/material";
+import Button from "@mui/material/Button";
 // import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
-import SimpleNavbar from "../layout/SimpleNavbar";
+import SimpleNavbar from "../components/navbar/SimpleNavbar";
 
 //#region styled
 const Wrapper = styled.div`

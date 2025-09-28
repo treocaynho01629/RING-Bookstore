@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { useLocation, useNavigate } from "react-router";
 import { MobileExtendButton } from "@ring/ui/Components";
 import { currencyFormat } from "@ring/shared/utils/convert";
-import useAuth from "@ring/auth/useAuth";
+import useAuth from "../../hooks/useAuth";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LocalShippingOutlined from "@mui/icons-material/LocalShippingOutlined";

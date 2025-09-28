@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import { useLocation, useNavigation } from "react-router";
-import { styled } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import LinearProgress, {
   linearProgressClasses,
 } from "@mui/material/LinearProgress";

@@ -1,7 +1,9 @@
 "use client";
 
 import { persistReducer } from "redux-persist";
-import { authReducer, enumReducer, StoreProvider } from "@ring/redux";
+import authReducer from "../features/auth/authReducer";
+import enumReducer from "@ring/redux/enumReducer";
+import StoreProvider from "@ring/redux/provider";
 import storage from "redux-persist/lib/storage";
 
 const enumPersistConfig = {
@@ -22,7 +24,7 @@ const reducers = {
   auth: persistReducer(authPersistConfig, authReducer), //AUTH
 };
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+// const baseUrl = "/api/proxy";
 const devTools = process.env.NEXT_PUBLIC_NODE_ENV === "development";
 
 export default function NextStoreProvider({
@@ -34,7 +36,7 @@ export default function NextStoreProvider({
     <StoreProvider
       {...{
         reducers,
-        baseUrl,
+        // baseUrl,
         devTools,
       }}
     >

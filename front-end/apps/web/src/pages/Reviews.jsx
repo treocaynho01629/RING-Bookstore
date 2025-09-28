@@ -1,4 +1,4 @@
-import { Dialog } from "@mui/material";
+import Dialog from "@mui/material/Dialog";
 import { TabContentContainer } from "../components/custom/ProfileComponents";
 import { useNavigate, useOutletContext } from "react-router";
 import useTitle from "@ring/shared/useTitle";

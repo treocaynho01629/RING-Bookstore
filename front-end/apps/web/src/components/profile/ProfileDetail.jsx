@@ -8,7 +8,7 @@ import { PatternFormat } from "react-number-format";
 import { PHONE_REGEX } from "@ring/shared/utils/regex";
 import { getGenderType } from "@ring/shared/enums/user";
 import useConfirm from "@ring/shared/useConfirm";
-import useAuth from "@ring/auth/useAuth";
+import useAuth from "../../hooks/useAuth";
 import Button from "@mui/material/Button";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";

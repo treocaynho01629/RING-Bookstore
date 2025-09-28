@@ -142,10 +142,10 @@ public interface TokenService {
     /**
      * Extracts the refresh token value from an HTTP request's cookies.
      *
-     * @param request The HTTP request containing the cookies.
+     * @param request The HTTP request.
      * @return The refresh token value, or null if not found.
      */
-    String getRefreshTokenFromCookie(HttpServletRequest request);
+    String extractRefreshToken(HttpServletRequest request);
 
     /**
      * Clears the refresh token by generating an empty cookie.

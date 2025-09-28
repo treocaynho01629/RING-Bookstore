@@ -1,5 +1,5 @@
 import useTitle from "@ring/shared/useTitle";
-import { Dialog } from "@mui/material";
+import Dialog from "@mui/material/Dialog";
 import { useNavigate, useOutletContext } from "react-router";
 import { TabContentContainer } from "../components/custom/ProfileComponents";
 import CouponsList from "../components/coupon/CouponsList";
