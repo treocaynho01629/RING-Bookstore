@@ -4,13 +4,13 @@ import { getToken } from "next-auth/jwt";
 
 export async function GET(request: NextRequest) {
   try {
-    // Get access token from session
+    // Get refresh token
     const token = await getToken({ req: request });
     const refreshToken = token?.data.tokens.refresh;
 
     if (!refreshToken) {
       return NextResponse.json(
-        { error: "No refresh token found - Please log in" },
+        { error: "No refresh token found" },
         { status: 401 }
       );
     }

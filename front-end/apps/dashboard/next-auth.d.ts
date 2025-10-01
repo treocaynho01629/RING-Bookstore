@@ -66,6 +66,7 @@ declare module "next-auth" {
   export interface Session {
     user: UserObject;
     validity: AuthValidity;
+    access: string;
     error?: "RefreshTokenExpired" | "RefreshAccessTokenError";
   }
 }

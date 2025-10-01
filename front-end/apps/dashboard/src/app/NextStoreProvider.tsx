@@ -24,7 +24,6 @@ const reducers = {
   auth: persistReducer(authPersistConfig, authReducer), //AUTH
 };
 
-// const baseUrl = "/api/proxy";
 const devTools = process.env.NEXT_PUBLIC_NODE_ENV === "development";
 
 export default function NextStoreProvider({
@@ -36,7 +35,6 @@ export default function NextStoreProvider({
     <StoreProvider
       {...{
         reducers,
-        // baseUrl,
         devTools,
       }}
     >

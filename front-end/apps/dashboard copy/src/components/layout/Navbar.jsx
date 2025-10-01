@@ -1,3 +1,5 @@
+"use client";
+
 import { Suspense, lazy, useCallback, useState } from "react";
 import {
   Toolbar,
@@ -17,7 +19,6 @@ import {
   WarningAmber,
 } from "@mui/icons-material";
 import { useGetPreviewShopsQuery } from "../../features/shops/shopsApiSlice";
-import useAuth from "@ring/auth/useAuth";
 import { getUserRole } from "@ring/shared";
 import { useAppStore } from "@ring/redux";
 import MuiAppBar from "@mui/material/AppBar";

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getServerSession } from "next-auth";
+import { options } from "../../auth/[...nextauth]/options";
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Helper function to check if token is expired
 function isTokenExpired(validUntil: number): boolean {
@@ -39,29 +40,37 @@ async function proxyRequest(
   method: string
 ) {
   try {
-    // Get access token from session
-    const token = await getToken({ req: request });
-    const accessToken = token?.data.tokens.access;
+    // Get access token from session so it auto refresh
+    const session = await getServerSession(options);
+    const accessToken = session?.access;
+    const valid_until = session?.validity.valid_until;
 
+    // Error handling
     if (!accessToken) {
       return NextResponse.json(
         { error: "No access token found" },
-        { status: 401 }
+        { status: 403 }
       );
-    }
-
-    // Get session to check token expiration
-    const valid_until = token?.data?.validity.valid_until;
-    if (isTokenExpired(valid_until)) {
+    } else if (isTokenExpired(valid_until ?? 0)) {
       return NextResponse.json(
         { error: "Access token expired" },
-        { status: 401 }
+        { status: 403 }
+      );
+    } else if (session?.error === "RefreshTokenExpired") {
+      return NextResponse.json(
+        { error: "Refresh token expired" },
+        { status: 403 }
+      );
+    } else if (session?.error === "RefreshAccessTokenError") {
+      return NextResponse.json(
+        { error: "Refresh access token error" },
+        { status: 403 }
       );
     }
 
     // Build target URL
     const path = pathSegments.join("/");
-    const targetUrl = `${BACKEND_URL}/api/${path}`;
+    const targetUrl = `${API_URL}/api/${path}`;
 
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;

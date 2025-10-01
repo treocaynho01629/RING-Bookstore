@@ -87,3 +87,14 @@ export async function refresh(token: string): Promise<Response> {
     },
   });
 }
+
+export async function logout(token: string): Promise<Response> {
+  const response = await fetch(`${API_URL}/api/auth/logout`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response;
+}

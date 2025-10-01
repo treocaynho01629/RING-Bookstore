@@ -12,7 +12,7 @@ export default function AuthProvider({ children, session }: AuthContextProps) {
   return (
     <SessionProvider
       session={session}
-      refetchInterval={5 * 60}
+      refetchInterval={30 * 60}
       refetchOnWindowFocus={false}
     >
       {children}

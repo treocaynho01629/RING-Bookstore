@@ -91,7 +91,6 @@ const baseQueryWithRefresh = async (
           api.dispatch(clearAuth());
           api.dispatch(apiSlice.util.resetApiState());
 
-          console.log("LOGOUT");
           return refreshResult;
         }
       } finally {

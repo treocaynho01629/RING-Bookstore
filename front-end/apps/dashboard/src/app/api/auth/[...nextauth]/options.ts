@@ -8,7 +8,7 @@ import type {
   AuthValidity,
 } from "next-auth";
 import type { JWT } from "next-auth/jwt";
-import { login, refresh } from "../../../actions/auth";
+import { login, logout, refresh } from "../../../actions/auth";
 import { jwtDecode } from "jwt-decode";
 import CredentialsProvider from "next-auth/providers/credentials";
 
@@ -124,13 +124,14 @@ export const options: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user, account }) {
+      // Reset error
+      token.error = undefined;
+
       // Initial signin contains a 'User' object from authorize method
       if (user && account) {
         console.debug("Initial signin");
         return { data: user };
       }
-
-      // console.log(token);
 
       // The current access token is still valid
       if (Date.now() < token.data.validity.valid_until * 1000) {
@@ -155,7 +156,17 @@ export const options: NextAuthOptions = {
       session.user = token.data.user;
       session.validity = token.data.validity;
       session.error = token.error;
+      session.access = token.data.tokens.access;
       return session;
+    },
+  },
+  events: {
+    async signOut({ token }) {
+      try {
+        await logout(token?.refresh as string);
+      } catch (e) {
+        console.error(e);
+      }
     },
   },
 };

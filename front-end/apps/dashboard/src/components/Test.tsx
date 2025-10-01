@@ -10,14 +10,16 @@ const UserRole = getUserRole();
 const Test = () => {
   // const { data, isLoading, isUninitialized, isError } = useGetEnumsQuery();
   // useReachable();
-  const { data, isLoading, isUninitialized, isError } = useGetBooksQuery({
-    page: 1,
-    size: 10,
-  });
+  const { data, isLoading, isUninitialized, isError, refetch } =
+    useGetBooksQuery({
+      page: 1,
+      size: 10,
+    });
 
   return (
     <div>
       Testing
+      <button onClick={() => refetch()}>Refetch</button>
       <p>{isLoading ? "Loading..." : data?.ids.length}</p>
     </div>
   );

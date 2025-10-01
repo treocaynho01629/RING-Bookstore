@@ -1,28 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
+import { getToken } from "next-auth/jwt";
+import { logout } from "../../../actions/auth";
 
 export async function DELETE(request: NextRequest) {
   try {
-    const refreshToken = request.cookies.get("refreshToken")?.value;
+    // Get access token from session
+    const token = await getToken({ req: request });
+    const refreshToken = token?.data.tokens.refresh;
 
-    // Call Spring Boot logout endpoint
-    await fetch(`${BACKEND_URL}/api/auth/logout`, {
-      method: "DELETE",
-      headers: {
-        Cookie: `refreshToken=${refreshToken}`,
-      },
-    });
+    if (!refreshToken) {
+      return NextResponse.json(
+        { error: "No refresh token found" },
+        { status: 401 }
+      );
+    }
 
-    // Clear the refresh token cookie
-    const response = NextResponse.json({ message: "Logout successful" });
-    response.cookies.set("refreshToken", "", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 0, // Expire immediately
-    });
-
+    const response = await logout(refreshToken);
     return response;
   } catch (error) {
     console.error("Logout API error:", error);
