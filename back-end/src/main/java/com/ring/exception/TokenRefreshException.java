@@ -4,6 +4,8 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.ring.common.AppConstants;
+
 import java.io.Serial;
 
 /**
@@ -16,7 +18,23 @@ public class TokenRefreshException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = -6924357230755962371L;
 
-    public TokenRefreshException(String token, String message) {
-        super(token != null ? String.format("%s for: [%s]", message, token) : message);
+    private final String error;
+    private String message;
+
+    public TokenRefreshException() {
+        super();
+        this.error = AppConstants.REFRESH_TOKEN_FAILED;
+    }
+
+    public TokenRefreshException(String message) {
+        super();
+        this.error = AppConstants.REFRESH_TOKEN_FAILED;
+        this.message = message;
+    }
+
+    public TokenRefreshException(String error, String message) {
+        super();
+        this.error = error;
+        this.message = message;
     }
 }

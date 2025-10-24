@@ -16,17 +16,17 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest { //Request body for sign-up
+public class RegisterRequest { 
 
-	@NotBlank(message = "Tên đăng nhập không được để trống!")
-	@Size(min = 4, max = 24, message = "Tên đăng nhập dài 4-24 kí tự")
+	@NotBlank(message = "{validation.constraints.not.blank}")
+	@Size(min = 4, max = 24, message = "{validation.constraints.size.range}")
 	private String username;
 	
-	@NotBlank(message = "Mật khẩu không được để trống!")
-	@Size(min = 8, max = 24, message = "Mật khẩu dài 8-24 kí tự")
+	@NotBlank(message = "{validation.constraints.not.blank}")
+	@Size(min = 8, max = 24, message = "{validation.constraints.size.range}")
 	private String pass;
 	
-	@NotBlank(message = "Email không được để trống!")
-	@Email(message = "Sai định dạng email!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
+	@Email(message = "{validation.constraints.pattern}")
 	private String email;
 }

@@ -3,6 +3,9 @@ package com.ring.service.impl;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.net.HttpHeaders;
+import com.ring.common.AppConstants;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +18,11 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class LoginProtectionService {
+
     public static final int MAX_ATTEMPT = 10;
     public static final int VALID_ATTEMPT = 5;
+    public static final int EXPIRE_TIME = 15;
+
     private final LoadingCache<String, Integer> attemptsCache;
 
     private final HttpServletRequest request;
@@ -28,12 +34,13 @@ public class LoginProtectionService {
      */
     public LoginProtectionService(HttpServletRequest request) {
         super();
-        attemptsCache = CacheBuilder.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build(new CacheLoader<String, Integer>() {
-            @Override
-            public Integer load(final String key) {
-            return 0;
-            }
-        });
+        attemptsCache = CacheBuilder.newBuilder()
+                .expireAfterWrite(EXPIRE_TIME, TimeUnit.MINUTES)
+                .build(new CacheLoader<String, Integer>() {
+                    @Override
+                    public Integer load(final String key) { return 0; }
+                }
+        );
         this.request = request;
     }
 
@@ -87,9 +94,9 @@ public class LoginProtectionService {
      * @return The client's IP address.
      */
     private String getClientIP() {
-        final String xfHeader = request.getHeader("X-Forwarded-For");
+        final String xfHeader = request.getHeader(HttpHeaders.X_FORWARDED_FOR);
         if (xfHeader != null) {
-            return xfHeader.split(",")[0];
+            return xfHeader.split(AppConstants.DELIMITER)[0];
         }
         return request.getRemoteAddr();
     }

@@ -413,7 +413,7 @@ const ProfileDetail = ({
                       onChange={(e) => setName(e.target.value)}
                       value={name ?? ""}
                       error={err?.data?.errors?.name}
-                      helperText={err?.data?.errors?.name}
+                      label={err?.data?.errors?.name}
                       size="small"
                       fullWidth
                     />
@@ -434,7 +434,7 @@ const ProfileDetail = ({
                       onValueChange={(values) => setPhone(values.value)}
                       value={phone}
                       error={(phone && !validPhone) || err?.data?.errors?.phone}
-                      helperText={
+                      label={
                         phone && !validPhone
                           ? "Sai định dạng số điện thoại!"
                           : err?.data?.errors?.phone
@@ -510,7 +510,7 @@ const ProfileDetail = ({
                             size: "small",
                             fullWidth: true,
                             error: err?.data?.errors?.dob,
-                            helperText: err?.data?.errors?.dob,
+                            label: err?.data?.errors?.dob,
                           },
                         }}
                       />

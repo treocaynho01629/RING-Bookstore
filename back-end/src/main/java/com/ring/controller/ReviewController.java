@@ -159,7 +159,8 @@ public class ReviewController {
     @PutMapping("/hide/{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('update:review')")
     public ResponseEntity<?> hideReview(@PathVariable("id") Long id) {
-        reviewService.hideReview(id);
+
+        reviewService.setReviewVisibility(id, true);
         return new ResponseEntity<>("Review hid successfully!", HttpStatus.OK);
     }
 
@@ -172,7 +173,8 @@ public class ReviewController {
     @PutMapping("/unhide/{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('update:review')")
     public ResponseEntity<?> unhideReview(@PathVariable("id") Long id) {
-        reviewService.unhideReview(id);
+
+        reviewService.setReviewVisibility(id, false);
         return new ResponseEntity<>("Review unhid successfully!", HttpStatus.CREATED);
     }
 

@@ -1,7 +1,8 @@
 package com.ring.mapper;
 
 import com.cloudinary.Cloudinary;
-import com.cloudinary.Transformation;
+import com.ring.common.AppConstants;
+import com.ring.common.CloudinaryTransformations;
 import com.ring.dto.projection.accounts.IAccount;
 import com.ring.dto.projection.accounts.IAccountDetail;
 import com.ring.dto.projection.accounts.IProfile;
@@ -14,24 +15,29 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
+/**
+ * A mapper for {@link IAccount}, {@link IAccountDetail}, and {@link IProfile} to {@link AccountDTO}, {@link AccountDetailDTO}, and {@link ProfileDTO}.
+ */
 @RequiredArgsConstructor
 @Service
 public class AccountMapper {
 
     private final Cloudinary cloudinary;
 
+    /**
+     * Maps a {@link IAccount} to a {@link AccountDTO}.
+     * 
+     * @param projection the projection to map
+     * @return the mapped {@link AccountDTO}
+     */
     public AccountDTO projectionToDTO(IAccount projection) {
+
         IImage image = projection.getImage();
-        String url = image != null ?
-                cloudinary.url().transformation(new Transformation()
-                                .aspectRatio("1.0")
-                                .width(55)
-                                .crop("thumb")
-                                .chain()
-                                .radius("max")
-                                .quality(50)
-                                .fetchFormat("auto"))
-                        .secure(true).generate(image.getPublicId())
+        String imageUrl = image != null 
+                ? cloudinary.url()
+                        .transformation(CloudinaryTransformations.AVATAR_TRANSFORMATION)
+                        .secure(true)
+                        .generate(image.getPublicId())
                 : null;
 
         return new AccountDTO(projection.getId(),
@@ -39,28 +45,30 @@ public class AccountMapper {
                 projection.getEmail(),
                 projection.getName(),
                 projection.getPhone(),
-                url,
+                imageUrl,
                 projection.getRoles());
     }
 
+    /**
+     * Maps a {@link IAccountDetail} to a {@link AccountDetailDTO}.
+     * 
+     * @param projection the projection to map
+     * @return the mapped {@link AccountDetailDTO}
+     */
     public AccountDetailDTO projectionToDetailDTO(IAccountDetail projection) {
-        LocalDate dob = (dob = projection.getDob()) != null ? dob : LocalDate.of(1970, 1, 1);
+
+        LocalDate dob = (dob = projection.getDob()) != null ? dob : AppConstants.DEFAULT_DATE;
         IImage image = projection.getImage();
-        String url = image != null ?
-                cloudinary.url().transformation(new Transformation()
-                                .aspectRatio("1.0")
-                                .width(120)
-                                .crop("thumb")
-                                .chain()
-                                .radius("max")
-                                .quality("auto")
-                                .fetchFormat("auto"))
-                        .secure(true).generate(image.getPublicId())
+        String imageUrl = image != null 
+                ? cloudinary.url()
+                        .transformation(CloudinaryTransformations.PROFILE_TRANSFORMATION)
+                        .secure(true)
+                        .generate(image.getPublicId())
                 : null;
 
         return new AccountDetailDTO(projection.getId(),
                 projection.getUsername(),
-                url,
+                imageUrl,
                 projection.getEmail(),
                 projection.getRoles(),
                 projection.getName(),
@@ -72,22 +80,24 @@ public class AccountMapper {
                 projection.getTotalReviews());
     }
 
+    /**
+     * Maps a {@link IProfile} to a {@link ProfileDTO}.
+     * 
+     * @param projection the projection to map
+     * @return the mapped {@link ProfileDTO}
+     */
     public ProfileDTO projectionToProfileDTO(IProfile projection) {
-        LocalDate dob = (dob = projection.getDob()) != null ? dob : LocalDate.of(1970, 1, 1);
-        IImage image = projection.getImage();
-        String url = image != null ?
-                cloudinary.url().transformation(new Transformation()
-                                .aspectRatio("1.0")
-                                .width(120)
-                                .crop("thumb")
-                                .chain()
-                                .radius("max")
-                                .quality("auto")
-                                .fetchFormat("auto"))
-                        .secure(true).generate(image.getPublicId())
-                : null;
 
-        return new ProfileDTO(url,
+        LocalDate dob = (dob = projection.getDob()) != null ? dob : AppConstants.DEFAULT_DATE;
+        IImage image = projection.getImage();
+        String imageUrl = image != null 
+        ? cloudinary.url()
+                .transformation(CloudinaryTransformations.PROFILE_TRANSFORMATION)
+                .secure(true)
+                .generate(image.getPublicId())
+        : null;
+
+        return new ProfileDTO(imageUrl,
                 projection.getName(),
                 projection.getEmail(),
                 projection.getPhone(),

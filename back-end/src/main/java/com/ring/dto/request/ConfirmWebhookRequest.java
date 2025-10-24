@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ConfirmWebhookRequest {
 	
-	@NotBlank(message = "URL Webhook không được bỏ trống!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
 	private String webhookUrl;
 
 }

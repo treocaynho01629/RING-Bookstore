@@ -1,17 +1,20 @@
 package com.ring.controller;
 
+import com.ring.common.AppConstants;
 import com.ring.dto.request.AuthenticationRequest;
 import com.ring.dto.request.RegisterRequest;
 import com.ring.dto.request.ResetPassRequest;
 import com.ring.dto.response.AuthenticationResponse;
-import com.ring.exception.HttpResponseException;
 import com.ring.model.entity.Account;
 import com.ring.service.AuthenticationService;
 import com.ring.service.RefreshTokenService;
 import com.ring.service.RegisterService;
 import com.ring.service.TokenService;
+import com.ring.service.impl.MessageService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -32,7 +35,7 @@ public class AuthenticationController {
 	private final RegisterService registerService;
 	private final TokenService tokenService;
 	private final RefreshTokenService refreshService;
-
+	private final MessageService messageService;
 	/**
 	 * Registers a new user.
 	 *
@@ -43,8 +46,11 @@ public class AuthenticationController {
 	@PostMapping("/register")
 	public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest registerRequest,
 									  HttpServletRequest request) {
-		Account newUser = registerService.register(registerRequest, request);
-		return ResponseEntity.ok(newUser.getUsername() + " đã đăng ký thành công!");
+
+		registerService.register(registerRequest, request);
+		String message = messageService.getMessage("message.create.succeeded");
+
+		return new ResponseEntity<>(message, HttpStatus.CREATED);
 	}
 
 	/**
@@ -59,12 +65,14 @@ public class AuthenticationController {
 	public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody @Valid AuthenticationRequest authRequest,
 			@RequestParam(value = "persist", defaultValue = "true") Boolean persist,
 			HttpServletRequest request) {
-		//Generate new JWT & refresh token
+
+		// Generate JWT & refresh token
 		Account auth = authService.authenticate(authRequest, request);
 		String jwtToken = tokenService.generateAccessToken(auth);
 
-		//Set refresh token
+		// Set refresh token
 		ResponseCookie refreshCookie;
+
 		if (persist) {
 			refreshCookie = refreshService.generateRefreshCookie(auth);
 		} else {
@@ -87,11 +95,13 @@ public class AuthenticationController {
 	public ResponseEntity<AuthenticationResponse> refreshToken(HttpServletRequest request,
 		   @RequestParam(required = false) String refreshToken) {
 
-		//Generate new token
+		// Get refresh token
 		String token = refreshToken != null ? refreshToken : tokenService.extractRefreshToken(request);
-		if (token == null) throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Phải bao gồm refresh token");
 
-		Account auth = refreshService.refreshToken(token);
+		// Verify token
+		Account auth = refreshService.verifyRefreshToken(token);
+
+		// Generate access token
 		String jwtToken = tokenService.generateAccessToken(auth);
 
 		return ResponseEntity.ok().body(new AuthenticationResponse(jwtToken));
@@ -105,11 +115,13 @@ public class AuthenticationController {
 	 * @return a {@link ResponseEntity} containing a success message.
 	 */
 	@PostMapping("/forgot-password")
-	public ResponseEntity<?> forgotPassword(@RequestParam(value="email") String email,
+	public ResponseEntity<?> forgotPassword(@RequestParam("email") @NotBlank(message = "{validation.constraints.not.blank}") String email,
 											HttpServletRequest request){
-		registerService.forgotPassword(email, request);
 
-		return ResponseEntity.ok("Đã gửi email khôi phục mật khẩu!");
+		registerService.forgotPassword(email, request);
+		String message = messageService.getMessage("message.send.email.succeeded");
+
+		return new ResponseEntity<>(message, HttpStatus.OK);
 	}
 
 	/**
@@ -124,8 +136,10 @@ public class AuthenticationController {
 	public ResponseEntity<?> resetPassword(@PathVariable("token") String token,
 										   @Valid @RequestBody ResetPassRequest resetRequest,
 											HttpServletRequest request){
-		Account updatedUser = registerService.resetPassword(token, resetRequest, request);
+												
+		registerService.resetPassword(token, resetRequest, request);
+		String message = messageService.getMessage("message.update.succeeded");
 
-		return ResponseEntity.ok("Người dùng " + updatedUser.getUsername() + " thay đổi mật khẩu thành công!");
+		return new ResponseEntity<>(message, HttpStatus.OK);
 	}
 }

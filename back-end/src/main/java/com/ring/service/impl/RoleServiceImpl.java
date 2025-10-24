@@ -1,5 +1,6 @@
 package com.ring.service.impl;
 
+import com.ring.common.AppConstants;
 import com.ring.exception.HttpResponseException;
 import com.ring.exception.ResourceNotFoundException;
 import com.ring.model.entity.Privilege;
@@ -14,6 +15,7 @@ import com.ring.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -27,28 +29,43 @@ public class RoleServiceImpl implements RoleService {
     private final PrivilegeRepository privilegeRepo;
     private final PrivilegeGroupRepository groupRepo;
 
-    @Cacheable(cacheNames = "role", key = "#userRole")
+    private final MessageService messageService;
+
+    @Cacheable(cacheNames = AppConstants.ROLE, key = "#userRole")
     public Role findRole(UserRole userRole) {
 
         return roleRepo.findRoleWithPrivileges(userRole)
-                .orElseThrow(() -> new ResourceNotFoundException("Role not found!",
-                        "Không tìm thấy chức vụ yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.role") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
     }
 
-    @Cacheable(cacheNames = "privileges")
+    @Cacheable(cacheNames = AppConstants.PRIVILEGES)
     public List<PrivilegeGroup> getPrivileges() {
 
         return groupRepo.findAllWithPrivileges();
     }
 
-    @CacheEvict(cacheNames = "role", key = "#userRole")
+    @CacheEvict(cacheNames = AppConstants.ROLE, key = "#userRole")
     public void updateRole(List<PrivilegeType> privileges, UserRole userRole) {
 
-        if (userRole == UserRole.ROLE_ADMIN)
-            throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Can not edit Admin role!");
+        // Prevent update Admin role
+        if (userRole == UserRole.ROLE_ADMIN) {
+
+            var errorMsg = messageService.getMessage("exception.role.admin.edit");
+            throw new HttpResponseException(HttpStatus.BAD_REQUEST, 
+                    AppConstants.INVALID_ARGUMENT,
+                    errorMsg);
+        }
+
         Role role = roleRepo.findByRoleName(userRole)
-                .orElseThrow(() -> new ResourceNotFoundException("Role not found!",
-                        "Không tìm thấy chức vụ yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.role") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         List<Privilege> rolePrivileges = privilegeRepo.findAllByPrivilegeTypeIn(privileges);
 
         role.setPrivileges(rolePrivileges);

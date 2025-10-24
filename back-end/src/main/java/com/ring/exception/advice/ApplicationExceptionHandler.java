@@ -2,9 +2,14 @@ package com.ring.exception.advice;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.ring.dto.response.ExceptionResponse;
+import com.ring.common.AppConstants;
 import com.ring.exception.*;
+import com.ring.service.impl.MessageService;
+
+import lombok.RequiredArgsConstructor;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -13,7 +18,6 @@ import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
@@ -27,165 +31,187 @@ import java.util.Map;
  * It handles different types of exceptions and returns appropriate {@link ExceptionResponse} for each.
  */
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class ApplicationExceptionHandler{
+
+    private final MessageService messageService;
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public ExceptionResponse handleAllException(Exception e) {
+
+        String message = messageService.getMessage("exception.internal.server.error");
+
         return new ExceptionResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "An error occurred!",
-                e.getLocalizedMessage()
+                AppConstants.INTERNAL_SERVER_ERROR,
+                message
         );
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(RuntimeException.class)
     public ExceptionResponse handleRuntimeException(RuntimeException e) {
+
+        String message = messageService.getMessage("exception.internal.server.error");
+
         return new ExceptionResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "An internal server error occurred!",
-                e.getLocalizedMessage()
+                AppConstants.INTERNAL_SERVER_ERROR,
+                message
         );
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ExceptionResponse handleInvalidArgument(MethodArgumentNotValidException e) {
+
         Map<String, String> errorsMap = new HashMap<>();
 
-        //Map each request
+        // Map each field error
         e.getBindingResult().getFieldErrors().forEach(error -> {
-            errorsMap.put(error.getField(), error.getDefaultMessage());
+            String fieldMessage = StringUtils.capitalize(messageService.getMessage(error));
+            errorsMap.put(error.getField(), fieldMessage);
         });
+
+        String message = messageService.getMessage("exception.invalid.argument");
+
         return new ExceptionResponse(
                 HttpStatus.BAD_REQUEST.value(),
-                "Invalid argument",
+                AppConstants.INVALID_ARGUMENT,
                 errorsMap,
-                "Sai định dạng thông tin!"
+                message
         );
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ExceptionResponse handleMissingServletRequestPart(MissingServletRequestPartException e) {
+
         Map<String, String> errorsMap = new HashMap<>();
 
-        errorsMap.put(e.getRequestPartName(), "Phải bao gồm " + e.getRequestPartName() + "!");
+        String errorMessage = messageService.getMessage("exception.empty", new Object[]{ e.getRequestPartName() });
+        errorsMap.put(e.getRequestPartName(), errorMessage);
+
+        String message = messageService.getMessage("exception.invalid.argument");
+
         return new ExceptionResponse(
                 HttpStatus.BAD_REQUEST.value(),
-                "Missing required part!",
+                AppConstants.INVALID_ARGUMENT,
                 errorsMap,
-                e.getLocalizedMessage()
+                message
         );
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MissingRequestCookieException.class)
     public ExceptionResponse handleMissingCookie(MissingRequestCookieException e) {
+
         return new ExceptionResponse(
                 HttpStatus.BAD_REQUEST.value(),
-                "Missing cookie request!",
+                AppConstants.MISSING_COOKIE,
                 e.getLocalizedMessage()
         );
     }
 
     @ExceptionHandler(HttpResponseException.class)
-    public ResponseEntity<ExceptionResponse> handleResponseException(HttpResponseException e) {
-        ExceptionResponse response = new ExceptionResponse(
+    public ExceptionResponse handleResponseException(HttpResponseException e) {
+
+        return new ExceptionResponse(
                 e.getStatus().value(),
                 e.getError(),
-                e.getMessage()
+                e.getLocalizedMessage()
         );
-        return new ResponseEntity<>(response, e.getStatus());
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(ResourceNotFoundException.class)
     public ExceptionResponse handleResourceNotFoundException(ResourceNotFoundException e) {
+
         return new ExceptionResponse(
                 HttpStatus.NOT_FOUND.value(),
                 e.getError(),
-                e.getMessage()
+                e.getLocalizedMessage()
         );
     }
 
     @ResponseStatus(HttpStatus.PAYMENT_REQUIRED)
     @ExceptionHandler(PaymentException.class)
     public ExceptionResponse handlePaymentException(PaymentException e) {
+
         return new ExceptionResponse(
                 HttpStatus.PAYMENT_REQUIRED.value(),
                 e.getError(),
-                e.getMessage()
+                e.getLocalizedMessage()
         );
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(EntityOwnershipException.class)
     public ExceptionResponse handleEntityOwnershipException(EntityOwnershipException e) {
+        
         return new ExceptionResponse(
                 HttpStatus.FORBIDDEN.value(),
                 e.getError(),
-                e.getMessage()
+                e.getLocalizedMessage()
         );
     }
 
     @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
     @ExceptionHandler(ImageResizerException.class)
     public ExceptionResponse handleImageResizerException(ImageResizerException e) {
+
         return new ExceptionResponse(
                 HttpStatus.EXPECTATION_FAILED.value(),
                 e.getError(),
-                e.getMessage()
+                e.getLocalizedMessage()
         );
     }
 
     @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
     @ExceptionHandler(ImageUploadException.class)
     public ExceptionResponse handleImageUploadException(ImageUploadException e) {
+
         return new ExceptionResponse(
                 HttpStatus.EXPECTATION_FAILED.value(),
                 e.getError(),
-                e.getMessage()
+                e.getLocalizedMessage()
         );
     }
     
     @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ExceptionResponse handleMaxSizeException(MaxUploadSizeExceededException e) {
-        return new ExceptionResponse(
-                HttpStatus.PAYLOAD_TOO_LARGE.value() ,
-                "File size exceed maximum limit!",
-                e.getLocalizedMessage()
-        );
-    }
 
-    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
-    @ExceptionHandler(HttpClientErrorException.class)
-    public ExceptionResponse handleTooManyAttemptsException(HttpClientErrorException e) {
+        String message = messageService.getMessage("exception.image.size", new Object[]{ e.getMaxUploadSize() });
+
         return new ExceptionResponse(
-                HttpStatus.TOO_MANY_REQUESTS.value() ,
-                e.getStatusText(),
-                e.getLocalizedMessage()
+                e.getStatusCode().value(),
+                AppConstants.FILE_SIZE_EXCEED_MAXIMUM_LIMIT,
+                message
         );
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ExceptionResponse handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+
+        String message = messageService.getMessage("exception.authorization.failed");
+
         return new ExceptionResponse(
-                HttpStatus.FORBIDDEN.value() ,
-                "Authorization failed!",
-                e.getLocalizedMessage()
+                HttpStatus.FORBIDDEN.value(),
+                AppConstants.AUTHORIZATION_FAILED,
+                message
         );
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(BadCredentialsException.class)
     public ExceptionResponse handleBadCredentialsException(BadCredentialsException e) {
+
         return new ExceptionResponse(
-                HttpStatus.FORBIDDEN.value() ,
-                "Invalid user!",
+                HttpStatus.FORBIDDEN.value(),
+                AppConstants.AUTHORIZATION_FAILED,
                 e.getLocalizedMessage()
         );
     }
@@ -193,68 +219,81 @@ public class ApplicationExceptionHandler{
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(TokenRefreshException.class)
     public ExceptionResponse handleTokenRefreshException(TokenRefreshException e) {
+
         return new ExceptionResponse(
-                HttpStatus.FORBIDDEN.value() ,
-                "Refresh token failed!",
-                e.getMessage()
+                HttpStatus.FORBIDDEN.value(),
+                e.getError(),
+                e.getLocalizedMessage()
         );
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(ResetPasswordException.class)
     public ExceptionResponse handleResetPasswordException(ResetPasswordException e) {
+
         return new ExceptionResponse(
-                HttpStatus.FORBIDDEN.value() ,
-                "Reset password failed!",
-                e.getMessage()
+                HttpStatus.FORBIDDEN.value(),
+                e.getError(),
+                e.getLocalizedMessage()
         );
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(ReCaptchaInvalidException.class)
     public ExceptionResponse handleInvalidReCaptchaException(ReCaptchaInvalidException e) {
+
         return new ExceptionResponse(
-                HttpStatus.FORBIDDEN.value() ,
-                "reCaptcha failed!",
-                e.getMessage()
+                HttpStatus.FORBIDDEN.value(),
+                e.getError(),
+                e.getLocalizedMessage()
         );
     }
 
     @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
     @ExceptionHandler(ReCaptchaSuspiciousException.class)
     public ExceptionResponse handleSuspiciousReCaptchaException(ReCaptchaSuspiciousException e) {
+
         return new ExceptionResponse(
-                HttpStatus.PRECONDITION_FAILED.value() ,
-                "reCaptcha marked suspicious!",
-                e.getMessage()
+                HttpStatus.PRECONDITION_FAILED.value(),
+                e.getError(),
+                e.getLocalizedMessage()
         );
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ExceptionResponse handleValidationException(HttpMessageNotReadableException e) {
-        String errorMessage = "";
+
+        String message = messageService.getMessage("exception.invalid.argument");
 
         if (e.getCause() instanceof InvalidFormatException ifx) {
             if (ifx.getTargetType() != null && ifx.getTargetType().isEnum()) {
-                errorMessage = String.format("Invalid enum value: '%s' for the field: '%s'. The value must be one of: %s.",
-                        ifx.getValue(), ifx.getPath().get(ifx.getPath().size()-1).getFieldName(), Arrays.toString(ifx.getTargetType().getEnumConstants()));
+
+                message = messageService.getMessage("exception.invalid.enum", new Object[]{
+                    ifx.getValue(), 
+                    ifx.getPath().get(ifx.getPath().size() - 1).getFieldName(), 
+                    Arrays.toString(ifx.getTargetType().getEnumConstants())
+                });
             }
         }
+
         return new ExceptionResponse(
                 HttpStatus.BAD_REQUEST.value(),
-                "Unacceptable JSON " + e.getMessage(),
-                errorMessage
+                AppConstants.INVALID_ARGUMENT,
+                message
         );
     }
 
     @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
     @ExceptionHandler(IOException.class)
     public ExceptionResponse handleUploadImageException(IOException e) {
+
+        String message = messageService.getMessage("exception.image.upload");
+
         return new ExceptionResponse(
                 HttpStatus.EXPECTATION_FAILED.value(),
-                "Failed to upload image!",
-                e.getLocalizedMessage()
+                AppConstants.UPLOAD_IMAGE_FAILED,
+                message
         );
     }
 }

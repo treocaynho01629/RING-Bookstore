@@ -13,7 +13,7 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
 /**
- * Service named {@link LogoutService} for handling user logout operations.
+ * Service for handling user logout operation.
  */
 @Service
 @RequiredArgsConstructor

@@ -18,7 +18,7 @@ import com.ring.repository.AccountRepository;
 import com.ring.repository.AddressRepository;
 import com.ring.repository.ShopRepository;
 import com.ring.service.impl.ShopServiceImpl;
-import com.ring.utils.FileUploadUtil;
+import com.ring.common.FileUploadUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

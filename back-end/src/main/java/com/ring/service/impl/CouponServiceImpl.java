@@ -1,5 +1,7 @@
 package com.ring.service.impl;
 
+import com.ring.common.AppConstants;
+import com.ring.common.CommonUtils;
 import com.ring.dto.projection.coupons.ICoupon;
 import com.ring.dto.request.CartStateRequest;
 import com.ring.dto.request.CouponRequest;
@@ -24,16 +26,16 @@ import com.ring.repository.CouponRepository;
 import com.ring.repository.ShopRepository;
 import com.ring.service.CouponService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +45,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing coupons.
+ */
 @RequiredArgsConstructor
 @Service
 public class CouponServiceImpl implements CouponService {
@@ -51,10 +56,12 @@ public class CouponServiceImpl implements CouponService {
     private final CouponDetailRepository couponDetailRepo;
     private final ShopRepository shopRepo;
 
+    private final MessageService messageService;
+
     private final CouponMapper couponMapper;
     private final DashboardMapper dashMapper;
 
-    @Cacheable(cacheNames = "coupons")
+    @Cacheable(cacheNames = AppConstants.COUPONS)
     public PagingResponse<CouponDTO> getCoupons(Integer pageNo,
             Integer pageSize,
             String sortBy,
@@ -69,9 +76,11 @@ public class CouponServiceImpl implements CouponService {
             Double cValue,
             Integer cQuantity) {
         Pageable pageable = PageRequest.of(pageNo, pageSize,
-                sortDir.equals("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
+                sortDir.equals(AppConstants.ASCENDING)
+                        ? Sort.by(sortBy).ascending()
+                        : Sort.by(sortBy).descending());
 
-        // Fetch from database
+        // Fetch from the database
         Page<ICoupon> couponsList = couponRepo.findCoupons(
                 types,
                 codes,
@@ -113,22 +122,28 @@ public class CouponServiceImpl implements CouponService {
                 couponsList.isEmpty());
     }
 
-    @Cacheable(cacheNames = "couponDetail", key = "#id")
+    @Cacheable(cacheNames = AppConstants.COUPON_DETAIL, key = "#id")
     public CouponDetailDTO getCoupon(Long id) {
         ICoupon coupon = couponRepo.findCouponById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Coupon not found!",
-                        "Không tìm thấy mã giảm giá yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.coupon") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         return couponMapper.couponToDetailDTO(coupon);
     }
 
-    @Cacheable(cacheNames = "coupons")
+    @Cacheable(cacheNames = AppConstants.COUPONS)
     public CouponDTO getCouponByCode(String code,
             Long shopId,
             Double cValue,
             Integer cQuantity) {
         ICoupon projection = couponRepo.findCouponByCode(code)
-                .orElseThrow(() -> new ResourceNotFoundException("Coupon not found!",
-                        "Không tìm thấy mã giảm giá yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.coupon") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         if (cValue != null || cQuantity != null) {
             CartStateRequest request = CartStateRequest.builder()
                     .value(cValue)
@@ -140,37 +155,39 @@ public class CouponServiceImpl implements CouponService {
         return couponMapper.couponToDTO(projection);
     }
 
-    @Cacheable(cacheNames = "coupons")
+    @Cacheable(cacheNames = AppConstants.COUPONS)
     public List<CouponDTO> recommendCoupons(List<Long> shopIds) {
         List<ICoupon> couponsList = couponRepo.recommendCoupons(shopIds);
-        List<CouponDTO> couponDTOS = couponsList.stream().map(couponMapper::couponToDTO).collect(Collectors.toList());
-        return couponDTOS;
+        return couponsList.stream()
+                .map(couponMapper::couponToDTO)
+                .collect(Collectors.toList());
     }
 
-    @Cacheable(cacheNames = "coupon")
+    @Cacheable(cacheNames = AppConstants.COUPON)
     public CouponDTO recommendCoupon(Long shopId, CartStateRequest state) {
-        ICoupon coupon = couponRepo.recommendCoupon(shopId, state.getValue(), state.getQuantity()).orElse(null);
-        if (coupon == null)
-            return null;
+        ICoupon coupon = couponRepo.recommendCoupon(shopId, state.getValue(), state.getQuantity())
+                .orElse(null);
+        if (coupon == null) return null;
         return couponMapper.couponToDTO(coupon);
     }
 
-    @Cacheable(cacheNames = "couponAnalytics")
+    @Cacheable(cacheNames = AppConstants.COUPON_ANALYTICS)
     public StatDTO getAnalytics(Long shopId,
             Long userId,
             Account user) {
-        boolean isAdmin = isAuthAdmin();
+        boolean isAdmin = CommonUtils.isAuthAdmin();
+        var label = StringUtils.capitalize(messageService.getMessage("label.coupon"));
         return dashMapper.statToDTO(couponRepo.getCouponAnalytics(shopId,
                 isAdmin ? userId : user.getId()),
-                "coupons",
-                "Mã giảm giá");
+                AppConstants.COUPONS,
+                label);
     }
 
-    @CacheEvict(cacheNames = { "coupons", "couponAnalytics" }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.COUPONS, AppConstants.COUPON_ANALYTICS }, allEntries = true)
     @Transactional
     public Coupon addCoupon(CouponRequest request, Account user) {
 
-        // Create new coupon
+        // New coupon
         var coupon = Coupon.builder()
                 .code(request.getCode())
                 .build();
@@ -178,17 +195,28 @@ public class CouponServiceImpl implements CouponService {
         // Shop validation
         if (request.getShopId() != null) {
             Shop shop = shopRepo.findById(request.getShopId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Shop not found!",
-                            "Không tìm thấy cửa hàng yêu cầu!"));
-            if (!isOwnerValid(shop, user))
-                throw new EntityOwnershipException("Invalid ownership!",
-                        "Người dùng không phải chủ sở hữu của cửa hàng này!");
+                    .orElseThrow(() -> {
+                        var errorMsg = messageService.getMessage("exception.not.found",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                        return new ResourceNotFoundException(errorMsg);
+                    });
+            if (!CommonUtils.isValidShopOwner(shop, user)) {
+                var errorMsg = messageService.getMessage("exception.ownership",
+                        new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                throw new EntityOwnershipException(errorMsg);
+            }
             coupon.setShop(shop);
         } else {
-            if (!isAuthAdmin())
-                throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Shop is required!");
+            if (!CommonUtils.isAuthAdmin()) {
+                var errorMsg = messageService.getMessage("exception.required.for",
+                        new Object[]{ new DefaultMessageSourceResolvable("label.shop"),
+                                new DefaultMessageSourceResolvable(UserRole.ROLE_ADMIN.getLabel()) });
+                throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                        AppConstants.INVALID_ARGUMENT,
+                        errorMsg);
+            }
         }
-        Coupon addedCoupon = couponRepo.save(coupon); // Save to database
+        Coupon addedCoupon = couponRepo.save(coupon); // Save to the database
 
         // Create coupon details
         var couponDetail = CouponDetail.builder()
@@ -206,33 +234,52 @@ public class CouponServiceImpl implements CouponService {
         return addedCoupon;
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = { "coupons", "couponAnalytics" }, allEntries = true),
-            @CacheEvict(cacheNames = "couponDetail", key = "#id") })
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { AppConstants.COUPONS,  AppConstants.COUPON_ANALYTICS }, allEntries = true),
+            @CacheEvict(cacheNames = AppConstants.COUPON_DETAIL, key = "#id") })
     @Transactional
     public Coupon updateCoupon(Long id, CouponRequest request, Account user) {
 
-        // Get original coupon
+        // Get the original coupon
         Coupon coupon = couponRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Coupon not found!",
-                        "Không tìm thấy mã giảm giá yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.coupon") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
 
-        // Check if correct seller or admin
-        if (!isOwnerValid(coupon.getShop(), user))
-            throw new EntityOwnershipException("Invalid ownership!",
-                    "Người dùng không có quyền chỉnh suửa mã giảm giá này!");
+        // Check if seller correct or admin
+        if (!CommonUtils.isValidShopOwner(coupon.getShop(), user)) {
+            if (!CommonUtils.isAuthAdmin()) {
+                var errorMsg = messageService.getMessage("exception.ownership",
+                        new Object[]{ new DefaultMessageSourceResolvable("label.coupon") });
+                throw new EntityOwnershipException(errorMsg);
+            }
+        }
 
         // Shop validation + set
         if (request.getShopId() != null) {
             Shop shop = shopRepo.findById(request.getShopId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Shop not found!",
-                            "Không tìm thấy cửa hàng yêu cầu!"));
-            if (!isOwnerValid(shop, user))
-                throw new EntityOwnershipException("Invalid ownership!",
-                        "Người dùng không phải chủ sở hữu của cửa hàng này!");
+                    .orElseThrow(() -> {
+                        var errorMsg = messageService.getMessage("exception.not.found",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                        return new ResourceNotFoundException(errorMsg);
+                    });
+            if (!CommonUtils.isValidShopOwner(shop, user)) {
+                var errorMsg = messageService.getMessage("exception.ownership",
+                        new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                throw new EntityOwnershipException(errorMsg);
+            }
             coupon.setShop(shop);
         } else {
-            if (!isAuthAdmin())
-                throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Shop is required!");
+            if (!CommonUtils.isAuthAdmin()) {
+                var errorMsg = messageService.getMessage("exception.required.for",
+                        new Object[]{ new DefaultMessageSourceResolvable("label.shop"),
+                                new DefaultMessageSourceResolvable(UserRole.ROLE_ADMIN.getLabel()) });
+                throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                        AppConstants.INVALID_ARGUMENT,
+                        errorMsg);
+            }
         }
 
         // Set new details info
@@ -248,35 +295,47 @@ public class CouponServiceImpl implements CouponService {
         coupon.setCode(request.getCode());
 
         // Update
-        Coupon updatedCoupon = couponRepo.save(coupon);
-        return updatedCoupon;
+        return couponRepo.save(coupon);
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = { "coupons", "couponAnalytics" }, allEntries = true),
-            @CacheEvict(cacheNames = "couponDetail", key = "#id") })
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { AppConstants.COUPONS, AppConstants.COUPON_ANALYTICS }, allEntries = true),
+            @CacheEvict(cacheNames = AppConstants.COUPON_DETAIL, key = "#id") })
     @Transactional
     public Coupon deleteCoupon(Long id, Account user) {
         Coupon coupon = couponRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Coupon not found!",
-                        "Không tìm thấy mã giảm giá yêu cầu!"));
-        // Check if correct seller or admin
-        if (!isOwnerValid(coupon.getShop(), user))
-            throw new EntityOwnershipException("Invalid ownership!",
-                    "Người dùng không có quyền xoá mã giảm giá này!");
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.coupon") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
+
+        // Check if seller correct or admin
+        if (!CommonUtils.isValidShopOwner(coupon.getShop(), user)) {
+            if (!CommonUtils.isAuthAdmin()) {
+                var errorMsg = messageService.getMessage("exception.ownership",
+                        new Object[]{ new DefaultMessageSourceResolvable("label.coupon") });
+                throw new EntityOwnershipException(errorMsg);
+            }
+        }
 
         couponRepo.deleteById(id); // Delete from database
         return coupon;
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = { "coupons", "couponAnalytics" }, allEntries = true) })
+    @Caching(evict = { @CacheEvict(cacheNames = { AppConstants.COUPONS,
+            AppConstants.COUPON_ANALYTICS }, allEntries = true) })
     @Transactional
     public void deleteCoupons(List<Long> ids,
             Account user) {
-        List<Long> deleteIds = isAuthAdmin() ? ids : couponRepo.findCouponIdsByInIdsAndSeller(ids, user.getId());
+        List<Long> deleteIds = CommonUtils.isAuthAdmin()
+                ? ids
+                : couponRepo.findCouponIdsByInIdsAndSeller(ids, user.getId());
         couponRepo.deleteAllById(deleteIds);
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = { "coupons", "couponAnalytics" }, allEntries = true) })
+    @Caching(evict = { @CacheEvict(cacheNames = { AppConstants.COUPONS,
+            AppConstants.COUPON_ANALYTICS }, allEntries = true) })
     @Transactional
     public void deleteCouponsInverse(List<CouponType> types,
             List<String> codes,
@@ -292,17 +351,18 @@ public class CouponServiceImpl implements CouponService {
                 codes,
                 code,
                 shopId,
-                isAuthAdmin() ? userId : user.getId(),
+                CommonUtils.isAuthAdmin() ? userId : user.getId(),
                 byShop,
                 showExpired,
                 ids);
         couponRepo.deleteAllById(deleteIds);
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = { "coupons", "couponAnalytics" }, allEntries = true) })
+    @Caching(evict = { @CacheEvict(cacheNames = { AppConstants.COUPONS,
+            AppConstants.COUPON_ANALYTICS }, allEntries = true) })
     @Transactional
     public void deleteAllCoupons(Long shopId, Account user) {
-        if (isAuthAdmin()) {
+        if (CommonUtils.isAuthAdmin()) {
             if (shopId != null) {
                 couponRepo.deleteAllByShopId(shopId);
             } else {
@@ -370,6 +430,13 @@ public class CouponServiceImpl implements CouponService {
         return (couponDetail.getUsage() <= 0 || couponDetail.getExpDate().isBefore(LocalDate.now()));
     }
 
+    /**
+     * Check if coupon is usable.
+     * 
+     * @param coupon The coupon.
+     * @param request The request.
+     * @return true if coupon is usable, false otherwise.
+     */
     protected boolean isUsable(Coupon coupon, CartStateRequest request) {
 
         boolean result;
@@ -400,22 +467,5 @@ public class CouponServiceImpl implements CouponService {
         }
 
         return result;
-    }
-
-    // Check valid role function
-    protected boolean isAuthAdmin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication(); // Get current auth
-        return (auth != null && auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(UserRole.ROLE_ADMIN.toString())));
-    }
-
-    protected boolean isOwnerValid(Shop shop, Account user) {
-        // Check if is admin or valid owner id
-        boolean isAdmin = isAuthAdmin();
-
-        if (shop != null) {
-            return shop.getOwner().getId().equals(user.getId()) || isAdmin;
-        } else
-            return isAdmin;
     }
 }

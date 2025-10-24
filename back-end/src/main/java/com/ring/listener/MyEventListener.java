@@ -1,9 +1,9 @@
 package com.ring.listener;
 
-import com.ring.listener.checkout.OnCheckoutCompletedEvent;
-import com.ring.listener.forgot.OnResetTokenCreatedEvent;
-import com.ring.listener.registration.OnRegistrationCompleteEvent;
-import com.ring.listener.reset.OnResetPasswordCompletedEvent;
+import com.ring.listener.events.OnCheckoutCompletedEvent;
+import com.ring.listener.events.OnRegistrationCompleteEvent;
+import com.ring.listener.events.OnResetPasswordCompletedEvent;
+import com.ring.listener.events.OnResetTokenCreatedEvent;
 import com.ring.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;

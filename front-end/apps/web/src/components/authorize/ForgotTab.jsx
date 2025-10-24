@@ -54,7 +54,7 @@ const NotificationContent = styled.div`
 const ButtonContainer = styled.div`
   display: flex;
   justify-content: space-between;
-  padding-top: ${({ theme }) => theme.spacing(2)};
+  padding-top: ${({ theme }) => theme.spacing(3)};
 `;
 //#endregion
 
@@ -66,35 +66,35 @@ const ForgotTab = ({
 }) => {
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
-  //Initial value
+  // Initial value
   const [email, setEmail] = useState("");
   const [validEmail, setValidEmail] = useState(false);
   const [sended, setSended] = useState(false);
 
-  //Error
+  // Error
   const [err, setErr] = useState([]);
   const [errMsg, setErrMsg] = useState("");
 
-  //Recaptcha v2
-  const [challenge, setChallenge] = useState(false); //Toggle if marked suspicious by v3
+  // Recaptcha v2
+  const [challenge, setChallenge] = useState(false); // Toggle if marked suspicious by v3
   const [token, setToken] = useState("");
 
-  const [sendForgot, { isLoading: sending }] = useForgotMutation(); //Request forgot hook
+  const [sendForgot, { isLoading: sending }] = useForgotMutation(); // Request forgot hook
 
-  //Validation email
+  // Validation email
   useEffect(() => {
     const result = EMAIL_REGEX.test(email);
     setValidEmail(result);
   }, [email]);
 
-  //Forgot pass
+  // Forgot pass
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (sending || pending) return;
 
     setPending(true);
 
-    //Validation
+    // Validation
     if (!validEmail) {
       setErrMsg("Sai định dạng email!");
       return;
@@ -102,7 +102,7 @@ const ForgotTab = ({
 
     const { enqueueSnackbar } = await import("notistack");
 
-    //Send mutation
+    // Send mutation
     const recaptchaToken = challenge
       ? token
       : await generateReCaptchaToken("forgot");
@@ -113,14 +113,14 @@ const ForgotTab = ({
     })
       .unwrap()
       .then((data) => {
-        //Reset input
+        // Reset input
         setEmail("");
         setErr([]);
         setErrMsg("");
         setSended(true);
         setChallenge(false);
 
-        //Queue snack
+        // Queue snack
         enqueueSnackbar("Đã gửi yêu cầu về email!", { variant: "success" });
         setPending(false);
       })
@@ -150,10 +150,10 @@ const ForgotTab = ({
   return (
     <form onSubmit={handleSubmit}>
       <AuthTitle>Khôi phục mật khẩu</AuthTitle>
+      <Instruction aria-live="assertive">
+        {errMsg != "" ? errMsg : " "}&nbsp;
+      </Instruction>
       <Stack spacing={1} direction="column">
-        <Instruction display={errMsg ? "block" : "none"} aria-live="assertive">
-          {errMsg}
-        </Instruction>
         {sended && (
           <NotificationContent>
             <MarkEmailReadOutlined />

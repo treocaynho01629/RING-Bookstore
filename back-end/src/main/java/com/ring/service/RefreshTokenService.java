@@ -1,7 +1,6 @@
 package com.ring.service;
 
 import com.ring.model.entity.Account;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseCookie;
 
 /**
@@ -9,13 +8,13 @@ import org.springframework.http.ResponseCookie;
  */
 public interface RefreshTokenService {
 
-    /**
-     * Refreshes the authentication token using the refresh token from the HTTP request.
-     *
-     * @param token Refresh token value.
-     * @return The updated {@link Account} with a new authentication token.
-     */
-    Account refreshToken(String token);
+   /**
+	 * Verifies the validity and integrity of the provided refresh token.
+	 *
+	 * @param token Refresh token value.
+	 * @return The {@link Account} associated with the refresh token.
+	 */
+    Account verifyRefreshToken(String token);
 
     /**
      * Generates a response cookie containing a refresh token for the given user account.

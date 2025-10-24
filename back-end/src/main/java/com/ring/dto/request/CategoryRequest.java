@@ -16,12 +16,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CategoryRequest {
 	
-	@NotBlank(message = "Tên danh mục không được bỏ trống!")
-	@Size(min = 1, max = 50, message = "Tên danh mục dài từ 1-50 kí tự!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
+	@Size(min = 1, max = 50, message = "{validation.constraints.size.range}")
 	private String name;
 
 	private Integer parentId;
 
-	@Size(max = 500, message = "Mô tả không quá 500 kí tự")
+	@Size(max = 500, message = "{validation.constraints.size.max}")
 	private String description;
 }

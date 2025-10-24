@@ -14,10 +14,6 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./theme": {
-      "import": "./dist/src/theme.js",
-      "require": "./dist/src/theme.cjs"
-    },
     "./ConfirmDialog": {
       "import": "./dist/src/components/ConfirmDialog.js",
       "require": "./dist/src/components/ConfirmDialog.cjs"
@@ -100,19 +96,21 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "lint": "eslint \"**/*.{ts,tsx,js,jsx}\"",
-    "update-dependencies": "npx npm-check-updates -u"
+    "update-dependencies": "npx npm-check-updates -u",
+    "gen:types": "orval --config ./orval.config.ts"
   },
   "devDependencies": {
     "@ring/eslint-config": "*",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
+    "orval": "^7.13.0",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
-    "@ring/redux": "*",
     "@mui/icons-material": "^7.2.0",
     "@mui/material": "^7.2.0",
+    "@ring/redux": "*",
     "lodash-es": "^4.17.21",
     "notistack": "^3.0.2",
     "react": "^18.0.0 || ^19.0.0"

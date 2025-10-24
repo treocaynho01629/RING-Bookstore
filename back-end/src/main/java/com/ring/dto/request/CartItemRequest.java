@@ -15,9 +15,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CartItemRequest {
 
-    @NotNull(message = "Sản phẩm không được trống!")
+    @NotNull(message = "{validation.constraints.not.blank}")
     private Long id;
 
-    @NotNull(message = "Số lượng không được bỏ trống!")
+    @NotNull(message = "{validation.constraints.not.blank}")
     private Short quantity;
 }

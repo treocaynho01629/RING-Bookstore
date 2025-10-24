@@ -12,7 +12,7 @@ export default function ProfileLayout() {
   const mobileMode = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const [pending, setPending] = useState(false);
 
-  //Fetch current profile
+  // Fetch current profile
   const { data, isLoading, isSuccess, error } = useGetProfileQuery();
 
   return (

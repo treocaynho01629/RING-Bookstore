@@ -18,7 +18,7 @@ const ResetTab = ({
 }) => {
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
-  //Password validation
+  // Password validation
   const [password, setPassword] = useState("");
   const [validPass, setValidPass] = useState(false);
   const [passFocus, setPassFocus] = useState(false);
@@ -27,29 +27,29 @@ const ResetTab = ({
   const [errMsg, setErrMsg] = useState("");
   const [err, setErr] = useState([]);
 
-  //Other
+  // Other
   const errRef = useRef();
   const navigate = useNavigate();
 
-  //Recaptcha v2
-  const [challenge, setChallenge] = useState(false); //Toggle if marked suspicious by v3
+  // Recaptcha v2
+  const [challenge, setChallenge] = useState(false); // Toggle if marked suspicious by v3
   const [token, setToken] = useState("");
 
-  //Reset mutation
+  // Reset mutation
   const [reset, { isLoading: reseting }] = useResetMutation();
 
-  //Password
+  // Password
   useEffect(() => {
     const match = password === matchPass;
     setValidMatch(match);
   }, [matchPass]);
 
-  //Error message reset when reinput stuff
+  // Error message reset when reinput stuff
   useEffect(() => {
     setErrMsg("");
   }, [password, matchPass]);
 
-  //Reset passowrd
+  // Reset passowrd
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (reseting || pending) return;
@@ -64,21 +64,21 @@ const ResetTab = ({
       token: recaptchaToken,
       source: challenge ? "v2" : "v3",
       resetToken,
-      newPass: {
-        password: password,
-        reInputPassword: matchPass,
+      resetBody: {
+        newPass: password,
+        newPassRe: matchPass,
       },
     })
       .unwrap()
       .then((data) => {
-        //Reset input
+        // Reset input
         setPassword("");
         setMatchPass("");
         setErr([]);
         setErrMsg("");
         setChallenge(false);
 
-        //Queue snack
+        // Queue snack
         enqueueSnackbar("Đổi mật khẩu thành công!", { variant: "success" });
         navigate("/auth/login");
         setPending(false);
@@ -110,14 +110,10 @@ const ResetTab = ({
   return (
     <form onSubmit={handleSubmit}>
       <AuthTitle>Khôi phục mật khẩu</AuthTitle>
+      <Instruction ref={errRef} aria-live="assertive">
+        {errMsg != "" ? errMsg : " "}&nbsp;
+      </Instruction>
       <Stack spacing={2.5} direction="column">
-        <Instruction
-          ref={errRef}
-          display={errMsg ? "block" : "none"}
-          aria-live="assertive"
-        >
-          {errMsg}
-        </Instruction>
         <PasswordInput
           label="Mật khẩu mới"
           size="small"

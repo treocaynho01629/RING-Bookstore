@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.ring.common.AppConstants;
+
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,8 +53,8 @@ public class RedisCacheConfig {
 
                 return RedisCacheManager.builder(redisConnectionFactory)
                                 .cacheDefaults(cacheConfig)
-                                .withCacheConfiguration("calculate", cacheConfiguration(Duration.ofMinutes(1)))
-                                .withCacheConfiguration("enums", cacheConfiguration(Duration.ofDays(1)))
+                                .withCacheConfiguration(AppConstants.CALCULATE, cacheConfiguration(Duration.ofMinutes(1)))
+                                .withCacheConfiguration(AppConstants.ENUMS, cacheConfiguration(Duration.ofDays(1)))
                                 .build();
         }
 }

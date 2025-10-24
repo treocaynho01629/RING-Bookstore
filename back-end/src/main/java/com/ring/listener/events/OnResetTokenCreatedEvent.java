@@ -1,4 +1,4 @@
-package com.ring.listener.forgot;
+package com.ring.listener.events;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;

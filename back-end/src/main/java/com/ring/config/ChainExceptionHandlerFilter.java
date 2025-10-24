@@ -20,7 +20,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 @RequiredArgsConstructor
 public class ChainExceptionHandlerFilter extends OncePerRequestFilter {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private HandlerExceptionResolver resolver;
 
@@ -49,7 +49,7 @@ public class ChainExceptionHandlerFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            log.error("Exception in filter: ", e);
+            logger.error("Exception in filter: ", e);
             resolver.resolveException(request, response, null, e);
         }
     }

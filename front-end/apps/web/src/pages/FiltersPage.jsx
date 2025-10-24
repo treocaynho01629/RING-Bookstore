@@ -168,19 +168,15 @@ const FiltersPage = () => {
     updateFilters();
   }, [cSlug, searchParams]);
 
-  //Set title
+  // Set title
   useTitle("Cửa hàng");
 
-  //Handle change
+  // Handle change
   const scrollToTop = useCallback(() => {
-    if (mobileMode) {
-      scrollRef?.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    scrollRef?.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   }, []);
 
   //Filter change
@@ -278,7 +274,7 @@ const FiltersPage = () => {
     handleResetPage();
   };
 
-  //Pagination change
+  // Pagination change
   const handleChangePage = (page) => {
     setPagination((prev) => ({ ...prev, number: page - 1 }));
     page - 1 == DEFAULT_PAGINATION.number

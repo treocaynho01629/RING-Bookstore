@@ -19,17 +19,17 @@ import java.util.List;
 @NoArgsConstructor
 public class CartDetailRequest {
 
-    @NotNull(message = "Cửa hàng không được bỏ trống!")
+    @NotNull(message = "{validation.constraints.not.blank}")
     private Long shopId;
 
     private String coupon;
 
-    @Size(max = 300, message = "Ghi chú không quá quá 300 kí tự!")
+    @Size(max = 300, message = "{validation.constraints.size.max}")
     private String note;
 
-    @NotNull(message = "Hình thức giao hàng không được bỏ trống!")
+    @NotNull(message = "{validation.constraints.not.blank}")
     private ShippingType shippingType;
 
-    @NotNull(message = "Sản phẩm không được trống!")
+    @NotNull(message = "{validation.constraints.not.blank}")
     private List<CartItemRequest> items;
 }

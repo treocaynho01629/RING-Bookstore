@@ -6,7 +6,7 @@ import com.ring.model.entity.Account;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * Service interface named {@link RegisterService} for handling user registration operations.
+ * Service interface for handling user registration operations.
  */
 public interface RegisterService {
 

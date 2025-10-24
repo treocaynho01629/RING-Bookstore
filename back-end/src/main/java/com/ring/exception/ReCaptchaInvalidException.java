@@ -1,5 +1,6 @@
 package com.ring.exception;
 
+import com.ring.common.AppConstants;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -11,12 +12,23 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(code = HttpStatus.FORBIDDEN)
 public final class ReCaptchaInvalidException extends RuntimeException {
 
-    public ReCaptchaInvalidException(String message, final Throwable cause) {
-        super(message, cause);
+    private final String error;
+    private String message;
+
+    public ReCaptchaInvalidException() {
+        super();
+        this.error = AppConstants.INVALID_RECAPTCHA;
     }
 
     public ReCaptchaInvalidException(String message) {
-        super(message);
+        super();
+        this.error = AppConstants.INVALID_RECAPTCHA;
+        this.message = message;
     }
 
+    public ReCaptchaInvalidException(String error, String message) {
+        super();
+        this.error = error;
+        this.message = message;
+    }
 }

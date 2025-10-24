@@ -1,5 +1,7 @@
 package com.ring.service.impl;
 
+import com.ring.common.AppConstants;
+import com.ring.common.CommonUtils;
 import com.ring.dto.projection.shops.*;
 import com.ring.dto.request.AddressRequest;
 import com.ring.dto.request.ShopRequest;
@@ -14,21 +16,21 @@ import com.ring.model.entity.Account;
 import com.ring.model.entity.Address;
 import com.ring.model.entity.Image;
 import com.ring.model.entity.Shop;
-import com.ring.model.enums.UserRole;
 import com.ring.repository.AddressRepository;
 import com.ring.repository.ShopRepository;
 import com.ring.service.ImageService;
 import com.ring.service.ShopService;
-import com.ring.utils.FileUploadUtil;
+import com.ring.common.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,11 +46,12 @@ public class ShopServiceImpl implements ShopService {
     private final AddressRepository addressRepo;
 
     private final ImageService imageService;
+    private final MessageService messageService;
 
     private final ShopMapper shopMapper;
     private final DashboardMapper dashMapper;
 
-    @Cacheable(cacheNames = "shops")
+    @Cacheable(cacheNames = AppConstants.SHOPS)
     public PagingResponse<ShopDisplayDTO> getDisplayShops(Integer pageNo,
                                                           Integer pageSize,
                                                           String sortBy,
@@ -58,7 +61,9 @@ public class ShopServiceImpl implements ShopService {
                                                           Account user) {
 
         Pageable pageable = PageRequest.of(pageNo, pageSize,
-                sortDir.equals("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
+                sortDir.equals(AppConstants.ASCENDING) 
+                ? Sort.by(sortBy).ascending() 
+                : Sort.by(sortBy).descending());
         Long userId = user != null ? user.getId() : null;
 
         // Fetch from database
@@ -73,7 +78,7 @@ public class ShopServiceImpl implements ShopService {
                 shopsList.isEmpty());
     }
 
-    @Cacheable(cacheNames = "shops")
+    @Cacheable(cacheNames = AppConstants.SHOPS)
     public PagingResponse<ShopDTO> getShops(Integer pageNo,
                                             Integer pageSize,
                                             String sortBy,
@@ -83,12 +88,15 @@ public class ShopServiceImpl implements ShopService {
                                             Account user) {
 
         Pageable pageable = PageRequest.of(pageNo, pageSize,
-                sortDir.equals("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
-        boolean isAdmin = isAuthAdmin();
+                sortDir.equals(AppConstants.ASCENDING) 
+                ? Sort.by(sortBy).ascending() 
+                : Sort.by(sortBy).descending());
+        boolean isAdmin = CommonUtils.isAuthAdmin();
 
         Page<IShop> shopsList = shopRepo.findShops(keyword,
-                userId != null ? isAdmin ? userId : null
-                        : isAdmin ? null : user.getId(),
+                userId != null 
+                    ? isAdmin ? userId : null
+                    : isAdmin ? null : user.getId(),
                 pageable);
         List<ShopDTO> shopDTOS = shopsList.map(shopMapper::shopToDTO).toList();
         return new PagingResponse<>(
@@ -100,7 +108,7 @@ public class ShopServiceImpl implements ShopService {
                 shopsList.isEmpty());
     }
 
-    @Cacheable(cacheNames = "shops")
+    @Cacheable(cacheNames = AppConstants.SHOPS)
     public List<ShopPreviewDTO> getShopsPreview(Account user) {
 
         List<IShopPreview> shops = shopRepo.findShopsPreview(user.getId());
@@ -108,77 +116,86 @@ public class ShopServiceImpl implements ShopService {
         return shopDTOS;
     }
 
-    @Cacheable(cacheNames = "shopInfo")
-    public ShopInfoDTO getShopInfo(Long id,
-                                   Account user) {
+    @Cacheable(cacheNames = AppConstants.SHOP_INFO)
+    public ShopInfoDTO getShopInfo(Long id, Account user) {
 
         Long userId = user != null ? user.getId() : null;
         IShopInfo shop = shopRepo.findShopInfoById(id, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Shop not found!",
-                        "Không tìm thấy cửa hàng yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         ShopInfoDTO shopDTO = shopMapper.infoToDTO(shop); // Map to DTO
         return shopDTO;
     }
 
-    @Cacheable(cacheNames = "shop")
-    public ShopDisplayDetailDTO getShopDisplayDetail(Long id,
-                                                     Account user) {
+    @Cacheable(cacheNames = AppConstants.SHOP)
+    public ShopDisplayDetailDTO getShopDisplayDetail(Long id, Account user) {
 
         Long userId = user != null ? user.getId() : null;
         IShopDisplayDetail shop = shopRepo.findShopDisplayDetailById(id, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Shop not found!",
-                        "Không tìm thấy cửa hàng yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         ShopDisplayDetailDTO shopDTO = shopMapper.displayDetailToDTO(shop); // Map to DTO
         return shopDTO;
     }
 
-    @Cacheable(cacheNames = "shopDetail")
-    public ShopDetailDTO getShopDetail(Long id,
-                                       Account user) {
+    @Cacheable(cacheNames = AppConstants.SHOP_DETAIL)
+    public ShopDetailDTO getShopDetail(Long id, Account user) {
 
-        IShopDetail shop = shopRepo.findShopDetailById(id,
-                isAuthAdmin() ? null : user.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Shop not found!",
-                        "Không tìm thấy cửa hàng yêu cầu!"));
+        IShopDetail shop = shopRepo.findShopDetailById(id, CommonUtils.isAuthAdmin() ? null : user.getId())
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         ShopDetailDTO shopDTO = shopMapper.detailToDTO(shop); // Map to DTO
         return shopDTO;
     }
 
-    @Cacheable(cacheNames = "shopAnalytics")
-    public StatDTO getAnalytics(Long userId,
-            Account user) {
+    @Cacheable(cacheNames = AppConstants.SHOP_ANALYTICS)
+    public StatDTO getAnalytics(Long userId, Account user) {
 
-        boolean isAdmin = isAuthAdmin();
+        boolean isAdmin = CommonUtils.isAuthAdmin();
+        var label = StringUtils.capitalize(messageService.getMessage("label.shop"));
         return dashMapper.statToDTO(shopRepo.getShopAnalytics(isAdmin ? userId : user.getId()),
-                "shops",
-                "Cửa hàng");
+                AppConstants.SHOPS,
+                label);
     }
 
-    @CacheEvict(cacheNames = { "shopInfo", "shopDetail", "shop" }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL, AppConstants.SHOP }, allEntries = true)
     @Transactional
-    public void follow(Long id,
-            Account user) {
+    public void follow(Long id, Account user) {
 
         Shop shop = shopRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Shop not found!",
-                        "Không tìm thấy cửa hàng yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         shop.addFollower(user);
         shopRepo.save(shop);
     }
 
-    @CacheEvict(cacheNames = { "shopInfo", "shopDetail", "shop" }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL, AppConstants.SHOP }, allEntries = true)
     @Transactional
-    public void unfollow(Long id,
-            Account user) {
+    public void unfollow(Long id, Account user) {
 
         Shop shop = shopRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Shop not found!",
-                        "Không tìm thấy cửa hàng yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         shop.removeFollower(user);
         shopRepo.save(shop);
     }
 
-    @CacheEvict(cacheNames = { "shops", "shopsAnalytics" }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.SHOPS, AppConstants.SHOP_ANALYTICS }, allEntries = true)
     @Transactional
     public Shop addShop(ShopRequest request,
             MultipartFile file,
@@ -212,19 +229,29 @@ public class ShopServiceImpl implements ShopService {
         return addedShop;
     }
 
-    @CacheEvict(cacheNames = { "shopInfo", "shopDetail", "shop", "shops" }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL, 
+        AppConstants.SHOP, AppConstants.SHOPS }, allEntries = true)
     @Transactional
-    public Shop updateShop(Long id, ShopRequest request, MultipartFile file, Account user) {
+    public Shop updateShop(Long id, 
+        ShopRequest request,
+        MultipartFile file, 
+        Account user) {
 
         // Get original shop
         Shop shop = shopRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Shop not found!",
-                        "Không tìm thấy cửa hàng yêu cầu!"));
+                    .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
 
         // Check if correct seller or admin
-        if (!isOwnerValid(shop, user))
-            throw new EntityOwnershipException("Invalid ownership!",
-                    "Người dùng không có quyền chỉnh sửa cửa hàng này!");
+        if (!CommonUtils.isValidShopOwner(shop, user)) {
+
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+            throw new EntityOwnershipException(errorMsg);
+        }
 
         // Update address
         AddressRequest addressRequest = request.getAddressRequest();
@@ -254,30 +281,41 @@ public class ShopServiceImpl implements ShopService {
         return updatedShop;
     }
 
-    @CacheEvict(cacheNames = { "shopInfo", "shopDetail", "shop", "shops", "shopsAnalytics" }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL, 
+        AppConstants.SHOP, AppConstants.SHOPS, AppConstants.SHOP_ANALYTICS }, allEntries = true)
     public Shop deleteShop(Long id, Account user) {
 
         Shop shop = shopRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Shop not found!",
-                        "Không tìm thấy cửa hàng yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         // Check if correct seller or admin
-        if (!isOwnerValid(shop, user))
-            throw new EntityOwnershipException("Invalid ownership!",
-                    "Người dùng không có quyền xoá cửa hàng này!");
+        if (!CommonUtils.isValidShopOwner(shop, user)) {
+
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+            throw new EntityOwnershipException(errorMsg);
+        }
 
         shopRepo.deleteById(id); // Delete from database
         return shop;
     }
 
-    @CacheEvict(cacheNames = { "shopInfo", "shopDetail", "shop", "shops", "shopsAnalytics" }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL, 
+        AppConstants.SHOP, AppConstants.SHOPS, AppConstants.SHOP_ANALYTICS }, allEntries = true)
     @Transactional
     public void deleteShops(List<Long> ids, Account user) {
 
-        List<Long> deleteIds = isAuthAdmin() ? ids : shopRepo.findShopIdsByInIdsAndOwner(ids, user.getId());
+        List<Long> deleteIds = CommonUtils.isAuthAdmin()
+            ? ids 
+            : shopRepo.findShopIdsByInIdsAndOwner(ids, user.getId());
         shopRepo.deleteAllById(deleteIds);
     }
 
-    @CacheEvict(cacheNames = { "shopInfo", "shopDetail", "shop", "shops", "shopsAnalytics" }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL, 
+        AppConstants.SHOP, AppConstants.SHOPS, AppConstants.SHOP_ANALYTICS }, allEntries = true)
     @Transactional
     public void deleteShopsInverse(String keyword,
             Long userId,
@@ -286,47 +324,44 @@ public class ShopServiceImpl implements ShopService {
 
         List<Long> deleteIds = shopRepo.findInverseIds(
                 keyword,
-                isAuthAdmin() ? userId : user.getId(),
+                CommonUtils.isAuthAdmin() ? userId : user.getId(),
                 ids);
         shopRepo.deleteAllById(deleteIds);
     }
 
-    @CacheEvict(cacheNames = { "shopInfo", "shopDetail", "shop", "shops", "shopsAnalytics" }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL, 
+        AppConstants.SHOP, AppConstants.SHOPS, AppConstants.SHOP_ANALYTICS }, allEntries = true)
     @Override
     public void deleteAllShops(Account user) {
 
-        if (isAuthAdmin()) {
+        if (CommonUtils.isAuthAdmin()) {
             shopRepo.deleteAll();
         } else {
             shopRepo.deleteAllByOwner(user);
         }
     }
 
-    // Check valid role function
-    protected boolean isAuthAdmin() {
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication(); // Get current auth
-        return (auth != null && auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(UserRole.ROLE_ADMIN.toString())));
-    }
-
-    // Check valid role function
-    protected boolean isOwnerValid(Shop shop, Account user) {
-
-        boolean isAdmin = isAuthAdmin();
-
-        // Check if is admin or valid owner id
-        return shop.getOwner().getId().equals(user.getId()) || isAdmin;
-    }
-
+     /**
+      * Updates the shop picture. This method allows uploading a new shop picture,
+      * replacing an existing one, or removing the shop picture.
+      *
+      * @param file    the new image file to be uploaded as the shop picture, can be
+      *                null for removing the image
+      * @param image   the identifier of the image, used for determining if an image
+      *                should be removed, can be null
+      * @param shop    the shop to be updated
+      * @return the updated shop with the modified shop picture
+      */
     protected Shop changeShopPic(MultipartFile file, String image, Shop shop) {
 
-        if (file != null) { // Contain new image >> upload/replace
+        // Contain new image >> upload/replace
+        if (file != null) { 
             if (shop.getImage() != null)
                 imageService.deleteImage(shop.getImage().getId()); // Delete old image
             Image savedImage = imageService.upload(file, FileUploadUtil.SHOP_FOLDER); // Upload new image
             shop.setImage(savedImage); // Set new image
-        } else if (image == null) { // Remove image
+        // Remove image
+        } else if (image == null) { 
             if (shop.getImage() != null)
                 imageService.deleteImage(shop.getImage().getId()); // Delete old image
             shop.setImage(null);

@@ -1,5 +1,6 @@
 package com.ring.config.security;
 
+import com.ring.common.AppConstants;
 import com.ring.config.ChainExceptionHandlerFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -44,10 +45,9 @@ public class SecurityConfig {
      * <p>
      * For example:
      * <ul>
-     * <li>{@code ROLE_ADMIN} inherits permissions from {@code ROLE_SELLER} and
-     * {@code ROLE_USER}</li>
-     * <li>{@code ROLE_SELLER} inherits from {@code ROLE_USER}</li>
-     * <li>{@code ROLE_GUEST} also inherits from {@code ROLE_USER}</li>
+     *     <li>{@code ROLE_ADMIN} inherits permissions from {@code ROLE_SELLER} and {@code ROLE_USER}</li>
+     *     <li>{@code ROLE_SELLER} inherits from {@code ROLE_USER}</li>
+     *     <li>{@code ROLE_GUEST} also inherits from {@code ROLE_USER}</li>
      * </ul>
      *
      * @return A {@link RoleHierarchy} object representing the configured role
@@ -62,11 +62,11 @@ public class SecurityConfig {
      * Configures a {@link SecurityExpressionHandler} that uses the defined role
      * hierarchy for access expressions.
      *
-     * @return A customized {@link SecurityExpressionHandler} with role hierarchy
-     *         support.
+     * @return A customized {@link SecurityExpressionHandler} with role hierarchy support.
      */
     @Bean
     public SecurityExpressionHandler<FilterInvocation> customWebSecurityExpressionHandler() {
+        
         DefaultWebSecurityExpressionHandler expressionHandler = new DefaultWebSecurityExpressionHandler();
         expressionHandler.setRoleHierarchy(roleHierarchy());
         return expressionHandler;
@@ -110,7 +110,7 @@ public class SecurityConfig {
                         .addLogoutHandler(logoutHandler)
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
-                        .deleteCookies("refreshToken")
+                        .deleteCookies(AppConstants.REFRESH_TOKEN)
                         .logoutSuccessHandler(
                                 (request, response, authentication) -> SecurityContextHolder.clearContext())
                         .permitAll());

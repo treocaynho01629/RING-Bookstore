@@ -57,9 +57,10 @@ Object.values(CouponType).forEach((item) => {
   });
 });
 
-const CouponsList = ({ scrollPosition, tabletMode }) => {
+const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
   const { coupons: savedCoupons } = useCoupon();
   const scrollRef = useRef(null);
+  const mobileScrollRef = useRef(null);
   const inputRef = useRef(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -116,7 +117,17 @@ const CouponsList = ({ scrollPosition, tabletMode }) => {
   }, [data]);
 
   const scrollToTop = useCallback(() => {
-    scrollRef?.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (mobileMode) {
+      mobileScrollRef?.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    } else {
+      scrollRef?.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
   }, []);
 
   //Change tab
@@ -235,7 +246,7 @@ const CouponsList = ({ scrollPosition, tabletMode }) => {
 
   return (
     <>
-      <StyledDialogTitle>
+      <StyledDialogTitle ref={scrollRef}>
         <Link to={-1}>
           <KeyboardArrowLeft />
         </Link>
@@ -259,7 +270,7 @@ const CouponsList = ({ scrollPosition, tabletMode }) => {
         sx={{ py: 0, px: { xs: 0, sm: 2, md: 0 } }}
         onScroll={tabletMode ? scrollListener : undefined}
       >
-        <form ref={scrollRef} onSubmit={handleChangeCode}>
+        <form ref={mobileScrollRef} onSubmit={handleChangeCode}>
           <TextField
             placeholder="Nhập mã giảm giá"
             autoComplete="code"

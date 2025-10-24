@@ -22,57 +22,57 @@ import java.util.List;
 @NoArgsConstructor
 public class BookRequest {
 	
-	@NotNull(message = "Giá không được bỏ trống!")
-	@Min(value = 1000, message = "Giá từ 1.000 ₫")
-	@Max(value = 10000000, message = "Giá dưới 10.000.000 ₫")
+	@NotNull(message = "{validation.constraints.not.blank}")
+	@Min(value = 1000, message = "{validation.constraints.min}")
+	@Max(value = 10000000, message = "{validation.constraints.max}")
 	private Double price;
 
 	@DecimalMin(value = "0.0", inclusive = true)
-	@Digits(integer=1, fraction=4)
+	@Digits(integer = 1, fraction = 4)
 	private BigDecimal discount;
 
-	@NotNull(message = "Số lượng không được bỏ trống!")
-	@Min(value = 1, message = "Số lượng phải từ 1")
-	@Max(value = 10000, message = "Tối đa 10.000")
+	@NotNull(message = "{validation.constraints.not.blank}")
+	@Min(value = 1, message = "{validation.constraints.min}")
+	@Max(value = 10000, message = "{validation.constraints.max}")
 	private Short amount;
 	
-	@NotBlank(message = "Tiêu đề không được bỏ trống!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
 	private String title;
 	
-	@NotBlank(message = "Mô tả không được bỏ trống!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
 	private String description;
 	
-	@NotNull(message = "Hình thức bìa không được bỏ trống!")
+	@NotNull(message = "{validation.constraints.not.blank}")
 	private BookType type;
 	
-	@NotNull(message = "Tác giả không được bỏ trống!")
+	@NotNull(message = "{validation.constraints.not.blank}")
 	private String author;
 	
-	@NotNull(message = "NXB không được bỏ trống!")
+	@NotNull(message = "{validation.constraints.not.blank}")
 	private Integer pubId;
 	
-	@NotNull(message = "Danh mục không được bỏ trống!")
+	@NotNull(message = "{validation.constraints.not.blank}")
 	private Integer cateId;
 	
-	@NotNull(message = "Trọng lượng không được bỏ trống!")
-	@Min(value = 1, message = "Trọng lượng phải trên 1g")
+	@NotNull(message = "{validation.constraints.not.blank}")
+	@Min(value = 1, message = "{validation.constraints.min}")
 	private Double weight;
 	
-	@NotBlank(message = "Kích cỡ không được bỏ trống!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
 	private String size;
 	
-	@NotNull(message = "Số trang không được bỏ trống!")
-	@Min(value = 1, message = "Số trang phải trên 1")
+	@NotNull(message = "{validation.constraints.not.blank}")
+	@Min(value = 1, message = "{validation.constraints.min}")
 	private Integer pages;
 	
-	@Past(message = "Ngày xuất bản phải trước hôm nay!")
+	@Past(message = "{validation.constraints.date.past}")
 	@DateTimeFormat(pattern = "dd-MM-yyyy")
 	private LocalDate date;
 
-	@NotNull(message = "Ngôn ngữ không được bỏ trống!")
+	@NotNull(message = "{validation.constraints.not.blank}")
 	private BookLanguage language;
 
-	@NotNull(message = "Cửa hàng không được bỏ trống!")
+	@NotNull(message = "{validation.constraints.not.blank}")
 	private Long shopId;
 
 	private Long thumbnailId;

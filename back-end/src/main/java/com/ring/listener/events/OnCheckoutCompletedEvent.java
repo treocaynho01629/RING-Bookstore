@@ -1,4 +1,4 @@
-package com.ring.listener.checkout;
+package com.ring.listener.events;
 
 import com.ring.dto.response.orders.ReceiptDTO;
 import lombok.Getter;

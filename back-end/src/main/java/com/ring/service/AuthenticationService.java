@@ -5,7 +5,7 @@ import com.ring.model.entity.Account;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * Service implementation named {@link AuthenticationService} for handling user authentication operations.
+ * Service interface for handling user authentication operations.
  */
 public interface AuthenticationService {
 

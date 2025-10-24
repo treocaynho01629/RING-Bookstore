@@ -14,7 +14,7 @@ import com.ring.dto.response.publishers.PublisherDTO;
 import com.ring.dto.response.reviews.ReviewsInfoDTO;
 import com.ring.model.entity.Book;
 import com.ring.model.entity.Image;
-import com.ring.utils.FileUploadUtil;
+import com.ring.common.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,17 +24,25 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * A mapper for {@link IBook}, {@link IBookDetail}, {@link IBookDisplay}, {@link Book}, {@link Image} to {@link BookDTO}, {@link BookDetailDTO}, {@link BookDisplayDTO}, {@link BookResponseDTO}, {@link CategoryDTO}, {@link ImageDTO}, {@link PublisherDTO}, {@link ReviewsInfoDTO}.
+ */
 @RequiredArgsConstructor
 @Service
 public class BookMapper {
     private final FileUploadUtil fileUploadUtil;
 
+    /**
+     * Maps a {@link IBookDisplay} to a {@link BookDisplayDTO}.
+     * 
+     * @param book the book to map
+     * @return the mapped {@link BookDisplayDTO}
+     */
     public BookDisplayDTO displayToDTO(IBookDisplay book) {
-        Double rating = book.getRating();
-        Integer totalOrders = book.getTotalOrders();
+
         IImage image = book.getImage();
 
-        //Generate url
+        // Generate image URL
         Map<String, String> srcSet = fileUploadUtil.generateUrl(image.getPublicId());
         return new BookDisplayDTO(book.getId(),
                 book.getSlug(),
@@ -46,35 +54,44 @@ public class BookMapper {
                 book.getAmount(),
                 book.getShopId(),
                 book.getShopName(),
-                rating,
-                totalOrders);
+                book.getRating(),
+                book.getTotalOrders());
     }
 
+    /**
+     * Maps a {@link IBookDetail} to a {@link BookDetailDTO}.
+     * 
+     * @param book the book to map
+     * @return the mapped {@link BookDetailDTO}
+     */
     public BookDetailDTO detailToDTO(IBookDetail book) {
-        //Info
+
+        // Info
         Integer totalOrders = book.getTotalOrders();
         Double rating = book.getRating();
         Integer totalRates = book.getTotalRates();
         List<Integer> rates = new ArrayList<>();
+
         rates.add(book.getRate1());
         rates.add(book.getRate2());
         rates.add(book.getRate3());
         rates.add(book.getRate4());
         rates.add(book.getRate5());
 
-        //Other preview images
+        // Other preview images
         List<IImage> previews = book.getPreviews();
         List<ImageDTO> images = previews != null ? previews
                 .stream()
                 .map(image -> {
-                    //Generate url
+
+                    // Generate image URL
                     Map<String, String> srcSet = fileUploadUtil.generateUrl(image.getPublicId());
                     return new ImageDTO(image.getUrl(), srcSet);
                 })
                 .collect(Collectors.toList())
                 : null;
 
-        //Category
+        // Category
         CategoryDTO cate = new CategoryDTO(
                 book.getCateId(),
                 book.getCateSlug(),
@@ -88,13 +105,13 @@ public class BookMapper {
                 : null
         );
 
-        //Publisher
+        // Publisher
         PublisherDTO pub = new PublisherDTO(
                 book.getPubId(),
                 book.getPubName()
         );
 
-        //Generate url
+        // Generate image URL
         IImage image = book.getImage();
         Map<String, String> srcSet = fileUploadUtil.generateUrl(image.getPublicId());
         return new BookDetailDTO(book.getId(),
@@ -122,7 +139,13 @@ public class BookMapper {
         );
     }
 
+    /**
+     * Maps a {@link Book} to a {@link BookResponseDTO}.
+     * @param book the book to map
+     * @return the mapped {@link BookResponseDTO}
+     */
     public BookResponseDTO bookToResponseDTO(Book book) {
+
         return new BookResponseDTO(book.getId(),
                 book.getSlug(),
                 book.getPrice(),
@@ -130,22 +153,29 @@ public class BookMapper {
                 book.getTitle());
     }
 
+    /**
+     * Maps a {@link IBook} to a {@link BookDTO}.
+     * @param book the book to map
+     * @param imagesList the list of images to map
+     * @return the mapped {@link BookDTO}
+     */
     public BookDTO projectionToDTO(IBook book, List<Image> imagesList) {
-        //Images
-        Optional<Image> thumbnail = imagesList.stream()
-                                                .filter(item -> item.getId().equals(book.getImage()))
-                                                .findFirst();
-        List<Image> previews = imagesList.stream()
-                                                .filter(item -> !item.getId().equals(book.getImage()))
-                                                .toList();
 
-        //Category
+        // Images
+        Optional<Image> thumbnail = imagesList.stream()
+                                        .filter(item -> item.getId().equals(book.getImage()))
+                                        .findFirst();
+        List<Image> previews = imagesList.stream()
+                                        .filter(item -> !item.getId().equals(book.getImage()))
+                                        .toList();
+
+        // Category
         CategoryDTO cate = new CategoryDTO(
                 book.getCateId(),
                 book.getCateName()
         );
 
-        //Publisher
+        // Publisher
         PublisherDTO pub = new PublisherDTO(
                 book.getPubId(),
                 book.getPubName()

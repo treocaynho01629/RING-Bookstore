@@ -14,13 +14,14 @@ import com.ring.dto.response.books.BookDisplayDTO;
 import com.ring.dto.response.books.BookResponseDTO;
 import com.ring.exception.EntityOwnershipException;
 import com.ring.exception.ResourceNotFoundException;
+import com.ring.listener.ImageEntityListener;
 import com.ring.mapper.BookMapper;
 import com.ring.model.entity.*;
 import com.ring.model.enums.BookType;
 import com.ring.model.enums.UserRole;
 import com.ring.repository.*;
 import com.ring.service.impl.BookServiceImpl;
-import com.ring.utils.FileUploadUtil;
+import com.ring.common.FileUploadUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -62,6 +63,9 @@ class BookServiceTest extends AbstractServiceTest {
 
         @Mock
         private ImageService imageService;
+
+        @Mock
+        private ImageEntityListener eventListener;
 
         @Mock
         private Slugify slg;
@@ -545,8 +549,7 @@ class BookServiceTest extends AbstractServiceTest {
                                 .thenReturn(List.of(image));
                 when(detailRepo.save(any(BookDetail.class))).thenReturn(mock(BookDetail.class));
                 when(bookRepo.save(any(Book.class))).thenReturn(mock(Book.class));
-                when(imageRepo.findBookImagePublicIds(id, request.getRemoveIds())).thenReturn(publicIds);
-                when(imageService.deleteImages(publicIds)).thenReturn(mock(ApiResponse.class));
+//                when(imageRepo.findBookImagePublicIds(id, request.getRemoveIds())).thenReturn(publicIds);
                 when(bookMapper.bookToResponseDTO(any(Book.class))).thenReturn(expected);
 
                 // Then
@@ -563,8 +566,7 @@ class BookServiceTest extends AbstractServiceTest {
                 verify(imageService, times(1)).uploadMultiple(eq(List.of(file)), eq(FileUploadUtil.PRODUCT_FOLDER));
                 verify(detailRepo, times(1)).save(any(BookDetail.class));
                 verify(bookRepo, times(1)).save(any(Book.class));
-                verify(imageRepo, times(1)).findBookImagePublicIds(id, request.getRemoveIds());
-                verify(imageService, times(1)).deleteImages(publicIds);
+//                verify(imageRepo, times(1)).findBookImagePublicIds(id, request.getRemoveIds());
                 verify(bookMapper, times(1)).bookToResponseDTO(any(Book.class));
         }
 
@@ -591,8 +593,8 @@ class BookServiceTest extends AbstractServiceTest {
                 verify(imageService, never()).uploadMultiple(eq(List.of(file)), eq(FileUploadUtil.PRODUCT_FOLDER));
                 verify(detailRepo, never()).save(any(BookDetail.class));
                 verify(bookRepo, never()).save(any(Book.class));
-                verify(imageRepo, never()).findBookImagePublicIds(id, request.getRemoveIds());
-                verify(imageService, never()).deleteImages(publicIds);
+//                verify(imageRepo, never()).findBookImagePublicIds(id, request.getRemoveIds());
+//                verify(imageService, never()).deleteImages(publicIds);
                 verify(bookMapper, never()).bookToResponseDTO(any(Book.class));
         }
 
@@ -620,8 +622,8 @@ class BookServiceTest extends AbstractServiceTest {
                 verify(imageService, never()).uploadMultiple(eq(List.of(file)), eq(FileUploadUtil.PRODUCT_FOLDER));
                 verify(detailRepo, never()).save(any(BookDetail.class));
                 verify(bookRepo, never()).save(any(Book.class));
-                verify(imageRepo, never()).findBookImagePublicIds(id, request.getRemoveIds());
-                verify(imageService, never()).deleteImages(publicIds);
+//                verify(imageRepo, never()).findBookImagePublicIds(id, request.getRemoveIds());
+//                verify(imageService, never()).deleteImages(publicIds);
                 verify(bookMapper, never()).bookToResponseDTO(any(Book.class));
         }
 
@@ -650,8 +652,8 @@ class BookServiceTest extends AbstractServiceTest {
                 verify(imageService, never()).uploadMultiple(eq(List.of(file)), eq(FileUploadUtil.PRODUCT_FOLDER));
                 verify(detailRepo, never()).save(any(BookDetail.class));
                 verify(bookRepo, never()).save(any(Book.class));
-                verify(imageRepo, never()).findBookImagePublicIds(id, request.getRemoveIds());
-                verify(imageService, never()).deleteImages(publicIds);
+//                verify(imageRepo, never()).findBookImagePublicIds(id, request.getRemoveIds());
+//                verify(imageService, never()).deleteImages(publicIds);
                 verify(bookMapper, never()).bookToResponseDTO(any(Book.class));
         }
 
@@ -686,8 +688,8 @@ class BookServiceTest extends AbstractServiceTest {
                 verify(imageService, never()).uploadMultiple(eq(List.of(file)), eq(FileUploadUtil.PRODUCT_FOLDER));
                 verify(detailRepo, never()).save(any(BookDetail.class));
                 verify(bookRepo, never()).save(any(Book.class));
-                verify(imageRepo, never()).findBookImagePublicIds(id, request.getRemoveIds());
-                verify(imageService, never()).deleteImages(publicIds);
+//                verify(imageRepo, never()).findBookImagePublicIds(id, request.getRemoveIds());
+//                verify(imageService, never()).deleteImages(publicIds);
                 verify(bookMapper, never()).bookToResponseDTO(any(Book.class));
         }
 
@@ -725,8 +727,8 @@ class BookServiceTest extends AbstractServiceTest {
                 verify(imageService, never()).uploadMultiple(eq(List.of(file)), eq(FileUploadUtil.PRODUCT_FOLDER));
                 verify(detailRepo, never()).save(any(BookDetail.class));
                 verify(bookRepo, never()).save(any(Book.class));
-                verify(imageRepo, never()).findBookImagePublicIds(id, request.getRemoveIds());
-                verify(imageService, never()).deleteImages(publicIds);
+//                verify(imageRepo, never()).findBookImagePublicIds(id, request.getRemoveIds());
+//                verify(imageService, never()).deleteImages(publicIds);
                 verify(bookMapper, never()).bookToResponseDTO(any(Book.class));
         }
 

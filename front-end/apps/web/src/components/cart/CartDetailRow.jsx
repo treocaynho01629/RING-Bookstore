@@ -385,17 +385,17 @@ const CartDetailRow = ({
           id={shopLabelId}
           scope="row"
         >
-          <Link to={"/store"}>
+          <Link to={`/shop/${shop?.id}`}>
             <Shop>
               <ShopTag>Đối tác</ShopTag>
               <Storefront />
-              &nbsp;{shop.shopName}
+              &nbsp;{shop?.shopName}
               <KeyboardArrowRight fontSize="small" />
             </Shop>
           </Link>
         </StyledTableCell>
       </StyledTableRow>
-      {shop.products?.map((product, index) => {
+      {shop?.products?.map((product, index) => {
         const isItemSelected = isSelected(product.id);
 
         return (

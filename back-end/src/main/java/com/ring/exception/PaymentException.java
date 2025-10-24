@@ -4,6 +4,8 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.ring.common.AppConstants;
+
 /**
  * Exception class named {@link PaymentException} thrown when the payment could not be processed.
  */
@@ -14,9 +16,15 @@ public class PaymentException extends RuntimeException {
     private final String error;
     private String message;
 
-    public PaymentException(String error) {
+    public PaymentException() {
         super();
-        this.error = error;
+        this.error = AppConstants.PAYMENT_FAILED;
+    }
+
+    public PaymentException(String message) {
+        super();
+        this.error = AppConstants.PAYMENT_FAILED;
+        this.message = message;
     }
 
     public PaymentException(String error, String message) {

@@ -1,5 +1,6 @@
 package com.ring.exception;
 
+import com.ring.common.AppConstants;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -14,9 +15,15 @@ public class EntityOwnershipException extends RuntimeException {
     private final String error;
     private String message;
 
-    public EntityOwnershipException(String error) {
+    public EntityOwnershipException() {
         super();
-        this.error = error;
+        this.error = AppConstants.INVALID_OWNERSHIP;
+    }
+
+    public EntityOwnershipException(String message) {
+        super();
+        this.error = AppConstants.INVALID_OWNERSHIP;
+        this.message = message;
     }
 
     public EntityOwnershipException(String error, String message) {

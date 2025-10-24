@@ -123,6 +123,11 @@ export const options: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      return url.startsWith(baseUrl)
+        ? Promise.resolve(url)
+        : Promise.resolve(baseUrl);
+    },
     async jwt({ token, user, account }) {
       // Reset error
       token.error = undefined;

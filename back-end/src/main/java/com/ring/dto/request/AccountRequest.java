@@ -22,29 +22,29 @@ import java.util.List;
 @NoArgsConstructor
 public class AccountRequest {
 
-	@NotBlank(message = "Tên đăng nhập không được để trống!")
-	@Size(min = 4, max = 24, message = "Tên đăng nhập dài 4-24 kí tự")
+	@NotBlank(message = "{validation.constraints.not.blank}")
+	@Size(min = 4, max = 24, message = "{validation.constraints.size.range}")
 	private String username;
 
-	@NullOrNotBlank(message = "Mật khẩu không được để trống!")
-	@Size(min = 8, max = 24, message = "Mật khẩu dài 8-24 kí tự")
+	@NullOrNotBlank(message = "{validation.constraints.not.blank}")
+	@Size(min = 8, max = 24, message = "{validation.constraints.size.range}")
 	private String pass;
 
-	@NotBlank(message = "Email không được để trống!")
-	@Email(message = "Sai định dạng email!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
+	@Email(message = "{validation.constraints.pattern}")
 	private String email;
 
-	@NotNull(message = "Chức vụ không được để trống!")
-	@NotEmpty(message = "Chức vụ không được để trống!")
+	@NotNull(message = "{validation.constraints.not.blank}")
+	@NotEmpty(message = "{validation.constraints.not.blank}")
 	private List<UserRole> roles;
 
-	@Size(max = 250, message = "Tên không quá 250 kí tự")
+	@Size(max = 250, message = "{validation.constraints.size.max}")
 	private String name;
 
-	@Pattern(regexp = "\\(?([0-9]{3})\\)?([ .-]?)([0-9]{3})\\2([0-9]{3})", message = "Sai định dạng số điện thoại")
+	@Pattern(regexp = "\\(?([0-9]{3})\\)?([ .-]?)([0-9]{3})\\2([0-9]{3})", message = "{validation.constraints.pattern}")
 	private String phone;
 
-	@Past(message = "Ngày sinh phải trước hôm nay!")
+	@Past(message = "{validation.constraints.date.past}")
 	@DateTimeFormat(pattern = "dd-MM-yyyy")
 	private LocalDate dob;
 

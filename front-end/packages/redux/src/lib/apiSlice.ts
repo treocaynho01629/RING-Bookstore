@@ -27,14 +27,17 @@ const baseQuery: BaseQueryFn<
     baseQueryParams.baseUrl = baseUrl;
   }
 
-  // Token
-  const token = (api.getState() as RootState).auth.token;
-  if (token) {
-    baseQueryParams.prepareHeaders = (headers, { getState }) => {
+  baseQueryParams.prepareHeaders = (headers) => {
+    // Token
+    const token = (api.getState() as RootState).auth.token;
+    if (token) {
       headers.set("Authorization", `Bearer ${token}`);
-      return headers;
-    };
-  }
+    }
+
+    // Language
+    headers.set("Accept-Language", "vi-VN");
+    return headers;
+  };
 
   return fetchBaseQuery(baseQueryParams)(args, api, extraOptions);
 };
@@ -49,13 +52,13 @@ const baseQueryWithRefresh = async (
 
   let result = await baseQuery(args, api, extraOptions);
 
-  //Token expired
+  // Token expired
   if (result?.meta?.response?.status === 401) {
     // Checking whether the mutex is locked
     if (!mutex.isLocked()) {
       const release = await mutex.acquire();
       try {
-        //Auto refresh
+        // Auto refresh
         const refreshResult = await baseQuery(
           {
             url: "/api/auth/refresh-token",
@@ -78,7 +81,7 @@ const baseQueryWithRefresh = async (
         } else if (error) {
           console.error(error);
 
-          //Logout
+          // Logout
           await baseQuery(
             {
               url: "/api/auth/logout",

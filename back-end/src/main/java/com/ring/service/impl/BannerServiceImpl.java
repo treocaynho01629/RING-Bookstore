@@ -1,5 +1,7 @@
 package com.ring.service.impl;
 
+import com.ring.common.AppConstants;
+import com.ring.common.CommonUtils;
 import com.ring.dto.projection.banners.IBanner;
 import com.ring.dto.request.BannerRequest;
 import com.ring.dto.response.PagingResponse;
@@ -17,24 +19,26 @@ import com.ring.repository.BannerRepository;
 import com.ring.repository.ShopRepository;
 import com.ring.service.BannerService;
 import com.ring.service.ImageService;
-import com.ring.utils.FileUploadUtil;
+import com.ring.common.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+/**
+ * Service class for managing banners.
+ */
 @RequiredArgsConstructor
 @Service
 public class BannerServiceImpl implements BannerService {
@@ -43,10 +47,11 @@ public class BannerServiceImpl implements BannerService {
     private final ShopRepository shopRepo;
 
     private final ImageService imageService;
+    private final MessageService messageService;
 
     private final BannerMapper bannerMapper;
 
-    @Cacheable(cacheNames = "banners")
+    @Cacheable(cacheNames = AppConstants.BANNERS)
     public PagingResponse<BannerDTO> getBanners(Integer pageNo,
             Integer pageSize,
             String sortBy,
@@ -55,11 +60,13 @@ public class BannerServiceImpl implements BannerService {
             Long shopId,
             Boolean byShop) {
         Pageable pageable = PageRequest.of(pageNo, pageSize,
-                sortDir.equals("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
+                sortDir.equals(AppConstants.ASCENDING)
+                        ? Sort.by(sortBy).ascending()
+                        : Sort.by(sortBy).descending());
 
-        // Fetch from database
+        // Fetch from the database
         Page<IBanner> bannersList = bannerRepo.findBanners(keyword, shopId, byShop, pageable);
-        List<BannerDTO> bannerDTOS = bannersList.map(bannerMapper::apply).toList();
+        List<BannerDTO> bannerDTOS = bannersList.map(bannerMapper).toList();
         return new PagingResponse<>(bannerDTOS,
                 bannersList.getTotalPages(),
                 bannersList.getTotalElements(),
@@ -68,13 +75,13 @@ public class BannerServiceImpl implements BannerService {
                 bannersList.isEmpty());
     }
 
-    @CacheEvict(cacheNames = "banners", allEntries = true)
+    @CacheEvict(cacheNames = AppConstants.BANNERS, allEntries = true)
     @Transactional
     public Banner addBanner(BannerRequest request,
             MultipartFile file,
             Account user) {
 
-        // Create new banner
+        // New banner
         var banner = Banner.builder()
                 .name(request.getName())
                 .description(request.getDescription())
@@ -82,28 +89,16 @@ public class BannerServiceImpl implements BannerService {
                 .build();
 
         // Shop validation
-        if (request.getShopId() != null) {
-            Shop shop = shopRepo.findById(request.getShopId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Shop not found!",
-                            "Không tìm thấy cửa hàng yêu cầu!"));
-            if (!isOwnerValid(shop, user))
-                throw new EntityOwnershipException("Invalid ownership!",
-                        "Người dùng không sở hữu của hàng này!");
-            banner.setShop(shop);
-        } else {
-            if (!isAuthAdmin())
-                throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Shop is required!");
-        }
+        validateShop(request, user, banner);
 
         // Image upload
         banner = this.changeBannerPic(file, banner);
 
-        Banner addedBanner = bannerRepo.save(banner); // Save to database
-        return addedBanner;
+        return bannerRepo.save(banner); // Save to the database
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = "banners", allEntries = true),
-            @CacheEvict(cacheNames = "bannerDetail", key = "#id") })
+    @Caching(evict = { @CacheEvict(cacheNames = AppConstants.BANNERS, allEntries = true),
+            @CacheEvict(cacheNames = AppConstants.BANNER_DETAIL, key = "#id") })
 
     @Transactional
     public Banner updateBanner(Integer id,
@@ -111,29 +106,23 @@ public class BannerServiceImpl implements BannerService {
             MultipartFile file,
             Account user) {
 
-        // Get original banner
+        // Get the original banner
         Banner banner = bannerRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Banner not found!",
-                        "Không tìm thấy sự kiện yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.banner") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
 
-        // Check if correct seller or admin
-        if (!isOwnerValid(banner.getShop(), user))
-            throw new EntityOwnershipException("Invalid ownership!",
-                    "Người dùng không có quyền chỉnh sửa sự kiện này!");
+        // Check if seller correct or admin
+        if (!CommonUtils.isValidShopOwner(banner.getShop(), user)) {
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[]{ new DefaultMessageSourceResolvable("label.banner") });
+            throw new EntityOwnershipException(errorMsg);
+        }
 
         // Shop validation + set
-        if (request.getShopId() != null) {
-            Shop shop = shopRepo.findById(request.getShopId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Shop not found!",
-                            "Không tìm thấy cửa hàng yêu cầu!"));
-            if (!isOwnerValid(shop, user))
-                throw new EntityOwnershipException("Invalid ownership!",
-                        "Người dùng không sở hữu cửa hàng này!");
-            banner.setShop(shop);
-        } else {
-            if (!isAuthAdmin())
-                throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Shop is required!");
-        }
+        validateShop(request, user, banner);
 
         // Set new info
         banner.setName(request.getName());
@@ -144,36 +133,70 @@ public class BannerServiceImpl implements BannerService {
         banner = this.changeBannerPic(file, banner);
 
         // Update
-        Banner updatedBanner = bannerRepo.save(banner);
-        return updatedBanner;
+        return bannerRepo.save(banner);
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = "banners", allEntries = true),
-            @CacheEvict(cacheNames = "bannerDetail", key = "#id") })
+    private void validateShop(BannerRequest request, Account user, Banner banner) {
+        if (request.getShopId() != null) {
+            Shop shop = shopRepo.findById(request.getShopId())
+                    .orElseThrow(() -> {
+                        var errorMsg = messageService.getMessage("exception.not.found",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                        return new ResourceNotFoundException(errorMsg);
+                    });
+            if (!CommonUtils.isValidShopOwner(shop, user)) {
+                var errorMsg = messageService.getMessage("exception.ownership",
+                        new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                throw new EntityOwnershipException(errorMsg);
+            }
+            banner.setShop(shop);
+        } else {
+            if (!CommonUtils.isAuthAdmin()) {
+                var errorMsg = messageService.getMessage("exception.required.for",
+                        new Object[]{ new DefaultMessageSourceResolvable("label.shop"),
+                                new DefaultMessageSourceResolvable(UserRole.ROLE_ADMIN.getLabel()) });
+                throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                        AppConstants.INVALID_ARGUMENT,
+                        errorMsg);
+            }
+        }
+    }
+
+    @Caching(evict = { @CacheEvict(cacheNames = AppConstants.BANNERS, allEntries = true),
+            @CacheEvict(cacheNames = AppConstants.BANNER_DETAIL, key = "#id") })
     @Transactional
     public Banner deleteBanner(Integer id,
             Account user) {
+
         Banner banner = bannerRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Banner not found",
-                        "Không tìm thấy sự kiện yêu cầu!"));
-        // Check if correct seller or admin
-        if (!isOwnerValid(banner.getShop(), user))
-            throw new EntityOwnershipException("Invalid ownership!",
-                    "Người dùng không có quyền xoá sự kiện này!");
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.banner") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
+
+        // Check if seller correct or admin
+        if (!CommonUtils.isValidShopOwner(banner.getShop(), user)) {
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[]{ new DefaultMessageSourceResolvable("label.banner") });
+            throw new EntityOwnershipException(errorMsg);
+        }
 
         bannerRepo.deleteById(id); // Delete from database
         return banner;
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = "banners", allEntries = true) })
+    @Caching(evict = { @CacheEvict(cacheNames = AppConstants.BANNERS, allEntries = true) })
     @Transactional
     public void deleteBanners(List<Integer> ids,
             Account user) {
-        List<Integer> deleteIds = isAuthAdmin() ? ids : bannerRepo.findBannerIdsByInIdsAndOwner(ids, user.getId());
+        List<Integer> deleteIds = CommonUtils.isAuthAdmin() 
+            ? ids 
+            : bannerRepo.findBannerIdsByInIdsAndOwner(ids, user.getId());
         bannerRepo.deleteAllById(deleteIds);
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = "banners", allEntries = true) })
+    @Caching(evict = { @CacheEvict(cacheNames = AppConstants.BANNERS, allEntries = true) })
     @Transactional
     public void deleteBannersInverse(String keyword,
             Long shopId,
@@ -184,16 +207,16 @@ public class BannerServiceImpl implements BannerService {
                 keyword,
                 shopId,
                 byShop,
-                isAuthAdmin() ? null : user.getId(),
+                CommonUtils.isAuthAdmin() ? null : user.getId(),
                 ids);
         bannerRepo.deleteAllById(deleteIds);
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = "banners", allEntries = true) })
+    @Caching(evict = { @CacheEvict(cacheNames = AppConstants.BANNERS, allEntries = true) })
     @Transactional
     public void deleteAllBanners(Long shopId,
             Account user) {
-        if (isAuthAdmin()) {
+        if (CommonUtils.isAuthAdmin()) {
             if (shopId != null) {
                 bannerRepo.deleteAllByShopId(shopId);
             } else {
@@ -208,24 +231,13 @@ public class BannerServiceImpl implements BannerService {
         }
     }
 
-    // Check valid role function
-    protected boolean isAuthAdmin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication(); // Get current auth
-        return (auth != null && auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(UserRole.ROLE_ADMIN.toString())));
-    }
-
-    protected boolean isOwnerValid(Shop shop,
-            Account user) {
-        // Check if is admin or valid owner id
-        boolean isAdmin = isAuthAdmin();
-
-        if (shop != null) {
-            return shop.getOwner().getId().equals(user.getId()) || isAdmin;
-        } else
-            return isAdmin;
-    }
-
+    /**
+     * Change the banner picture.
+     *
+     * @param file The file to change.
+     * @param banner The banner to change.
+     * @return The changed banner.
+     */
     protected Banner changeBannerPic(MultipartFile file, Banner banner) {
         if (file != null) {
             if (banner.getImage() != null)

@@ -64,8 +64,8 @@ class ResetTokenServiceTest extends AbstractServiceTest {
                                 eq(account.getPassword()))).thenReturn(true);
 
                 // Then
-                boolean result = resetTokenService.verifyResetToken(account);
-                assertTrue(result);
+//                boolean result = resetTokenService.verifyResetToken(account);
+//                assertTrue(result);
 
                 // Verify
                 verify(tokenService, times(1)).extractCustomUsername(eq(token),

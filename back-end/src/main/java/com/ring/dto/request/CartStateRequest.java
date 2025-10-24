@@ -7,8 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Represents the current cart's state {@link CartStateRequest} with cart total value, products quantity
- * and estimated shipping fee.
+ * Represents the current cart's state {@link CartStateRequest} with cart total value, 
+ * products quantity and estimated shipping fee.
  */
 @Data
 @Builder
@@ -16,13 +16,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CartStateRequest {
 
-	@Min(value = 0, message = "Đơn vị tối thiểu từ 0 trở lên")
+	@Min(value = 0, message = "{validation.constraints.min}")
 	private Double value;
 
-	@Min(value = 0, message = "Tiền giao hàng tối thiểu từ 0 trở lên")
+	@Min(value = 0, message = "{validation.constraints.min}")
 	private Double shippingFee;
 
-	@Min(value = 0, message = "Số lượng tối thiểu từ 0 trở lên")
+	@Min(value = 0, message = "{validation.constraints.min}")
 	private Integer quantity;
 
 	private Long shopId;

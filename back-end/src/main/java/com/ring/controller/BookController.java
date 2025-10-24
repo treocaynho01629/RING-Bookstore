@@ -1,6 +1,7 @@
 package com.ring.controller;
 
 import com.ring.config.CurrentAccount;
+import com.ring.common.AppConstants;
 import com.ring.dto.request.BookRequest;
 import com.ring.dto.response.PagingResponse;
 import com.ring.dto.response.books.BookDisplayDTO;
@@ -41,6 +42,7 @@ public class BookController {
     @GetMapping("/random")
     public ResponseEntity<?> getRandomBooks(@RequestParam(value = "amount", defaultValue = "5") Integer amount,
             @RequestParam(value = "withDesc", defaultValue = "false") Boolean withDesc) {
+
         List<BookDisplayDTO> books = bookService.getRandomBooks(amount, withDesc);
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
@@ -53,6 +55,7 @@ public class BookController {
      */
     @GetMapping("/find")
     public ResponseEntity<?> getBooksInIds(@RequestParam(value = "ids") List<Long> ids) {
+
         List<BookDisplayDTO> books = bookService.getBooksInIds(ids);
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
@@ -93,7 +96,8 @@ public class BookController {
             @RequestParam(value = "rating", defaultValue = "0") Integer rating,
             @RequestParam(value = "amount", defaultValue = "1") Integer amount,
             @RequestParam(value = "withDesc", defaultValue = "false") Boolean withDesc) {
-        PagingResponse<BookDisplayDTO> books = bookService.getBooks(
+        
+                PagingResponse<BookDisplayDTO> books = bookService.getBooks(
                 pageNo,
                 pageSize,
                 sortBy,
@@ -270,6 +274,7 @@ public class BookController {
             @RequestParam(value = "amount", defaultValue = "1") Integer amount,
             @RequestParam("ids") List<Long> ids,
             @CurrentAccount Account currUser) {
+                
         bookService.deleteBooksInverse(keyword,
                 amount,
                 rating,

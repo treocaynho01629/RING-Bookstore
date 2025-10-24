@@ -31,3 +31,6 @@ public/dist
 *.local
 analyse.html
 .vercel
+
+# Orval generated models
+models/*

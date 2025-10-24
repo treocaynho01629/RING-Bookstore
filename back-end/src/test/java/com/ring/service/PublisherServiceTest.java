@@ -10,7 +10,7 @@ import com.ring.model.entity.Image;
 import com.ring.model.entity.Publisher;
 import com.ring.repository.PublisherRepository;
 import com.ring.service.impl.PublisherServiceImpl;
-import com.ring.utils.FileUploadUtil;
+import com.ring.common.FileUploadUtil;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;

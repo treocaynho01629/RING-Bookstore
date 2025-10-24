@@ -26,12 +26,12 @@ const RegisterTab = ({
   const userRef = useRef();
   const errRef = useRef();
 
-  //User validation
-  const [username, setUsername] = useState(""); //user input
-  const [validName, setValidName] = useState(false); //check name validate or not
-  const [userFocus, setUserFocus] = useState(false); //focus on field or not
+  // User validation
+  const [username, setUsername] = useState(""); // user input
+  const [validName, setValidName] = useState(false); // check name validate or not
+  const [userFocus, setUserFocus] = useState(false); // focus on field or not
 
-  //Password validation
+  // Password validation
   const [password, setPassword] = useState("");
   const [validPass, setValidPass] = useState(false);
   const [passFocus, setPassFocus] = useState(false);
@@ -39,28 +39,28 @@ const RegisterTab = ({
   const [matchPass, setMatchPass] = useState("");
   const [validMatch, setValidMatch] = useState(false);
 
-  //Email validation
+  // Email validation
   const [email, setEmail] = useState("");
   const [validEmail, setValidEmail] = useState(false);
   const [emailFocus, setEmailFocus] = useState(false);
 
-  //Error and success message
+  // Error and success message
   const [errMsg, setErrMsg] = useState("");
   const [err, setErr] = useState([]);
 
-  //Recaptcha v2
-  const [challenge, setChallenge] = useState(false); //Toggle if marked suspicious by v3
+  // Recaptcha v2
+  const [challenge, setChallenge] = useState(false); // Toggle if marked suspicious by v3
   const [token, setToken] = useState("");
 
-  //Register mutation
+  // Register mutation
   const [register, { isLoading }] = useRegisterMutation();
 
-  //Focus username
+  // Focus username
   useEffect(() => {
     userRef?.current?.focus();
   }, []);
 
-  //Username
+  // Username
   useEffect(() => {
     const result = USER_REGEX.test(username);
     setValidName(result);
@@ -72,23 +72,23 @@ const RegisterTab = ({
     setValidMatch(match);
   }, [matchPass]);
 
-  //Email
+  // Email
   useEffect(() => {
     const result = EMAIL_REGEX.test(email);
     setValidEmail(result);
   }, [email]);
 
-  //Error message reset when reinput stuff
+  // Error message reset when re-input stuff
   useEffect(() => {
     setErrMsg("");
   }, [username, email, password, matchPass]);
 
-  //Register
+  // Register
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (pending || !reCaptchaLoaded) return;
 
-    // //Validation
+    // Validation
     const v1 = USER_REGEX.test(username);
     const v2 = EMAIL_REGEX.test(email);
 
@@ -114,7 +114,7 @@ const RegisterTab = ({
     })
       .unwrap()
       .then((data) => {
-        //Reset input
+        // Reset input
         setUsername("");
         setPassword("");
         setMatchPass("");
@@ -123,7 +123,7 @@ const RegisterTab = ({
         setErrMsg("");
         setChallenge(false);
 
-        //Queue snack
+        // Queue snack
         enqueueSnackbar("Đăng ký thành công!", { variant: "success" });
         setPending(false);
       })
@@ -156,16 +156,20 @@ const RegisterTab = ({
   return (
     <form style={{ maxHeight: 560 }} onSubmit={handleSubmit}>
       <AuthTitle>Đăng ký tài khoản mới</AuthTitle>
-      <Stack spacing={{ xs: 0.75, md: 1.5 }} direction="column">
-        <Instruction
-          ref={errRef}
-          display={errMsg ? "block" : "none"}
-          aria-live="assertive"
-        >
-          {errMsg}
-        </Instruction>
+      <Instruction ref={errRef} aria-live="assertive">
+        {errMsg != "" ? errMsg : " "}&nbsp;
+      </Instruction>
+      <Stack
+        spacing={{ xs: 0.75, md: 1.5 }}
+        mt={{ xs: 0.75, md: 1.5 }}
+        direction="column"
+      >
         <TextField
-          label="Tên đăng nhập"
+          label={
+            username && !validName
+              ? "4 đến 24 kí tự."
+              : (err?.data?.errors?.username ?? "Tên đăng nhập")
+          }
           type="text"
           id="new-username"
           autoComplete="username"
@@ -177,17 +181,15 @@ const RegisterTab = ({
           onFocus={() => setUserFocus(true)}
           onBlur={() => setUserFocus(false)}
           error={
-            (userFocus && username && !validName) ||
-            err?.data?.errors?.username != null
-          }
-          helperText={
-            userFocus && username && !validName
-              ? "4 đến 24 kí tự."
-              : err?.data?.errors?.username
+            (username && !validName) || err?.data?.errors?.username != null
           }
         />
         <TextField
-          label="Địa chỉ email"
+          label={
+            email && !validEmail
+              ? "Sai định dạng email."
+              : (err?.data?.errors?.email ?? "Địa chỉ email")
+          }
           type="email"
           id="email"
           autoComplete="off"
@@ -197,24 +199,16 @@ const RegisterTab = ({
           aria-invalid={validEmail ? "false" : "true"}
           onFocus={() => setEmailFocus(true)}
           onBlur={() => setEmailFocus(false)}
-          error={
-            (emailFocus && email && !validEmail) ||
-            err?.data?.errors?.email != null
-          }
-          helperText={
-            emailFocus && email && !validEmail
-              ? "Sai định dạng email."
-              : err?.data?.errors?.email
-          }
+          error={(email && !validEmail) || err?.data?.errors?.email != null}
         />
         <Stack
-          spacing={{ xs: 0.75, md: 1.5 }}
+          spacing={{ xs: 0.8, md: 1.5 }}
           direction={challenge ? "row" : "column"}
           position="relative"
         >
           <div style={{ width: "100%s" }}>
             <PasswordInput
-              label="Mật khẩu"
+              label={err?.data?.errors?.pass ?? "Mật khẩu"}
               size="small"
               onChange={(e) => setPassword(e.target.value)}
               value={password}
@@ -223,9 +217,8 @@ const RegisterTab = ({
               onBlur={() => setPassFocus(false)}
               fullWidth
               error={err?.data?.errors?.pass != null}
-              helperText={err?.data?.errors?.pass}
             />
-            <Grow in={passFocus} style={{ transformOrigin: "0 100%" }}>
+            <Grow in={passFocus} style={{ transformOrigin: "0 0 0" }}>
               <Paper
                 elevation={16}
                 sx={{
@@ -233,9 +226,13 @@ const RegisterTab = ({
                   bgcolor: "background.paper",
                   padding: 1,
                   marginBottom: 1,
+                  marginTop: { xs: 0.4, md: 0.75 },
                   left: 0,
-                  bottom: "100%",
-                  zIndex: 1,
+                  top: "50%",
+                  zIndex: 2,
+                  borderStyle: "solid",
+                  borderColor: "divider",
+                  borderWidth: 2,
                 }}
               >
                 <PasswordEvaluate
@@ -245,7 +242,11 @@ const RegisterTab = ({
             </Grow>
           </div>
           <PasswordInput
-            label="Nhập lại mật khẩu"
+            label={
+              matchPass && !validMatch
+                ? "Không trùng mật khẩu."
+                : "Nhập lại mật khẩu"
+            }
             size="small"
             onChange={(e) => setMatchPass(e.target.value)}
             value={matchPass}
@@ -254,7 +255,6 @@ const RegisterTab = ({
             error={
               (matchPass && !validMatch) || err?.data?.errors?.pass != null
             }
-            helperText={matchPass && !validMatch ? "Không trùng mật khẩu." : ""}
           />
         </Stack>
         {reCaptchaLoaded && challenge && (

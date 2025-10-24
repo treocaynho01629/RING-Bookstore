@@ -8,10 +8,10 @@ const Coupons = () => {
   const { tabletMode, mobileMode } = useOutletContext();
   const navigate = useNavigate();
 
-  //Set title
+  // Set title
   useTitle("Mã giảm giá");
 
-  let content = <CouponsList tabletMode={tabletMode} />;
+  let content = <CouponsList mobileMode={mobileMode} tabletMode={tabletMode} />;
 
   return (
     <>

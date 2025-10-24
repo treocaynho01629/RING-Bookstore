@@ -14,14 +14,18 @@ import java.util.concurrent.TimeUnit;
 @Service("captchaProtectionService")
 public class CaptchaProtectionService {
 
+    public final int EXPIRE_TIME = 4;
+    public final int MAX_ATTEMPT = 5;
+
     private final LoadingCache<String, Integer> attemptsCache;
 
     /**
      * Constructs a new CaptchaProtectionService.
-     * Initializes the cache to track captcha attempts, with a 4-hour expiration for each entry.
+     * Initializes the cache to track captcha attempts.
      */
     public CaptchaProtectionService() {
-        attemptsCache = CacheBuilder.newBuilder().expireAfterWrite(4, TimeUnit.HOURS).build(new CacheLoader<String, Integer>() {
+        attemptsCache = CacheBuilder.newBuilder().expireAfterWrite(EXPIRE_TIME, TimeUnit.HOURS)
+                .build(new CacheLoader<String, Integer>() {
             @Override
             public Integer load(final String key) {
                 return 0;
@@ -58,7 +62,6 @@ public class CaptchaProtectionService {
      * @return True if the client has exceeded the maximum failed attempts; otherwise, false.
      */
     public boolean isBlocked(final String key) {
-        int MAX_ATTEMPT = 5;
         return attemptsCache.getUnchecked(key) >= MAX_ATTEMPT;
     }
 

@@ -15,7 +15,7 @@ import com.ring.dto.response.accounts.ProfileDTO;
 import com.ring.dto.response.dashboard.StatDTO;
 import com.ring.exception.HttpResponseException;
 import com.ring.exception.ResourceNotFoundException;
-import com.ring.listener.reset.OnResetPasswordCompletedEvent;
+import com.ring.listener.events.OnResetPasswordCompletedEvent;
 import com.ring.mapper.AccountMapper;
 import com.ring.mapper.DashboardMapper;
 import com.ring.model.entity.Account;
@@ -28,7 +28,7 @@ import com.ring.repository.AccountProfileRepository;
 import com.ring.repository.AccountRepository;
 import com.ring.repository.RoleRepository;
 import com.ring.service.impl.AccountServiceImpl;
-import com.ring.utils.FileUploadUtil;
+import com.ring.common.FileUploadUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -749,7 +749,7 @@ class AccountServiceTest extends AbstractServiceTest {
                                 .build();
 
                 // When
-                when(imageService.deleteImage(eq(image.getId()))).thenReturn("Deleted!");
+//                when(imageService.deleteImage(eq(image.getId()))).thenReturn("Deleted!");
                 when(imageService.upload(any(MultipartFile.class), eq(FileUploadUtil.USER_FOLDER))).thenReturn(image);
 
                 // Then

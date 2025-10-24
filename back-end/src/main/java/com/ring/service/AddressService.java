@@ -10,7 +10,7 @@ import com.ring.model.entity.Address;
 import java.util.List;
 
 /**
- * Service interface named {@link AddressService} for handling address-related operations.
+ * Service interface for handling address-related operations.
  */
 public interface AddressService {
 

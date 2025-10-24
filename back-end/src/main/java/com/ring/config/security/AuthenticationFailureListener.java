@@ -1,5 +1,7 @@
 package com.ring.config.security;
 
+import com.google.common.net.HttpHeaders;
+import com.ring.common.AppConstants;
 import com.ring.service.impl.LoginProtectionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -30,13 +32,15 @@ public class AuthenticationFailureListener implements ApplicationListener<Authen
      */
     @Override
     public void onApplicationEvent(final AuthenticationFailureBadCredentialsEvent e) {
+
         RequestAttributes attribs = RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = (HttpServletRequest) ((NativeWebRequest) attribs).getNativeRequest();
-        final String xfHeader = request.getHeader("X-Forwarded-For");
+        final String xfHeader = request.getHeader(HttpHeaders.X_FORWARDED_FOR);
+        
         if (xfHeader == null || xfHeader.isEmpty() || !xfHeader.contains(request.getRemoteAddr())) {
             loginProtectionService.loginFailed(request.getRemoteAddr());
         } else {
-            loginProtectionService.loginFailed(xfHeader.split(",")[0]);
+            loginProtectionService.loginFailed(xfHeader.split(AppConstants.DELIMITER)[0]);
         }
     }
 }

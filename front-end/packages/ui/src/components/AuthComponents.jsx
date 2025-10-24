@@ -4,11 +4,20 @@ import Button from "@mui/material/Button";
 export const AuthTitle = styled.h1`
   font-size: 30px;
   font-weight: 400;
+
+  :not(.full) {
+    margin-bottom: 0px;
+  }
+
+  ${({ theme }) => theme.breakpoints.down("md")} {
+    text-align: center;
+  }
 `;
 
 export const TermText = styled.p`
   font-size: 12px;
-  margin: ${({ theme }) => theme.spacing(1)} 0;
+  margin: 0;
+  padding: ${({ theme }) => theme.spacing(0.75)} 0;
   text-align: center;
   color: ${({ theme }) => theme.vars.palette.text.secondary};
 `;

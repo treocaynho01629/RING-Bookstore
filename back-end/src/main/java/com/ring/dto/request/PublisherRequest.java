@@ -16,8 +16,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PublisherRequest {
 	
-	@NotBlank(message = "Tên nhà xuất bản không được bỏ trống!")
-	@Size(min = 1, max = 50, message = "Tên nhà xuất bản dài từ 1-50 kí tự!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
+	@Size(min = 1, max = 50, message = "{validation.constraints.size.range}")
 	private String name;
 
 }

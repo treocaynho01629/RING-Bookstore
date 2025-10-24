@@ -159,6 +159,31 @@ class BookRepositoryTest extends AbstractRepositoryTest {
     }
 
     @Test
+    public void whenReplaceBookImage_ThenDeleteOldImage_AndReturnBook() {
+
+        // Given
+        Image image4 = Image.builder().name("image4").build();
+        Book foundBook = bookRepo.findById(book.getId()).orElse(null);
+        assertNotNull(foundBook);
+
+        // When
+        foundBook.setImage(image4);
+
+        Book updatedBook = bookRepo.save(foundBook);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // Then
+        Image foundImage = imageRepo.findById(image.getId()).orElse(null);
+
+        assertNotNull(updatedBook);
+        assertNotNull(updatedBook.getImage());
+        assertEquals(image4.getName(), updatedBook.getImage().getName());
+        assertNull(foundImage);
+    }
+
+    @Test
     public void whenDeleteBook_ThenFindNull() {
 
         // Given

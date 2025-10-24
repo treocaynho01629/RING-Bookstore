@@ -28,8 +28,8 @@ public class AppController {
      */
     @GetMapping("/ping")
     public ResponseEntity<?> ping() {
+
         String message = "Health checks at: " + LocalDateTime.now();
-        System.out.println(message);
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
@@ -40,8 +40,7 @@ public class AppController {
      */
     @GetMapping("/enums")
     public ResponseEntity<?> getEnums() {
+        
         return new ResponseEntity<>(configService.getEnums(), HttpStatus.OK);
     }
-
-
 }

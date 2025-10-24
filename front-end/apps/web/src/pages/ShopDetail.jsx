@@ -150,22 +150,18 @@ const ShopDetail = () => {
     updateFilters();
   }, [searchParams]);
 
-  //Set title
+  // Set title
   useTitle(`${data?.name ?? "RING - Bookstore!"}`);
 
-  //Handle change
+  // Handle change
   const scrollToTop = useCallback(() => {
-    if (mobileMode) {
-      scrollRef?.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    scrollRef?.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   }, []);
 
-  //Filter change
+  // Filter change
   const handleChangeKeyword = (newValue) => {
     setFilters((prev) => ({
       ...prev,

@@ -1,6 +1,7 @@
 package com.ring.service.impl;
 
-import com.cloudinary.api.ApiResponse;
+import com.google.common.base.Strings;
+import com.ring.common.AppConstants;
 import com.ring.dto.response.CloudinaryResponse;
 import com.ring.exception.HttpResponseException;
 import com.ring.exception.ImageUploadException;
@@ -9,9 +10,10 @@ import com.ring.model.entity.Image;
 import com.ring.repository.ImageRepository;
 import com.ring.service.CloudinaryService;
 import com.ring.service.ImageService;
-import com.ring.utils.FileUploadUtil;
+import com.ring.common.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -20,56 +22,69 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing images from cloudinary.
+ */
 @RequiredArgsConstructor
 @Service
 public class ImageServiceImpl implements ImageService {
 
     private final ImageRepository imageRepo;
     private final CloudinaryService cloudinaryService;
+    private final MessageService messageService;
 
-    //Get all images
     public List<Image> getAllImages() {
         return imageRepo.findAll();
     }
 
-    @Override
     public Image replace(MultipartFile file, Long id) {
-        FileUploadUtil.assertAllowed(file, FileUploadUtil.IMAGE_PATTERN);
+
+        this.isFileAllowed(file);
 
         try {
             if (file.isEmpty()) {
-                throw new HttpResponseException(HttpStatus.BAD_REQUEST, "File not found!");
+
+                var errorMsg = messageService.getMessage("exception.image.not.found" );
+                throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                        AppConstants.INVALID_ARGUMENT,
+                        errorMsg);
             }
             Image image = imageRepo.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Image not found!",
-                            "Không tim thấy hình ảnh yêu cầu!"));
+                    .orElseThrow(() -> {
+                        var errorMsg = messageService.getMessage("exception.not.found",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.image") });
+                        return new ResourceNotFoundException(errorMsg);
+                    });
 
-            BufferedImage imageBuffer = ImageIO.read(file.getInputStream());
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(imageBuffer, file.getContentType().split("/")[1], baos);
-            byte[] bytes = baos.toByteArray();
+            byte[] bytes = writeImage(file);
 
             CloudinaryResponse uploaded = cloudinaryService.replace(bytes, image.getPublicId());
             image.setPublicId(uploaded.getPublicId());
             image.setUrl(uploaded.getUrl());
+
             if (uploaded.getUrl() == null) {
-                throw new ImageUploadException("Image failed to replace!");
+
+                var errorMsg = messageService.getMessage("exception.image.replace");
+                throw new ImageUploadException(errorMsg);
             }
             return image;
-        } catch (Exception e) {
-            throw new ImageUploadException("Image failed to replace!", e);
+        } catch (IOException e) {
+
+            var errorMsg = messageService.getMessage("exception.image.replace");
+            throw new ImageUploadException(errorMsg);
         }
     }
 
-    @Override
     public Image upload(MultipartFile file, String folderName) {
-        FileUploadUtil.assertAllowed(file, FileUploadUtil.IMAGE_PATTERN);
+
+        this.isFileAllowed(file);
         String fileName = FileUploadUtil.getFileName(file);
 
         try {
@@ -77,12 +92,11 @@ public class ImageServiceImpl implements ImageService {
                 throw new HttpResponseException(HttpStatus.BAD_REQUEST, "File not found!");
             }
 
-            BufferedImage imageBuffer = ImageIO.read(file.getInputStream());
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(imageBuffer, file.getContentType().split("/")[1], baos);
-            byte[] bytes = baos.toByteArray();
+            byte[] bytes = writeImage(file);
 
-            CloudinaryResponse uploaded = cloudinaryService.upload(bytes, FilenameUtils.getBaseName(fileName), folderName);
+            CloudinaryResponse uploaded = cloudinaryService.upload(bytes,
+                    FilenameUtils.getBaseName(fileName),
+                    folderName);
             Image image = Image.builder()
                     .name(fileName)
                     .publicId(uploaded.getPublicId())
@@ -90,22 +104,81 @@ public class ImageServiceImpl implements ImageService {
                     .type(file.getContentType())
                     .build();
             if (image.getUrl() == null) {
-                throw new ImageUploadException("Image failed to upload!");
+
+                var errorMsg = messageService.getMessage("exception.image.upload");
+                throw new ImageUploadException(errorMsg);
             }
-            Image savedImage = imageRepo.save(image);
-            return savedImage;
-        } catch (Exception e) {
-            throw new ImageUploadException("Image failed to upload!", e);
+
+            return imageRepo.save(image);
+        } catch (IOException e) {
+
+            var errorMsg = messageService.getMessage("exception.image.upload");
+            throw new ImageUploadException(errorMsg);
         }
     }
 
+    /**
+     * Write image to byte array.
+     * 
+     * @param file The multipart file.
+     * @return The byte array.
+     * @throws IOException If an I/O error occurs.
+     */
+    private byte[] writeImage(MultipartFile file) throws IOException {
+
+        BufferedImage imageBuffer = ImageIO.read(file.getInputStream());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        String formatName = Strings.isNullOrEmpty(file.getContentType())
+                ? "" : file.getContentType().split("/")[1];
+        if (formatName.isBlank()) {
+            var errorMsg = messageService.getMessage("exception.empty",
+                    new Object[]{ new DefaultMessageSourceResolvable("label.image.name") });
+            throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                    AppConstants.INVALID_ARGUMENT,
+                    errorMsg);
+        }
+
+        ImageIO.write(imageBuffer, formatName, baos);
+        return baos.toByteArray();
+    }
+
+    /**
+     * Check if file is allowed.
+     * 
+     * @param file The multipart file.
+     */
+    protected void isFileAllowed(MultipartFile file) {
+
+        final String fileName = file.getOriginalFilename();
+
+        if (!FileUploadUtil.isAllowedExtension(fileName, FileUploadUtil.IMAGE_PATTERN)) {
+
+            var errorMsg = messageService.getMessage("exception.invalid",
+                    new Object[]{ new DefaultMessageSourceResolvable("label.image") });
+            throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                    AppConstants.INVALID_ARGUMENT,
+                    errorMsg);
+        }
+    }
+
+    /**
+     * Upload image asynchronously.
+     * 
+     * @param file The multipart file.
+     * @param folderName The folder name.
+     * @return The image.
+     */
     @Async
     protected CompletableFuture<Image> uploadAsync(MultipartFile file, String folderName) {
+
         return CompletableFuture.completedFuture(upload(file, folderName));
     }
 
     public List<Image> uploadMultiple(List<MultipartFile> files, String folderName) {
+
         List<CompletableFuture<Image>> futures = new ArrayList<>();
+
         for (MultipartFile file : files) {
             CompletableFuture<Image> future = uploadAsync(file, folderName);
             futures.add(future);
@@ -118,27 +191,17 @@ public class ImageServiceImpl implements ImageService {
                         .map(CompletableFuture::join) // Join each future to get the result
                         .filter(Objects::nonNull) // Filter out any failed uploads
                         .collect(Collectors.toList()))
-                .join();
+                        .join();
     }
 
-    public String deleteImage(String publicId) {
-        cloudinaryService.destroy(publicId);
-        return "Delete image " + publicId + " succesfully!";
+    public boolean deleteImage(Long id) {
+
+        imageRepo.deleteById(id);
+        return true;
     }
 
-    public String deleteImage(Long id) {
-        Image image = imageRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Image not found!",
-                        "Không tim thấy hình ảnh yêu cầu!"));
-        return deleteImage(image.getPublicId());
-    }
+    public void deleteImages(List<Long> ids) {
 
-    public ApiResponse deleteImages(List<String> publicIds) {
-        return cloudinaryService.destroyMultiple(publicIds);
-    }
-
-    public ApiResponse deleteImagesByIds(List<Long> ids) {
-        List<String> publicIds = imageRepo.findPublicIds(ids);
-        return cloudinaryService.destroyMultiple(publicIds);
+        imageRepo.deleteAllByIdInBatch(ids);
     }
 }

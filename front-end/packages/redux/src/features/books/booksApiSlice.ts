@@ -16,7 +16,7 @@ export interface BookResponse {
   totalOrders: number;
 }
 
-interface BookQueryArgs {
+export interface BookQueryArgs {
   page?: number;
   size?: number;
   sortBy?: string;
@@ -43,7 +43,7 @@ interface BooksResponse {
   totalPages: number;
 }
 
-interface BooksState extends EntityState<BookResponse, number> {
+export interface BooksState extends EntityState<BookResponse, number> {
   empty: boolean;
   page: number;
   size: number;

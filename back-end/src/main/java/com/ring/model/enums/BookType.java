@@ -8,6 +8,7 @@ import lombok.Getter;
  */
 @Getter
 public enum BookType {
+    
     HARD_COVER("Bìa cứng"),
     SOFT_COVER( "Bìa mềm"),
     WOOD_COVER("Bìa gỗ"),

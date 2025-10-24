@@ -1,6 +1,8 @@
 package com.ring.service.impl;
 
 import com.github.slugify.Slugify;
+import com.ring.common.AppConstants;
+import com.ring.common.CommonUtils;
 import com.ring.dto.projection.books.IBook;
 import com.ring.dto.projection.books.IBookDetail;
 import com.ring.dto.projection.books.IBookDisplay;
@@ -17,21 +19,21 @@ import com.ring.mapper.BookMapper;
 import com.ring.mapper.DashboardMapper;
 import com.ring.model.entity.*;
 import com.ring.model.enums.BookType;
-import com.ring.model.enums.UserRole;
 import com.ring.repository.*;
 import com.ring.service.BookService;
 import com.ring.service.ImageService;
-import com.ring.utils.FileUploadUtil;
+import com.ring.common.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +43,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing books.
+ */
 @RequiredArgsConstructor
 @Service
 public class BookServiceImpl implements BookService {
@@ -53,6 +58,7 @@ public class BookServiceImpl implements BookService {
     private final ImageRepository imageRepo;
 
     private final ImageService imageService;
+    private final MessageService messageService;
 
     private final BookMapper bookMapper;
     private final DashboardMapper dashMapper;
@@ -60,18 +66,20 @@ public class BookServiceImpl implements BookService {
 
     public List<BookDisplayDTO> getRandomBooks(Integer amount, Boolean withDesc) {
         List<IBookDisplay> booksList = bookRepo.findRandomBooks(amount, withDesc);
-        List<BookDisplayDTO> bookDTOS = booksList.stream().map(bookMapper::displayToDTO).collect(Collectors.toList());
-        return bookDTOS;
+        return booksList.stream()
+                .map(bookMapper::displayToDTO)
+                .collect(Collectors.toList());
     }
 
-    @Cacheable("books")
+    @Cacheable(AppConstants.BOOKS)
     public List<BookDisplayDTO> getBooksInIds(List<Long> ids) {
         List<IBookDisplay> booksList = bookRepo.findBooksDisplayInIds(ids);
-        List<BookDisplayDTO> bookDTOS = booksList.stream().map(bookMapper::displayToDTO).collect(Collectors.toList());
-        return bookDTOS;
+        return booksList.stream()
+                .map(bookMapper::displayToDTO)
+                .collect(Collectors.toList());
     }
 
-    @Cacheable("books")
+    @Cacheable(AppConstants.BOOKS)
     public PagingResponse<BookDisplayDTO> getBooks(Integer pageNo,
             Integer pageSize,
             String sortBy,
@@ -88,9 +96,11 @@ public class BookServiceImpl implements BookService {
             Double toRange,
             Boolean withDesc) {
         Pageable pageable = PageRequest.of(pageNo, pageSize,
-                sortDir.equals("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
+                sortDir.equals(AppConstants.ASCENDING)
+                        ? Sort.by(sortBy).ascending()
+                        : Sort.by(sortBy).descending());
 
-        // Fetch from database
+        // Fetch from the database
         Page<IBookDisplay> booksList = bookRepo.findBooksWithFilter(
                 keyword,
                 cateId,
@@ -114,46 +124,57 @@ public class BookServiceImpl implements BookService {
                 booksList.isEmpty());
     }
 
-    @Cacheable(cacheNames = "book", key = "#id")
+    @Cacheable(cacheNames = AppConstants.BOOK, key = "#id")
     public BookDTO getBook(Long id) {
         IBook book = detailRepo.findBook(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found!",
-                        "Không tìm thấy sản phẩm yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         List<Long> imageIds = book.getPreviews() != null ? book.getPreviews() : new ArrayList<>();
         imageIds.add(book.getImage());
 
         List<Image> images = imageRepo.findImages(imageIds);
-        BookDTO bookDTO = bookMapper.projectionToDTO(book, images); // Map to DTO
-        return bookDTO;
+        return bookMapper.projectionToDTO(book, images); // Map to DTO
     }
 
-    @Cacheable(cacheNames = "bookDetail", key = "#id")
+    @Cacheable(cacheNames = AppConstants.BOOK_DETAIL, key = "#id")
     public BookDetailDTO getBookDetail(Long id) {
         IBookDetail book = detailRepo.findBookDetail(id, null)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found!",
-                        "Không tìm thấy sản phẩm yêu cầu!"));
-        BookDetailDTO bookDetailDTO = bookMapper.detailToDTO(book); // Map to DTO
-        return bookDetailDTO;
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
+        return bookMapper.detailToDTO(book); // Map to DTO
     }
 
-    @Cacheable(cacheNames = "bookDetail", key = "#slug")
+    @Cacheable(cacheNames = AppConstants.BOOK_DETAIL, key = "#slug")
     public BookDetailDTO getBookDetail(String slug) {
         IBookDetail book = detailRepo.findBookDetail(null, slug)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found!",
-                        "Không tìm thấy sản phẩm yêu cầu!"));
-        BookDetailDTO bookDetailDTO = bookMapper.detailToDTO(book); // Map to DTO
-        return bookDetailDTO;
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
+        return bookMapper.detailToDTO(book); // Map to DTO
     }
 
-    @Cacheable(cacheNames = "booksSuggestion", key = "#keyword")
+    @Cacheable(cacheNames = AppConstants.BOOK_SUGGESTIONS, key = "#keyword")
     public List<String> getBooksSuggestion(String keyword) {
         return bookRepo.findSuggestion(keyword);
     }
 
     @Caching(evict = {
-            @CacheEvict(cacheNames = { "books", "booksSuggestion", "bookAnalytics" }, allEntries = true),
-            @CacheEvict(cacheNames = { "book", "bookDetail" }, key = "#id"),
-            @CacheEvict(cacheNames = "bookDetail", key = "#result.slug", condition = "#result != null") })
+            @CacheEvict(cacheNames = { AppConstants.BOOKS,
+                    AppConstants.BOOK_SUGGESTIONS,
+                    AppConstants.BOOK_ANALYTICS }, allEntries = true),
+            @CacheEvict(cacheNames = { AppConstants.BOOK,
+                    AppConstants.BOOK_DETAIL }, key = "#result.id"),
+            @CacheEvict(cacheNames = AppConstants.BOOK_DETAIL,
+                    key = "#result.slug",
+                    condition = "#result != null") })
     @Transactional
     public BookResponseDTO addBook(BookRequest request,
             MultipartFile thumbnail,
@@ -161,17 +182,28 @@ public class BookServiceImpl implements BookService {
             Account user) {
         // Validation
         Category cate = cateRepo.findById(request.getCateId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found!",
-                        "Không tìm thấy danh mục yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.cate") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         Publisher pub = pubRepo.findById(request.getPubId())
-                .orElseThrow(() -> new ResourceNotFoundException("Publisher not found!",
-                        "Không tìm thấy nhà xuất bản yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.pub") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         Shop shop = shopRepo.findById(request.getShopId())
-                .orElseThrow(() -> new ResourceNotFoundException("Shop not found!",
-                        "Không tìm thấy cửa hàng yêu cầu!"));
-        if (!isOwnerValid(shop, user))
-            throw new EntityOwnershipException("Invalid ownership!",
-                    "Người dùng không phải chủ sở hữu của cửa hàng này!");
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
+        if (!CommonUtils.isValidShopOwner(shop, user)) {
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+            throw new EntityOwnershipException(errorMsg);
+        }
 
         // Thumbnail
         Image savedThumbnail = imageService.upload(thumbnail, FileUploadUtil.PRODUCT_FOLDER);
@@ -179,7 +211,7 @@ public class BookServiceImpl implements BookService {
         // Slugify
         String slug = slg.slugify(request.getTitle());
 
-        // Create new book
+        // Create a new book
         var book = Book.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
@@ -194,12 +226,13 @@ public class BookServiceImpl implements BookService {
                 .type(request.getType())
                 .slug(slug)
                 .build();
-        Book addedBook = bookRepo.save(book); // Save to database
+        Book addedBook = bookRepo.save(book); // Save to the database
 
         // Images upload
         ArrayList<Image> previewImages = new ArrayList<>();
         if (images != null && images.length != 0) {
-            previewImages.addAll(imageService.uploadMultiple(Arrays.asList(images), FileUploadUtil.PRODUCT_FOLDER));
+            previewImages.addAll(imageService.uploadMultiple(Arrays.asList(images),
+                    FileUploadUtil.PRODUCT_FOLDER));
         }
 
         // Create book details
@@ -212,7 +245,7 @@ public class BookServiceImpl implements BookService {
                 .bDate(request.getDate())
                 .previewImages(previewImages)
                 .build();
-        BookDetail addedDetail = detailRepo.save(bookDetail); // Save details to database
+        BookDetail addedDetail = detailRepo.save(bookDetail); // Save details to the database
 
         // Return added book
         addedBook.setDetail(addedDetail);
@@ -220,46 +253,68 @@ public class BookServiceImpl implements BookService {
     }
 
     @Caching(evict = {
-            @CacheEvict(cacheNames = { "books", "booksSuggestion" }, allEntries = true),
-            @CacheEvict(cacheNames = { "book", "bookDetail" }, key = "#id"),
-            @CacheEvict(cacheNames = "bookDetail", key = "#result.slug", condition = "#result != null") })
+            @CacheEvict(cacheNames = { AppConstants.BOOKS, AppConstants.BOOK_SUGGESTIONS }, allEntries = true),
+            @CacheEvict(cacheNames = { AppConstants.BOOK, AppConstants.BOOK_DETAIL }, key = "#id"),
+            @CacheEvict(cacheNames = AppConstants.BOOK_DETAIL,
+                    key = "#result.slug",
+                    condition = "#result != null") })
     @Transactional
     public BookResponseDTO updateBook(Long id,
             BookRequest request,
             MultipartFile thumbnail,
             MultipartFile[] images,
             Account user) {
+
         // Check book exists & category, publisher validation
         Book book = bookRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found!",
-                        "Không tìm thấy sản phẩm yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         Category cate = cateRepo.findById(request.getCateId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found!",
-                        "Không tìm thấy danh mục yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.cate") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         Publisher pub = pubRepo.findById(request.getPubId())
-                .orElseThrow(() -> new ResourceNotFoundException("Publisher not found!",
-                        "Không tìm thấy nhà xuất bản yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.pub") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
         BookDetail currDetail = book.getDetail();
         List<Long> removeImageIds = request.getRemoveIds();
         boolean isRemove = removeImageIds != null && !removeImageIds.isEmpty();
 
-        // Check if correct owner
-        if (!isOwnerValid(book.getShop(), user))
-            throw new EntityOwnershipException("Invalid ownership!",
-                    "Người dùng không phải chủ sở hữu của sản phẩm này!");
+        // Check if correct ownership
+        if (!CommonUtils.isValidShopOwner(book.getShop(), user)) {
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+            throw new EntityOwnershipException(errorMsg);
+        }
 
         // Image upload/replace
-        if (thumbnail != null) { // Contain new image >> upload/replace
+        // Contain new image >> upload/replace
+        if (thumbnail != null) {
+
             Image oldImage = book.getImage();
-            Image savedImage = imageService.upload(thumbnail, FileUploadUtil.PRODUCT_FOLDER); // Upload new image
+            Image savedImage = imageService.upload(thumbnail,
+                    FileUploadUtil.PRODUCT_FOLDER); // Upload new image
             book.setImage(savedImage); // Set new thumbnail
             currDetail.addImage(oldImage); // Put old thumbnail to preview
         } else if (request.getThumbnailId() != null
                 && !request.getThumbnailId().equals(book.getImage().getId())) {
+
             Image oldImage = book.getImage();
             Image newImage = imageRepo.findBookImage(id, request.getThumbnailId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Image not found!",
-                            "Không tìm thấy hình ảnh yêu cầu!"));
+                    .orElseThrow(() -> {
+                        var errorMsg = messageService.getMessage("exception.not.found",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.image") });
+                        return new ResourceNotFoundException(errorMsg);
+                    });
+
             book.setImage(newImage); // Set new image
             currDetail.addImage(oldImage);
         }
@@ -276,7 +331,7 @@ public class BookServiceImpl implements BookService {
             imageService.uploadMultiple(Arrays.asList(images), FileUploadUtil.PRODUCT_FOLDER)
                     .forEach(currDetail::addImage);
         }
-        detailRepo.save(currDetail); // Save new details to database
+        detailRepo.save(currDetail); // Save new details to the database
 
         // Set new info
         String slug = slg.slugify(request.getTitle());
@@ -297,45 +352,65 @@ public class BookServiceImpl implements BookService {
 
         // Delete images
         if (isRemove)
-            imageService.deleteImages(imageRepo.findBookImagePublicIds(id, removeImageIds));
+            imageService.deleteImages(imageRepo.findBookImageIds(id, removeImageIds));
 
         return bookMapper.bookToResponseDTO(updatedBook);
     }
 
-    @Cacheable("bookAnalytics")
-    public StatDTO getAnalytics(Long shopId,
-            Long userId) {
+    @Cacheable(AppConstants.BOOK_ANALYTICS)
+    public StatDTO getAnalytics(Long shopId, Long userId) {
+
+        var label = StringUtils.capitalize(messageService.getMessage("label.product"));
         return dashMapper.statToDTO(bookRepo.getBookAnalytics(shopId, userId),
-                "books",
-                "Sản phẩm");
+                AppConstants.BOOKS,
+                label);
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = { "books", "booksSuggestion", "bookAnalytics" }, allEntries = true),
-            @CacheEvict(cacheNames = { "book", "bookDetail" }, key = "#id"),
-            @CacheEvict(cacheNames = "bookDetail", key = "#result.slug", condition = "#result != null") })
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { AppConstants.BOOKS,
+                    AppConstants.BOOK_SUGGESTIONS,
+                    AppConstants.BOOK_ANALYTICS }, allEntries = true),
+            @CacheEvict(cacheNames = { AppConstants.BOOK,
+                    AppConstants.BOOK_DETAIL }, key = "#id"),
+            @CacheEvict(cacheNames = AppConstants.BOOK_DETAIL,
+                    key = "#result.slug",
+                    condition = "#result != null") })
     @Transactional
     public BookResponseDTO deleteBook(Long id, Account user) {
         Book book = bookRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found!",
-                        "Không tìm thấy sản phẩm yêu cầu!"));
-        // Check if correct owner
-        if (!isOwnerValid(book.getShop(), user))
-            throw new EntityOwnershipException("Invalid ownership!",
-                    "Người dùng không có quyền chỉnh sửa sản phẩm này!");
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
+
+        // Check if correct ownership
+        if (!CommonUtils.isValidShopOwner(book.getShop(), user)) {
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+            throw new EntityOwnershipException(errorMsg);
+        }
 
         bookRepo.deleteById(id); // Delete from database
         return bookMapper.bookToResponseDTO(book);
     }
 
-    @CacheEvict(cacheNames = { "book", "bookDetail", "books", "booksSuggestion" }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.BOOK,
+            AppConstants.BOOK_DETAIL,
+            AppConstants.BOOKS,
+            AppConstants.BOOK_SUGGESTIONS,
+            AppConstants.BOOK_ANALYTICS }, allEntries = true)
     @Transactional
     public void deleteBooks(List<Long> ids, Account user) {
-        List<Long> deleteIds = isAuthAdmin() ? ids : bookRepo.findBookIdsByInIdsAndOwner(ids, user.getId());
+        List<Long> deleteIds = CommonUtils.isAuthAdmin() ? ids : bookRepo.findBookIdsByInIdsAndOwner(ids, user.getId());
         bookRepo.deleteAllById(deleteIds);
     }
 
-    @CacheEvict(cacheNames = { "book", "bookDetail", "books", "booksSuggestion", "bookAnalytics" }, allEntries = true)
-
+    @CacheEvict(cacheNames = { AppConstants.BOOK,
+            AppConstants.BOOK_DETAIL,
+            AppConstants.BOOKS,
+            AppConstants.BOOK_SUGGESTIONS,
+            AppConstants.BOOK_ANALYTICS  }, allEntries = true)
     @Transactional
     public void deleteBooksInverse(String keyword,
             Integer amount,
@@ -354,7 +429,7 @@ public class BookServiceImpl implements BookService {
                 pubIds,
                 types,
                 shopId,
-                isAuthAdmin() ? userId : user.getId(),
+                CommonUtils.isAuthAdmin() ? userId : user.getId(),
                 fromRange,
                 toRange,
                 rating,
@@ -363,10 +438,15 @@ public class BookServiceImpl implements BookService {
         bookRepo.deleteAllById(deleteIds);
     }
 
-    @CacheEvict(cacheNames = { "book", "bookDetail", "books", "booksSuggestion", "bookAnalytics" }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.BOOK,
+            AppConstants.BOOK_DETAIL,
+            AppConstants.BOOKS,
+            AppConstants.BOOK_SUGGESTIONS,
+            AppConstants.BOOK_ANALYTICS }, allEntries = true)
     @Transactional
     public void deleteAllBooks(Long shopId, Account user) {
-        if (isAuthAdmin()) {
+
+        if (CommonUtils.isAuthAdmin()) {
             if (shopId != null) {
                 bookRepo.deleteAllByShopId(shopId);
             } else {
@@ -379,22 +459,5 @@ public class BookServiceImpl implements BookService {
                 bookRepo.deleteAllByShop_Owner(user);
             }
         }
-    }
-
-    // Check valid role function
-    protected boolean isAuthAdmin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication(); // Get current auth
-        return (auth != null && auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(UserRole.ROLE_ADMIN.toString())));
-    }
-
-    protected boolean isOwnerValid(Shop shop, Account user) {
-        // Check if is admin or valid owner id
-        boolean isAdmin = isAuthAdmin();
-
-        if (shop != null) {
-            return shop.getOwner().getId().equals(user.getId()) || isAuthAdmin();
-        } else
-            return isAdmin;
     }
 }

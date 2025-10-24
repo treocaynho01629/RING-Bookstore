@@ -1,6 +1,7 @@
 package com.ring.config;
 
 import com.ring.repository.AccountRepository;
+import com.ring.service.impl.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.websocket.Constants;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,7 @@ import static org.springframework.data.web.config.EnableSpringDataWebSupport.Pag
 public class ApplicationConfig {
 
     private final AccountRepository accountRepo;
+    private final MessageService messageService;
 
     @Value("${ring.client-url}")
     private String clientUrl;
@@ -77,7 +79,10 @@ public class ApplicationConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> accountRepo.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Invalid username!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.username.not.found");
+                    return new UsernameNotFoundException(errorMsg);
+                });
     }
 
     /**

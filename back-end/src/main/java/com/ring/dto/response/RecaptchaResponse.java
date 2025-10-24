@@ -48,9 +48,15 @@ public class RecaptchaResponse {
 
     @JsonIgnore
     public boolean hasClientError() {
+
         final List<ErrorCode> errors = getErrorCodes();
-        if (errors == null) { return false; }
+
+        if (errors == null) { 
+            return false; 
+        }
+
         for (final ErrorCode error : errors) {
+
             switch (error) {
                 case InvalidResponse:
                 case MissingResponse:
@@ -65,6 +71,10 @@ public class RecaptchaResponse {
 
     @Override
     public String toString() {
-        return "GoogleResponse{" + "success=" + success + ", hostname='" + hostname + '\''+ ", score='" + score + '\''+ ", action='" + action+ '\'' + ", errorCodes=" + errorCodes + '}';
+        return "GoogleResponse{" + "success=" + success + 
+            ", hostname='" + hostname + '\''+ 
+            ", score='" + score + '\''+ 
+            ", action='" + action+ '\'' + 
+            ", errorCodes=" + errorCodes + '}';
     }
 }

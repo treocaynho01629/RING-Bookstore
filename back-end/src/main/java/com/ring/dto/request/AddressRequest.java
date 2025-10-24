@@ -2,6 +2,7 @@ package com.ring.dto.request;
 
 import com.ring.model.enums.AddressType;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,26 +18,27 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AddressRequest {
 
-	@NotBlank(message = "Tên người nhận không được để trống!")
-	@Size(max = 250, message = "Tên người nhận không quá 250 kí tự!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
+	@Size(max = 250, message = "{validation.constraints.size.max}")
 	private String name;
 
-	@Size(max = 250, message = "Tên công ty không quá 250 kí tự!")
+	@Size(max = 250, message = "{validation.constraints.size.max}")
 	private String companyName;
 
-	@NotBlank(message = "Số điện thoại không được để trống!")
-	@Size(min = 9, max = 12, message = "Sai định dạng số điện thoại")
+	@NotBlank(message = "{validation.constraints.not.blank}")
+	@Pattern(regexp = "\\(?([0-9]{3})\\)?([ .-]?)([0-9]{3})\\2([0-9]{3})", message = "{validation.constraints.pattern}")
 	private String phone;
 
-	@NotBlank(message = "Tỉnh/Thành phố không được để trống!")
-	@Size(max = 200, message = "Tỉnh/Thành phố không quá 200 kí tự!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
+	@Size(max = 200, message = "{validation.constraints.size.max}")
 	private String city;
 
-	@NotBlank(message = "Địa chỉ không được để trống!")
-	@Size(max = 300, message = "Địa chỉ không quá 300 kí tự!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
+	@Size(max = 300, message = "{validation.constraints.size.max}")
 	private String address;
 
 	private AddressType type;
 
+	@Builder.Default
 	private Boolean isDefault = false;
 }

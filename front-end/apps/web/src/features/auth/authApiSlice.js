@@ -23,12 +23,12 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     reset: builder.mutation({
-      query: ({ token, source, resetToken, newPass }) => ({
+      query: ({ token, source, resetToken, resetBody }) => ({
         url: `/api/auth/reset-password/${resetToken}`,
         method: "PUT",
         headers: { response: token, source },
         body: {
-          ...newPass,
+          ...resetBody,
         },
         responseHandler: "text",
       }),

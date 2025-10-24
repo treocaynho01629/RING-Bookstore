@@ -14,7 +14,7 @@ import com.ring.model.enums.UserRole;
 import com.ring.repository.BannerRepository;
 import com.ring.repository.ShopRepository;
 import com.ring.service.impl.BannerServiceImpl;
-import com.ring.utils.FileUploadUtil;
+import com.ring.common.FileUploadUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

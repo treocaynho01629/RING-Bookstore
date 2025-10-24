@@ -3,8 +3,15 @@ import styled from "@emotion/styled";
 export const Instruction = styled.p`
   font-size: 14px;
   font-style: italic;
+  margin: ${({ theme }) => theme.spacing(1)} 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: ${({ theme }) => theme.vars.palette.error.main};
   display: ${({ display }) => display};
+
+  span:not(:first-of-type) {
+    display: none;
+  }
 `;
 
 export const LogoImage = styled.img`

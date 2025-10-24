@@ -1,13 +1,13 @@
 package com.ring.service.impl;
 
+import com.ring.common.AppConstants;
 import com.ring.dto.request.RegisterRequest;
 import com.ring.dto.request.ResetPassRequest;
 import com.ring.exception.HttpResponseException;
-import com.ring.exception.ResetPasswordException;
 import com.ring.exception.ResourceNotFoundException;
-import com.ring.listener.forgot.OnResetTokenCreatedEvent;
-import com.ring.listener.registration.OnRegistrationCompleteEvent;
-import com.ring.listener.reset.OnResetPasswordCompletedEvent;
+import com.ring.listener.events.OnRegistrationCompleteEvent;
+import com.ring.listener.events.OnResetPasswordCompletedEvent;
+import com.ring.listener.events.OnResetTokenCreatedEvent;
 import com.ring.model.entity.Account;
 import com.ring.model.entity.AccountProfile;
 import com.ring.model.entity.Role;
@@ -18,6 +18,8 @@ import com.ring.service.CaptchaService;
 import com.ring.service.RegisterService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +37,7 @@ public class RegisterServiceImpl implements RegisterService {
 
 	private final CaptchaService captchaService;
 	private final ResetTokenServiceImpl resetService;
+	private final MessageService messageService;
 
 	private final PasswordEncoder passwordEncoder;
 	private final ApplicationEventPublisher eventPublisher;
@@ -50,22 +53,27 @@ public class RegisterServiceImpl implements RegisterService {
 	public Account register(RegisterRequest registerRequest, HttpServletRequest request) {
 
 		// Recaptcha
-		final String recaptchaToken = request.getHeader("response");
-		final String source = request.getHeader("source");
+		final String recaptchaToken = request.getHeader(AppConstants.HEADER_RESPONSE);
+		final String source = request.getHeader(AppConstants.HEADER_RECAPTCHA_SOURCE);
 		captchaService.validate(recaptchaToken, source, CaptchaServiceImpl.REGISTER_ACTION);
 
-		// Check if user with this username already exists
+		// Check user with this username already exists
 		if (accountRepo.existsByUsernameOrEmail(registerRequest.getUsername(), registerRequest.getEmail())) {
+
+			var errorMsg = messageService.getMessage("exception.user.existed");
 			throw new HttpResponseException(
 					HttpStatus.CONFLICT,
-					"User already existed!",
-					"Người dùng với tên đăng nhập hoặc email này đã tồn tại!");
+					AppConstants.USER_EXISTED,
+					errorMsg);
 		} else {
 			// Set role for USER
 			Set<Role> roles = new HashSet<>();
 			roles.add(roleRepo.findByRoleName(UserRole.ROLE_USER)
-					.orElseThrow(() -> new ResourceNotFoundException("No roles has been set!",
-							"Không tìm thấy các chức vụ yêu cầu!")));
+					.orElseThrow(() -> {
+						var errorMsg = messageService.getMessage("exception.not.found",
+								new Object[]{ new DefaultMessageSourceResolvable("label.user.role") });
+						return new ResourceNotFoundException(errorMsg);
+					}));
 
 			// Create and set new Account info
 			var user = Account.builder()
@@ -96,14 +104,17 @@ public class RegisterServiceImpl implements RegisterService {
 	public void forgotPassword(String email, HttpServletRequest request) {
 
 		// Recaptcha
-		final String recaptchaToken = request.getHeader("response");
-		final String source = request.getHeader("source");
+		final String recaptchaToken = request.getHeader(AppConstants.HEADER_RESPONSE);
+		final String source = request.getHeader(AppConstants.HEADER_RECAPTCHA_SOURCE);
 		captchaService.validate(recaptchaToken, source, CaptchaServiceImpl.FORGOT_ACTION);
 
 		// Get all accounts with this email
 		Account user = accountRepo.findByEmail(email)
-				.orElseThrow(() -> new ResourceNotFoundException("User with this email does not exist!",
-						"Không tìm thấy người dùng với tên tài khoản và email yêu cầu!"));
+				.orElseThrow(() -> {
+					var errorMsg = messageService.getMessage("exception.not.found",
+							new Object[]{ new DefaultMessageSourceResolvable("label.user") });
+					return new ResourceNotFoundException(errorMsg);
+				});
 
 		// Generate reset password token
 		String token = resetService.generateResetToken(user);
@@ -129,28 +140,33 @@ public class RegisterServiceImpl implements RegisterService {
 	public Account resetPassword(String token, ResetPassRequest resetRequest, HttpServletRequest request) {
 
 		// Recaptcha
-		final String recaptchaToken = request.getHeader("response");
-		final String source = request.getHeader("source");
+		final String recaptchaToken = request.getHeader(AppConstants.HEADER_RESPONSE);
+		final String source = request.getHeader(AppConstants.HEADER_RECAPTCHA_SOURCE);
 		captchaService.validate(recaptchaToken, source, CaptchaServiceImpl.RESET_ACTION);
 
 		// Find token
 		Account user = accountRepo.findByResetToken(token)
-				.orElseThrow(() -> new ResetPasswordException(token, "Reset token not found!"));
+				.orElseThrow(() -> {
+					var errorMsg = messageService.getMessage("exception.not.found",
+							new Object[]{ new DefaultMessageSourceResolvable("label.token.reset") });
+					return new ResourceNotFoundException(errorMsg);
+				});
 
-		// Verify >> return new jwt token
-		if (!resetService.verifyResetToken(user)) {
-			throw new ResetPasswordException(token, "Reset token not valid!");
-		}
+		// Verify
+		resetService.verifyResetToken(user);
 
 		// Validate new password
-		if (!resetRequest.getPassword().equals(resetRequest.getReInputPassword()))
+		if (!resetRequest.getNewPass().equals(resetRequest.getNewPassRe())) {
+
+			var errorMsg = messageService.getMessage("exception.password.not.match");
 			throw new HttpResponseException(
 					HttpStatus.BAD_REQUEST,
-					"Re input password does not match!",
-					"Mật khẩu không trùng khớp!");
+					AppConstants.PASSWORD_NOT_MATCH,
+					errorMsg);
+		}
 
-		// Change password and save to database
-		user.setPass(passwordEncoder.encode(resetRequest.getPassword()));
+		// Change password and save to the database
+		user.setPass(passwordEncoder.encode(resetRequest.getNewPass()));
 		resetService.clearResetToken(token);
 		accountRepo.save(user);
 

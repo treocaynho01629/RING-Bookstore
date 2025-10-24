@@ -123,32 +123,31 @@ export const theme = createTheme({
     MuiTextField: {
       styleOverrides: {
         root: ({ theme }) => ({
-          "--TextField-brandBorderColor": theme.vars.palette.divider,
-          "--TextField-brandBorderHoverColor": theme.vars.palette.action.hover,
-          "--TextField-brandBorderFocusedColor":
-            theme.vars.palette.primary.main,
           "& label.Mui-focused": {
             color: theme.vars.palette.primary.dark,
           },
-          "& .MuiFormHelperText-root": {
-            whiteSpace: "nowrap",
+          "& label.Mui-error": {
+            color: theme.vars.palette.error.main,
           },
         }),
       },
     },
     MuiOutlinedInput: {
       styleOverrides: {
-        notchedOutline: {
-          borderColor: "var(--TextField-brandBorderColor)",
-        },
-        root: {
+        notchedOutline: ({ theme }) => ({
+          borderColor: theme.vars.palette.divider,
+        }),
+        root: ({ theme }) => ({
           [`&:hover .${outlinedInputClasses.notchedOutline}`]: {
-            borderColor: "var(--TextField-brandBorderHoverColor)",
+            borderColor: theme.vars.palette.action.hover,
           },
           [`&.Mui-focused .${outlinedInputClasses.notchedOutline}`]: {
-            borderColor: "var(--TextField-brandBorderFocusedColor)",
+            borderColor: theme.vars.palette.primary.main,
           },
-        },
+          [`&.Mui-error .${outlinedInputClasses.notchedOutline}`]: {
+            borderColor: theme.vars.palette.error.main,
+          },
+        }),
       },
     },
     MuiInputBase: {

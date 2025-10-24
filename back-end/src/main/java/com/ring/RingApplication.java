@@ -6,6 +6,10 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Main application class for the RING project.
+ * This class is responsible for starting the Spring Boot application.
+ */
 @SpringBootApplication
 public class RingApplication {
 

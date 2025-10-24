@@ -1,9 +1,15 @@
 package com.ring.controller;
 
+import com.ring.common.AppConstants;
 import com.ring.config.CurrentAccount;
 import com.ring.dto.request.BannerRequest;
+import com.ring.dto.response.PagingResponse;
+import com.ring.dto.response.banners.BannerDTO;
 import com.ring.model.entity.Account;
+import com.ring.model.entity.Banner;
 import com.ring.service.BannerService;
+import com.ring.service.impl.MessageService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +31,7 @@ import java.util.List;
 public class BannerController {
 
     private final BannerService bannerService;
+    private final MessageService messageService;
 
     /**
      * Retrieves banners with optional filtering by shop, keyword, and pagination.
@@ -47,8 +54,15 @@ public class BannerController {
             @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
             @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir) {
-        return new ResponseEntity<>(
-                bannerService.getBanners(pageNo, pageSize, sortBy, sortDir, keyword, shopId, byShop), HttpStatus.OK);
+
+        PagingResponse<BannerDTO> banners = bannerService.getBanners(pageNo, 
+                pageSize, 
+                sortBy, 
+                sortDir, 
+                keyword, 
+                shopId, 
+                byShop);
+        return new ResponseEntity<>(banners, HttpStatus.OK);
     }
 
     /**
@@ -63,9 +77,9 @@ public class BannerController {
     public ResponseEntity<?> createBanner(@Valid @RequestPart("request") BannerRequest request,
             @RequestPart("image") MultipartFile file,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(bannerService.addBanner(request,
-                file,
-                currUser), HttpStatus.CREATED);
+
+        Banner banner = bannerService.addBanner(request, file, currUser);
+        return new ResponseEntity<>(banner, HttpStatus.CREATED);
     }
 
     /**
@@ -82,10 +96,9 @@ public class BannerController {
             @Valid @RequestPart("request") BannerRequest request,
             @RequestPart(name = "image", required = false) MultipartFile file,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(bannerService.updateBanner(id,
-                request,
-                file,
-                currUser), HttpStatus.CREATED);
+
+        Banner banner = bannerService.updateBanner(id, request, file, currUser);
+        return new ResponseEntity<>(banner, HttpStatus.CREATED);
     }
 
     /**
@@ -98,7 +111,11 @@ public class BannerController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:banner')")
     public ResponseEntity<?> deleteBanner(@PathVariable("id") Integer id, @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(bannerService.deleteBanner(id, currUser), HttpStatus.OK);
+
+        bannerService.deleteBanner(id, currUser);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -112,8 +129,11 @@ public class BannerController {
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:banner')")
     public ResponseEntity<?> deleteBanners(@RequestParam("ids") List<Integer> ids,
             @CurrentAccount Account currUser) {
+
         bannerService.deleteBanners(ids, currUser);
-        return new ResponseEntity<>("Banners deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -134,8 +154,11 @@ public class BannerController {
             @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam("ids") List<Integer> ids,
             @CurrentAccount Account currUser) {
+
         bannerService.deleteBannersInverse(keyword, shopId, byShop, ids, currUser);
-        return new ResponseEntity<>("Banners deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -149,7 +172,10 @@ public class BannerController {
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:banner')")
     public ResponseEntity<?> deleteAllBanners(@RequestParam(value = "shopId", required = false) Long shopId,
             @CurrentAccount Account currUser) {
+
         bannerService.deleteAllBanners(shopId, currUser);
-        return new ResponseEntity<>("All banners deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 }

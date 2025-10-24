@@ -1,6 +1,7 @@
 package com.ring.service.impl;
 
 import com.github.slugify.Slugify;
+import com.ring.common.AppConstants;
 import com.ring.dto.projection.categories.ICategory;
 import com.ring.dto.request.CategoryRequest;
 import com.ring.dto.response.PagingResponse;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,15 +30,20 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing categories.
+ */
 @RequiredArgsConstructor
 @Service
 public class CategoryServiceImpl implements CategoryService {
+
+    private final MessageService messageService;
 
     private final CategoryRepository cateRepo;
     private final CategoryMapper cateMapper;
     private final Slugify slg = Slugify.builder().lowerCase(false).build();
 
-    @Cacheable(cacheNames = "categories")
+    @Cacheable(cacheNames = AppConstants.CATEGORIES)
     public PagingResponse<CategoryDTO> getCategories(Integer pageNo,
             Integer pageSize,
             String sortBy,
@@ -45,9 +52,13 @@ public class CategoryServiceImpl implements CategoryService {
             Integer parentId) {
 
         Pageable pageable = PageRequest.of(pageNo, pageSize,
-                sortDir.equals("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
+                sortDir.equals(AppConstants.ASCENDING)
+                        ? Sort.by(sortBy).ascending()
+                        : Sort.by(sortBy).descending());
 
-        if (include != null && include.equalsIgnoreCase("children")) {
+        // Include child categories
+        if (AppConstants.CHILDREN.equalsIgnoreCase(include)) {
+
             Page<Integer> pagedIds = cateRepo.findCateIdsByParent(parentId, pageable);
             List<Integer> cateIds = pagedIds.getContent();
             List<ICategory> fullList = cateRepo.findParentAndSubCatesWithParentIds(cateIds);
@@ -68,7 +79,9 @@ public class CategoryServiceImpl implements CategoryService {
                     pagedIds.getSize(),
                     pagedIds.getNumber(),
                     pagedIds.isEmpty());
+        // Only categories without child
         } else {
+
             Page<ICategory> catesList = cateRepo.findCates(parentId, pageable);
             List<CategoryDTO> cateDTOS = catesList.map(cateMapper::projectionToDTO).toList();
             return new PagingResponse<>(
@@ -81,11 +94,13 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    @Cacheable(cacheNames = "categories")
+    @Cacheable(cacheNames = AppConstants.CATEGORIES)
     public PagingResponse<CategoryDTO> getRelevantCategories(Integer pageNo,
             Integer pageSize,
             Long shopId) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(pageNo,
+                pageSize,
+                Sort.by(AppConstants.ID).descending());
 
         Page<Integer[]> cateIds = cateRepo.findRelevantCategories(shopId, pageable);
 
@@ -116,44 +131,55 @@ public class CategoryServiceImpl implements CategoryService {
                 cateIds.isEmpty());
     }
 
-    @Cacheable(cacheNames = "previewCategories")
+    @Cacheable(cacheNames = AppConstants.CATEGORY_PREVIEWS)
     public List<PreviewCategoryDTO> getPreviewCategories() {
+
         List<ICategory> previews = cateRepo.findPreviewCategories();
         return previews.stream().map(cateMapper::projectionToPreviewDTO).collect(Collectors.toList());
     }
 
-    @Cacheable(cacheNames = "categoryDetail")
+    @Cacheable(cacheNames = AppConstants.CATEGORY_DETAIL)
     public CategoryDetailDTO getCategory(Integer id, String slug, String include) {
-        CategoryDetailDTO result = null;
 
-        if (include != null && include.equalsIgnoreCase("children")) {
+        CategoryDetailDTO result;
+
+        if (AppConstants.CHILDREN.equalsIgnoreCase(include)) {
             Category cate = cateRepo.findCateWithChildren(id, slug)
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found!",
-                            "Không tìm thấy danh mục yêu cầu!"));
-            result = cateMapper.cateToDetailDTO(cate, "children");
-        } else if (include != null && include.equalsIgnoreCase("parent")) {
+                    .orElseThrow(() -> {
+                        var errorMsg = messageService.getMessage("exception.not.found",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.cate.children") });
+                        return new ResourceNotFoundException(errorMsg);
+                    });
+            result = cateMapper.cateToDetailDTO(cate, AppConstants.CHILDREN);
+        } else if (AppConstants.PARENT.equalsIgnoreCase(include)) {
             Category cate = cateRepo.findCateWithParent(id, slug)
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found!",
-                            "Không tìm thấy danh mục yêu cầu!"));
-            result = cateMapper.cateToDetailDTO(cate, "parent");
+                    .orElseThrow(() -> {
+                        var errorMsg = messageService.getMessage("exception.not.found",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.cate.parent") });
+                        return new ResourceNotFoundException(errorMsg);
+                    });
+            result = cateMapper.cateToDetailDTO(cate, AppConstants.PARENT);
         } else {
             Category cate = cateRepo.findCate(id, slug)
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found!",
-                            "Không tìm thấy danh mục yêu cầu!"));
+                    .orElseThrow(() -> {
+                        var errorMsg = messageService.getMessage("exception.not.found",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.cate") });
+                        return new ResourceNotFoundException(errorMsg);
+                    });
             result = cateMapper.cateToDetailDTO(cate);
         }
 
         return result;
     }
 
-    @CacheEvict(cacheNames = { "categories", "previewCategories" }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.CATEGORIES, AppConstants.CATEGORY_PREVIEWS }, allEntries = true)
     @Transactional
     public Category addCategory(CategoryRequest request) {
 
         // Slugify
         String slug = slg.slugify(request.getName());
 
-        // Create new category
+        // New cate
         var category = Category.builder()
                 .slug(slug)
                 .name(request.getName())
@@ -162,26 +188,43 @@ public class CategoryServiceImpl implements CategoryService {
 
         // Set parent
         if (request.getParentId() != null) {
+
             Category parent = cateRepo.findById(request.getParentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Parent category not found!",
-                            "Không tìm thấy danh mục yêu cầu!"));
-            if (parent.getParent() != null)
-                throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Invalid parent category!");
+                    .orElseThrow(() -> {
+                        var errorMsg = messageService.getMessage("exception.not.found",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.cate") });
+                        return new ResourceNotFoundException(errorMsg);
+                    });
+
+            if (parent.getParent() != null) {
+
+                var errorMsg = messageService.getMessage("exception.invalid",
+                        new Object[]{ new DefaultMessageSourceResolvable("label.cate.parent") });
+                throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                        AppConstants.INVALID_ARGUMENT,
+                        errorMsg);
+            }
+
             category.setParent(parent);
         }
 
-        Category addedCate = cateRepo.save(category); // Save to database
-        return addedCate;
+        return cateRepo.save(category); // Save to the database
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = { "categories", "previewCategories" }, allEntries = true),
-            @CacheEvict(cacheNames = "categoryDetail", key = "#id") })
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { AppConstants.CATEGORIES,
+            AppConstants.CATEGORY_PREVIEWS }, allEntries = true),
+            @CacheEvict(cacheNames = AppConstants.CATEGORY_DETAIL, key = "#id") })
     @Transactional
     public Category updateCategory(Integer id, CategoryRequest request) {
-        // Get original category
+
+        // Get the original category
         Category category = cateRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found!",
-                        "Không tìm thấy danh mục yêu cầu!"));
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[]{ new DefaultMessageSourceResolvable("label.cate") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
 
         // Set new info
         String slug = slg.slugify(request.getName());
@@ -194,42 +237,67 @@ public class CategoryServiceImpl implements CategoryService {
         // Parent
         if (request.getParentId() != null
                 && (category.getParent() == null || !request.getParentId().equals(category.getParent().getId()))) {
-            if (!category.getSubCates().isEmpty())
-                throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Invalid child category!");
+
+            // Check child categories
+            if (!category.getSubCates().isEmpty()) {
+
+                var errorMsg = messageService.getMessage("exception.invalid",
+                        new Object[]{ new DefaultMessageSourceResolvable("label.cate.child") });
+                throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                        AppConstants.INVALID_ARGUMENT,
+                        errorMsg);
+            }
+
             Category parent = cateRepo.findById(request.getParentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Parent category not found!",
-                            "Không tìm thấy danh mục yêu cầu!"));
-            if (parent.getParent() != null)
-                throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Invalid parent category!");
+                    .orElseThrow(() -> {
+                        var errorMsg = messageService.getMessage("exception.not.found",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.cate.parent") });
+                        return new ResourceNotFoundException(errorMsg);
+                    });
+
+            // Check parent category
+            if (parent.getParent() != null) {
+
+                var errorMsg = messageService.getMessage("exception.invalid",
+                        new Object[]{ new DefaultMessageSourceResolvable("label.cate.parent") });
+                throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                        AppConstants.INVALID_ARGUMENT,
+                        errorMsg);
+            }
+
             category.setParent(parent);
         }
 
         // Update
-        Category updatedCate = cateRepo.save(category);
-        return updatedCate;
+        return cateRepo.save(category);
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = { "categories", "previewCategories" }, allEntries = true),
-            @CacheEvict(cacheNames = "categoryDetail", key = "#id") })
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { AppConstants.CATEGORIES,
+                AppConstants.CATEGORY_PREVIEWS }, allEntries = true),
+            @CacheEvict(cacheNames = AppConstants.CATEGORY_DETAIL, key = "#id") })
     @Transactional
     public void deleteCategory(Integer id) {
         cateRepo.deleteById(id);
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = { "categories", "previewCategories" }, allEntries = true) })
+    @Caching(evict = { @CacheEvict(cacheNames = { AppConstants.CATEGORIES,
+            AppConstants.CATEGORY_PREVIEWS }, allEntries = true) })
     @Transactional
     public void deleteCategories(List<Integer> ids) {
         cateRepo.deleteAllByIdInBatch(ids);
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = { "categories", "previewCategories" }, allEntries = true) })
+    @Caching(evict = { @CacheEvict(cacheNames = { AppConstants.CATEGORIES,
+            AppConstants.CATEGORY_PREVIEWS }, allEntries = true) })
     @Transactional
     public void deleteCategoriesInverse(Integer parentId, List<Integer> ids) {
         List<Integer> listDelete = cateRepo.findInverseIds(parentId, ids);
         cateRepo.deleteAllByIdInBatch(listDelete);
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = { "categories", "previewCategories" }, allEntries = true) })
+    @Caching(evict = { @CacheEvict(cacheNames = { AppConstants.CATEGORIES,
+            AppConstants.CATEGORY_PREVIEWS }, allEntries = true) })
     @Transactional
     public void deleteAllCategories() {
         cateRepo.deleteAll();

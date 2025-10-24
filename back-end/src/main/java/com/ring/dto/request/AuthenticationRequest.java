@@ -11,9 +11,9 @@ import lombok.Data;
 @Builder
 public class AuthenticationRequest {
 
-	@NotBlank(message = "Tên đăng nhập không được để trống!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
 	private String username;
 	
-	@NotBlank(message = "Mật khẩu không được để trống!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
 	private String pass;
 }

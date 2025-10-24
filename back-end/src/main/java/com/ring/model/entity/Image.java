@@ -1,6 +1,8 @@
 package com.ring.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ring.listener.ImageEntityListener;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,8 +15,10 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(ImageEntityListener.class)
 @Table(name = "image")
 public class Image {
+
     @Id
     @Column(nullable = false, updatable = false)
     @SequenceGenerator(

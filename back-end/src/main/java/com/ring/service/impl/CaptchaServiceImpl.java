@@ -1,6 +1,8 @@
 package com.ring.service.impl;
 
+import com.ring.common.AppConstants;
 import com.ring.config.captcha.CaptchaSettings;
+import com.ring.dto.request.ReCaptchaRequest;
 import com.ring.dto.response.RecaptchaResponse;
 import com.ring.exception.ReCaptchaInvalidException;
 import com.ring.exception.ReCaptchaSuspiciousException;
@@ -11,11 +13,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Service class for managing captcha.
+ */
 @RequiredArgsConstructor
 @Service
 public class CaptchaServiceImpl implements CaptchaService {
@@ -27,6 +30,8 @@ public class CaptchaServiceImpl implements CaptchaService {
     protected final CaptchaProtectionService captchaProtectionService;
     protected final RestTemplate restTemplate;
 
+    private final MessageService messageService;
+
     public static final String LOGIN_ACTION = "login";
     public static final String REGISTER_ACTION = "register";
     public static final String FORGOT_ACTION = "forgot";
@@ -34,22 +39,29 @@ public class CaptchaServiceImpl implements CaptchaService {
     public static final String CHECKOUT_ACTION = "checkout";
     public static final String PAYMENT_ACTION = "payment";
 
+    private static final String RECAPTCHA_V2 = "v2";
+    private static final String RECAPTCHA_V3 = "v3";
+
     public void validate(String recaptchaToken, String source, final String action) throws ReCaptchaInvalidException {
+
         if (captchaProtectionService.isBlocked(getClientIP())) {
-            throw new ReCaptchaInvalidException("Client exceeded maximum number of failed attempts!");
+            var errorMsg = messageService.getMessage("exception.recaptcha.protection");
+            throw new ReCaptchaInvalidException(errorMsg);
         }
 
         // Validate
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        String secretKey = source.equals("v2") ? captchaSettings.getSecret()
+        String secretKey = source.equals(RECAPTCHA_V2)
+                ? captchaSettings.getSecret()
                 : captchaSettings.getV3Secret();
-        map.add("secret", secretKey);
-        map.add("response", recaptchaToken);
+        ReCaptchaRequest req = ReCaptchaRequest.builder()
+                .secret(secretKey)
+                .response(recaptchaToken)
+                .build();
 
         ResponseEntity<RecaptchaResponse> responseEntity = null;
-        HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(map, headers);
+        HttpEntity<ReCaptchaRequest> httpEntity = new HttpEntity<>(req, headers);
 
         try {
             responseEntity = restTemplate.exchange(
@@ -59,49 +71,79 @@ public class CaptchaServiceImpl implements CaptchaService {
                     RecaptchaResponse.class);
 
             RecaptchaResponse recaptchaResponse = responseEntity.getBody();
-            log.debug("reCaptcha response: {} ", recaptchaResponse.toString());
 
-            // Version check
-            if (source.equals("v3")) {
-                verifyV3(recaptchaResponse, action);
-            } else if (source.equals("v2")) {
-                verifyV2(recaptchaResponse);
+            if (recaptchaResponse != null) {
+                log.debug("reCaptcha response: {} ", recaptchaResponse);
+
+                // Version check
+                if (RECAPTCHA_V3.equals(source)) {
+                    verifyV3(recaptchaResponse, action);
+                } else if (RECAPTCHA_V2.equals(source)) {
+                    verifyV2(recaptchaResponse);
+                }
             }
         } catch (HttpClientErrorException e) {
             log.error(e.getMessage());
-            throw new ReCaptchaInvalidException("Service unavailable at this time. Please try again later!", e);
+            var errorMsg = messageService.getMessage("exception.recaptcha.failed");
+            throw new ReCaptchaInvalidException(errorMsg);
         }
 
         captchaProtectionService.captchaSucceeded(getClientIP());
     }
 
+    /**
+     * Verify the v3 recaptcha response.
+     * 
+     * @param response The recaptcha response.
+     * @param action The action.
+     */
     protected void verifyV3(RecaptchaResponse response, final String action) {
-        if (!response.isSuccess() || !response.getAction().equals(action)
+
+        if (!response.isSuccess()
+                || !response.getAction().equals(action)
                 || response.getScore() < captchaSettings.getThreshold()) {
+
             if (response.hasClientError()) { // Protect against bad request attempts
                 captchaProtectionService.captchaFailed(getClientIP());
             }
-            throw new ReCaptchaInvalidException("reCaptcha detected unusual behavior!");
+            var errorMsg = messageService.getMessage("exception.recaptcha.invalid");
+            throw new ReCaptchaInvalidException(errorMsg);
         } else if (response.getScore() > captchaSettings.getThreshold()
                 && response.getScore() < captchaSettings.getSuspicious()) {
-            throw new ReCaptchaSuspiciousException("reCaptcha requires further verification!");
+
+            var errorMsg = messageService.getMessage("exception.recaptcha.suspicious");
+            throw new ReCaptchaSuspiciousException(errorMsg);
         }
     }
 
+    /**
+     * Verify the v2 recaptcha response.
+     * 
+     * @param response The recaptcha response.
+     */
     protected void verifyV2(RecaptchaResponse response) {
         if (!response.isSuccess()) {
+
             if (response.hasClientError()) {
                 captchaProtectionService.captchaFailed(getClientIP());
             }
-            throw new ReCaptchaInvalidException("reCaptcha detected unusual behavior!");
+
+            var errorMsg = messageService.getMessage("exception.recaptcha.invalid");
+            throw new ReCaptchaInvalidException(errorMsg);
         }
     }
 
+    /**
+     * Get the client IP address.
+     * 
+     * @return The client IP address.
+     */
     protected String getClientIP() {
-        final String xfHeader = request.getHeader("X-Forwarded-For");
+
+        final String xfHeader = request.getHeader(com.google.common.net.HttpHeaders.X_FORWARDED_FOR);
         if (xfHeader == null || xfHeader.isEmpty() || !xfHeader.contains(request.getRemoteAddr())) {
             return request.getRemoteAddr();
         }
-        return xfHeader.split(",")[0];
+        return xfHeader.split(AppConstants.DELIMITER)[0];
     }
 }

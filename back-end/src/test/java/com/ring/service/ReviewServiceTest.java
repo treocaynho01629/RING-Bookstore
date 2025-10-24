@@ -469,7 +469,7 @@ public class ReviewServiceTest extends AbstractServiceTest {
                 when(reviewRepo.save(any(Review.class))).thenReturn(review);
 
                 // Then
-                reviewService.hideReview(1L);
+                reviewService.setReviewVisibility(1L, true);
 
                 // Verify
                 verify(reviewRepo, times(1)).findById(anyLong());
@@ -484,7 +484,7 @@ public class ReviewServiceTest extends AbstractServiceTest {
 
                 // Then
                 ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                                () -> reviewService.hideReview(1L));
+                                () -> reviewService.setReviewVisibility(1L, true));
                 assertEquals("Review not found!", exception.getError());
 
                 // Verify
@@ -500,7 +500,7 @@ public class ReviewServiceTest extends AbstractServiceTest {
                 when(reviewRepo.save(any(Review.class))).thenReturn(review);
 
                 // Then
-                reviewService.unhideReview(1L);
+                reviewService.setReviewVisibility(1L, false);
 
                 // Verify
                 verify(reviewRepo, times(1)).findById(anyLong());
@@ -514,7 +514,7 @@ public class ReviewServiceTest extends AbstractServiceTest {
 
                 // Then
                 ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                                () -> reviewService.unhideReview(1L));
+                                () -> reviewService.setReviewVisibility(1L, false));
                 assertEquals("Review not found!", exception.getError());
 
                 // Verify

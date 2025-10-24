@@ -46,14 +46,14 @@ interface PageLayoutProps {
 
 export default function PageLayout({ children }: PageLayoutProps) {
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md"));
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<boolean>(false);
 
   return (
     <LayoutWrapper>
       {/* <ScrollToTop /> */}
       {/* <NavDrawer {...{ open, setOpen, tabletMode }} /> */}
       <MainContainer>
-        <Navbar />
+        <Navbar open={open} setOpen={setOpen} />
         <LayoutContainer>{children}</LayoutContainer>
       </MainContainer>
     </LayoutWrapper>

@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 public enum UserRole {
 
-    ROLE_USER("Thành viên",
+    ROLE_USER("role.user",
             "default",
             List.of(
                     PrivilegeType.READ_PROFILE,
@@ -27,7 +27,7 @@ public enum UserRole {
                     PrivilegeType.CREATE_REVIEW,
                     PrivilegeType.UPDATE_REVIEW
             )),
-    ROLE_SELLER("Người bán",
+    ROLE_SELLER("role.seller",
             "info",
             List.of(
                     PrivilegeType.READ_BOOK,
@@ -60,7 +60,7 @@ public enum UserRole {
                     PrivilegeType.UPDATE_REVIEW,
                     PrivilegeType.DELETE_REVIEW
             )),
-    ROLE_ADMIN("Quản trị viên",
+    ROLE_ADMIN("role.admin",
             "primary",
             List.of(
                     PrivilegeType.READ_BOOK,
@@ -112,7 +112,7 @@ public enum UserRole {
                     PrivilegeType.DELETE_REVIEW
             )),
 
-    ROLE_GUEST("Khách",
+    ROLE_GUEST("role.guest",
             "warning",
             List.of(
                     PrivilegeType.READ_BOOK,

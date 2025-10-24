@@ -15,15 +15,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BannerRequest {
-	
-	@NotBlank(message = "Tên banner không được bỏ trống!")
-	@Size(min = 5, max = 200, message = "Tên banner từ 5-200 kí tự")
+
+	@NotBlank(message = "{validation.constraints.not.blank}")
+	@Size(min = 5, max = 200, message = "{validation.constraints.size.range}")
 	private String name;
 
-	@Size(max = 4000, message = "Độ dài mô tả từ tối đa 4000 kí tự")
+	@Size(max = 4000, message = "{validation.constraints.size.max}")
 	private String description;
 
-	@NotBlank(message = "Đường dẫn không bỏ trống!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
 	private String url;
 
 	private Long shopId;

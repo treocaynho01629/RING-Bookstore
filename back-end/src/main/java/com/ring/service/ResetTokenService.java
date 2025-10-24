@@ -7,7 +7,7 @@ import com.ring.model.entity.Account;
  */
 public interface ResetTokenService {
 
-    /**
+     /**
      * Generates a secure reset token for the specified user account.
      *
      * @param user The account for which to generate the reset token.
@@ -16,15 +16,14 @@ public interface ResetTokenService {
     String generateResetToken(Account user);
 
     /**
-     * Verifies whether the reset token associated with the given user is valid and not expired.
+     * Verifies reset token associated with the given user is valid and not expired.
      *
      * @param user The user account to verify the reset token against.
-     * @return True if the reset token is valid; otherwise, false.
      */
-    boolean verifyResetToken(Account user);
+    void verifyResetToken(Account user);
 
     /**
-     * Clears or invalidates the specified reset token, preventing it from being reused.
+     * Invalidates the specified reset token, preventing it from being reused.
      *
      * @param token The reset token to clear or invalidate.
      */

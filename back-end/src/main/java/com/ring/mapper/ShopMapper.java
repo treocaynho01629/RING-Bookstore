@@ -1,7 +1,7 @@
 package com.ring.mapper;
 
 import com.cloudinary.Cloudinary;
-import com.cloudinary.Transformation;
+import com.ring.common.CloudinaryTransformations;
 import com.ring.dto.projection.images.IImage;
 import com.ring.dto.projection.shops.*;
 import com.ring.dto.response.shops.*;
@@ -9,6 +9,9 @@ import com.ring.model.entity.Address;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * A mapper for {@link IShopDisplay}, {@link IShop}, {@link IShopPreview}, {@link IShopInfo}, {@link IShopDisplayDetail}, {@link IShopDetail}.
+ */
 @RequiredArgsConstructor
 @Service
 public class ShopMapper {
@@ -16,24 +19,26 @@ public class ShopMapper {
     private final AddressMapper addressMapper;
     private final Cloudinary cloudinary;
 
+    /**
+     * Maps a {@link IShopDisplay} to a {@link ShopDisplayDTO}.
+     * 
+     * @param shop the shop to map
+     * @return the mapped {@link ShopDisplayDTO}
+     */
     public ShopDisplayDTO displayToDTO(IShopDisplay shop) {
+
         IImage image = shop.getImage();
-        String url = image != null ?
-                cloudinary.url().transformation(new Transformation()
-                                .aspectRatio("1.0")
-                                .width(55)
-                                .crop("thumb")
-                                .chain()
-                                .radius("max")
-                                .quality(50)
-                                .fetchFormat("auto"))
-                        .secure(true).generate(image.getPublicId())
+        String imageUrl = image != null 
+                ? cloudinary.url()
+                        .transformation(CloudinaryTransformations.AVATAR_TRANSFORMATION)
+                        .secure(true)
+                        .generate(image.getPublicId())
                 : null;
 
         return new ShopDisplayDTO(shop.getOwnerId(),
                 shop.getId(),
                 shop.getName(),
-                url,
+                imageUrl,
                 shop.getJoinedDate(),
                 shop.getTotalReviews(),
                 shop.getTotalProducts(),
@@ -41,69 +46,75 @@ public class ShopMapper {
                 shop.getFollowed());
     }
 
+    /**
+     * Maps a {@link IShop} to a {@link ShopDTO}.
+     * 
+     * @param shop the shop to map
+     * @return the mapped {@link ShopDTO}
+     */
     public ShopDTO shopToDTO(IShop shop) {
+
         IImage image = shop.getImage();
-        String url = image != null ?
-                cloudinary.url().transformation(new Transformation()
-                                .aspectRatio("1.0")
-                                .width(55)
-                                .crop("thumb")
-                                .chain()
-                                .radius("max")
-                                .quality(50)
-                                .fetchFormat("auto"))
-                        .secure(true).generate(image.getPublicId())
+        String imageUrl = image != null 
+                ? cloudinary.url().
+                        transformation(CloudinaryTransformations.AVATAR_TRANSFORMATION)
+                        .secure(true)
+                        .generate(image.getPublicId())
                 : null;
 
         return new ShopDTO(shop.getUsername(),
                 shop.getOwnerId(),
                 shop.getId(),
                 shop.getName(),
-                url,
+                imageUrl,
                 shop.getSales(),
                 shop.getTotalSold(),
                 shop.getTotalFollowers(),
                 shop.getJoinedDate());
     }
 
+    /**
+     * Maps a {@link IShopPreview} to a {@link ShopPreviewDTO}.
+     * 
+     * @param shop the shop to map
+     * @return the mapped {@link ShopPreviewDTO}
+     */
     public ShopPreviewDTO previewToDTO(IShopPreview shop) {
+
         IImage image = shop.getImage();
-        String url = image != null ?
-                cloudinary.url().transformation(new Transformation()
-                                .aspectRatio("1.0")
-                                .width(20)
-                                .crop("thumb")
-                                .chain()
-                                .radius("max")
-                                .quality(20)
-                                .fetchFormat("auto"))
-                        .secure(true).generate(image.getPublicId())
+        String imageUrl = image != null 
+                ? cloudinary.url()
+                        .transformation(CloudinaryTransformations.PREVIEW_CATEGORY_TRANSFORMATION)
+                        .secure(true)
+                        .generate(image.getPublicId())
                 : null;
 
         return new ShopPreviewDTO(shop.getId(),
                 shop.getName(),
-                url);
+                imageUrl);
     }
 
+    /**
+     * Maps a {@link IShopInfo} to a {@link ShopInfoDTO}.
+     * 
+     * @param shop the shop to map
+     * @return the mapped {@link ShopInfoDTO}
+     */
     public ShopInfoDTO infoToDTO(IShopInfo shop) {
+
         IImage image = shop.getImage();
-        String url = image != null ?
-                cloudinary.url().transformation(new Transformation()
-                                .aspectRatio("1.0")
-                                .width(75)
-                                .crop("thumb")
-                                .chain()
-                                .radius("max")
-                                .quality("auto")
-                                .fetchFormat("auto"))
-                        .secure(true).generate(image.getPublicId())
+        String imageUrl = image != null 
+                ? cloudinary.url()
+                        .transformation(CloudinaryTransformations.SHOP_TRANSFORMATION)
+                        .secure(true)
+                        .generate(image.getPublicId())
                 : null;
 
         return new ShopInfoDTO(shop.getUsername(),
                 shop.getOwnerId(),
                 shop.getId(),
                 shop.getName(),
-                url,
+                imageUrl,
                 shop.getJoinedDate(),
                 shop.getTotalReviews(),
                 shop.getTotalProducts(),
@@ -111,19 +122,21 @@ public class ShopMapper {
                 shop.getFollowed());
     }
 
+    /**
+     * Maps a {@link IShopDisplayDetail} to a {@link ShopDisplayDetailDTO}.
+     * 
+     * @param shop the shop to map
+     * @return the mapped {@link ShopDisplayDetailDTO}
+     */
     public ShopDisplayDetailDTO displayDetailToDTO(IShopDisplayDetail shop) {
+
         IImage image = shop.getImage();
         Address address = shop.getAddress();
-        String url = image != null ?
-                cloudinary.url().transformation(new Transformation()
-                                .aspectRatio("1.0")
-                                .width(75)
-                                .crop("thumb")
-                                .chain()
-                                .radius("max")
-                                .quality("auto")
-                                .fetchFormat("auto"))
-                        .secure(true).generate(image.getPublicId())
+        String imageUrl = image != null 
+                ? cloudinary.url()
+                        .transformation(CloudinaryTransformations.SHOP_TRANSFORMATION)
+                        .secure(true)
+                        .generate(image.getPublicId())
                 : null;
 
         return new ShopDisplayDetailDTO(shop.getUsername(),
@@ -131,7 +144,7 @@ public class ShopMapper {
                 shop.getId(),
                 shop.getName(),
                 shop.getDescription(),
-                url,
+                imageUrl,
                 address != null ? addressMapper.addressToDTO(address) : null,
                 shop.getTotalSold(),
                 shop.getCanceledRate(),
@@ -143,19 +156,21 @@ public class ShopMapper {
                 shop.getFollowed());
     }
 
+    /**
+     * Maps a {@link IShopDetail} to a {@link ShopDetailDTO}.
+     * 
+     * @param shop the shop to map
+     * @return the mapped {@link ShopDetailDTO}
+     */
     public ShopDetailDTO detailToDTO(IShopDetail shop) {
+
         IImage image = shop.getImage();
         Address address = shop.getAddress();
-        String url = image != null ?
-                cloudinary.url().transformation(new Transformation()
-                                .aspectRatio("1.0")
-                                .width(75)
-                                .crop("thumb")
-                                .chain()
-                                .radius("max")
-                                .quality("auto")
-                                .fetchFormat("auto"))
-                        .secure(true).generate(image.getPublicId())
+        String imageUrl = image != null ?
+                cloudinary.url()
+                        .transformation(CloudinaryTransformations.SHOP_TRANSFORMATION)
+                        .secure(true)
+                        .generate(image.getPublicId())
                 : null;
 
         return new ShopDetailDTO(shop.getUsername(),
@@ -163,7 +178,7 @@ public class ShopMapper {
                 shop.getId(),
                 shop.getName(),
                 shop.getDescription(),
-                url,
+                imageUrl,
                 address != null ? addressMapper.addressToDTO(address) : null,
                 shop.getSales(),
                 shop.getTotalSold(),

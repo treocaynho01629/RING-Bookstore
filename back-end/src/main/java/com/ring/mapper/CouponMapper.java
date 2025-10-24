@@ -1,51 +1,55 @@
 package com.ring.mapper;
 
 import com.cloudinary.Cloudinary;
-import com.cloudinary.Transformation;
+import com.ring.common.CloudinaryTransformations;
 import com.ring.dto.projection.coupons.ICoupon;
 import com.ring.dto.response.coupons.CouponDTO;
 import com.ring.dto.response.coupons.CouponDetailDTO;
 import com.ring.model.entity.Coupon;
 import com.ring.model.entity.CouponDetail;
 import com.ring.model.enums.CouponType;
+import com.ring.service.impl.MessageService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.text.NumberFormat;
-import java.util.Locale;
-
+/**
+ * A mapper for {@link ICoupon}, {@link Coupon} to {@link CouponDTO}, {@link CouponDetailDTO}.
+ */
 @RequiredArgsConstructor
 @Service
 public class CouponMapper {
 
     private final Cloudinary cloudinary;
+    private final MessageService messageService;
 
+    /**
+     * Maps a {@link ICoupon} to a {@link CouponDTO}.
+     * 
+     * @param projection the projection to map
+     * @return the mapped {@link CouponDTO}
+     */
     public CouponDTO couponToDTO(ICoupon projection) {
+
         Coupon coupon = projection.getCoupon();
         CouponDetail detail = coupon.getDetail();
-        String url = projection.getShopImage() != null ?
-                cloudinary.url().transformation(new Transformation()
-                                .aspectRatio("1.0")
-                                .width(55)
-                                .crop("thumb")
-                                .chain()
-                                .radius("max")
-                                .quality(50)
-                                .fetchFormat("auto"))
-                        .secure(true).generate(projection.getShopImage().getPublicId())
+        String url = projection.getShopImage() != null 
+                ? cloudinary.url()
+                        .transformation(CloudinaryTransformations.AVATAR_TRANSFORMATION)
+                        .secure(true)
+                        .generate(projection.getShopImage().getPublicId())
                 : null;
 
-        //Detail stuff
-        NumberFormat percentFormat = NumberFormat.getPercentInstance();
-        NumberFormat unitFormat = NumberFormat.getCurrencyInstance(
-                new Locale.Builder().setLanguage("vi").setRegion("VN").build()
-        );
-        unitFormat.setMaximumFractionDigits(0);
-        String summary = "Giảm " + (detail.getType().equals(CouponType.SHIPPING) ? "phí vận chuyển " : "") +
-                percentFormat.format(detail.getDiscount()) + " - giảm tối đa " + unitFormat.format(detail.getMaxDiscount());
-
-        String condition = (detail.getType().equals(CouponType.MIN_AMOUNT) ? "Khi mua " : "Đơn từ ") +
-                unitFormat.format(detail.getAttribute()) + (detail.getType().equals(CouponType.MIN_AMOUNT) ? " sản phẩm" : "");
+        // Detail stuff
+        String summary = messageService.getMessage("message.coupon.summary", new Object[] {
+            CouponType.SHIPPING.equals(detail.getType()) ? 1 : 0,
+            detail.getDiscount(),
+            detail.getMaxDiscount()
+        });
+        String condition =
+                CouponType.MIN_AMOUNT.equals(detail.getType()) ?
+                        messageService.getMessage("message.coupon.condition.amount", new Object[] { detail.getAttribute() }) :
+                        messageService.getMessage("message.coupon.condition.value", new Object[] { detail.getAttribute() });
 
         return new CouponDTO(coupon.getId(),
                 coupon.getCode(),
@@ -61,7 +65,14 @@ public class CouponMapper {
                 url);
     }
 
+    /**
+     * Maps a {@link ICoupon} to a {@link CouponDetailDTO}.
+     * 
+     * @param projection the projection to map
+     * @return the mapped {@link CouponDetailDTO}
+     */
     public CouponDetailDTO couponToDetailDTO(ICoupon projection) {
+
         Coupon coupon = projection.getCoupon();
         CouponDetail detail = coupon.getDetail();
 

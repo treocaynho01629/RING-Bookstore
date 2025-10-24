@@ -27,7 +27,6 @@ import {
   sortShopsBy,
 } from "../utils/filters";
 import { Wrapper } from "../components/custom/SortComponents";
-import useAuth from "../../hooks/useAuth";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -39,6 +38,7 @@ import CustomDivider from "../components/custom/CustomDivider";
 import Progress from "@ring/ui/Progress";
 import Shop from "../components/shop/Shop";
 import ShopSortList from "../components/shop/ShopSortList";
+import useAuth from "../hooks/useAuth";
 
 const JumpPagination = lazy(
   () => import("../components/custom/JumpPagination")
@@ -155,19 +155,15 @@ const Shops = () => {
     updateFilters();
   }, [searchParams]);
 
-  //Set title
+  // Set title
   useTitle("Danh sách cửa hàng");
 
-  //Handle change
+  // Handle change
   const scrollToTop = useCallback(() => {
-    if (mobileMode) {
-      scrollRef?.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    scrollRef?.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   }, []);
   const handleChangePage = (page) => {
     setPagination((prev) => ({ ...prev, number: page - 1 }));
@@ -216,7 +212,7 @@ const Shops = () => {
     handleResetPage();
   };
 
-  //Reset page
+  // Reset page
   const handleResetPage = () => {
     setPagination((prev) => ({
       ...prev,

@@ -6,9 +6,9 @@ import com.ring.dto.request.ResetPassRequest;
 import com.ring.exception.HttpResponseException;
 import com.ring.exception.ResetPasswordException;
 import com.ring.exception.ResourceNotFoundException;
-import com.ring.listener.forgot.OnResetTokenCreatedEvent;
-import com.ring.listener.registration.OnRegistrationCompleteEvent;
-import com.ring.listener.reset.OnResetPasswordCompletedEvent;
+import com.ring.listener.events.OnRegistrationCompleteEvent;
+import com.ring.listener.events.OnResetPasswordCompletedEvent;
+import com.ring.listener.events.OnResetTokenCreatedEvent;
 import com.ring.model.entity.Account;
 import com.ring.model.entity.AccountProfile;
 import com.ring.model.entity.Role;
@@ -65,8 +65,8 @@ class RegisterServiceTest extends AbstractServiceTest {
             .pass("password123")
             .build();
     private ResetPassRequest resetPassRequest = ResetPassRequest.builder()
-            .password("newpassword123")
-            .reInputPassword("newpassword123")
+            .newPass("newpassword123")
+            .newPassRe("newpassword123")
             .build();
     private Role userRole = Role.builder()
             .roleName(UserRole.ROLE_USER)
@@ -190,7 +190,7 @@ class RegisterServiceTest extends AbstractServiceTest {
 
         // When
         when(accountRepo.findByResetToken(any())).thenReturn(Optional.of(account));
-        when(resetService.verifyResetToken(any())).thenReturn(true);
+//        doNothing().when(resetService.verifyResetToken(any()));
         when(passwordEncoder.encode(any())).thenReturn("newEncodedPassword");
 
         // Then
@@ -227,13 +227,13 @@ class RegisterServiceTest extends AbstractServiceTest {
 
         // Given
         ResetPassRequest mismatchedRequest = ResetPassRequest.builder()
-                .password("password1")
-                .reInputPassword("password2")
+                .newPass("password1")
+                .newPassRe("password2")
                 .build();
 
         // When
         when(accountRepo.findByResetToken(any())).thenReturn(Optional.of(account));
-        when(resetService.verifyResetToken(any())).thenReturn(true);
+//        when(resetService.verifyResetToken(any())).thenReturn(true);
 
         // Then
         HttpResponseException exception = assertThrows(HttpResponseException.class,

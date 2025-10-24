@@ -17,10 +17,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ShopRequest {
 
-	@Size(max = 250, message = "Tên shop không quá 150 kí tự")
+	@Size(max = 250, message = "{validation.constraints.size.max}")
 	private String name;
 
-	@Size(max = 500, message = "Mô tả không quá 500 kí tự")
+	@Size(max = 500, message = "{validation.constraints.size.max}")
 	private String description;
 
 	private String image;

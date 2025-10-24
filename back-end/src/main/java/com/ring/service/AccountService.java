@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 /**
- * Service interface named {@link AccountService} for handling user-related operations.
+ * Service interface for handling user-related operations.
  */
 public interface AccountService {
 

@@ -1,8 +1,53 @@
-import { createEntityAdapter } from "@reduxjs/toolkit";
+import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
 import apiSlice from "@ring/redux/apiSlice";
 
-const shopsAdapter = createEntityAdapter({});
-const initialState = shopsAdapter.getInitialState({
+export interface PreviewResponse {
+  id: number;
+  name: string;
+  image: string;
+}
+
+type PreviewsResponse = PreviewResponse[];
+
+interface PreviewsState extends EntityState<PreviewResponse, number> {}
+
+interface ShopQueryArgs {
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  sortDir?: string;
+  keyword?: string;
+  userId?: number;
+}
+
+interface ShopResponse {
+  id: number;
+  name: string;
+  image: string;
+}
+
+interface ShopsResponse {
+  content: ShopResponse[];
+  empty: boolean;
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+interface ShopsState extends EntityState<ShopResponse, number> {
+  empty: boolean;
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+const previewsAdapter = createEntityAdapter<PreviewResponse>();
+const initialPreviewState = previewsAdapter.getInitialState();
+
+const shopsAdapter = createEntityAdapter<ShopResponse>();
+const initialState: ShopsState = shopsAdapter.getInitialState({
   empty: false,
   page: 0,
   size: 0,
@@ -10,7 +55,9 @@ const initialState = shopsAdapter.getInitialState({
   totalPages: 0,
 });
 
-export const shopsApiSlice = apiSlice.injectEndpoints({
+const apiWithEnum = apiSlice.enhanceEndpoints({ addTagTypes: ["Shop"] });
+
+export const shopsApiSlice = apiWithEnum.injectEndpoints({
   endpoints: (builder) => ({
     getShop: builder.query({
       query: (id) => ({
@@ -19,20 +66,22 @@ export const shopsApiSlice = apiSlice.injectEndpoints({
           return response.status === 200 && !result?.isError;
         },
       }),
-      providesTags: (result, error, id) => [{ type: "Shop", id }],
+      providesTags: (result, error) => [
+        { type: "Shop", id: result ? result.id : "LIST" },
+      ],
     }),
-    getShops: builder.query({
+    getShops: builder.query<ShopsState, ShopQueryArgs>({
       query: (args) => {
         const { page, size, sortBy, sortDir, keyword, userId } = args || {};
 
         //Params
         const params = new URLSearchParams();
-        if (page) params.append("pageNo", page);
-        if (size) params.append("pSize", size);
+        if (page) params.append("pageNo", page.toString());
+        if (size) params.append("pSize", size.toString());
         if (sortBy) params.append("sortBy", sortBy);
         if (sortDir) params.append("sortDir", sortDir);
         if (keyword) params.append("keyword", keyword);
-        if (userId) params.append("userId", userId);
+        if (userId) params.append("userId", userId.toString());
 
         return {
           url: `/api/shops?${params.toString()}`,
@@ -41,9 +90,9 @@ export const shopsApiSlice = apiSlice.injectEndpoints({
           },
         };
       },
-      transformResponse: (responseData) => {
+      transformResponse: (response: ShopsResponse) => {
         const { content, empty, page, size, totalElements, totalPages } =
-          responseData;
+          response;
         return shopsAdapter.setAll(
           {
             ...initialState,
@@ -56,16 +105,15 @@ export const shopsApiSlice = apiSlice.injectEndpoints({
           content
         );
       },
-      providesTags: (result, error, arg) => {
-        if (result?.ids) {
-          return [
-            { type: "Shop", id: "LIST" },
-            ...result.ids.map((id) => ({ type: "Shop", id })),
-          ];
-        } else return [{ type: "Shop", id: "LIST" }];
-      },
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.ids.map((id) => ({ type: "Shop" as const, id })),
+              { type: "Shop", id: "LIST" },
+            ]
+          : [{ type: "Shop", id: "LIST" }],
     }),
-    getPreviewShops: builder.query({
+    getPreviewShops: builder.query<PreviewsState, void>({
       query: () => {
         return {
           url: "/api/shops/preview",
@@ -74,17 +122,16 @@ export const shopsApiSlice = apiSlice.injectEndpoints({
           },
         };
       },
-      transformResponse: (responseData) => {
-        return shopsAdapter.setAll(initialState, responseData ?? {});
+      transformResponse: (response: PreviewsResponse) => {
+        return previewsAdapter.setAll(initialPreviewState, response ?? {});
       },
-      providesTags: (result, error, arg) => {
-        if (result?.ids) {
-          return [
-            { type: "Shop", id: "LIST" },
-            ...result.ids.map((id) => ({ type: "Shop", id })),
-          ];
-        } else return [{ type: "Shop", id: "LIST" }];
-      },
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.ids.map((id) => ({ type: "Shop" as const, id })),
+              { type: "Shop", id: "LIST" },
+            ]
+          : [{ type: "Shop", id: "LIST" }],
     }),
     getShopAnalytics: builder.query({
       query: (userId) => {

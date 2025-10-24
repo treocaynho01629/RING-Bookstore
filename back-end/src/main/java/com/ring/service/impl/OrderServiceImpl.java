@@ -1,5 +1,7 @@
 package com.ring.service.impl;
 
+import com.ring.common.AppConstants;
+import com.ring.common.CommonUtils;
 import com.ring.dto.projection.coupons.ICoupon;
 import com.ring.dto.projection.orders.*;
 import com.ring.dto.request.*;
@@ -12,7 +14,7 @@ import com.ring.exception.EntityOwnershipException;
 import com.ring.exception.HttpResponseException;
 import com.ring.exception.PaymentException;
 import com.ring.exception.ResourceNotFoundException;
-import com.ring.listener.checkout.OnCheckoutCompletedEvent;
+import com.ring.listener.events.OnCheckoutCompletedEvent;
 import com.ring.mapper.CalculateMapper;
 import com.ring.mapper.CouponMapper;
 import com.ring.mapper.DashboardMapper;
@@ -26,17 +28,18 @@ import com.ring.service.OrderService;
 import com.ring.service.PayOSService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.payos.type.CheckoutResponseData;
@@ -52,6 +55,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing orders.
+ */
 @RequiredArgsConstructor
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -68,6 +74,7 @@ public class OrderServiceImpl implements OrderService {
         private final CouponService couponService;
         private final CaptchaService captchaService;
         private final PayOSService payOSService;
+        private final MessageService messageSerice;
 
         private final OrderMapper orderMapper;
         private final CalculateMapper calculateMapper;
@@ -76,9 +83,9 @@ public class OrderServiceImpl implements OrderService {
 
         private final ApplicationEventPublisher eventPublisher;
 
-        @Cacheable(cacheNames = "calculate")
-        public CalculateDTO calculate(CalculateRequest request,
-                        Account user) {
+        @Cacheable(cacheNames = AppConstants.CALCULATE)
+        public CalculateDTO calculate(CalculateRequest request, Account user) {
+
                 // Create address
                 AddressRequest addressRequest = request.getAddress();
                 var address = addressRequest != null
@@ -102,15 +109,16 @@ public class OrderServiceImpl implements OrderService {
                 return calculateMapper.orderToDTO(calculatedReceipt);
         }
 
-        @CacheEvict(cacheNames = { "calculate", "receipts", "orders", "orderAnalytics", "sales" }, allEntries = true)
+        @CacheEvict(cacheNames = { AppConstants.CALCULATE, AppConstants.RECEIPTS, 
+                AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, AppConstants.SALES }, allEntries = true)
         @Transactional
         public ReceiptDTO checkout(OrderRequest checkRequest,
                         HttpServletRequest request,
                         Account user) {
 
                 // Recaptcha
-                final String recaptchaToken = request.getHeader("response");
-                final String source = request.getHeader("source");
+                final String recaptchaToken = request.getHeader(AppConstants.HEADER_RESPONSE);
+                final String source = request.getHeader(AppConstants.HEADER_RECAPTCHA_SOURCE);
                 captchaService.validate(recaptchaToken, source, CaptchaServiceImpl.CHECKOUT_ACTION);
 
                 // Create address
@@ -177,19 +185,22 @@ public class OrderServiceImpl implements OrderService {
                 return receiptDTO;
         }
 
-        @Cacheable(cacheNames = "paymentLink", key = "#id")
+        @Cacheable(cacheNames = AppConstants.PAYMENT_LINK, key = "#id")
         @Transactional
         public PaymentInfo createPaymentLink(HttpServletRequest request,
                         Long id) {
 
                 // Recaptcha
-                final String recaptchaToken = request.getHeader("response");
-                final String source = request.getHeader("source");
+                final String recaptchaToken = request.getHeader(AppConstants.HEADER_RESPONSE);
+                final String source = request.getHeader(AppConstants.HEADER_RECAPTCHA_SOURCE);
                 captchaService.validate(recaptchaToken, source, CaptchaServiceImpl.PAYMENT_ACTION);
 
-                PaymentInfo paymentInfo = paymentRepo.findByOrder(id).orElseThrow(
-                                () -> new ResourceNotFoundException("Payment for this Order not found!",
-                                                "Không thể tìm thấy đường dẫn thanh toán cho đơn hàng yêu cầu!"));
+                PaymentInfo paymentInfo = paymentRepo.findByOrder(id)
+                        .orElseThrow(() -> {
+                                var errorMsg = messageSerice.getMessage("exception.not.found",
+                                        new Object[]{ new DefaultMessageSourceResolvable("label.order.payment") });
+                                return new ResourceNotFoundException(errorMsg);
+                        });
 
                 if (paymentInfo.getPaymentType().equals(PaymentType.ONLINE_PAYMENT)
                                 && paymentInfo.getStatus().equals(PaymentStatus.PENDING)
@@ -218,27 +229,35 @@ public class OrderServiceImpl implements OrderService {
                 return payOSService.getPaymentLinkData(id);
         }
 
-        @CacheEvict(cacheNames = { "orders", "orderAnalytics" }, allEntries = true)
+        @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS }, allEntries = true)
         @Transactional
-        public void cancel(Long id,
-                        String reason,
-                        Account user) {
+        public void cancel(Long id, String reason, Account user) {
 
                 OrderDetail detail = detailRepo.findDetailById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Order detail not found!",
-                                                "Không tìm thấy chi tiết đơn hàng yêu cầu!"));
+                                .orElseThrow(() -> {
+                                        var errorMsg = messageSerice.getMessage("exception.not.found",
+                                                new Object[]{ new DefaultMessageSourceResolvable("label.order.detail") });
+                                        return new ResourceNotFoundException(errorMsg);
+                                });
 
                 // Check valid status for cancel
                 OrderStatus currStatus = detail.getStatus();
-                if (!currStatus.equals(OrderStatus.PENDING)) {
-                        throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Invalid order status!");
+                if (!OrderStatus.PENDING.equals(currStatus)) {
+
+                        var errorMsg = messageSerice.getMessage("exception.invalid",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.order.status") });
+                        throw new HttpResponseException(HttpStatus.BAD_REQUEST, 
+                                AppConstants.INVALID_ARGUMENT,
+                                errorMsg);
                 }
 
                 // Check if correct user
                 OrderReceipt order = detail.getOrder();
-                if (!isUserValid(order, user)) {
-                        throw new EntityOwnershipException("Invalid user!",
-                                        "Người dùng không có quyền huỷ đơn hàng này!");
+                if (!isValidBuyer(order, user)) {
+
+                        var errorMsg = messageSerice.getMessage("exception.ownership",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                        throw new EntityOwnershipException(errorMsg);
                 }
 
                 detail.setStatus(OrderStatus.CANCELED);
@@ -253,31 +272,42 @@ public class OrderServiceImpl implements OrderService {
         }
 
         @Caching(evict = {
-                        @CacheEvict(cacheNames = { "orders", "orderAnalytics", "receipts",
-                                        "sales" }, allEntries = true),
-                        @CacheEvict(cacheNames = "paymentLink", key = "#orderId"),
-                        @CacheEvict(cacheNames = "payment", key = "#orderId") })
+                        @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, 
+                                AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true),
+                        @CacheEvict(cacheNames = AppConstants.PAYMENT_LINK, key = "#orderId"),
+                        @CacheEvict(cacheNames = AppConstants.PAYMENT, key = "#orderId") })
         @Transactional
-        public void cancelUnpaidOrder(Long orderId,
-                        String reason,
-                        Account user) {
+        public void cancelUnpaidOrder(Long orderId, String reason, Account user) {
 
                 OrderReceipt order = orderRepo.findById(orderId)
-                                .orElseThrow(() -> new ResourceNotFoundException("Order not found!",
-                                                "Không tìm thấy đơn hàng yêu cầu!"));
+                                .orElseThrow(() -> {
+                                        var errorMsg = messageSerice.getMessage("exception.not.found",
+                                                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                                        return new ResourceNotFoundException(errorMsg);
+                                });
 
                 // Check if correct user
-                if (!isUserValid(order, user)) {
-                        throw new EntityOwnershipException("Invalid user!",
-                                        "Người dùng không có quyền huỷ đơn hàng này!");
+                if (!isValidBuyer(order, user)) {
+                        var errorMsg = messageSerice.getMessage("exception.ownership",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                        throw new EntityOwnershipException(errorMsg);
                 }
 
-                PaymentInfo paymentInfo = paymentRepo.findByOrder(order.getId()).orElseThrow(
-                                () -> new ResourceNotFoundException("Payment for this Order not found!",
-                                                "Không thể tìm thấy đường dẫn thanh toán cho đơn hàng yêu cầu!"));
+                PaymentInfo paymentInfo = paymentRepo.findByOrder(order.getId())
+                        .orElseThrow(() -> {
+                                        var errorMsg = messageSerice.getMessage("exception.not.found",
+                                                new Object[]{ new DefaultMessageSourceResolvable("label.order.payment") });
+                                        return new ResourceNotFoundException(errorMsg);
+                                });
 
-                if (!paymentInfo.getStatus().equals(PaymentStatus.PENDING))
-                        throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Invalid payment status!");
+                if (!PaymentStatus.PENDING.equals(paymentInfo.getStatus())) {
+
+                        var errorMsg = messageSerice.getMessage("exception.invalid",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.order.payment.status") });
+                        throw new HttpResponseException(HttpStatus.BAD_REQUEST, 
+                                AppConstants.INVALID_ARGUMENT,
+                                errorMsg);
+                }
 
                 // Cancel all details
                 detailRepo.cancelUnpaidByOrderId(order.getId(), reason);
@@ -303,30 +333,49 @@ public class OrderServiceImpl implements OrderService {
                 orderRepo.save(order);
         }
 
-        @CacheEvict(cacheNames = { "orders", "orderAnalytics", "receipts", "sales" }, allEntries = true)
+        @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, 
+                AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true)
         @Transactional
         public void refund(Long id,
                         String reason,
                         Account user) {
 
                 OrderDetail detail = detailRepo.findDetailById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Order detail not found!",
-                                                "Không tìm thấy chi tiết đơn hàng yêu cầu!"));
+                                .orElseThrow(() -> {
+                                        var errorMsg = messageSerice.getMessage("exception.not.found",
+                                                new Object[]{ new DefaultMessageSourceResolvable("label.order.detail") });
+                                        return new ResourceNotFoundException(errorMsg);
+                                });
 
                 // Check valid status for cancel
                 OrderStatus currStatus = detail.getStatus();
-                if (!currStatus.equals(OrderStatus.COMPLETED))
-                        throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Invalid order status!");
+                if (!OrderStatus.COMPLETED.equals(currStatus)) {
+
+                        var errorMsg = messageSerice.getMessage("exception.invalid",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.order.status") });
+                        throw new HttpResponseException(HttpStatus.BAD_REQUEST, 
+                                AppConstants.INVALID_ARGUMENT,
+                                errorMsg);
+                }
 
                 // Check if correct user
                 OrderReceipt order = detail.getOrder();
-                if (!isUserValid(order, user))
-                        throw new EntityOwnershipException("Invalid user!",
-                                        "Người dùng không có quyền hoàn trả đơn hàng này!");
+                if (!isValidBuyer(order, user)) {
+
+                        var errorMsg = messageSerice.getMessage("exception.ownership",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                        throw new EntityOwnershipException(errorMsg);
+                }
 
                 if (order.getLastModifiedDate()
-                                .plus(1, ChronoUnit.WEEKS).isAfter(LocalDateTime.now()))
-                        throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Invalid date!");
+                                .plus(1, ChronoUnit.WEEKS)
+                                .isAfter(LocalDateTime.now())) {
+                        var errorMsg = messageSerice.getMessage("exception.date.invalid",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                        throw new HttpResponseException(HttpStatus.CONFLICT, 
+                                AppConstants.INVALID_DATE,
+                                errorMsg);
+                }
 
                 detail.setStatus(OrderStatus.PENDING_REFUND);
                 detail.setNote(reason);
@@ -334,73 +383,103 @@ public class OrderServiceImpl implements OrderService {
         }
 
         @Caching(evict = {
-                        @CacheEvict(cacheNames = { "orders", "orderAnalytics", "receipts",
-                                        "sales" }, allEntries = true),
-                        @CacheEvict(cacheNames = "paymentLink", key = "#orderId"),
-                        @CacheEvict(cacheNames = "payment", key = "#orderId") })
+                        @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, 
+                                AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true),
+                        @CacheEvict(cacheNames = AppConstants.PAYMENT_LINK, key = "#orderId"),
+                        @CacheEvict(cacheNames = AppConstants.PAYMENT, key = "#orderId") })
         @Transactional
         public void changePaymentMethod(Long orderId,
                         PaymentType paymentMethod,
                         Account user) {
 
                 OrderReceipt order = orderRepo.findById(orderId)
-                                .orElseThrow(() -> new ResourceNotFoundException("Order not found!",
-                                                "Không tìm thấy đơn hàng yêu cầu!"));
+                                .orElseThrow(() -> {
+                                        var errorMsg = messageSerice.getMessage("exception.not.found",
+                                                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                                        return new ResourceNotFoundException(errorMsg);
+                                });
 
                 // Check if correct user
-                if (!isUserValid(order, user))
-                        throw new EntityOwnershipException("Invalid user!",
-                                        "Người dùng không có quyền thay đổi hình thức thanh toán cho đơn hàng này!");
+                if (!isValidBuyer(order, user)) {
+                        var errorMsg = messageSerice.getMessage("exception.ownership",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                        throw new EntityOwnershipException(errorMsg);
+                }
 
-                PaymentInfo paymentInfo = paymentRepo.findByOrder(order.getId()).orElseThrow(
-                                () -> new ResourceNotFoundException("Payment for this Order not found!",
-                                                "Không thể tìm thấy đường dẫn thanh toán cho đơn hàng yêu cầu!"));
+                PaymentInfo paymentInfo = paymentRepo.findByOrder(order.getId())
+                                .orElseThrow(() -> {
+                                        var errorMsg = messageSerice.getMessage("exception.not.found",
+                                                new Object[]{ new DefaultMessageSourceResolvable("label.order.payment") });
+                                        return new ResourceNotFoundException(errorMsg);
+                                });
 
                 // Check valid status for cancel
-                if (!paymentInfo.getStatus().equals(PaymentStatus.PENDING))
-                        throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Invalid payment status!");
-
+                if (!PaymentStatus.PENDING.equals(paymentInfo.getStatus())) {
+                        var errorMsg = messageSerice.getMessage("exception.invalid",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.order.payment.status") });
+                        throw new HttpResponseException(HttpStatus.BAD_REQUEST, 
+                                AppConstants.INVALID_ARGUMENT,
+                                errorMsg);
+                }
+                
                 paymentInfo.setPaymentType(paymentMethod);
                 paymentRepo.save(paymentInfo);
         }
 
-        @CacheEvict(cacheNames = { "orders", "orderAnalytics", "receipts", "sales" }, allEntries = true)
+        @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, 
+                AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true)
         @Transactional
         public void confirm(Long id,
                         Account user) {
 
                 OrderDetail detail = detailRepo.findDetailById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Order detail not found!",
-                                                "Không tìm thấy chi tiết đơn hàng yêu cầu!"));
+                                .orElseThrow(() -> {
+                                        var errorMsg = messageSerice.getMessage("exception.not.found",
+                                                new Object[]{ new DefaultMessageSourceResolvable("label.order.detail") });
+                                        return new ResourceNotFoundException(errorMsg);
+                                });
 
                 // Check valid status for cancel
                 OrderStatus currStatus = detail.getStatus();
-                if (!currStatus.equals(OrderStatus.SHIPPING)) {
-                        throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Invalid order status!");
+                if (!OrderStatus.SHIPPING.equals(currStatus)) {
+                        var errorMsg = messageSerice.getMessage("exception.invalid",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.order.status") });
+                        throw new HttpResponseException(HttpStatus.BAD_REQUEST, 
+                                AppConstants.INVALID_ARGUMENT,
+                                errorMsg);
                 }
 
-                PaymentInfo paymentInfo = paymentRepo.findByOrder(detail.getOrder().getId()).orElseThrow(
-                                () -> new ResourceNotFoundException("Payment for this Order not found!",
-                                                "Không thể tìm thấy đường dẫn thanh toán cho đơn hàng yêu cầu!"));
+                PaymentInfo paymentInfo = paymentRepo.findByOrder(detail.getOrder().getId())
+                                .orElseThrow(() -> {
+                                        var errorMsg = messageSerice.getMessage("exception.not.found",
+                                                new Object[]{ new DefaultMessageSourceResolvable("label.order.payment") });
+                                        return new ResourceNotFoundException(errorMsg);
+                                });
 
-                if (!paymentInfo.getStatus().equals(PaymentStatus.PAID)) {
-                        throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Invalid payment status!");
+                if (!PaymentStatus.PAID.equals(paymentInfo.getStatus())) {
+                        var errorMsg = messageSerice.getMessage("exception.invalid",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.order.payment.status") });
+                        throw new HttpResponseException(HttpStatus.BAD_REQUEST, 
+                                AppConstants.INVALID_ARGUMENT,
+                                errorMsg);
                 }
 
                 // Check if correct user
-                if (!isUserValid(detail.getOrder(), user))
-                        throw new EntityOwnershipException("Invalid user!",
-                                        "Người dùng không có quyền xác nhận đơn hàng này!");
+                if (!isValidBuyer(detail.getOrder(), user)) {
+                        var errorMsg = messageSerice.getMessage("exception.ownership",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                        throw new EntityOwnershipException(errorMsg);
+                }
 
                 detail.setStatus(OrderStatus.COMPLETED);
                 detailRepo.save(detail);
         }
 
         @Caching(evict = {
-                        @CacheEvict(cacheNames = { "orders", "orderAnalytics", "receipts",
-                                        "sales" }, allEntries = true),
-                        @CacheEvict(cacheNames = "paymentLink", key = "#id"),
-                        @CacheEvict(cacheNames = "payment", key = "#id") })
+                @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, 
+                                AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true),
+                @CacheEvict(cacheNames = AppConstants.PAYMENT_LINK, key = "#id"),
+                @CacheEvict(cacheNames = AppConstants.PAYMENT, key = "#id") })
         @Transactional
         public void confirmPayment(Long id) {
 
@@ -417,30 +496,35 @@ public class OrderServiceImpl implements OrderService {
         }
 
         @Caching(evict = {
-                        @CacheEvict(cacheNames = { "orders", "orderAnalytics", "receipts",
-                                        "sales" }, allEntries = true),
-                        @CacheEvict(cacheNames = "paymentLink", key = "#id"),
-                        @CacheEvict(cacheNames = "payment", key = "#id") })
+                @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, 
+                                AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true),
+                @CacheEvict(cacheNames = AppConstants.PAYMENT_LINK, key = "#id"),
+                @CacheEvict(cacheNames = AppConstants.PAYMENT, key = "#id") })
         @Transactional
         public void changeStatus(Long id,
                         OrderStatus status,
                         Account user) {
 
                 OrderDetail detail = detailRepo.findDetailById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Order detail not found!",
-                                                "Không tìm thấy chi tiết đơn hàng yêu cầu!"));
+                                .orElseThrow(() -> {
+                                        var errorMsg = messageSerice.getMessage("exception.not.found",
+                                                new Object[]{ new DefaultMessageSourceResolvable("label.order.detail") });
+                                        return new ResourceNotFoundException(errorMsg);
+                                });
                 OrderReceipt order = detail.getOrder();
 
                 // Check if correct user
-                if (!isOwnerValid(detail.getShop(), user))
-                        throw new EntityOwnershipException("Invalid ownership!",
-                                        "Người dùng không có quyền chỉnh sửa đơn hàng này!");
+                if (!CommonUtils.isValidShopOwner(detail.getShop(), user)) {
+                        var errorMsg = messageSerice.getMessage("exception.ownership",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                        throw new EntityOwnershipException(errorMsg);
+                }
 
                 detail.setStatus(status);
                 detailRepo.save(detail);
 
                 // Subtract price & discount
-                if (status.equals(OrderStatus.CANCELED) || status.equals(OrderStatus.REFUNDED)) {
+                if (OrderStatus.CANCELED.equals(status) || OrderStatus.REFUNDED.equals(status)) {
                         order.setTotal(order.getTotal() - detail.getTotalPrice() - detail.getShippingFee());
                         order.setTotalDiscount(
                                         order.getTotalDiscount() - detail.getDiscount() - detail.getShippingDiscount());
@@ -448,7 +532,7 @@ public class OrderServiceImpl implements OrderService {
                 }
         }
 
-        @Cacheable(cacheNames = "receipts")
+        @Cacheable(cacheNames = AppConstants.RECEIPTS)
         @Transactional
         public PagingResponse<ReceiptDTO> getAllReceipts(Account user,
                         Long shopId,
@@ -460,8 +544,10 @@ public class OrderServiceImpl implements OrderService {
                         String sortDir) {
 
                 Pageable pageable = PageRequest.of(pageNo, pageSize,
-                                sortDir.equals("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
-                boolean isAdmin = isAuthAdmin();
+                                sortDir.equals(AppConstants.ASCENDING) 
+                                ? Sort.by(sortBy).ascending() 
+                                : Sort.by(sortBy).descending());
+                boolean isAdmin = CommonUtils.isAuthAdmin();
 
                 Page<IOrderReceipt> receipts = orderRepo.findAllBy(shopId,
                                 isAdmin ? null : user.getId(),
@@ -485,7 +571,7 @@ public class OrderServiceImpl implements OrderService {
                                 receipts.isEmpty());
         }
 
-        @Cacheable(cacheNames = "receipts")
+        @Cacheable(cacheNames = AppConstants.RECEIPTS)
         @Transactional
         public PagingResponse<ReceiptSummaryDTO> getSummariesWithFilter(Account user,
                         Long shopId,
@@ -496,16 +582,21 @@ public class OrderServiceImpl implements OrderService {
                         String sortDir) {
 
                 Pageable pageable = PageRequest.of(pageNo, pageSize,
-                                sortDir.equals("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
-                boolean isAdmin = isAuthAdmin();
+                                sortDir.equals(AppConstants.ASCENDING) 
+                                ? Sort.by(sortBy).ascending() 
+                                : Sort.by(sortBy).descending());
+                boolean isAdmin = CommonUtils.isAuthAdmin();
 
                 Page<IReceiptSummary> summariesList = orderRepo.findAllSummaries(shopId,
                                 isAdmin ? null : user.getId(),
                                 bookId,
                                 pageable);
-                if (summariesList == null)
-                        throw new EntityOwnershipException("Invalid role!",
-                                        "Người dùng không có quyền truy xuất dữ liệu này!");
+
+                if (summariesList == null) {
+                        var errorMsg = messageSerice.getMessage("exception.ownership",
+                                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                        throw new EntityOwnershipException(errorMsg);
+                }
 
                 List<ReceiptSummaryDTO> summariesDTOS = summariesList.map(orderMapper::summaryToDTO).toList();
                 return new PagingResponse<>(
@@ -517,7 +608,7 @@ public class OrderServiceImpl implements OrderService {
                                 summariesList.isEmpty());
         }
 
-        @Cacheable(cacheNames = "orders")
+        @Cacheable(cacheNames = AppConstants.ORDERS)
         @Override
         public PagingResponse<OrderDTO> getOrdersByBookId(Long id,
                         Integer pageNo,
@@ -525,7 +616,9 @@ public class OrderServiceImpl implements OrderService {
                         String sortBy,
                         String sortDir) {
                 Pageable pageable = PageRequest.of(pageNo, pageSize,
-                                sortDir.equals("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
+                                sortDir.equals(AppConstants.ASCENDING) 
+                                ? Sort.by(sortBy).ascending() 
+                                : Sort.by(sortBy).descending());
 
                 Page<IOrder> details = detailRepo.findAllByBookId(id, pageable);
                 List<Long> orderIds = details.getContent().stream().map(IOrder::getId).collect(Collectors.toList());
@@ -540,7 +633,7 @@ public class OrderServiceImpl implements OrderService {
                                 details.isEmpty());
         }
 
-        @Cacheable(cacheNames = "orders")
+        @Cacheable(cacheNames = AppConstants.ORDERS)
         @Transactional
         public PagingResponse<OrderDTO> getOrdersByUser(Account user,
                         OrderStatus status,
@@ -563,12 +656,15 @@ public class OrderServiceImpl implements OrderService {
                                 details.isEmpty());
         }
 
-        @Cacheable(cacheNames = "receipt", key = "#id")
+        @Cacheable(cacheNames = AppConstants.RECEIPTS, key = "#id")
         public ReceiptDTO getReceipt(Long id) {
 
                 OrderReceipt order = orderRepo.findById(id)
-                                .orElseThrow(() -> new ResourceNotFoundException("Order not found!",
-                                                "Không tìm thấy đơn hàng yêu cầu!"));
+                                .orElseThrow(() -> {
+                                        var errorMsg = messageSerice.getMessage("exception.not.found",
+                                                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                                        return new ResourceNotFoundException(errorMsg);
+                                });
                 ReceiptDTO receiptDTO = orderMapper.orderToDTO(order); // Map to DTO
                 return receiptDTO;
         }
@@ -576,9 +672,13 @@ public class OrderServiceImpl implements OrderService {
         @Transactional
         public OrderDetailDTO getOrderDetail(Long id, Account user) {
 
-                IOrderDetail detailProjection = detailRepo.findOrderDetail(id, isAuthAdmin() ? null : user.getId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Order detail not found!",
-                                                "Không tìm thấy chi tiết đơn hàng yêu cầu!"));
+                boolean isAdmin = CommonUtils.isAuthAdmin();
+                IOrderDetail detailProjection = detailRepo.findOrderDetail(id, isAdmin ? null : user.getId())
+                                .orElseThrow(() -> {
+                                        var errorMsg = messageSerice.getMessage("exception.not.found",
+                                                new Object[]{ new DefaultMessageSourceResolvable("label.order.detail") });
+                                        return new ResourceNotFoundException(errorMsg);
+                                });
                 List<IOrderItem> items = itemRepo.findAllWithDetailIds(List.of(detailProjection.getId()));
                 OrderDetailDTO detailDTO = orderMapper.orderDetailAndItemsProjectionToOrderDetailDTO(detailProjection,
                                 items);
@@ -588,9 +688,13 @@ public class OrderServiceImpl implements OrderService {
         @Transactional
         public ReceiptDetailDTO getReceiptDetail(Long id, Account user) {
 
-                IReceiptDetail receiptProjection = orderRepo.findReceiptDetail(id, isAuthAdmin() ? null : user.getId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Order not found!",
-                                                "Không tìm thấy đơn hàng yêu cầu!"));
+                boolean isAdmin = CommonUtils.isAuthAdmin();
+                IReceiptDetail receiptProjection = orderRepo.findReceiptDetail(id, isAdmin ? null : user.getId())
+                                .orElseThrow(() -> {
+                                        var errorMsg = messageSerice.getMessage("exception.not.found",
+                                                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                                        return new ResourceNotFoundException(errorMsg);
+                                });
                 List<IOrder> details = detailRepo.findAllByReceiptId(id);
                 List<Long> orderIds = details.stream().map(IOrder::getId).collect(Collectors.toList());
                 List<IOrderItem> items = itemRepo.findAllWithDetailIds(orderIds);
@@ -600,23 +704,35 @@ public class OrderServiceImpl implements OrderService {
                 return orderDTO;
         }
 
-        @Cacheable(cacheNames = "orderAnalytics")
+        @Cacheable(cacheNames = AppConstants.ORDER_ANALYTICS)
         public StatDTO getAnalytics(Account user, Long shopId) {
 
-                boolean isAdmin = isAuthAdmin();
+                boolean isAdmin = CommonUtils.isAuthAdmin();
+                var label = StringUtils.capitalize(messageSerice.getMessage("label.sales"));
                 return dashMapper.statToDTO(detailRepo.getSalesAnalytics(shopId, isAdmin ? null : user.getId()),
-                                "sales",
-                                "Doanh thu tháng này");
+                                AppConstants.SALES,
+                                label);
         }
 
-        @Cacheable(cacheNames = "sales")
+        @Cacheable(cacheNames = AppConstants.SALES)
         public List<ChartDTO> getMonthlySales(Account user, Long shopId, Integer year) {
 
-                boolean isAdmin = isAuthAdmin();
+                boolean isAdmin = CommonUtils.isAuthAdmin();
                 List<Map<String, Object>> data = orderRepo.getMonthlySales(shopId, isAdmin ? null : user.getId(), year);
                 return data.stream().map(dashMapper::dataToChartDTO).collect(Collectors.toList()); // Return chart data
         }
 
+        /**
+         * Process order from cart
+         * 
+         * @param cart          Cart details
+         * @param orderCoupon   Order coupon code
+         * @param address       Address
+         * @param paymentMethod Payment method
+         * @param user          Current user
+         * @param isCheckout    Is processing checkout if no ignore exception
+         * @return Processed order receipt
+         */
         private OrderReceipt processOrder(List<CartDetailRequest> cart,
                         String orderCoupon,
                         Address address,
@@ -630,34 +746,34 @@ public class OrderServiceImpl implements OrderService {
                                 .build();
 
                 // Get books, shops, coupons IDS for prefetch
-                List<Long> bookIds = new ArrayList<>();
-                List<Long> shopIds = new ArrayList<>();
-                List<String> couponCodes = new ArrayList<>();
-                couponCodes.add(orderCoupon);
-
-                for (CartDetailRequest detail : cart) {
-                        shopIds.add(detail.getShopId());
-                        couponCodes.add(detail.getCoupon());
-                        for (CartItemRequest item : detail.getItems()) {
-                                bookIds.add(item.getId());
-                        }
-                }
+                List<Long> bookIds = cart.stream()
+                                .flatMap(detail -> detail.getItems().stream().map(CartItemRequest::getId))
+                                .collect(Collectors.toList());
+                List<Long> shopIds = cart.stream()
+                                .map(CartDetailRequest::getShopId)
+                                .collect(Collectors.toList());
+                List<String> couponCodes = cart.stream()
+                                .map(CartDetailRequest::getCoupon)
+                                .collect(Collectors.toList());
 
                 // Fetch shops, books, coupons
-                Map<Long, Shop> shops = shopRepo.findShopsInIds(shopIds).stream()
-                                .collect(Collectors.toMap(Shop::getId, Function.identity()));
-                Map<Long, Book> books = bookRepo.findBooksInIds(bookIds).stream()
-                                .collect(Collectors.toMap(Book::getId, Function.identity()));
-                Map<String, ICoupon> coupons = couponRepo.findCouponInCodes(couponCodes).stream()
-                                .collect(Collectors.toMap(coupon -> coupon.getCoupon().getCode(), Function.identity()));
+                Map<Long, Shop> shops = shopRepo.findShopsInIds(shopIds)
+                                .stream()
+                                .collect(Collectors.toMap(Shop::getId, Function.identity())); // Map to ID
+                Map<Long, Book> books = bookRepo.findBooksInIds(bookIds)
+                                .stream()
+                                .collect(Collectors.toMap(Book::getId, Function.identity())); // Map to ID
+                Map<String, ICoupon> coupons = couponRepo.findCouponInCodes(couponCodes)
+                                .stream()
+                                .collect(Collectors.toMap(coupon -> coupon.getCoupon().getCode(), Function.identity())); // Map to code
 
                 // Initial values
-                double totalPrice = 0.0;
-                double totalShippingFee = 0.0;
-                double totalDealDiscount = 0.0;
-                double totalCouponDiscount = 0.0;
-                double totalShippingDiscount = 0.0;
-                int totalQuantity = 0;
+                double totalPrice = 0.0; // Total price
+                double totalShippingFee = 0.0; // Total shipping fee
+                double totalDealDiscount = 0.0; // Total deal discount
+                double totalCouponDiscount = 0.0; // Total coupon discount
+                double totalShippingDiscount = 0.0; // Total shipping discount
+                int totalQuantity = 0; // Total quantity
 
                 // Process each detail in the cart order
                 for (CartDetailRequest detail : cart) {
@@ -683,15 +799,16 @@ public class OrderServiceImpl implements OrderService {
                 }
 
                 // Apply main coupon
-                ICoupon cProjection = orderCoupon == null ? null // Null => User not select any coupon
-                                : coupons.containsKey(orderCoupon) ? coupons.get(orderCoupon)
-                                                : (couponRepo.recommendCoupon(null, totalPrice - totalDealDiscount,
-                                                                totalQuantity)
-                                                                .orElse(null));
+                ICoupon cProjection = orderCoupon == null 
+                                ? null // Null => User not select any coupon
+                                : coupons.containsKey(orderCoupon) 
+                                        ? coupons.get(orderCoupon)
+                                        : couponRepo.recommendCoupon(null, totalPrice - totalDealDiscount, totalQuantity).orElse(null);
 
                 Coupon coupon = cProjection != null ? cProjection.getCoupon() : null;
                 if (coupon != null && coupon.getShop() == null
                                 && !couponService.isExpired(coupon)) {
+
                         // Initial value
                         double discountValue = 0.0;
                         double shippingDiscount = 0.0;
@@ -700,30 +817,30 @@ public class OrderServiceImpl implements OrderService {
 
                         // Apply coupon
                         if (couponRepo.hasUserUsedCoupon(coupon.getId(), user.getId())) {
+                                
                                 coupon.setIsUsed(true);
-
                                 if (isCheckout) {
+
+                                        var errorMsg = messageSerice.getMessage("exception.coupon.expired",
+                                                new Object[]{ orderCoupon });
                                         throw new HttpResponseException(
                                                         HttpStatus.CONFLICT,
-                                                        "Coupon expired!",
-                                                        "Mã coupon " + orderCoupon + " đã qua sử dụng!");
+                                                        AppConstants.COUPON_EXPIRED,
+                                                        errorMsg);
                                 }
                         }
 
                         CouponDiscountDTO discountFromCoupon = couponService.applyCoupon(coupon,
-                                        new CartStateRequest(value,
-                                                        shipping,
-                                                        totalQuantity,
-                                                        null),
+                                        new CartStateRequest(value, shipping, totalQuantity, null),
                                         user);
 
                         if (discountFromCoupon != null) {
+
                                 // Decrease usage on checkout
-                                if (isCheckout) {
-                                        couponRepo.decreaseUsage(coupon.getId());
-                                }
+                                if (isCheckout) couponRepo.decreaseUsage(coupon.getId());
 
                                 coupon.setIsUsable(true); // Mark usable for DTO result mapping
+                                
                                 discountValue = discountFromCoupon.discountValue();
                                 shippingDiscount = discountFromCoupon.discountShipping();
 
@@ -744,10 +861,12 @@ public class OrderServiceImpl implements OrderService {
                                         detail.setShippingDiscount(sDiscount + applyShippingDiscount);
                                 }
                         } else if (isCheckout) {
+                                var errorMsg = messageSerice.getMessage("exception.coupon.invalid",
+                                                new Object[]{ orderCoupon });
                                 throw new HttpResponseException(
                                                 HttpStatus.CONFLICT,
-                                                "Invalid coupon!",
-                                                "Không thể sử dụng mã coupon " + orderCoupon + "!");
+                                                AppConstants.INVALID_COUPON,
+                                                errorMsg);
                         }
 
                         // Add to total
@@ -776,7 +895,19 @@ public class OrderServiceImpl implements OrderService {
                 return orderReceipt;
         }
 
-        // Process detail (Shop's items)
+        /**
+         * Process detail (Shop's items)
+         * 
+         * @param detail        Detail request
+         * @param shops         Shops
+         * @param books         Books
+         * @param coupons       Coupons
+         * @param address       Address
+         * @param paymentMethod Payment method
+         * @param user          Current user
+         * @param isCheckout    Is processing checkout if no ignore exception
+         * @return Processed detail
+         */
         private OrderDetail processOrderDetail(CartDetailRequest detail,
                         Map<Long, Shop> shops,
                         Map<Long, Book> books,
@@ -790,9 +921,11 @@ public class OrderServiceImpl implements OrderService {
                 Shop shop = shops.get(detail.getShopId());
                 List<CartItemRequest> items = detail.getItems();
                 if (shop == null || items == null || items.isEmpty()) {
-                        if (isCheckout)
-                                throw new ResourceNotFoundException("Shop not found!",
-                                                "Không tìm thấy cửa hàng yêu cầu!");
+                        if (isCheckout) {
+                                var errorMsg = messageSerice.getMessage("exception.not.found",
+                                                new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                                throw new ResourceNotFoundException(errorMsg);
+                        }
 
                         // Return temp detail
                         return OrderDetail.builder()
@@ -806,6 +939,7 @@ public class OrderServiceImpl implements OrderService {
                 }
 
                 // New detail
+                // Set status depends on payment
                 OrderStatus status = paymentMethod == PaymentType.CASH
                                 ? OrderStatus.PENDING
                                 : OrderStatus.PENDING_PAYMENT;
@@ -825,12 +959,16 @@ public class OrderServiceImpl implements OrderService {
 
                 // Process each item in detail
                 for (CartItemRequest item : items) {
+
                         // Book validation
                         Book book = books.get(item.getId());
                         if (book == null || !book.getShop().getId().equals(shop.getId())) {
-                                if (isCheckout)
-                                        throw new ResourceNotFoundException("Product not found!",
-                                                        "Không tìm thấy sản phẩm yêu cầu!");
+
+                                if (isCheckout) {
+                                        var errorMsg = messageSerice.getMessage("exception.not.found",
+                                                new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+                                        throw new ResourceNotFoundException(errorMsg);
+                                }
 
                                 // Create temp item
                                 var orderItem = OrderItem.builder()
@@ -844,6 +982,7 @@ public class OrderServiceImpl implements OrderService {
                         // Stocks validation
                         short quantity = item.getQuantity();
                         if (quantity < 1 || quantity > book.getAmount()) {
+
                                 throw new HttpResponseException(HttpStatus.CONFLICT, "Product out of stock!",
                                                 "Sản phẩm không đủ số lượng!");
                         }
@@ -869,47 +1008,52 @@ public class OrderServiceImpl implements OrderService {
                 }
 
                 // Check coupon
-                ICoupon shopCoupon = detail.getCoupon() == null ? null // Null => User not select any coupon
-                                : coupons.containsKey(detail.getCoupon()) ? coupons.get(detail.getCoupon())
-                                                : couponRepo.recommendCoupon(shop.getId(), detailTotal - discountDeal,
-                                                                detailQuantity)
-                                                                .orElse(null);
+                ICoupon shopCoupon = detail.getCoupon() == null 
+                                ? null // Null => User not select any coupon
+                                : coupons.containsKey(detail.getCoupon()) 
+                                        ? coupons.get(detail.getCoupon())
+                                        : couponRepo.recommendCoupon(shop.getId(), detailTotal - discountDeal, detailQuantity).orElse(null);
 
                 // Validate + apply coupon
                 if (shopCoupon != null
-                                && shopCoupon.getCoupon().getShop().getId().equals(shop.getId())
-                                && !couponService.isExpired(shopCoupon.getCoupon())) {
+                        && shopCoupon.getCoupon().getShop().getId().equals(shop.getId())
+                        && !couponService.isExpired(shopCoupon.getCoupon())) {
                         CouponDiscountDTO discountFromCoupon = couponService.applyCoupon(shopCoupon.getCoupon(),
-                                        new CartStateRequest(detailTotal - discountDeal, shippingFee, detailQuantity,
-                                                        shop.getId()),
-                                        user);
+                                new CartStateRequest(detailTotal - discountDeal, shippingFee, detailQuantity, shop.getId()), user);
 
                         // Apply coupon
                         if (couponRepo.hasUserUsedCoupon(shopCoupon.getCoupon().getId(), user.getId())) {
+
                                 shopCoupon.getCoupon().setIsUsed(true);
 
                                 if (isCheckout) {
+                                        var errorMsg = messageSerice.getMessage("exception.coupon.expired",
+                                                new Object[]{ detail.getCoupon() });
                                         throw new HttpResponseException(
                                                         HttpStatus.CONFLICT,
-                                                        "Coupon expired!",
-                                                        "Mã coupon " + detail.getCoupon() + " đã qua sử dụng!");
+                                                        AppConstants.COUPON_EXPIRED,
+                                                        errorMsg);
                                 }
                         }
 
                         // Appliable coupon
                         if (discountFromCoupon != null) {
+
                                 // Decrease usage on checkout
-                                if (isCheckout) {
-                                        couponRepo.decreaseUsage(shopCoupon.getCoupon().getId());
-                                }
+                                if (isCheckout)  couponRepo.decreaseUsage(shopCoupon.getCoupon().getId());
+
                                 shopCoupon.getCoupon().setIsUsable(true); // Mark usable to map DTO result
+
                                 discountCoupon = discountFromCoupon.discountValue();
                                 discountShipping = discountFromCoupon.discountShipping();
                         } else if (isCheckout) {
+
+                                var errorMsg = messageSerice.getMessage("exception.coupon.invalid",
+                                                new Object[]{ detail.getCoupon() });
                                 throw new HttpResponseException(
                                                 HttpStatus.CONFLICT,
-                                                "Invalid coupon!",
-                                                "Không thể sử dụng mã coupon " + detail.getCoupon() + "!");
+                                                AppConstants.INVALID_COUPON,
+                                                errorMsg);
                         }
                 }
 
@@ -942,22 +1086,40 @@ public class OrderServiceImpl implements OrderService {
                 return orderDetail;
         }
 
+        /**
+         * Calculate shipping fee
+         * 
+         * @param origin      Origin address
+         * @param destination Destination address
+         * @param type        Shipping type
+         * @return Shipping fee
+         */
         private double calculateShippingFee(Address origin,
                         Address destination,
                         ShippingType type) {
-                double shippingFee = !(destination == null || origin == null) ? distanceCalculation(origin, destination)
-                                : 10000;
-                if (type != null)
-                        shippingFee = shippingFee * type.getMultiplier().doubleValue();
+
+                double baseFee = 1000;
+                double shippingFee = !(destination == null || origin == null) 
+                                ? distanceCalculation(origin, destination) * baseFee
+                                : 10000; // Fixed fee for now
+
+                if (type != null) shippingFee = shippingFee * type.getMultiplier().doubleValue();
+
                 return shippingFee;
         }
 
-        // Mock for now
+        /**
+         * Calculate distance between origin and destination
+         * 
+         * @param origin      Origin address
+         * @param destination Destination address
+         * @return Distance
+         */
         private double distanceCalculation(Address origin,
                         Address destination) {
 
-                double baseFee = 10000;
-                return baseFee;
+                double distance = 10.0; // Fixed 10 meters for now
+                return distance;
                 // if (destination == null) return baseFee;
                 //
                 // // Mock shipping fee calculation based on address hash codes
@@ -972,29 +1134,16 @@ public class OrderServiceImpl implements OrderService {
                 // return Math.min(100000, Math.max(baseFee, baseFee + distanceFactor));
         }
 
-        // Check valid role function
-        protected boolean isAuthAdmin() {
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication(); // Get current auth
-                return (auth != null && auth.getAuthorities().stream()
-                                .anyMatch(a -> a.getAuthority().equals(UserRole.ROLE_ADMIN.toString())));
-        }
+        /**
+         * Check if the user is the buyer of the order
+         * 
+         * @param receipt Order receipt
+         * @param user    Current user
+         * @return True if the user is the buyer of the order, false otherwise
+         */
+        protected boolean isValidBuyer(OrderReceipt receipt, Account user) {
 
-        // Check valid role function
-        protected boolean isOwnerValid(Shop shop,
-                        Account user) {
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication(); // Get current auth
-                boolean isAdmin = (auth != null && auth.getAuthorities().stream()
-                                .anyMatch(a -> a.getAuthority().equals(UserRole.ROLE_ADMIN.toString())));
-                // Check if is admin or valid owner id
-                return shop.getOwner().getId().equals(user.getId()) || isAdmin;
-        }
-
-        protected boolean isUserValid(OrderReceipt receipt,
-                        Account user) {
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication(); // Get current auth
-                boolean isAdmin = (auth != null && auth.getAuthorities().stream()
-                                .anyMatch(a -> a.getAuthority().equals(UserRole.ROLE_ADMIN.toString())));
-                // Check if is admin or valid owner id
+                boolean isAdmin = CommonUtils.isAuthAdmin();
                 return receipt.getUser().getId().equals(user.getId()) || isAdmin;
         }
 }

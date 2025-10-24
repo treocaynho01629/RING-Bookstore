@@ -21,6 +21,11 @@ import java.util.List;
 @Configuration
 @Profile({ "!prod && dev" })
 public class OpenApiConfig {
+        static {
+                // use Reusable Enums for Swagger generation:
+                // see https://springdoc.org/#how-can-i-apply-enumasref-true-to-all-enums
+                io.swagger.v3.core.jackson.ModelResolver.enumsAsRef = true;
+        }
 
         final String securitySchemeName = "bearerAuth";
 

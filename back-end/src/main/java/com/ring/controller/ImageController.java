@@ -1,11 +1,13 @@
 package com.ring.controller;
 
-import com.cloudinary.api.ApiResponse;
 import com.ring.exception.HttpResponseException;
 import com.ring.model.entity.Image;
+import com.ring.service.CloudinaryService;
 import com.ring.service.ImageService;
-import jakarta.validation.constraints.NotBlank;
+import com.ring.service.impl.MessageService;
+
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +28,8 @@ import java.util.List;
 public class ImageController {
 
     private final ImageService imageService;
+    private final CloudinaryService cloudinaryService;
+    private final MessageService messageService;
 
     /**
      * Retrieves all images in the system.
@@ -96,9 +100,23 @@ public class ImageController {
      */
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:image')")
-    public ResponseEntity<?> deleteImage(@RequestParam("id") @NotBlank(message = "Phải bao gồm public id!") String publicId) {
-        String result = imageService.deleteImage(publicId);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+    public ResponseEntity<?> deleteImage(@RequestParam(name = "publicId", required = false) String publicId,
+                                         @RequestParam(name = "id", required = false) Long id) {
+
+        if (StringUtils.isBlank(publicId) && id == null) {
+
+            String errorMsg = messageService.getMessage("exception.missing.argument");
+            throw new HttpResponseException(HttpStatus.BAD_REQUEST, errorMsg);
+        }
+
+        if (id != null) {
+            imageService.deleteImage(id);
+        } else {
+            cloudinaryService.destroy(publicId);
+        }
+
+        String message = messageService.getMessage("message.delete.succeeded");
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -110,7 +128,8 @@ public class ImageController {
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:image')")
     public ResponseEntity<?> deleteImage(@PathVariable Long id) {
-        String result = imageService.deleteImage(id);
+
+        boolean result = imageService.deleteImage(id);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
@@ -126,10 +145,20 @@ public class ImageController {
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:image')")
     public ResponseEntity<?> deleteImages(@RequestParam(value = "publicIds", required = false) List<String> publicIds,
                                           @RequestParam(value = "ids", required = false) List<Long> ids) {
-        if (publicIds.isEmpty() && ids.isEmpty())
-            throw new HttpResponseException(HttpStatus.BAD_REQUEST, "Phải bao gồm ids hoặc publicIds");
-        ApiResponse response = !publicIds.isEmpty() ? imageService.deleteImages(publicIds)
-                : imageService.deleteImagesByIds(ids);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+
+        if (publicIds.isEmpty() && ids.isEmpty()) {
+
+            String errorMsg = messageService.getMessage("exception.missing.argument");
+            throw new HttpResponseException(HttpStatus.BAD_REQUEST, errorMsg);
+        }
+
+        if (!ids.isEmpty()) {
+            imageService.deleteImages(ids);
+        } else {
+            cloudinaryService.destroyMultiple(publicIds);
+        }
+
+        String message = messageService.getMessage("message.delete.succeeded");
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 }

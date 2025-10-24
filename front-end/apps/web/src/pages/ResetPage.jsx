@@ -43,7 +43,7 @@ function ResetPage() {
   const { token } = useParams();
   const [pending, setPending] = useState(false);
 
-  //Recaptcha
+  // Recaptcha
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY;
   const { reCaptchaLoaded, generateReCaptchaToken } =
     useReCaptcha(recaptchaSiteKey);

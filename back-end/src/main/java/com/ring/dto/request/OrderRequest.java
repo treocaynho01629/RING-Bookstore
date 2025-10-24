@@ -20,13 +20,13 @@ import java.util.List;
 @NoArgsConstructor
 public class OrderRequest {
 
-	@NotNull(message = "Giỏ hàng không được trống!")
-	@NotEmpty(message = "Giỏ hàng không được trống!")
+	@NotNull(message = "{validation.constraints.not.blank}")
+	@NotEmpty(message = "{validation.constraints.not.blank}")
 	private List<CartDetailRequest> cart;
 
 	private String coupon;
 
-	@NotNull(message = "Hình thức thanh toán không được bỏ trống!")
+	@NotNull(message = "{validation.constraints.not.blank}")
 	private PaymentType paymentMethod;
 
 	@Valid

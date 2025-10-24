@@ -2,11 +2,16 @@ package com.ring.dto.response;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.util.Collection;
 
+/**
+ * Represents a paging response as {@link PagingResponse}.
+ */
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class PagingResponse<T> {
 
     private Collection<T> content;
@@ -15,13 +20,4 @@ public class PagingResponse<T> {
     private Integer size;
     private Integer page;
     private boolean empty;
-
-    public PagingResponse(Collection<T> content, Integer totalPages, long totalElements, Integer size, Integer page, boolean empty) {
-        this.content = content;
-        this.totalPages = totalPages;
-        this.totalElements = totalElements;
-        this.size = size;
-        this.page = page;
-        this.empty = empty;
-    }
 }

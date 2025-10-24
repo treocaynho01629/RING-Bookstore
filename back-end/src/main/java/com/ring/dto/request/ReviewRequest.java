@@ -18,11 +18,11 @@ import org.hibernate.validator.constraints.Range;
 @NoArgsConstructor
 public class ReviewRequest {
 	
-	@NotBlank(message = "Nội dung đánh giá không bỏ trống!")
-	@Size(min = 50, message = "Nội dung tối thiểu 50 kí tự!")
+	@NotBlank(message = "{validation.constraints.not.blank}")
+	@Size(min = 50, message = "{validation.constraints.size.min}")
 	private String content;
 
-	@NotNull(message = "Đánh giá không bỏ trống!")
-	@Range(min = 1, max = 5, message = "Đánh giá phải từ 1 đến 5 sao")
+	@NotNull(message = "{validation.constraints.not.blank}")
+	@Range(min = 1, max = 5, message = "{validation.constraints.range}")
 	private Integer rating;
 }

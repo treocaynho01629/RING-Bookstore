@@ -23,7 +23,6 @@ import { CustomTab, CustomTabs } from "../custom/CustomTabs";
 import { debounce } from "lodash-es";
 import { Message } from "@ring/ui/Components";
 import { getOrderStatus } from "@ring/shared/enums/order";
-import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -44,6 +43,7 @@ const defaultSize = 5;
 const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
   const { addProduct } = useCart();
   const scrollRef = useRef(null);
+  const mobileScrollRef = useRef(null);
   const inputRef = useRef(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
@@ -89,7 +89,17 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
   }, [data]);
 
   const scrollToTop = useCallback(() => {
-    scrollRef?.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (mobileMode) {
+      mobileScrollRef?.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    } else {
+      scrollRef?.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
   }, []);
 
   //Change tab
@@ -148,7 +158,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
       });
   };
 
-  //Cancel
+  // Cancel
   const handleCancelOrder = (order) => {
     setContextOrder(order);
     setOpen(true);
@@ -159,7 +169,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
     setOpen(false);
   };
 
-  //Show more
+  // Show more
   const handleShowMore = () => {
     const currentPage = data?.page;
     if (
@@ -246,7 +256,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
 
   return (
     <>
-      <StyledDialogTitle>
+      <StyledDialogTitle ref={scrollRef}>
         <Link to={-1}>
           <KeyboardArrowLeft />
         </Link>
@@ -274,7 +284,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
         sx={{ py: 0, px: { xs: 0, sm: 2, md: 0 } }}
         onScroll={tabletMode ? scrollListener : undefined}
       >
-        <form ref={scrollRef} onSubmit={handleChangeKeyword}>
+        <form ref={mobileScrollRef} onSubmit={handleChangeKeyword}>
           <TextField
             placeholder="Tìm theo Mã, Tên Shop hoặc Tên sản phẩm"
             autoComplete="order"

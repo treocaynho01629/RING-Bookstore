@@ -33,33 +33,52 @@ const LoginTab = ({
     useAuthenticateMutation();
   const signOut = useLogout();
 
-  //Router
+  // Router
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
   const fromState = location.state?.from?.state;
   const errRef = useRef();
 
-  //Login value
+  // Login value
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [currPersist, setCurrPersist] = useState(true);
 
-  //Recaptcha v2
+  // Validation
+  const [validName, setValidName] = useState(true);
+  const [validPass, setValidPass] = useState(true);
+
+  // Recaptcha v2
   const [challenge, setChallenge] = useState(false); //Toggle if marked suspicious by v3
   const [token, setToken] = useState("");
 
-  //Error
+  // Error
   const [errMsg, setErrMsg] = useState(location.state?.errorMsg || "");
+  const [err, setErr] = useState([]);
 
+  // Toggle persist
   const togglePersist = () => {
     setCurrPersist((prev) => !prev);
-  }; //Toggle persist
+  };
 
-  //Login
+  const reset = () => {
+    setValidName(true);
+    setValidPass(true);
+    setPassword("");
+    setErrMsg("");
+    setErr([]);
+  };
+
+  // Login
   const handleSubmitLogin = async (e) => {
     e.preventDefault();
     if (pending || !reCaptchaLoaded) return;
+
+    // Validation
+    setValidName(username ? true : false);
+    setValidPass(password ? true : false);
+    if (!username || !password) return;
 
     setPending(true);
     const { enqueueSnackbar } = await import("notistack");
@@ -78,34 +97,21 @@ const LoginTab = ({
         // Set auth persist
         if (currPersist) setPersist(true);
 
-        //Queue snack
+        // Queue snack
         enqueueSnackbar("Đăng nhập thành công", { variant: "success" });
-        navigate(from, { replace: true, state: fromState }); //Redirect to previous page
-        setUsername("");
-        setPassword("");
-        setErrMsg("");
-        setChallenge(false);
-        setPending(false);
+        navigate(from, { replace: true, state: fromState }); // Redirect to previous page
+        reset();
       })
       .catch((err) => {
         console.error(err);
+        setErr(err);
         if (!err?.status) {
           setErrMsg("Server không phản hồi");
-        } else if (err?.status === 409) {
-          setErrMsg(err?.data?.message);
-        } else if (
-          err?.status === 404 ||
-          err?.status === 400 ||
-          err?.status === 403
-        ) {
-          setErrMsg("Sai tên tài khoản hoặc mật khẩu!");
         } else if (err?.status === 412) {
           setChallenge(true);
-          setErrMsg("Yêu cầu của bạn cần xác thực lại!");
-        } else if (err?.status === 429) {
-          setErrMsg("Bạn đã thử quá nhiều lần, vui lòng thử lại sau!");
+          setErrMsg(err?.data?.message);
         } else {
-          setErrMsg("Đăng nhập thất bại");
+          setErrMsg(err?.data?.message);
         }
         errRef.current.focus();
         setPending(false);
@@ -127,14 +133,20 @@ const LoginTab = ({
   ) : (
     <form onSubmit={handleSubmitLogin}>
       <AuthTitle>Đăng nhập tài khoản</AuthTitle>
+      <Instruction ref={errRef} aria-live="assertive">
+        {err?.data?.errors?.username ? (
+          <span>{err?.data?.errors?.username}</span>
+        ) : !validName ? (
+          <span>Tên đăng nhập không được bỏ trống!</span>
+        ) : null}
+        {err?.data?.errors?.pass ? (
+          <span>{err?.data?.errors?.pass}</span>
+        ) : !validPass ? (
+          <span>Mật khẩu không được bỏ trống!</span>
+        ) : null}
+        <span>{errMsg != "" ? errMsg : " "}&nbsp;</span>
+      </Instruction>
       <Stack spacing={2.5} direction="column">
-        <Instruction
-          ref={errRef}
-          display={errMsg ? "block" : "none"}
-          aria-live="assertive"
-        >
-          {errMsg}
-        </Instruction>
         <TextField
           label="Tên đăng nhập"
           type="text"

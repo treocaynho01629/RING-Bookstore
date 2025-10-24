@@ -8,6 +8,7 @@ import lombok.Getter;
  */
 @Getter
 public enum ImageSize {
+    
     TINY(65),
 	SMALL( 180),
     MEDIUM(405);

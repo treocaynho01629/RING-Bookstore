@@ -24,11 +24,16 @@ const Container = styled.div`
 
 const SimpleButton = styled.span`
   height: 46px;
-  display: flex;
-  align-items: center;
   color: ${({ theme }) => theme.vars.palette.text.secondary};
   float: right;
+  display: flex;
+  align-items: center;
   cursor: pointer;
+
+  a {
+    display: flex;
+    align-items: center;
+  }
 
   p {
     font-size: 13px;
@@ -84,8 +89,10 @@ const SimpleNavbar = () => {
         <Logo src="/full-logo.svg" alt="RING! Logo" />
       </Link>
       <SimpleButton>
-        <ContactSupportOutlined />
-        <p>Trợ giúp</p>
+        <Link to="https://github.com/treocaynho01629/RING-Bookstore/issues">
+          <ContactSupportOutlined />
+          <p>Trợ giúp</p>
+        </Link>
       </SimpleButton>
       {mode && (
         <SimpleButton aria-label="toggle-mode" onClick={toggleMode}>

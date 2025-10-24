@@ -16,11 +16,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ResetPassRequest {
 
-	@NotNull(message = "Mật khẩu mới không được để trống!")
-	@Size(min = 8, max = 24, message = "Mật khẩu dài 8-24 kí tự")
-	private String password;
+	@NotNull(message = "{validation.constraints.not.blank}")
+	@Size(min = 8, max = 24, message = "{validation.constraints.size.range}")
+	private String newPass;
 	
-	@NotNull(message = "Mật khẩu mới không được để trống!")
-	@Size(min = 8, max = 24, message = "Mật khẩu dài 8-24 kí tự")
-	private String reInputPassword;
+	@NotNull(message = "{validation.constraints.not.blank}")
+	@Size(min = 8, max = 24, message = "{validation.constraints.size.range}")
+	private String newPassRe;
 }

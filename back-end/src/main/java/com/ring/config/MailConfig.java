@@ -1,5 +1,7 @@
 package com.ring.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +15,8 @@ import java.util.Properties;
  */
 @Configuration
 public class MailConfig {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Value("${spring.mail.host}")
     private String mailHost;
@@ -54,14 +58,16 @@ public class MailConfig {
 
         try {
             if (mailHost == null || mailPort == null || mailUsername == null || mailPassword == null) {
-                System.err.println("Mail configuration is invalid or missing. Mail functionality will not be available.");
+
+                logger.error("Mail configuration is invalid or missing. Mail functionality will not be available.");
                 return new JavaMailSenderImpl(); // Return default
             }
 
             return getJavaMailSender();
         } catch (Exception e) {
 
-            System.err.println("Error initializing JavaMailSender: " + e.getMessage());
+            String error = "Error initializing JavaMailSender: \n" + e.getMessage();
+            logger.error(error);
             return new JavaMailSenderImpl(); // Return default
         }
     }
