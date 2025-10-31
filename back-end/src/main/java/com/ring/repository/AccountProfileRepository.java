@@ -17,7 +17,7 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
 
 	/**
 	 * Retrieves profile details for a specific user identified by their user ID.
-	 * The method fetches details such as the user's name, phone number, gender, date of birth,
+	 * The method fetches details such AS the user's name, phone number, gender, date of birth,
 	 * email, account creation date, total number of follows, total number of reviews,
 	 * and associated profile image.
 	 *
@@ -27,12 +27,19 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
 	 *         exists for the given user ID.
 	 */
 	@Query("""
-        select p.name as name, p.phone as phone, p.gender as gender,
-			p.dob as dob, a.email as email, a.createdDate as joinedDate,
-			size(a.following) as totalFollows, size(a.userReviews) as totalReviews,
-			i as image
-        from Account a left join a.profile p left join p.image i
-        where a.id = :userId
+        SELECT p.name AS name, 
+			p.phone AS phone, 
+			p.gender AS gender,
+			p.dob AS dob, 
+			a.email AS email, 
+			a.createdDate AS joinedDate,
+			size(a.following) AS totalFollows, 
+			size(a.userReviews) AS totalReviews,
+			i AS image
+        FROM Account a 
+		LEFT JOIN a.profile p 
+		LEFT JOIN p.image i
+        WHERE a.id = :userId
     """)
     Optional<IProfile> findProfileByUser(Long userId);
 
@@ -46,18 +53,24 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
 	 *         or an empty Optional if no account is found with the specified ID
 	 */
 	@Query("""
-		select distinct a.id as id, a.username as username, a.email as email,
-			p.name as name, p.phone as phone,
-			array_agg(r.roleName) over (partition by a.id order by a.id) as roles,
-			p.gender as gender, p.dob as dob, a.createdDate as joinedDate,
-			size(a.following) as totalFollows, size(a.userReviews) as totalReviews,
-			i as image
-		from Account a
-		left join a.profile p
-		left join p.image i
-		join a.roles r
-		where a.id = :id
-		group by a.id, p.id, i.id, r.roleName
+		SELECT DISTINCT a.id AS id, 
+			a.username AS username, 
+			a.email AS email,
+			p.name AS name, 
+			p.phone AS phone,
+			ARRAY_AGG(r.roleName) OVER (PARTITION BY a.id ORDER BY a.id) AS roles,
+			p.gender AS gender, 
+			p.dob AS dob, 
+			a.createdDate AS joinedDate,
+			SIZE(a.following) AS totalFollows, 
+			SIZE(a.userReviews) AS totalReviews,
+			i AS image
+		FROM Account a
+		LEFT JOIN a.profile p
+		LEFT JOIN p.image i
+		JOIN a.roles r
+		WHERE a.id = :id
+		GROUP BY a.id, p.id, i.id, r.roleName
 	""")
     Optional<IAccountDetail> findDetailById(Long id);
 }

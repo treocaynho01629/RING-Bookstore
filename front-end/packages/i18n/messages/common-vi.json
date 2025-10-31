@@ -1,0 +1,64 @@
+{
+  "hello": "Xin chào",
+  "logout": "Đăng xuất",
+  "login": "Đăng nhập",
+  "items": "sản phẩm",
+  "ring": "RING!",
+  "shop": "Cửa hàng",
+  "saved": "Đã lưu",
+  "unknown": "Không xác định",
+  "coupon": {
+    "shipping": {
+      "label": "Giảm phí ship",
+      "summary": {
+        "default": "Giảm {{discount}} phí ship - tối đa {{max}}",
+        "full": "Giảm {{discount}} phí ship"
+      }
+    },
+    "product": {
+      "label": "Giảm giá",
+      "summary": {
+        "default": "Giảm {{discount}} - tối đa {{max}}",
+        "full": "Giảm {{discount}}"
+      }
+    },
+    "condition": {
+      "quantity": {
+        "label": "Số lượng"
+      },
+      "value": {
+        "label": "Giá trị"
+      },
+      "default": "Cho đơn từ: {{min}} {{unit}}",
+      "all": "Cho tất cả đơn hàng"
+    }
+  },
+  "payment": {
+    "cash": {
+      "label": "Thanh toán bằng tiền mặt",
+      "summary": "Tiền mặt: Phí thu hộ: 0đ. Ưu đãi về phí vận chuyển (nếu có) áp dụng cả với phí thu hộ."
+    },
+    "online": {
+      "label": "Ví online/chuyển khoản",
+      "description": "Quét Mã QR từ ứng dụng hoặc chuyển khoản",
+      "summary": "Quét Mã QR từ ví điện tử Online hoặc chuyển khoản theo hướng dẫn để thanh toán."
+    },
+    "status": {
+      "pending": {
+        "label": "Chờ thanh toán"
+      },
+      "paid": {
+        "label": "Đã thanh toán"
+      },
+      "canceled": {
+        "label": "Đã huỷ"
+      },
+      "pending_refund": {
+        "label": "Chờ hoàn tiền"
+      },
+      "refunded": {
+        "label": "Đã hoàn tiền"
+      }
+    }
+  }
+}

@@ -107,6 +107,11 @@ const BadgeButton = styled.span`
   border: 2px solid ${({ theme }) => theme.vars.palette.background.paper};
   cursor: pointer;
 
+  &.disabled {
+    pointer-events: none;
+    color: ${({ theme }) => theme.vars.palette.grey[500]};
+  }
+
   svg {
     font-size: 16px;
     margin-right: 0;
@@ -352,7 +357,7 @@ const ProfileDetail = ({
                       anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
                       badgeContent={
                         <BadgeButton
-                          className={!profile?.image && !pic ? "edit" : ""}
+                          className={`${!profile?.image && !pic ? "edit" : ""} ${loading ? "disabled" : ""}`}
                           onClick={handleClickBadge}
                         >
                           {!profile?.image && !pic ? (
@@ -363,12 +368,16 @@ const ProfileDetail = ({
                         </BadgeButton>
                       }
                     >
-                      <Avatar
-                        alt={name ?? "Profile pic"}
-                        src={pic}
-                        sx={{ width: 120, height: 120, cursor: "pointer" }}
-                        onClick={handleOpenFile}
-                      />
+                      {loading ? (
+                        <Skeleton variant="circular" width={120} height={120} />
+                      ) : (
+                        <Avatar
+                          alt={name ?? "Profile pic"}
+                          src={pic}
+                          sx={{ width: 120, height: 120, cursor: "pointer" }}
+                          onClick={handleOpenFile}
+                        />
+                      )}
                     </Badge>
                   </ProfilePicContainer>
                 </ProfilePic>

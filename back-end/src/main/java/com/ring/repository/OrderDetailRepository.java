@@ -31,53 +31,70 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
      *         if not found
      */
     @Query("""
-               select od from OrderDetail od
-               join fetch od.order o
-               where od.id = :id
-            """)
+        SELECT od 
+        FROM OrderDetail od
+        JOIN FETCH od.order o
+        WHERE od.id = :id
+    """)
     Optional<OrderDetail> findDetailById(Long id);
 
     @Query("""
-                select o.id as orderId, od.id as id, s.id as shopId, s.name as shopName, od.note as note,
-                od.lastModifiedDate as date, od.totalPrice as totalPrice, od.discount as discount,
-                od.shippingFee as shippingFee, od.shippingDiscount as shippingDiscount, sum(oi.quantity) as totalItems,
-                od.status as status
-                from OrderDetail od
-                join od.order o
-                join OrderItem oi on od.id = oi.detail.id
-                left join Shop s on od.shop.id = s.id
-                left join Book b on oi.book.id = b.id
-                where od.order.user.id = :id
-                and (coalesce(:status) is null or od.status = :status)
-                and concat (b.title, s.name, od.order.id) ilike %:keyword%
-                group by o.id, s.id, od.id
-                order by od.id desc
-            """)
+        SELECT o.id AS orderId, 
+                od.id AS id, 
+                s.id AS shopId, 
+                s.name AS shopName, 
+                od.note AS note,
+                od.lastModifiedDate AS date, 
+                od.totalPrice AS totalPrice, 
+                od.discount AS discount,
+                od.shippingFee AS shippingFee, 
+                od.shippingDiscount AS shippingDiscount, 
+                SUM(oi.quantity) AS totalItems,
+                od.status AS status
+        FROM OrderDetail od
+        JOIN od.order o
+        JOIN OrderItem oi ON od.id = oi.detail.id
+        LEFT JOIN Shop s ON od.shop.id = s.id
+        LEFT JOIN Book b ON oi.book.id = b.id
+        WHERE od.order.user.id = :id
+        AND (COALESCE(:status) IS NULL OR od.status = :status)
+        AND CONCAT(b.title, s.name, od.order.id) ILIKE %:keyword%
+        GROUP BY o.id, s.id, od.id
+        ORDER BY od.id DESC
+    """)
     Page<IOrder> findAllByUserId(Long id,
             OrderStatus status,
             String keyword,
             Pageable pageable);
 
     @Query("""
-                select o.id as orderId, od.id as id, s.id as shopId, s.name as shopName, od.note as note,
-                od.lastModifiedDate as date, od.totalPrice as totalPrice, od.discount as discount,
-                od.shippingFee as shippingFee, od.shippingDiscount as shippingDiscount, sum(oi.quantity) as totalItems,
-                od.status as status
-                from OrderDetail od
-                join od.order o
-                join OrderItem oi on od.id = oi.detail.id
-                left join Shop s on od.shop.id = s.id
-                left join Book b on oi.book.id = b.id
-                where b.id = :id
-                group by o.id, s.id, od.id
-                order by od.id desc
-            """)
+        SELECT o.id AS orderId, 
+                od.id AS id, 
+                s.id AS shopId, 
+                s.name AS shopName, 
+                od.note AS note,
+                od.lastModifiedDate AS date, 
+                od.totalPrice AS totalPrice, 
+                od.discount AS discount,
+                od.shippingFee AS shippingFee, 
+                od.shippingDiscount AS shippingDiscount, 
+                SUM(oi.quantity) AS totalItems,
+                od.status AS status
+        FROM OrderDetail od
+        JOIN od.order o
+        JOIN OrderItem oi ON od.id = oi.detail.id
+        LEFT JOIN Shop s ON od.shop.id = s.id
+        LEFT JOIN Book b ON oi.book.id = b.id
+        WHERE b.id = :id
+        GROUP BY o.id, s.id, od.id
+        ORDER BY od.id DESC
+    """)
     Page<IOrder> findAllByBookId(Long id,
             Pageable pageable); // Get orders with book's {id}
 
     /**
      * Retrieves a list of distinct order details along with additional information
-     * such as order ID, shop name, user data, address details, and aggregated
+     * such AS order ID, shop name, user data, address details, and aggregated
      * information of the provided receipt IDs.
      *
      * @param ids the list of receipt IDs to retrieve order details for
@@ -86,52 +103,82 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
      *         containing detailed information about the orders
      */
     @Query("""
-                select o.id as orderId, od.id as id, s.id as shopId, s.name as shopName, od.note as note,
-                od.lastModifiedDate as date, od.totalPrice as totalPrice, od.discount as discount,
-                od.shippingFee as shippingFee, od.shippingDiscount as shippingDiscount, sum(oi.quantity) as totalItems,
-                od.status as status
-                from OrderDetail od
-                join od.order o
-                join OrderItem oi on od.id = oi.detail.id
-                left join Shop s on od.shop.id = s.id
-                where o.id in :ids
-                group by o.id, s.id, od.id
-            """)
+        SELECT o.id AS orderId, 
+                od.id AS id, 
+                s.id AS shopId, 
+                s.name AS shopName, 
+                od.note AS note,
+                od.lastModifiedDate AS date, 
+                od.totalPrice AS totalPrice, 
+                od.discount AS discount,
+                od.shippingFee AS shippingFee, 
+                od.shippingDiscount AS shippingDiscount, 
+                SUM(oi.quantity) AS totalItems,
+                od.status AS status
+        FROM OrderDetail od
+        JOIN od.order o
+        JOIN OrderItem oi ON od.id = oi.detail.id
+        LEFT JOIN Shop s ON od.shop.id = s.id
+        WHERE o.id IN :ids
+        GROUP BY o.id, s.id, od.id
+    """)
     List<IOrder> findAllByReceiptIds(List<Long> ids);
 
     @Query("""
-                select o.id as orderId, od.id as id, s.id as shopId, s.name as shopName, od.note as note,
-                od.lastModifiedDate as date, od.totalPrice as totalPrice, od.discount as discount,
-                od.shippingFee as shippingFee, od.shippingDiscount as shippingDiscount, sum(oi.quantity) as totalItems,
-                od.status as status
-                from OrderDetail od
-                join od.order o
-                join OrderItem oi on od.id = oi.detail.id
-                left join Shop s on od.shop.id = s.id
-                where o.id = :id
-                group by o.id, s.id, od.id
-            """)
+        SELECT o.id AS orderId, 
+                od.id AS id, 
+                s.id AS shopId, 
+                s.name AS shopName, 
+                od.note AS note,
+                od.lastModifiedDate AS date, 
+                od.totalPrice AS totalPrice, 
+                od.discount AS discount,
+                od.shippingFee AS shippingFee, 
+                od.shippingDiscount AS shippingDiscount, 
+                SUM(oi.quantity) AS totalItems,
+                od.status AS status
+        FROM OrderDetail od
+        JOIN od.order o
+        JOIN OrderItem oi ON od.id = oi.detail.id
+        LEFT JOIN Shop s ON od.shop.id = s.id
+        WHERE o.id = :id
+        GROUP BY o.id, s.id, od.id
+    """)
     List<IOrder> findAllByReceiptId(Long id);
 
     @Query("""
-                select od.id as id, o.id as orderId, a.name as name, a.companyName as companyName,
-                a.city as city, a.address as address, od.note as note, a.phone as phone,
-                od.createdDate as orderedDate, od.lastModifiedDate as date, p.paymentType as paymentType,
-                od.totalPrice as totalPrice, od.shippingFee as shippingFee, od.shippingType as shippingType,
-                od.shippingDiscount as shippingDiscount, od.discount as discount, od.status as status,
-                s.id as shopId, s.name as shopName, p.status as paymentStatus
-                from OrderDetail od
-                join od.items oi
-                join od.order o
-                left join o.payment p
-                left join o.address a
-                left join od.shop s
-                left join oi.book b
-                left join b.image i
-                where od.id = :id
-                and (coalesce(:userId) is null or o.user.id = :userId)
-                group by o.id, s.id, od.id, a.id, p.id
-            """)
+        SELECT od.id AS id, 
+                o.id AS orderId, 
+                a.name AS name, 
+                a.companyName AS companyName,
+                a.city AS city, 
+                a.address AS address, 
+                od.note AS note, 
+                a.phone AS phone,
+                od.createdDate AS orderedDate, 
+                od.lastModifiedDate AS date, 
+                p.paymentType AS paymentType,
+                od.totalPrice AS totalPrice, 
+                od.shippingFee AS shippingFee, 
+                od.shippingType AS shippingType,
+                od.shippingDiscount AS shippingDiscount, 
+                od.discount AS discount, 
+                od.status AS status,
+                s.id AS shopId, 
+                s.name AS shopName, 
+                p.status AS paymentStatus
+        FROM OrderDetail od
+        JOIN od.items oi
+        JOIN od.order o
+        LEFT JOIN o.payment p
+        LEFT JOIN o.address a
+        LEFT JOIN od.shop s
+        LEFT JOIN oi.book b
+        LEFT JOIN b.image i
+        WHERE od.id = :id
+        AND (COALESCE(:userId) IS NULL OR o.user.id = :userId)
+        GROUP BY o.id, s.id, od.id, a.id, p.id
+    """)
     Optional<IOrderDetail> findOrderDetail(Long id, Long userId);
 
     /**
@@ -148,37 +195,37 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
      *         previous month.
      */
     @Query("""
-                select coalesce(sum(case when od.lastModifiedDate >= date_trunc('month', current date)
-                        then (od.totalPrice - od.discount) end), 0) as currentMonth,
-                coalesce(sum(case when od.lastModifiedDate >= date_trunc('month', current date) - 1 month
-                    and od.lastModifiedDate < date_trunc('month', current date)
-                        then (od.totalPrice - od.discount) end), 0) lastMonth
-                from OrderDetail od
-                    left join od.shop s
-                where od.status = com.ring.model.enums.OrderStatus.COMPLETED
-                and od.lastModifiedDate >= date_trunc('month', current date) - 1 month
-                and (coalesce(:shopId) is null or s.id = :shopId)
-                and (coalesce(:userId) is null or s.owner.id = :userId)
-            """)
+        SELECT COALESCE(SUM(CASE WHEN od.lastModifiedDate >= DATE_TRUNC('month', current date)
+                THEN (od.totalPrice - od.discount) END), 0) AS currentMonth,
+        COALESCE(SUM(CASE WHEN od.lastModifiedDate >= DATE_TRUNC('month', current date) - 1 month
+                AND od.lastModifiedDate < DATE_TRUNC('month', current date)
+                THEN (od.totalPrice - od.discount) END), 0) lastMonth
+        FROM OrderDetail od
+        LEFT JOIN od.shop s
+        WHERE od.status = com.ring.model.enums.OrderStatus.COMPLETED
+        AND od.lastModifiedDate >= DATE_TRUNC('month', current date) - 1 month
+        AND (COALESCE(:shopId) IS NULL OR s.id = :shopId)
+        AND (COALESCE(:userId) IS NULL OR s.owner.id = :userId)
+    """)
     IStat getSalesAnalytics(Long shopId,
             Long userId);
 
     @Modifying
     @Query("""
-                update OrderDetail od
-                set od.status = com.ring.model.enums.OrderStatus.CANCELED,
-                    od.note = :reason
-                where od.order.id = :id
-                and od.status = com.ring.model.enums.OrderStatus.PENDING_PAYMENT
-            """)
+        UPDATE OrderDetail od
+        SET od.status = com.ring.model.enums.OrderStatus.CANCELED,
+                od.note = :reason
+        WHERE od.order.id = :id
+        AND od.status = com.ring.model.enums.OrderStatus.PENDING_PAYMENT
+    """)
     void cancelUnpaidByOrderId(Long id, String reason);
 
     @Modifying
     @Query("""
-                update OrderDetail od
-                set od.status = com.ring.model.enums.OrderStatus.PENDING
-                where od.order.id = :id
-                and od.status = com.ring.model.enums.OrderStatus.PENDING_PAYMENT
-            """)
+        UPDATE OrderDetail od
+        SET od.status = com.ring.model.enums.OrderStatus.PENDING
+        WHERE od.order.id = :id
+        AND od.status = com.ring.model.enums.OrderStatus.PENDING_PAYMENT
+    """)
     void confirmPaymentByOrderId(Long id);
 }

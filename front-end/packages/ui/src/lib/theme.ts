@@ -176,6 +176,24 @@ export const theme = createTheme({
         }),
       },
     },
+    MuiDialogContent: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          [theme.breakpoints.down("sm")]: {
+            padding: theme.spacing(1),
+          },
+        }),
+      },
+    },
+    MuiDialogActions: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          [theme.breakpoints.up("sm")]: {
+            padding: `${theme.spacing(2)} ${theme.spacing(3)}`,
+          },
+        }),
+      },
+    },
   },
   breakpoints: {
     values: {

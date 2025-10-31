@@ -11,7 +11,15 @@ import type {
 import type { RootState } from "./store";
 import { Mutex } from "async-mutex";
 
+// Base url
+let baseUrl: string = "";
+export function setBaseUrl(newBaseUrl: string) {
+  if (newBaseUrl) baseUrl = newBaseUrl;
+}
+
+// Mutex for preventing multiple requests
 const mutex = new Mutex();
+
 const baseQuery: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -22,20 +30,20 @@ const baseQuery: BaseQueryFn<
   let baseQueryParams: FetchBaseQueryArgs = {};
 
   // Get base url
-  const baseUrl = (api.getState() as RootState).baseUrl;
-  if (baseUrl) {
-    baseQueryParams.baseUrl = baseUrl;
-  }
+  if (baseUrl) baseQueryParams.baseUrl = baseUrl;
 
   baseQueryParams.prepareHeaders = (headers) => {
-    // Token
-    const token = (api.getState() as RootState).auth.token;
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
+    // Accept-Language header with current language
+    const language = (api.getState() as RootState).app.lang;
+    if (language) headers.set("Accept-Language", language);
 
-    // Language
-    headers.set("Accept-Language", "vi-VN");
+    // Common headers
+    headers.set("Content-Type", "application/json");
+
+    // Authorization Bearer token
+    const token = (api.getState() as RootState).auth.token;
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+
     return headers;
   };
 
@@ -79,8 +87,6 @@ const baseQueryWithRefresh = async (
 
           // Refresh failed
         } else if (error) {
-          console.error(error);
-
           // Logout
           await baseQuery(
             {

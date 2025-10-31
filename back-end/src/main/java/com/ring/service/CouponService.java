@@ -9,6 +9,7 @@ import com.ring.dto.response.coupons.CouponDiscountDTO;
 import com.ring.dto.response.dashboard.StatDTO;
 import com.ring.model.entity.Account;
 import com.ring.model.entity.Coupon;
+import com.ring.model.enums.CouponCriteria;
 import com.ring.model.enums.CouponType;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public interface CouponService {
      * @param sortBy       the field to sort by
      * @param sortDir      the sorting direction (asc/desc)
      * @param types        the list of coupon types to filter by
+     * @param criterias    the list of coupon criteria to filter by
      * @param codes        the list of coupon codes to filter by
      * @param code         the specific coupon code to filter by
      * @param shopId       the shop ID to filter by
@@ -41,6 +43,7 @@ public interface CouponService {
             String sortBy,
             String sortDir,
             List<CouponType> types,
+            List<CouponCriteria> criterias,
             List<String> codes,
             String code,
             Long shopId,
@@ -167,6 +170,7 @@ public interface CouponService {
      * Deletes coupons that are not in the provided list of IDs.
      *
      * @param types       the list of coupon types to filter by
+     * @param criterias   the list of coupon criteria to filter by
      * @param codes       the list of coupon codes to filter by
      * @param code        the specific coupon code to filter by
      * @param shopId      the shop ID to filter by
@@ -177,6 +181,7 @@ public interface CouponService {
      * @param user        the authenticated user deleting the coupons
      */
     void deleteCouponsInverse(List<CouponType> types,
+            List<CouponCriteria> criterias,
             List<String> codes,
             String code,
             Long shopId,

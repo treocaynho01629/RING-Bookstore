@@ -330,6 +330,7 @@ const PreviewDetailRow = ({
   handleOpenCouponDialog,
   handleOpenShippingDialog,
 }) => {
+  // Calculated price for display
   let total = 0;
   let totalQuantity = 0;
   const shippingSummary =
@@ -340,6 +341,8 @@ const PreviewDetailRow = ({
     total += product.quantity * product.price * (1 - (product?.discount || 0));
     totalQuantity += product.quantity;
   }
+
+  console.log("test");
 
   return (
     <>

@@ -28,8 +28,9 @@ public interface PrivilegeGroupRepository extends JpaRepository<PrivilegeGroup, 
      * @return a list of {@link PrivilegeGroup} entities with their group privileges eagerly fetched
      */
     @Query("""
-        select pg from PrivilegeGroup pg
-        join fetch pg.groupPrivileges p
+        SELECT pg 
+        FROM PrivilegeGroup pg
+        JOIN FETCH pg.groupPrivileges p
     """)
     List<PrivilegeGroup> findAllWithPrivileges();
 }

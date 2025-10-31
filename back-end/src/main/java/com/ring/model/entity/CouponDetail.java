@@ -1,6 +1,7 @@
 package com.ring.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ring.model.enums.CouponCriteria;
 import com.ring.model.enums.CouponType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,6 +35,10 @@ public class CouponDetail {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private CouponType type;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private CouponCriteria criteria;
 
     @Column(nullable = false)
     private Double attribute; //Min money/quantity

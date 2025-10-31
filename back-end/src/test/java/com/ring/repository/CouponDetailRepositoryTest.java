@@ -37,7 +37,7 @@ class CouponDetailRepositoryTest extends AbstractRepositoryTest {
                                 .maxDiscount(1000.0)
                                 .attribute(2.0)
                                 .expDate(LocalDate.now().plusMonths(1))
-                                .type(CouponType.MIN_AMOUNT)
+                                .type(CouponType.PRODUCT)
                                 .coupon(coupon)
                                 .build();
 
@@ -65,7 +65,7 @@ class CouponDetailRepositoryTest extends AbstractRepositoryTest {
                                 .maxDiscount(1000.0)
                                 .attribute(2.0)
                                 .expDate(LocalDate.now().plusMonths(1))
-                                .type(CouponType.MIN_AMOUNT)
+                                .type(CouponType.PRODUCT)
                                 .coupon(coupon)
                                 .build();
                 detailRepo.save(detail);
@@ -75,14 +75,14 @@ class CouponDetailRepositoryTest extends AbstractRepositoryTest {
 
                 // When
                 foundDetail.setAttribute(10000.0);
-                foundDetail.setType(CouponType.MIN_VALUE);
+                foundDetail.setType(CouponType.PRODUCT);
 
                 CouponDetail updatedDetail = detailRepo.save(foundDetail);
 
                 // Then
                 assertNotNull(updatedDetail);
                 assertEquals(10000.0, updatedDetail.getAttribute());
-                assertEquals(CouponType.MIN_VALUE, updatedDetail.getType());
+                assertEquals(CouponType.PRODUCT, updatedDetail.getType());
         }
 
         @Test
@@ -101,7 +101,7 @@ class CouponDetailRepositoryTest extends AbstractRepositoryTest {
                                 .maxDiscount(1000.0)
                                 .attribute(2.0)
                                 .expDate(LocalDate.now().plusMonths(1))
-                                .type(CouponType.MIN_AMOUNT)
+                                .type(CouponType.PRODUCT)
                                 .coupon(coupon)
                                 .build();
                 detailRepo.save(detail);

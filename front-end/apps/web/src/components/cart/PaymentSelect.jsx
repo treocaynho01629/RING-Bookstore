@@ -1,7 +1,9 @@
 import styled from "@emotion/styled";
 import { Suspense } from "react";
+import { PaymentType } from "@ring/shared/models/paymentType";
 import { getPaymentType } from "@ring/shared/enums/payment";
 import { iconList } from "@ring/shared/utils/icon";
+import { useTranslation } from "react-i18next";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
@@ -52,23 +54,37 @@ const PaymentContainer = styled.div`
     padding: ${({ theme }) => theme.spacing(1)};
   }
 `;
+
+const Message = styled.span`
+  ${({ theme }) => theme.breakpoints.down("sm")} {
+    font-size: 14px;
+  }
+`;
+
+const Title = styled.h4`
+  margin: ${({ theme }) => theme.spacing(1.5)} 0;
+  margin-top: 0;
+  font-weight: 420;
+`;
 //#endregion
 
-const PaymentType = getPaymentType();
-
 const PaymentSelect = ({ value, handleChange }) => {
+  const { t } = useTranslation();
+  const meta = getPaymentType(value);
+
   return (
     <>
       <RadioContainer>
         <RadioGroup spacing={1} row value={value} onChange={handleChange}>
-          {Object.values(PaymentType).map((item, index) => {
-            const Icon = iconList[item.icon];
+          {Object.values(PaymentType).map((type, index) => {
+            const itemMeta = getPaymentType(type);
+            const Icon = iconList[itemMeta?.icon];
 
             return (
               <StyledForm
                 key={index}
                 sx={{ width: "100%" }}
-                value={item.value}
+                value={type}
                 control={<Radio />}
                 label={
                   <FormContent>
@@ -76,9 +92,9 @@ const PaymentSelect = ({ value, handleChange }) => {
                       <Suspense fallback={null}>
                         <Icon />
                       </Suspense>
-                      {item.label}
+                      {t(itemMeta?.label)}
                     </ItemTitle>
-                    <Description>{item.description}</Description>
+                    <Description>{t(itemMeta?.description)}</Description>
                   </FormContent>
                 }
               />
@@ -86,7 +102,10 @@ const PaymentSelect = ({ value, handleChange }) => {
           })}
         </RadioGroup>
       </RadioContainer>
-      <PaymentContainer>{getPaymentContent(value)}</PaymentContainer>
+      <PaymentContainer>
+        <Title>{t(meta?.label)}</Title>
+        <Description>{t(meta?.summary)}</Description>
+      </PaymentContainer>
     </>
   );
 };

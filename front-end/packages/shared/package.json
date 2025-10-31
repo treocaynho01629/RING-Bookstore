@@ -62,10 +62,6 @@
       "import": "./dist/src/utils/location.js",
       "require": "./dist/src/utils/location.cjs"
     },
-    "./utils/payment": {
-      "import": "./dist/src/utils/payment.js",
-      "require": "./dist/src/utils/payment.cjs"
-    },
     "./utils/regex": {
       "import": "./dist/src/utils/regex.js",
       "require": "./dist/src/utils/regex.cjs"
@@ -90,6 +86,14 @@
       "import": "./dist/src/hooks/useTitle.js",
       "require": "./dist/src/hooks/useTitle.cjs"
     },
+    "./models": {
+      "import": "./dist/src/models/index.js",
+      "require": "./dist/src/models/index.cjs"
+    },
+    "./models/*": {
+      "import": "./dist/src/models/*.js",
+      "require": "./dist/src/models/*.cjs"
+    },
     "./assets/empty": "./assets/empty.svg"
   },
   "scripts": {
@@ -101,11 +105,11 @@
   },
   "devDependencies": {
     "@ring/eslint-config": "*",
-    "@types/react": "^19.1.9",
-    "@types/react-dom": "^19.1.7",
-    "orval": "^7.13.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "orval": "^7.14.0",
     "tsup": "^8.5.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "@mui/icons-material": "^7.2.0",

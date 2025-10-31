@@ -1,9 +1,10 @@
 import styled from "@emotion/styled";
-import { dateFormatter } from "@ring/shared/utils/convert";
+import { currencyFormat, dateFormatter } from "@ring/shared/utils/convert";
 import { iconList } from "@ring/shared/utils/icon";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { Link } from "react-router";
 import { Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
 import Paper from "@mui/material/Paper";
@@ -401,7 +402,8 @@ const CouponContainer = styled.div`
 
 const CouponItem = ({
   coupon,
-  summary,
+  meta,
+  criteria,
   isDisabled,
   isUsed,
   isSelected,
@@ -411,6 +413,7 @@ const CouponItem = ({
   className,
   scrollPosition,
 }) => {
+  const { t } = useTranslation();
   const { addCoupon, removeCoupon } = useCoupon();
   const date = new Date(coupon?.expDate);
   const warnDate = new Date();
@@ -424,9 +427,9 @@ const CouponItem = ({
     isSaved ? removeCoupon(coupon?.code) : addCoupon(coupon?.code);
   };
 
-  const Icon = iconList[summary?.icon];
+  const Icon = iconList[meta?.icon];
   let shopIcon = coupon ? (
-    <CouponIcon color={summary?.color}>
+    <CouponIcon color={meta?.color}>
       {coupon?.shopImage ? (
         <ShopImage
           src={coupon.shopImage}
@@ -471,8 +474,29 @@ const CouponItem = ({
             </Suspense>
             <CouponMain>
               <div>
-                <h2>{coupon?.summary}</h2>
-                <p>{coupon?.condition}</p>
+                <h2>
+                  {t(
+                    coupon?.discount == 1 ? meta?.summaryFull : meta?.summary,
+                    {
+                      discount:
+                        coupon?.discount == 1
+                          ? currencyFormat.format(coupon?.maxDiscount)
+                          : coupon?.discount * 100 + "%",
+                      max: currencyFormat.format(coupon?.maxDiscount),
+                    }
+                  )}
+                </h2>
+                <p>
+                  {t(
+                    coupon?.attribute == 0
+                      ? criteria?.conditionAll
+                      : criteria?.condition,
+                    {
+                      min: criteria?.formatter(coupon?.attribute),
+                      unit: t(criteria?.unit),
+                    }
+                  )}
+                </p>
               </div>
               <Expire>
                 <ExpText

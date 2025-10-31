@@ -5,7 +5,7 @@ import { logout } from "../../../actions/auth";
 export async function DELETE(request: NextRequest) {
   try {
     // Get access token from session
-    const token = await getToken({ req: request });
+    const token = await getToken({ req: request as any });
     const refreshToken = token?.data.tokens.refresh;
 
     if (!refreshToken) {

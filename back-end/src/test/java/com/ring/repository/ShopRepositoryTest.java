@@ -183,7 +183,7 @@ class ShopRepositoryTest extends AbstractRepositoryTest {
                 .maxDiscount(1000.0)
                 .attribute(2.0)
                 .expDate(LocalDate.now().plusMonths(1))
-                .type(CouponType.MIN_AMOUNT)
+                .type(CouponType.PRODUCT)
                 .coupon(coupon)
                 .build();
         couponDetailRepo.save(couponDetail);

@@ -7,8 +7,6 @@ import com.ring.dto.response.coupons.CouponDTO;
 import com.ring.dto.response.coupons.CouponDetailDTO;
 import com.ring.model.entity.Coupon;
 import com.ring.model.entity.CouponDetail;
-import com.ring.model.enums.CouponType;
-import com.ring.service.impl.MessageService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Service;
 public class CouponMapper {
 
     private final Cloudinary cloudinary;
-    private final MessageService messageService;
 
     /**
      * Maps a {@link ICoupon} to a {@link CouponDTO}.
@@ -40,24 +37,15 @@ public class CouponMapper {
                         .generate(projection.getShopImage().getPublicId())
                 : null;
 
-        // Detail stuff
-        String summary = messageService.getMessage("message.coupon.summary", new Object[] {
-            CouponType.SHIPPING.equals(detail.getType()) ? 1 : 0,
-            detail.getDiscount(),
-            detail.getMaxDiscount()
-        });
-        String condition =
-                CouponType.MIN_AMOUNT.equals(detail.getType()) ?
-                        messageService.getMessage("message.coupon.condition.amount", new Object[] { detail.getAttribute() }) :
-                        messageService.getMessage("message.coupon.condition.value", new Object[] { detail.getAttribute() });
-
         return new CouponDTO(coupon.getId(),
                 coupon.getCode(),
                 coupon.getIsUsable(),
                 coupon.getIsUsed(),
                 detail.getType(),
-                summary,
-                condition,
+                detail.getCriteria(),
+                detail.getDiscount(),
+                detail.getMaxDiscount(),
+                detail.getAttribute(),
                 detail.getUsage(),
                 detail.getExpDate(),
                 coupon.getShop() != null ? coupon.getShop().getId() : null,
@@ -79,6 +67,7 @@ public class CouponMapper {
         return new CouponDetailDTO(coupon.getId(),
                 coupon.getCode(),
                 detail.getType(),
+                detail.getCriteria(),
                 detail.getAttribute(),
                 detail.getMaxDiscount(),
                 detail.getDiscount(),

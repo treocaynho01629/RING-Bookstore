@@ -1,7 +1,9 @@
 package com.ring.dto.response.coupons;
 
+import com.ring.model.enums.CouponCriteria;
 import com.ring.model.enums.CouponType;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
@@ -12,8 +14,10 @@ public record CouponDTO(Long id,
                         Boolean isUsable,
                         Boolean isUsed,
                         CouponType type,
-                        String summary,
-                        String condition,
+                        CouponCriteria criteria,
+                        BigDecimal discount,
+                        Double maxDiscount,
+                        Double attribute,
                         Short usage,
                         LocalDate expDate,
                         Long shopId,

@@ -23,8 +23,9 @@ public interface PublisherRepository extends JpaRepository<Publisher, Integer> {
      * @return a paginated list of publishers with their associated images
      */
     @Query("""
-          select p as publisher
-          from Publisher p left join fetch p.image i
+        SELECT p AS publisher
+        FROM Publisher p 
+        LEFT JOIN FETCH p.image i
     """)
     Page<Publisher> findPublishers(Pageable pageable);
 
@@ -37,12 +38,13 @@ public interface PublisherRepository extends JpaRepository<Publisher, Integer> {
      * @return a pageable object containing the list of relevant publishers
      */
     @Query("""
-          select distinct p as publisher
-          from Publisher p left join fetch p.image i
-          join p.publisherBooks b
-          join b.cate c
-          where c.id = :cateId or c.parent.id = :cateId
-          group by p.id, i.id
+        SELECT DISTINCT p AS publisher
+        FROM Publisher p 
+        LEFT JOIN FETCH p.image i
+        JOIN p.publisherBooks b
+        JOIN b.cate c
+        WHERE c.id = :cateId OR c.parent.id = :cateId
+        GROUP BY p.id, i.id
     """)
     Page<Publisher> findRelevantPublishers(Integer cateId, Pageable pageable);
 
@@ -53,9 +55,10 @@ public interface PublisherRepository extends JpaRepository<Publisher, Integer> {
      * @return an {@link Optional} containing the publisher with its image if found, or an empty {@link Optional} if no publisher exists with the given ID
      */
     @Query("""
-          select p as publisher
-          from Publisher p left join fetch p.image i
-          where p.id = :id
+        SELECT p AS publisher
+        FROM Publisher p 
+        LEFT JOIN FETCH p.image i
+        WHERE p.id = :id
     """)
     Optional<Publisher> findWithImageById(Integer id);
 
@@ -66,7 +69,9 @@ public interface PublisherRepository extends JpaRepository<Publisher, Integer> {
      * @return a list of publisher IDs that are not in the provided list
      */
     @Query("""
-	    select p.id from Publisher p where p.id not in :ids
-	""")
+        SELECT p.id 
+        FROM Publisher p 
+        WHERE p.id NOT IN :ids
+    """)
     List<Integer> findInverseIds(List<Integer> ids);
 }

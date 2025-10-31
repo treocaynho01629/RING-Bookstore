@@ -1,24 +1,16 @@
 import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
 import { defaultSerializeQueryArgs } from "@reduxjs/toolkit/query";
 import { isEqual } from "lodash-es";
+import { CouponDTO } from "@ring/shared/models/couponDTO";
 import apiSlice from "../../lib/apiSlice";
 
-export interface CouponResponse {
+interface CouponResponse extends CouponDTO {
   id: number;
-  code: string;
-  isUsable: boolean;
-  isUsed: boolean;
-  type: string;
-  summary: string;
-  condition: string;
-  usage: number;
-  expDate: string;
-  shopId: number;
-  shopName: string;
 }
 
 interface CouponQueryArgs {
   types?: string[];
+  criterias?: string[];
   shopId?: number;
   userId?: number;
   byShop?: boolean;
@@ -70,6 +62,7 @@ export const couponsApiSlice = apiWithEnum.injectEndpoints({
       query: (args) => {
         const {
           types,
+          criterias,
           shopId,
           userId,
           byShop,
@@ -84,10 +77,12 @@ export const couponsApiSlice = apiWithEnum.injectEndpoints({
           sortDir,
         } = args || {};
 
-        //Params
+        // Params
         const params = new URLSearchParams();
         if (types && types?.length > 0)
           params.append("types", types?.join(","));
+        if (criterias && criterias?.length > 0)
+          params.append("criterias", criterias?.join(","));
         if (shopId) params.append("shopId", shopId.toString());
         if (userId) params.append("userId", userId.toString());
         if (byShop != null) params.append("byShop", byShop.toString());
@@ -129,7 +124,7 @@ export const couponsApiSlice = apiWithEnum.injectEndpoints({
           const { loadMore, ...mainQuery } = queryArgs;
 
           if (loadMore) {
-            //Load more >> serialize without <pagination>
+            // Load more >> serialize without <pagination>
             const { page, size, ...rest } = mainQuery;
             if (JSON.stringify(rest) === "{}") return endpointName + "Merge";
             return defaultSerializeQueryArgs({
@@ -139,7 +134,7 @@ export const couponsApiSlice = apiWithEnum.injectEndpoints({
             });
           }
 
-          //Serialize like normal
+          // Serialize like normal
           if (JSON.stringify(mainQuery) === "{}") return endpointName;
           return defaultSerializeQueryArgs({
             endpointName,

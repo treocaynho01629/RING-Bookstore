@@ -35,13 +35,18 @@ public interface BannerRepository extends JpaRepository<Banner, Integer> {
 	 *         projections matching the criteria.
 	 */
 	@Query("""
-				select b.id as id, b.shop.id as shopId, b.name as name,
-					b.description as description, b.url as url, i as image
-				from Banner b left join b.image i
-				where concat (b.name, b.description) ilike %:keyword%
-				and (coalesce(:shopId) is null or b.shop.id = :shopId)
-				and (coalesce(:byShop) is null or case when :byShop = true then b.shop.id is not null else b.shop.id is null end)
-			""")
+		SELECT b.id AS id, 
+			b.shop.id AS shopId, 
+			b.name AS name,
+			b.description AS description, 
+			b.url AS url, 
+			i AS image
+		FROM Banner b 
+		LEFT JOIN b.image i
+		WHERE CONCAT(b.name, b.description) ILIKE %:keyword%
+		AND (COALESCE(:shopId) IS NULL OR b.shop.id = :shopId)
+		AND (COALESCE(:byShop) IS NULL OR CASE WHEN :byShop = TRUE THEN b.shop.id IS NOT NULL ELSE b.shop.id IS NULL END)
+	""")
 	Page<IBanner> findBanners(String keyword,
 			Long shopId,
 			Boolean byShop,
@@ -57,10 +62,10 @@ public interface BannerRepository extends JpaRepository<Banner, Integer> {
 	 *         no match is found.
 	 */
 	@Query("""
-				select b.id from Banner b
-				where b.id in :ids
-				and b.shop.owner.id = :ownerId
-			""")
+		SELECT b.id FROM Banner b
+		WHERE b.id IN :ids
+		AND b.shop.owner.id = :ownerId
+	""")
 	List<Integer> findBannerIdsByInIdsAndOwner(List<Integer> ids,
 			Long ownerId);
 
@@ -83,14 +88,16 @@ public interface BannerRepository extends JpaRepository<Banner, Integer> {
 	 * @return a list of banner IDs that meet the filtering criteria
 	 */
 	@Query("""
-				select b.id from Banner b left join b.shop s
-				where concat (b.name, b.description) ilike %:keyword%
-				and (coalesce(:shopId) is null or s.id = :shopId)
-				and (coalesce(:byShop) is null or case when :byShop = true then s.id is not null else s.id is null end)
-				and (coalesce(:userId) is null or s.owner.id = :userId)
-				and b.id not in :ids
-				group by b.id
-			""")
+		SELECT b.id 
+		from Banner b 
+		LEFT JOIN b.shop s
+		WHERE CONCAT(b.name, b.description) ILIKE %:keyword%
+		AND (COALESCE(:shopId) IS NULL OR s.id = :shopId)
+		AND (COALESCE(:byShop) IS NULL OR CASE WHEN :byShop = TRUE THEN s.id IS NOT NULL ELSE s.id IS NULL END)
+		AND (COALESCE(:userId) IS NULL OR s.owner.id = :userId)
+		AND b.id NOT IN :ids
+		GROUP BY b.id
+	""")
 	List<Integer> findInverseIds(String keyword,
 			Long shopId,
 			Boolean byShop,

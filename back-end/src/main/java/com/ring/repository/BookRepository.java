@@ -36,53 +36,68 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      * @param rating    the minimum average rating to filter books by
      * @param amount    the minimum available quantity to filter books by
      * @param pageable  the pagination information to define the page size and sorting
-     * @return a page containing books matching the filter criteria encapsulated as IBookDisplay objects
+     * @return a page containing books matching the filter criteria encapsulated AS IBookDisplay objects
      */
     @Query(value = """
-                select b.id as id, b.slug as slug, b.title as title,
-                    (case when :withDesc = true then b.description else null end) as description,
-                    b.price as price, b.discount as discount, b.amount as amount, s.id as shopId,
-                    s.name as shopName, i as image,
-                    coalesce(rv.rating, 0) as rating,
-                    coalesce(od.totalOrders, 0) as totalOrders
-                from Book b
-                join b.shop s
-                left join b.image i
-                left join (select r.book.id as book_id, avg(r.rating) as rating
-                    from Review r
-                    group by r.book.id) rv on b.id = rv.book_id
-                left join (select o.book.id as book_id, sum(o.quantity) as totalOrders
-                    from OrderItem o
-                    group by o.book.id) od on b.id = od.book_id
-                where concat (b.title, b.author, s.name) ilike %:keyword%
-                and (coalesce(:cateId) is null or b.cate.id = :cateId or b.cate.parent.id = :cateId)
-                and (coalesce(:pubIds) is null or b.publisher.id in :pubIds)
-                and (coalesce(:types) is null or b.type in :types)
-                and (coalesce(:shopId) is null or b.shop.id = :shopId)
-                and (coalesce(:userId) is null or b.shop.owner.id = :userId)
-                and coalesce(rv.rating, 0) >= :rating
-                and b.price * (1 - b.discount) between :fromRange and :toRange
-                and b.amount >= :amount
-                group by b, i.id, rv.rating, od.totalOrders, s.id, s.name
-            """,
-            countQuery = """
-                     select count(b)
-                        from Book b
-                        join b.shop s
-                        left join (select r.book.id as book_id, avg(r.rating) as rating
-                            from Review r
-                            group by r.book.id) rv on b.id = rv.book_id
-                        where concat (b.title, b.author, s.name) ilike %:keyword%
-                        and (coalesce(:cateId) is null or b.cate.id = :cateId or b.cate.parent.id = :cateId)
-                        and (coalesce(:pubIds) is null or b.publisher.id in :pubIds)
-                        and (coalesce(:types) is null or b.type in :types)
-                        and (coalesce(:shopId) is null or b.shop.id = :shopId)
-                        and (coalesce(:userId) is null or b.shop.owner.id = :userId)
-                        and coalesce(rv.rating, 0) >= :rating
-                        and b.price * (1 - b.discount) between :fromRange and :toRange
-                        and b.amount >= :amount
-                        group by b, rv.rating, s.id, s.name
-                    """)
+        SELECT b.id AS id, 
+        b.slug AS slug, 
+        b.title AS title,
+            (CASE WHEN :withDesc = TRUE THEN b.description ELSE NULL END) AS description,
+            b.price AS price, 
+            b.discount AS discount, 
+            b.amount AS amount, 
+            s.id AS shopId,
+            s.name AS shopName, 
+            i AS image,
+            COALESCE(rv.rating, 0) AS rating,
+            COALESCE(od.totalOrders, 0) AS totalOrders
+        FROM Book b
+        JOIN b.shop s
+        LEFT JOIN b.image i
+        LEFT JOIN (
+            SELECT r.book.id AS book_id, 
+                AVG(r.rating) AS rating
+            FROM Review r
+            GROUP BY r.book.id
+        ) rv ON b.id = rv.book_id
+        LEFT JOIN (
+            SELECT o.book.id AS book_id, 
+            SUM(o.quantity) AS totalOrders
+            FROM OrderItem o
+            GROUP BY o.book.id
+        ) od ON b.id = od.book_id
+        WHERE CONCAT(b.title, b.author, s.name) ILIKE %:keyword%
+        AND (COALESCE(:cateId) IS NULL OR b.cate.id = :cateId or b.cate.parent.id = :cateId)
+        AND (COALESCE(:pubIds) IS NULL OR b.publisher.id in :pubIds)
+        AND (COALESCE(:types) IS NULL OR b.type in :types)
+        AND (COALESCE(:shopId) IS NULL OR b.shop.id = :shopId)
+        AND (COALESCE(:userId) IS NULL OR b.shop.owner.id = :userId)
+        AND COALESCE(rv.rating, 0) >= :rating
+        AND b.price * (1 - b.discount) BETWEEN :fromRange AND :toRange
+        AND b.amount >= :amount
+        GROUP BY b, i.id, rv.rating, od.totalOrders, s.id, s.name
+    """,
+    countQuery = """
+        SELECT COUNT(b)
+        FROM Book b
+        JOIN b.shop s
+        LEFT JOIN (
+            SELECT r.book.id AS book_id, 
+                avg(r.rating) AS rating
+            FROM Review r
+            GROUP BY r.book.id
+        ) rv ON b.id = rv.book_id
+        WHERE CONCAT(b.title, b.author, s.name) ILIKE %:keyword%
+        AND (COALESCE(:cateId) IS NULL OR b.cate.id = :cateId or b.cate.parent.id = :cateId)
+        AND (COALESCE(:pubIds) IS NULL OR b.publisher.id in :pubIds)
+        AND (COALESCE(:types) IS NULL OR b.type in :types)
+        AND (COALESCE(:shopId) IS NULL OR b.shop.id = :shopId)
+        AND (COALESCE(:userId) IS NULL OR b.shop.owner.id = :userId)
+        AND COALESCE(rv.rating, 0) >= :rating
+        AND b.price * (1 - b.discount) BETWEEN :fromRange AND :toRange
+        AND b.amount >= :amount
+        GROUP BY b, rv.rating, s.id, s.name
+    """)
     Page<IBookDisplay> findBooksWithFilter(String keyword,
                                            Integer cateId,
                                            List<Integer> pubIds,
@@ -105,51 +120,79 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      * @return a List of {@link IBookDisplay} containing the details of the randomly fetched books
      */
     @Query("""
-                select b.id as id, b.slug as slug, b.title as title,
-                    (case when :withDesc = true then b.description else null end) as description,
-                    b.price as price, b.discount as discount, b.amount as amount, s.id as shopId,
-                    s.name as shopName, i as image,
-                    coalesce(rv.rating, 0) as rating,
-                    coalesce(od.totalOrders, 0) as totalOrders
-                from Book b join b.shop s left join b.image i
-                left join (select r.book.id as book_id, avg(r.rating) as rating
-                    from Review r
-                    group by r.book.id) rv on b.id = rv.book_id
-                left join (select o.book.id as book_id, sum(o.quantity) as totalOrders
-                    from OrderItem o
-                    group by o.book.id) od on b.id = od.book_id
-                group by b, i.id, rv.rating, od.totalOrders, s.id, s.name
-                order by random()
-                limit :amount
-            """)
+        SELECT b.id AS id, 
+            b.slug AS slug, 
+            b.title AS title,
+            (CASE WHEN :withDesc = TRUE THEN b.description ELSE NULL END) AS description,
+            b.price AS price, 
+            b.discount AS discount, 
+            b.amount AS amount, 
+            s.id AS shopId,
+            s.name AS shopName, 
+            i AS image,
+            COALESCE(rv.rating, 0) AS rating,
+            COALESCE(od.totalOrders, 0) AS totalOrders
+        FROM Book b 
+        JOIN b.shop s 
+        LEFT JOIN b.image i
+        LEFT JOIN (
+            SELECT r.book.id AS book_id, 
+                AVG(r.rating) AS rating
+            FROM Review r
+            GROUP BY r.book.id
+        ) rv ON b.id = rv.book_id
+        LEFT JOIN (
+            SELECT o.book.id AS book_id, 
+                SUM(o.quantity) AS totalOrders
+            FROM OrderItem o
+            GROUP BY o.book.id
+        ) od ON b.id = od.book_id
+        GROUP BY b, i.id, rv.rating, od.totalOrders, s.id, s.name
+        ORDER BY random()
+        LIMIT :amount
+    """)
     List<IBookDisplay> findRandomBooks(Integer amount,
                                        Boolean withDesc); //Get random books
 
     /**
-     * Retrieves a list of books matching the given IDs with detailed information such as id, slug, title, price,
+     * Retrieves a list of books matching the given IDs with detailed information such AS id, slug, title, price,
      * discount, amount, associated shop details (id, name), image, rating, and total orders.
      *
-     * This method performs a query that joins multiple entities, such as Shop, Image, Review, and OrderItem,
+     * This method performs a query that joins multiple entities, such AS Shop, Image, Review, and OrderItem,
      * to gather the required information for display purposes.
      *
      * @param ids a list of book IDs for which the display information is to be retrieved
      * @return a list of {@link IBookDisplay} containing the display information of the books matching the given IDs
      */
     @Query("""
-                select b.id as id, b.slug as slug, b.title as title,
-                    b.price as price, b.discount as discount, b.amount as amount, s.id as shopId,
-                    s.name as shopName, i as image,
-                    coalesce(rv.rating, 0) as rating,
-                    coalesce(od.totalOrders, 0) as totalOrders
-                from Book b join b.shop s left join b.image i
-                left join (select r.book.id as book_id, avg(r.rating) as rating
-                    from Review r
-                    group by r.book.id) rv on b.id = rv.book_id
-                left join (select o.book.id as book_id, sum(o.quantity) as totalOrders
-                    from OrderItem o
-                    group by o.book.id) od on b.id = od.book_id
-                where b.id in :ids
-            """)
+        SELECT b.id AS id, 
+            b.slug AS slug, 
+            b.title AS title,
+            b.price AS price, 
+            b.discount AS discount, 
+            b.amount AS amount, 
+            s.id AS shopId,
+            s.name AS shopName, 
+            i AS image,
+            COALESCE(rv.rating, 0) AS rating,
+            COALESCE(od.totalOrders, 0) AS totalOrders
+        FROM Book b 
+        JOIN b.shop s 
+        LEFT JOIN b.image i
+        LEFT JOIN (
+            SELECT r.book.id AS book_id, 
+                AVG(r.rating) AS rating
+            FROM Review r
+            GROUP BY r.book.id
+        ) rv ON b.id = rv.book_id
+        LEFT JOIN (
+            SELECT o.book.id AS book_id, 
+                SUM(o.quantity) AS totalOrders
+            FROM OrderItem o
+            GROUP BY o.book.id
+        ) od ON b.id = od.book_id
+        WHERE b.id IN :ids
+    """)
     List<IBookDisplay> findBooksDisplayInIds(List<Long> ids);
 
     /**
@@ -159,9 +202,9 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      * @return a list of Book entities matching the provided IDs
      */
     @Query("""
-                select b from Book b
-                where b.id in :ids
-            """)
+        SELECT b FROM Book b
+        WHERE b.id IN :ids
+    """)
     List<Book> findBooksInIds(List<Long> ids);
 
     /**
@@ -173,10 +216,10 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      * @return a list of book IDs that match the given criteria
      */
     @Query("""
-                select b.id from Book b
-                where b.id in :ids
-                and b.shop.owner.id = :ownerId
-            """)
+        SELECT b.id FROM Book b
+        WHERE b.id IN :ids
+        AND b.shop.owner.id = :ownerId
+    """)
     List<Long> findBookIdsByInIdsAndOwner(List<Long> ids, Long ownerId);
 
     /**
@@ -196,24 +239,27 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      * @return A list of book IDs that satisfy the provided criteria.
      */
     @Query("""
-                select b.id
-                from Book b
-                join b.shop s
-                left join (select r.book.id as book_id, avg(r.rating) as rating
-                    from Review r
-                    group by r.book.id) rv on b.id = rv.book_id
-                where concat (b.title, b.author, s.name) ilike %:keyword%
-                and (coalesce(:cateId) is null or b.cate.id = :cateId or b.cate.parent.id = :cateId)
-                and (coalesce(:pubIds) is null or b.publisher.id in :pubIds)
-                and (coalesce(:types) is null or b.type in :types)
-                and (coalesce(:shopId) is null or b.shop.id = :shopId)
-                and (coalesce(:userId) is null or b.shop.owner.id = :userId)
-                and coalesce(rv.rating, 0) >= :rating
-                and b.price * (1 - b.discount) between :fromRange and :toRange
-                and b.amount >= :amount
-                and b.id not in :ids
-                group by b, rv.rating, s.id, s.name
-            """)
+        SELECT b.id
+        FROM Book b
+        JOIN b.shop s
+        LEFT JOIN (
+            SELECT r.book.id AS book_id, 
+                AVG(r.rating) AS rating
+            FROM Review r
+            GROUP BY r.book.id
+        ) rv ON b.id = rv.book_id
+        WHERE CONCAT(b.title, b.author, s.name) ILIKE %:keyword%
+        AND (COALESCE(:cateId) IS NULL OR b.cate.id = :cateId or b.cate.parent.id = :cateId)
+        AND (COALESCE(:pubIds) IS NULL OR b.publisher.id in :pubIds)
+        AND (COALESCE(:types) IS NULL OR b.type in :types)
+        AND (COALESCE(:shopId) IS NULL OR b.shop.id = :shopId)
+        AND (COALESCE(:userId) IS NULL OR b.shop.owner.id = :userId)
+        AND COALESCE(rv.rating, 0) >= :rating
+        AND b.price * (1 - b.discount) BETWEEN :fromRange AND :toRange
+        AND b.amount >= :amount
+        AND b.id NOT IN :ids
+        GROUP BY b, rv.rating, s.id, s.name
+    """)
     List<Long> findInverseIds(String keyword,
                               Integer cateId,
                               List<Integer> pubIds,
@@ -227,7 +273,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
                               List<Long> ids);
 
     /**
-     * Retrieves analytics related to books such as the total number of books,
+     * Retrieves analytics related to books such AS the total number of books,
      * books created in the current month, and books created in the last month.
      *
      * @param shopId the identifier of the shop for which analytics is to be retrieved;
@@ -238,14 +284,14 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      *         current month count, and last month count
      */
     @Query("""
-                select count(b.id) as total,
-                count(case when b.createdDate >= date_trunc('month', current date) then 1 end) as currentMonth,
-                count(case when b.createdDate >= date_trunc('month', current date) - 1 month
-                    and b.createdDate < date_trunc('month', current date) then 1 end) lastMonth
-                from Book b
-                where (coalesce(:shopId) is null or b.shop.id = :shopId)
-                and (coalesce(:userId) is null or b.shop.owner.id = :userId)
-            """)
+        SELECT COUNT(b.id) AS total,
+            COUNT(CASE WHEN b.createdDate >= DATE_TRUNC('month', CURRENT DATE) THEN 1 END) AS currentMonth,
+            COUNT(CASE WHEN b.createdDate >= DATE_TRUNC('month', CURRENT DATE) - 1 MONTH
+            AND b.createdDate < DATE_TRUNC('month', CURRENT DATE) THEN 1 END) AS lastMonth
+        FROM Book b
+        WHERE (COALESCE(:shopId) IS NULL OR b.shop.id = :shopId)
+        AND (COALESCE(:userId) IS NULL OR b.shop.owner.id = :userId)
+    """)
     IStat getBookAnalytics(Long shopId, Long userId);
 
     /**
@@ -256,15 +302,16 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      * @return a list of up to 9 suggested keywords, sorted by relevance to the given keyword.
      */
     @Query(value= """
-            select t.keyword
-            from (
-            	select distinct substring(left(lower(regexp_replace(b.title, CONCAT('^.*?(\\S*', :keyword, '\\S*)'), '\\1', 'i')) || ' ', 24) from '.*\\s') as keyword
-            	from book b
-            	where b.title ilike concat('%', :keyword, '%')
-            ) t
-            order by case when t.keyword ilike concat('%', :keyword, '%') then 1 else 2 end, t.keyword
-            limit 9
-            """, nativeQuery = true)
+        SELECT t.keyword
+        from (
+            SELECT DISTINCT substring(left(lower(regexp_replace(
+                b.title, CONCAT('^.*?(\\S*', :keyword, '\\S*)'), '\\1', 'i')) || ' ', 24) from '.*\\s') AS keyword
+            FROM Book b
+            WHERE b.title ILIKE CONCAT('%', :keyword, '%')
+        ) t
+        ORDER BY CASE WHEN t.keyword ILIKE CONCAT('%', :keyword, '%') THEN 1 ELSE 2 END, t.keyword
+        LIMIT 9
+    """, nativeQuery = true)
     List<String> findSuggestion(String keyword);
 
     /**
@@ -276,8 +323,10 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Modifying
     @Transactional
     @Query("""
-                update Book b set b.amount = b.amount - :amount where b.id = :id
-            """)
+        UPDATE Book b 
+        SET b.amount = b.amount - :amount 
+        WHERE b.id = :id
+    """)
     void decreaseStock(Long id, short amount);
 
     /**

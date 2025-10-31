@@ -38,7 +38,7 @@ public class AddressController {
      * @return a {@link ResponseEntity} containing the address.
      */
     @GetMapping
-    public ResponseEntity<?> getAddress(@CurrentAccount Account currUser) {
+    public ResponseEntity<AddressDTO> getAddress(@CurrentAccount Account currUser) {
 
         AddressDTO address = addressService.getMyAddress(currUser);
         return new ResponseEntity<>(address, HttpStatus.OK);
@@ -52,7 +52,7 @@ public class AddressController {
      */
     @GetMapping("/saved")
     @PreAuthorize("hasRole('USER') and hasAuthority('read:address')")
-    public ResponseEntity<?> getProfileAddresses(@CurrentAccount Account currUser) {
+    public ResponseEntity<List<AddressDTO>> getProfileAddresses(@CurrentAccount Account currUser) {
 
         List<AddressDTO> addresses = addressService.getMyAddresses(currUser);
         return new ResponseEntity<>(addresses, HttpStatus.OK);
@@ -66,8 +66,10 @@ public class AddressController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','GUEST') and hasAuthority('read:address')")
-    public ResponseEntity<?> getAddressById(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(addressService.getAddress(id), HttpStatus.OK);
+    public ResponseEntity<Address> getAddressById(@PathVariable("id") Long id) {
+
+        Address address = addressService.getAddress(id);
+        return new ResponseEntity<>(address, HttpStatus.OK);
     }
 
     /**
@@ -79,9 +81,12 @@ public class AddressController {
      */
     @PostMapping()
     @PreAuthorize("hasRole('USER') and hasAuthority('create:address')")
-    public ResponseEntity<?> addAddress(@Valid @RequestBody AddressRequest request,
+    public ResponseEntity<Address> addAddress(
+            @Valid @RequestBody AddressRequest request,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(addressService.addAddress(request, currUser), HttpStatus.CREATED);
+
+        Address address = addressService.addAddress(request, currUser);
+        return new ResponseEntity<>(address, HttpStatus.CREATED);
     }
 
     /**
@@ -94,7 +99,8 @@ public class AddressController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('USER') and hasAuthority('update:address')")
-    public ResponseEntity<?> updateAddress(@PathVariable("id") Long id,
+    public ResponseEntity<Address> updateAddress(
+            @PathVariable("id") Long id,
             @Valid @RequestBody AddressRequest request,
             @CurrentAccount Account currUser) {
 
@@ -110,8 +116,11 @@ public class AddressController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('USER') and hasAuthority('delete:address')")
-    public ResponseEntity<?> deleteAddress(@PathVariable("id") Long id, @CurrentAccount Account currUser) {
+    public ResponseEntity<Address> deleteAddress(
+        @PathVariable("id") Long id, 
+        @CurrentAccount Account currUser) {
 
-        return new ResponseEntity<>(addressService.deleteAddress(id, currUser), HttpStatus.OK);
+        Address address = addressService.deleteAddress(id, currUser);
+        return new ResponseEntity<>(address, HttpStatus.OK);
     }
 }

@@ -22,8 +22,4 @@ export * from "./src/enums/user";
 export * from "./src/utils/convert";
 export * from "./src/utils/icon";
 export * from "./src/utils/location";
-export * from "./src/utils/payment";
 export * from "./src/utils/regex";
-
-// Theme
-export * from "./src/theme";

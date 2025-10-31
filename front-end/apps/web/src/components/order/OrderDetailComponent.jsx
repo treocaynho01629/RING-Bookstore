@@ -375,17 +375,18 @@ const OrderDetailComponent = ({
   const stepContent = getStepContent(order);
   const orderedDate = new Date(order?.orderedDate);
   const date = new Date(order?.date);
+  const isRefundable = Math.abs(new Date() - date) / (1000 * 60 * 60 * 24) <= 7;
   const shippingSummary = ShippingType[order?.shippingType];
-  const Icon = iconList[shippingSummary?.icon];
+  // const Icon = iconList[shippingSummary?.icon];
 
   return (
     <>
       <StyledDialogTitle>
         <TitleContainer>
           <Link to={-1}>
-            <KeyboardArrowLeft />
+            <KeyboardArrowLeftIcon />
           </Link>
-          <Receipt />
+          <ReceiptIcon />
           &nbsp;Mã vận đơn&nbsp;
           {!order ? (
             <Skeleton variant="text" width={100} />
@@ -521,18 +522,20 @@ const OrderDetailComponent = ({
                     >
                       Mua lại
                     </MainButton>
-                    {order?.status == OrderStatus.COMPLETED.value && (
-                      <MainButton
-                        variant="outlined"
-                        color="warning"
-                        size="large"
-                        fullWidth
-                        sx={{ mt: 1 }}
-                        onClick={handleRefundOrder}
-                      >
-                        Hoàn trả hàng
-                      </MainButton>
-                    )}
+                    {order?.status == OrderStatus.COMPLETED.value &&
+                      isRefundable && (
+                        <MainButton
+                          variant="outlined"
+                          color="warning"
+                          size="large"
+                          fullWidth
+                          sx={{ mt: 1 }}
+                          onClick={handleRefundOrder}
+                          disabled={!isRefundable}
+                        >
+                          Hoàn trả hàng
+                        </MainButton>
+                      )}
                   </>
                 )}
               </Box>
@@ -555,7 +558,7 @@ const OrderDetailComponent = ({
         )}
         <ContentWrapper>
           <Title>
-            <Sell />
+            <SellIcon />
             &nbsp;Địa chỉ người nhận
           </Title>
           <Grid container spacing={1}>
@@ -599,7 +602,8 @@ const OrderDetailComponent = ({
                     ) : (
                       <Suspense fallback={null}>
                         <ShippingTag color={shippingSummary?.color}>
-                          <Icon /> {shippingSummary?.label}:
+                          {/* <Icon />  */}
+                          {shippingSummary?.label}:
                         </ShippingTag>
                         &nbsp;{shippingSummary?.description}
                       </Suspense>
@@ -632,7 +636,7 @@ const OrderDetailComponent = ({
           </Grid>
         </ContentWrapper>
         <Title>
-          <Inbox />
+          <InboxIcon />
           &nbsp;Kiện hàng
         </Title>
         <OrderDetailItems {...{ order, tabletMode }} />
@@ -641,28 +645,32 @@ const OrderDetailComponent = ({
             <MobileButton>
               <Skeleton variant="text" width={150} />
               <MobileExtendButton>
-                <KeyboardArrowRight fontSize="small" />
+                <KeyboardArrowRightIcon fontSize="small" />
               </MobileExtendButton>
             </MobileButton>
           ) : order?.status == OrderStatus.PENDING.value ? (
             <MobileButton onClick={handleCancelOrder}>
               <span>
-                <Close fontSize="small" color="error" />
+                <CloseIcon fontSize="small" color="error" />
                 &nbsp;Huỷ đơn hàng
               </span>
               <MobileExtendButton>
-                <KeyboardArrowRight fontSize="small" />
+                <KeyboardArrowRightIcon fontSize="small" />
               </MobileExtendButton>
             </MobileButton>
           ) : (
-            order?.status == OrderStatus.COMPLETED.value && (
+            order?.status == OrderStatus.COMPLETED.value &&
+            isRefundable && (
               <MobileButton onClick={handleRefundOrder}>
                 <span>
-                  <KeyboardReturn fontSize="small" color="warning" />
+                  <KeyboardReturnIcon fontSize="small" color="warning" />
                   &nbsp;Hoàn trả đơn hàng
                 </span>
                 <MobileExtendButton>
-                  <KeyboardArrowRight fontSize="small" />
+                  <KeyboardArrowRightIcon
+                    fontSize="small"
+                    disabled={!isRefundable}
+                  />
                 </MobileExtendButton>
               </MobileButton>
             )

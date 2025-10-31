@@ -20,7 +20,7 @@ import {
   WarningAmber,
 } from "@mui/icons-material";
 import { useGetPreviewShopsQuery } from "../../features/shops/shopsApiSlice";
-import { getUserRole } from "@ring/shared";
+import { getUserRole } from "@ring/shared/enums/user";
 import { useSession } from "next-auth/react";
 import MuiAppBar, { AppBarProps } from "@mui/material/AppBar";
 // import NavSetting from "./NavSetting";

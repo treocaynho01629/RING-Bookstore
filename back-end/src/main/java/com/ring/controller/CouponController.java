@@ -2,9 +2,16 @@ package com.ring.controller;
 
 import com.ring.config.CurrentAccount;
 import com.ring.dto.request.CouponRequest;
+import com.ring.dto.response.PagingResponse;
+import com.ring.dto.response.coupons.CouponDTO;
+import com.ring.dto.response.coupons.CouponDetailDTO;
+import com.ring.dto.response.dashboard.StatDTO;
 import com.ring.model.entity.Account;
+import com.ring.model.entity.Coupon;
+import com.ring.model.enums.CouponCriteria;
 import com.ring.model.enums.CouponType;
 import com.ring.service.CouponService;
+import com.ring.service.impl.MessageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,11 +32,13 @@ import java.util.List;
 public class CouponController {
 
     private final CouponService couponService;
+    private final MessageService messageService;
 
     /**
      * Retrieves a list of coupons with optional filters and pagination.
      *
      * @param types         types of coupons to filter.
+     * @param criterias     criteria of coupons to filter.
      * @param shopId        shop ID to filter coupons by.
      * @param userId        shop owner ID to filter coupons by.
      * @param byShop        if true, filters coupons created by shops, if false,
@@ -47,7 +56,9 @@ public class CouponController {
      * @return paginated and filtered list of coupons.
      */
     @GetMapping
-    public ResponseEntity<?> getCoupons(@RequestParam(value = "types", required = false) List<CouponType> types,
+    public ResponseEntity<PagingResponse<CouponDTO>> getCoupons(
+            @RequestParam(value = "types", required = false) List<CouponType> types,
+            @RequestParam(value = "criterias", required = false) List<CouponCriteria> criterias,
             @RequestParam(value = "shopId", required = false) Long shopId,
             @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "byShop", required = false) Boolean byShop,
@@ -60,12 +71,14 @@ public class CouponController {
             @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
             @RequestParam(value = "sortBy", defaultValue = "detail.discount") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir) {
-        return new ResponseEntity<>(couponService.getCoupons(
+
+        PagingResponse<CouponDTO> coupons = couponService.getCoupons(
                 pageNo,
                 pageSize,
                 sortBy,
                 sortDir,
                 types,
+                criterias,
                 codes,
                 code,
                 shopId,
@@ -73,7 +86,8 @@ public class CouponController {
                 byShop,
                 showExpired,
                 checkValue,
-                checkQuantity), HttpStatus.OK);
+                checkQuantity);
+        return new ResponseEntity<>(coupons, HttpStatus.OK);
     }
 
     /**
@@ -84,8 +98,10 @@ public class CouponController {
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('SELLER','GUEST') and hasAuthority('read:coupon')")
-    public ResponseEntity<?> getCoupon(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(couponService.getCoupon(id), HttpStatus.OK);
+    public ResponseEntity<CouponDetailDTO> getCoupon(@PathVariable("id") Long id) {
+
+        CouponDetailDTO coupon = couponService.getCoupon(id);
+        return new ResponseEntity<>(coupon, HttpStatus.OK);
     }
 
     /**
@@ -97,12 +113,14 @@ public class CouponController {
      * @return the matching coupon.
      */
     @GetMapping("/code/{code}")
-    public ResponseEntity<?> getCoupon(@PathVariable("code") String code,
+    public ResponseEntity<CouponDTO> getCoupon(
+            @PathVariable("code") String code,
             @RequestParam(value = "shopId", required = false) Long shopId,
             @RequestParam(value = "cValue", required = false) Double checkValue,
             @RequestParam(value = "cQuantity", required = false) Integer checkQuantity) {
-        return new ResponseEntity<>(couponService.getCouponByCode(code, shopId, checkValue, checkQuantity),
-                HttpStatus.OK);
+
+        CouponDTO coupon = couponService.getCouponByCode(code, shopId, checkValue, checkQuantity);
+        return new ResponseEntity<>(coupon, HttpStatus.OK);
     }
 
     /**
@@ -112,8 +130,10 @@ public class CouponController {
      * @return recommended coupons for the shops.
      */
     @GetMapping("/recommend")
-    public ResponseEntity<?> recommendCoupons(@RequestParam("shopIds") List<Long> shopIds) {
-        return new ResponseEntity<>(couponService.recommendCoupons(shopIds), HttpStatus.OK);
+    public ResponseEntity<List<CouponDTO>> recommendCoupons(@RequestParam("shopIds") List<Long> shopIds) {
+
+        List<CouponDTO> coupons = couponService.recommendCoupons(shopIds);
+        return new ResponseEntity<>(coupons, HttpStatus.OK);
     }
 
     /**
@@ -126,10 +146,12 @@ public class CouponController {
      */
     @GetMapping("/analytics")
     @PreAuthorize("hasAnyRole('SELLER','GUEST') and hasAuthority('read:coupon')")
-    public ResponseEntity<?> getCouponAnalytics(@RequestParam(value = "shopId", required = false) Long shopId,
+    public ResponseEntity<StatDTO> getCouponAnalytics(@RequestParam(value = "shopId", required = false) Long shopId,
             @RequestParam(value = "userId", required = false) Long userId,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(couponService.getAnalytics(shopId, userId, currUser), HttpStatus.OK);
+
+        StatDTO analytics = couponService.getAnalytics(shopId, userId, currUser);
+        return new ResponseEntity<>(analytics, HttpStatus.OK);
     }
 
     /**
@@ -141,9 +163,12 @@ public class CouponController {
      */
     @PostMapping
     @PreAuthorize("hasRole('SELLER') and hasAuthority('create:coupon')")
-    public ResponseEntity<?> createCoupon(@RequestBody @Valid CouponRequest request,
+    public ResponseEntity<Coupon> createCoupon(
+            @RequestBody @Valid CouponRequest request,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(couponService.addCoupon(request, currUser), HttpStatus.CREATED);
+
+        Coupon coupon = couponService.addCoupon(request, currUser);
+        return new ResponseEntity<>(coupon, HttpStatus.CREATED);
     }
 
     /**
@@ -156,10 +181,13 @@ public class CouponController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('update:coupon')")
-    public ResponseEntity<?> updateCoupon(@PathVariable("id") Long id,
+    public ResponseEntity<Coupon> updateCoupon(
+            @PathVariable("id") Long id,
             @RequestBody @Valid CouponRequest request,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(couponService.updateCoupon(id, request, currUser), HttpStatus.CREATED);
+
+        Coupon coupon = couponService.updateCoupon(id, request, currUser);
+        return new ResponseEntity<>(coupon, HttpStatus.CREATED);
     }
 
     /**
@@ -171,8 +199,14 @@ public class CouponController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:coupon')")
-    public ResponseEntity<?> deleteCoupon(@PathVariable("id") Long id, @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(couponService.deleteCoupon(id, currUser), HttpStatus.OK);
+    public ResponseEntity<String> deleteCoupon(
+            @PathVariable("id") Long id, 
+            @CurrentAccount Account currUser) {
+
+        couponService.deleteCoupon(id, currUser);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -184,16 +218,21 @@ public class CouponController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:coupon')")
-    public ResponseEntity<?> deleteCoupons(@RequestParam("ids") List<Long> ids,
+    public ResponseEntity<String> deleteCoupons(
+            @RequestParam("ids") List<Long> ids,
             @CurrentAccount Account currUser) {
+
         couponService.deleteCoupons(ids, currUser);
-        return new ResponseEntity<>("Coupons deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
      * Deletes all coupons except those specified by a list of IDs.
      *
      * @param types       optional filter for coupon types.
+     * @param criterias   optional filter for coupon criteria.
      * @param shopId      optional shop ID.
      * @param userId      shop owner ID to filter coupons by.
      * @param byShop      if true, filters coupons created by shops, if false,
@@ -207,8 +246,9 @@ public class CouponController {
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:coupon')")
-    public ResponseEntity<?> deleteCouponsInverse(
+    public ResponseEntity<String> deleteCouponsInverse(
             @RequestParam(value = "types", required = false) List<CouponType> types,
+            @RequestParam(value = "criterias", required = false) List<CouponCriteria> criterias,
             @RequestParam(value = "shopId", required = false) Long shopId,
             @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "byShop", required = false) Boolean byShop,
@@ -217,8 +257,10 @@ public class CouponController {
             @RequestParam(value = "codes", required = false) List<String> codes,
             @RequestParam("ids") List<Long> ids,
             @CurrentAccount Account currUser) {
+
         couponService.deleteCouponsInverse(
                 types,
+                criterias,
                 codes,
                 code,
                 shopId,
@@ -227,7 +269,9 @@ public class CouponController {
                 showExpired,
                 ids,
                 currUser);
-        return new ResponseEntity<>("Coupons deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -239,9 +283,13 @@ public class CouponController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:coupon')")
-    public ResponseEntity<?> deleteAllCoupons(@RequestParam(value = "shopId", required = false) Long shopId,
+    public ResponseEntity<String> deleteAllCoupons(
+            @RequestParam(value = "shopId", required = false) Long shopId,
             @CurrentAccount Account currUser) {
+                
         couponService.deleteAllCoupons(shopId, currUser);
-        return new ResponseEntity<>("All coupons deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 }

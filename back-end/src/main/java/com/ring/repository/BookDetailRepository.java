@@ -20,51 +20,78 @@ public interface BookDetailRepository extends JpaRepository<BookDetail, Long>{
      *
      * @param id the ID of the book to retrieve details for; optional if slug is provided.
      * @param slug the slug identifier of the book to retrieve details for; optional if ID is provided.
-     * @return an {@code Optional} containing the details of the book as an {@code IBookDetail}
+     * @return an {@code Optional} containing the details of the book AS an {@code IBookDetail}
      *         projection, or an empty {@code Optional} if no book matches the specified criteria.
      */
     @Query("""
-            select distinct b.id as id, b.slug as slug,
-                b.price as price, b.discount as discount, b.title as title,
-                b.description as description, b.type as type, b.author as author,
-                b.amount as amount, p.id as pubId, p.name as pubName,
-                c.id as cateId, c.name as cateName, c.slug as cateSlug,
-                pc.id as parentId, pc.name as parentName, pc.slug as parentSlug,
-                pc.ancestor_id as ancestorId, s.id as shopId, s.name as shopName,
-                d.size as size, d.pages as pages, d.bDate as date,
-                d.bLanguage as language, d.bWeight as weight, i as image, pv as previews,
-                coalesce(od.totalOrders, 0) as totalOrders,
-            	coalesce(rv.rating, 0) as rating, rv.totalRates as totalRates,
-            	coalesce(rv.five, 0) as rate5,
-            	coalesce(rv.four, 0) as rate4,
-            	coalesce(rv.three, 0) as rate3,
-            	coalesce(rv.two, 0) as rate2,
-            	coalesce(rv.one, 0) as rate1
-            from Book b
-            left join b.detail d
-            left join b.image i
-            left join d.previewImages pv
-            join b.shop s
-            join b.publisher p
-            join b.cate c
-            left join (select p.id as id, p.name as name, p.slug as slug, p.parent.id as ancestor_id
-                from Category p) pc on pc.id = c.parent.id
-            left join (select o.book.id as book_id, sum(o.quantity) as totalOrders
-            	from OrderItem o group by o.book.id) od on b.id = od.book_id
-            left join (
-            	select r.book.id as book_id,
-            	    avg(r.rating) as rating,
-            	    count(r.id) as totalRates,
-            		sum(case when r.rating = 5 then 1 else 0 end) as five,
-            		sum(case when r.rating = 4 then 1 else 0 end) as four,
-            		sum(case when r.rating = 3 then 1 else 0 end) as three,
-            		sum(case when r.rating = 2 then 1 else 0 end) as two,
-            		sum(case when r.rating = 1 then 1 else 0 end) as one
-            	from Review r group by r.book.id
-            ) rv on b.id = rv.book_id
-            where case when coalesce(:id) is not null
-                then (b.id = :id) else (b.slug = :slug) end
-            """)
+        SELECT DISTINCT b.id AS id, 
+            b.slug AS slug,
+            b.price AS price, 
+            b.discount AS discount, 
+            b.title AS title,
+            b.description AS description, 
+            b.type AS type, 
+            b.author AS author,
+            b.amount AS amount, 
+            p.id AS pubId, 
+            p.name AS pubName,
+            c.id AS cateId, 
+            c.name AS cateName, 
+            c.slug AS cateSlug,
+            pc.id AS parentId, 
+            pc.name AS parentName, 
+            pc.slug AS parentSlug,
+            pc.ancestor_id AS ancestorId, 
+            s.id AS shopId, 
+            s.name AS shopName,
+            d.size AS size, 
+            d.pages AS pages, 
+            d.bDate AS date,
+            d.bLanguage AS language, 
+            d.bWeight AS weight, 
+            i AS image, 
+            pv AS previews,
+            coalesce(od.totalOrders, 0) AS totalOrders,
+            coalesce(rv.rating, 0) AS rating, rv.totalRates AS totalRates,
+            coalesce(rv.five, 0) AS rate5,
+            coalesce(rv.four, 0) AS rate4,
+            coalesce(rv.three, 0) AS rate3,
+            coalesce(rv.two, 0) AS rate2,
+            coalesce(rv.one, 0) AS rate1
+        FROM Book b
+        LEFT JOIN b.detail d
+        LEFT JOIN b.image i
+        LEFT JOIN d.previewImages pv
+        JOIN b.shop s
+        JOIN b.publisher p
+        JOIN b.cate c
+        LEFT JOIN (
+            SELECT p.id AS id, 
+                p.name AS name, 
+                p.slug AS slug, 
+                p.parent.id AS ancestor_id
+            FROM Category p
+        ) pc ON pc.id = c.parent.id
+        LEFT JOIN (
+            SELECT o.book.id AS book_id, 
+                sum(o.quantity) AS totalOrders
+            FROM OrderItem o 
+            GROUP BY o.book.id
+        ) od ON b.id = od.book_id
+        LEFT JOIN (
+            SELECT r.book.id AS book_id,
+                AVG(r.rating) AS rating,
+                COUNT(r.id) AS totalRates,
+                SUM(CASE WHEN r.rating = 5 THEN 1 ELSE 0 END) AS five,
+                SUM(CASE WHEN r.rating = 4 THEN 1 ELSE 0 END) AS four,
+                SUM(CASE WHEN r.rating = 3 THEN 1 ELSE 0 END) AS three,
+                SUM(CASE WHEN r.rating = 2 THEN 1 ELSE 0 END) AS two,
+                SUM(CASE WHEN r.rating = 1 THEN 1 ELSE 0 END) AS one
+            FROM Review r 
+            GROUP BY r.book.id
+        ) rv ON b.id = rv.book_id
+        WHERE CASE WHEN COALESCE(:id) IS NOT NULL THEN (b.id = :id) ELSE (b.slug = :slug) END
+    """)
     Optional<IBookDetail> findBookDetail(Long id, String slug);
 
     /**
@@ -75,25 +102,40 @@ public interface BookDetailRepository extends JpaRepository<BookDetail, Long>{
      *         or an empty {@link Optional} if no book matches the provided identifier
      */
     @Query("""
-            select distinct b.id as id, b.slug as slug, b.price as price,
-                b.discount as discount, b.title as title, b.description as description,
-                b.type as type, b.author as author, b.amount as amount,
-                i.id as image, p.id as pubId, p.name as pubName,
-                c.id as cateId, c.name as cateName, s.id as shopId,
-                s.name as shopName, d.size as size, d.pages as pages,
-                d.bDate as date, d.bLanguage as language, d.bWeight as weight,
-                pv.previews as previews
-            from Book b
-            left join b.detail d
-            left join (
-                select pi.detail.id as detail_id, array_agg(pi.id)
-                over (order by pi.detail.id) as previews
-                from Image pi) pv on pv.detail_id = d.id
-            left join b.image i
-            join b.shop s
-            join b.publisher p
-            join b.cate c
-            where b.id = :id
-            """)
+        SELECT DISTINCT b.id AS id, 
+            b.slug AS slug, 
+            b.price AS price,
+            b.discount AS discount, 
+            b.title AS title, 
+            b.description AS description,
+            b.type AS type, 
+            b.author AS author, 
+            b.amount AS amount,
+            i.id AS image, 
+            p.id AS pubId, 
+            p.name AS pubName,
+            c.id AS cateId, 
+            c.name AS cateName, 
+            s.id AS shopId,
+            s.name AS shopName, 
+            d.size AS size, 
+            d.pages AS pages,
+            d.bDate AS date, 
+            d.bLanguage AS language, 
+            d.bWeight AS weight,
+            pv.previews AS previews
+        FROM Book b
+        LEFT JOIN b.detail d
+        LEFT JOIN (
+            SELECT pi.detail.id AS detail_id, 
+            ARRAY_AGG(pi.id) OVER (ORDER BY pi.detail.id) AS previews
+            FROM Image pi
+        ) pv ON pv.detail_id = d.id
+        LEFT JOIN b.image i
+        JOIN b.shop s
+        JOIN b.publisher p
+        JOIN b.cate c
+        WHERE b.id = :id
+    """)
     Optional<IBook> findBook(Long id);
 }

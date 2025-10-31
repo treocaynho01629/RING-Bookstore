@@ -2,8 +2,12 @@ package com.ring.controller;
 
 import com.ring.config.CurrentAccount;
 import com.ring.dto.request.ReviewRequest;
+import com.ring.dto.response.PagingResponse;
+import com.ring.dto.response.reviews.ReviewDTO;
 import com.ring.model.entity.Account;
+import com.ring.model.entity.Review;
 import com.ring.service.ReviewService;
+import com.ring.service.impl.MessageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +28,7 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final MessageService messageService;
 
     /**
      * Retrieves all reviews with optional filters and pagination.
@@ -40,7 +45,7 @@ public class ReviewController {
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','GUEST') and hasAuthority('read:review')")
-    public ResponseEntity<?> getReviews(
+    public ResponseEntity<PagingResponse<ReviewDTO>> getReviews(
             @RequestParam(value = "bookId", required = false) Long bookId,
             @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "rating", required = false) Integer rating,
@@ -49,14 +54,16 @@ public class ReviewController {
             @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
             @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir) {
-        return new ResponseEntity<>(reviewService.getReviews(bookId,
+
+        PagingResponse<ReviewDTO> reviews = reviewService.getReviews(bookId,
                 userId,
                 rating,
                 keyword,
                 pageNo,
                 pageSize,
                 sortBy,
-                sortDir), HttpStatus.OK);
+                sortDir);
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 
     /**
@@ -68,9 +75,12 @@ public class ReviewController {
      */
     @GetMapping("/book/{id}")
     @PreAuthorize("hasRole('USER') and hasAuthority('read:review')")
-    public ResponseEntity<?> getReviewByBook(@PathVariable("id") Long bookId,
+    public ResponseEntity<ReviewDTO> getReviewByBook(
+            @PathVariable("id") Long bookId,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(reviewService.getReviewByBook(bookId, currUser), HttpStatus.OK);
+
+        ReviewDTO review = reviewService.getReviewByBook(bookId, currUser);
+        return new ResponseEntity<>(review, HttpStatus.OK);
     }
 
     /**
@@ -85,14 +95,21 @@ public class ReviewController {
      * @return a {@link ResponseEntity} containing the book's reviews.
      */
     @GetMapping("/books/{id}")
-    public ResponseEntity<?> getReviewsByBook(@PathVariable("id") Long bookId,
+    public ResponseEntity<PagingResponse<ReviewDTO>> getReviewsByBook(
+            @PathVariable("id") Long bookId,
             @RequestParam(value = "rating", required = false) Integer rating,
             @RequestParam(value = "pSize", defaultValue = "5") Integer pageSize,
             @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
             @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir) {
-        return new ResponseEntity<>(reviewService.getReviewsByBookId(bookId, rating, pageNo, pageSize, sortBy, sortDir),
-                HttpStatus.OK);
+
+        PagingResponse<ReviewDTO> reviews = reviewService.getReviewsByBookId(bookId, 
+                rating, 
+                pageNo, 
+                pageSize, 
+                sortBy, 
+                sortDir);
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 
     /**
@@ -108,14 +125,21 @@ public class ReviewController {
      */
     @GetMapping("/user")
     @PreAuthorize("hasRole('USER') and hasAuthority('read:review')")
-    public ResponseEntity<?> getUserReviews(@RequestParam(value = "rating", required = false) Integer rating,
+    public ResponseEntity<PagingResponse<ReviewDTO>> getUserReviews(
+            @RequestParam(value = "rating", required = false) Integer rating,
             @RequestParam(value = "pSize", defaultValue = "5") Integer pageSize,
             @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
             @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(reviewService.getUserReviews(currUser, rating, pageNo, pageSize, sortBy, sortDir),
-                HttpStatus.OK);
+
+        PagingResponse<ReviewDTO> reviews = reviewService.getUserReviews(currUser, 
+                rating, 
+                pageNo, 
+                pageSize, 
+                sortBy, 
+                sortDir);
+        return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 
     /**
@@ -128,10 +152,13 @@ public class ReviewController {
      */
     @PostMapping("/{id}")
     @PreAuthorize("hasRole('USER') and hasAuthority('create:review')")
-    public ResponseEntity<?> reviewBook(@PathVariable("id") Long bookId,
+    public ResponseEntity<Review> reviewBook(
+            @PathVariable("id") Long bookId,
             @RequestBody @Valid ReviewRequest request,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(reviewService.review(bookId, request, currUser), HttpStatus.CREATED);
+
+        Review review = reviewService.review(bookId, request, currUser);
+        return new ResponseEntity<>(review, HttpStatus.CREATED);
     }
 
     /**
@@ -144,10 +171,13 @@ public class ReviewController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('USER') and hasAuthority('update:review')")
-    public ResponseEntity<?> updateReview(@PathVariable("id") Long bookId,
+    public ResponseEntity<ReviewDTO> updateReview(
+            @PathVariable("id") Long bookId,
             @Valid @RequestBody ReviewRequest request,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(reviewService.updateReview(bookId, request, currUser), HttpStatus.OK);
+
+        ReviewDTO review = reviewService.updateReview(bookId, request, currUser);
+        return new ResponseEntity<>(review, HttpStatus.OK);
     }
 
     /**
@@ -158,10 +188,12 @@ public class ReviewController {
      */
     @PutMapping("/hide/{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('update:review')")
-    public ResponseEntity<?> hideReview(@PathVariable("id") Long id) {
+    public ResponseEntity<String> hideReview(@PathVariable("id") Long id) {
 
         reviewService.setReviewVisibility(id, true);
-        return new ResponseEntity<>("Review hid successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.update.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -172,10 +204,12 @@ public class ReviewController {
      */
     @PutMapping("/unhide/{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('update:review')")
-    public ResponseEntity<?> unhideReview(@PathVariable("id") Long id) {
+    public ResponseEntity<String> unhideReview(@PathVariable("id") Long id) {
 
         reviewService.setReviewVisibility(id, false);
-        return new ResponseEntity<>("Review unhid successfully!", HttpStatus.CREATED);
+        String message = messageService.getMessage("message.update.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.CREATED);
     }
 
     /**
@@ -186,9 +220,12 @@ public class ReviewController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:review')")
-    public ResponseEntity<?> deleteReview(@PathVariable("id") Long id) {
+    public ResponseEntity<String> deleteReview(@PathVariable("id") Long id) {
+
         reviewService.deleteReview(id);
-        return new ResponseEntity<>("Review deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -199,9 +236,12 @@ public class ReviewController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:review')")
-    public ResponseEntity<?> deleteReviews(@RequestParam("ids") List<Long> ids) {
+    public ResponseEntity<String> deleteReviews(@RequestParam("ids") List<Long> ids) {
+
         reviewService.deleteReviews(ids);
-        return new ResponseEntity<>("Reviews deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -216,13 +256,17 @@ public class ReviewController {
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:review')")
-    public ResponseEntity<?> deleteReviewsInverse(@RequestParam(value = "bookId", required = false) Long bookId,
+    public ResponseEntity<String> deleteReviewsInverse(
+            @RequestParam(value = "bookId", required = false) Long bookId,
             @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "rating", required = false) Integer rating,
             @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam("ids") List<Long> ids) {
+
         reviewService.deleteReviewsInverse(bookId, userId, rating, keyword, ids);
-        return new ResponseEntity<>("Reviews deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -232,8 +276,11 @@ public class ReviewController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:review')")
-    public ResponseEntity<?> deleteAllReviews() {
+    public ResponseEntity<String> deleteAllReviews() {
+        
         reviewService.deleteAllReviews();
-        return new ResponseEntity<>("All reviews deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 }

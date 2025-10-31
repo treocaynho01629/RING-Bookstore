@@ -31,9 +31,10 @@ public interface RoleRepository extends JpaRepository<Role, Byte> {
      * @return an {@link Optional} containing the {@link Role} with its associated privileges if found, or empty if not found
      */
     @Query("""
-        select r from Role r
-        join fetch r.privileges p
-        where r.roleName = :userRole
+        SELECT r AS role
+        FROM Role r
+        JOIN FETCH r.privileges p
+        WHERE r.roleName = :userRole
     """)
     Optional<Role> findRoleWithPrivileges(UserRole userRole);
 

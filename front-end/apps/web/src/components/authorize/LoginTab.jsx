@@ -9,6 +9,7 @@ import {
 } from "@ring/ui/AuthComponents";
 import { useAuthenticateMutation } from "@ring/redux/authApiSlice";
 import { Instruction } from "@ring/ui/Components";
+import { useTranslation } from "react-i18next";
 import useAuth from "../../hooks/useAuth";
 import useLogout from "../../hooks/useLogout";
 import Stack from "@mui/material/Stack";
@@ -32,6 +33,7 @@ const LoginTab = ({
   const [authenticate, { isLoading, isSuccess, isUninitialized }] =
     useAuthenticateMutation();
   const signOut = useLogout();
+  const { t } = useTranslation();
 
   // Router
   const navigate = useNavigate();
@@ -195,7 +197,7 @@ const LoginTab = ({
           type="submit"
           aria-label="submit login"
         >
-          Đăng nhập
+          {t("login")}
         </ConfirmButton>
       </Stack>
       <AuthText>

@@ -284,9 +284,11 @@ public class AccountServiceImpl implements AccountService {
         return accountMapper.projectionToProfileDTO(currProfile);
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = AppConstants.ACCOUNTS, allEntries = true),
-            @CacheEvict(cacheNames = AppConstants.ACCOUNT_DETAIL, key = "#user.id") },
-                put = { @CachePut(cacheNames = AppConstants.PROFILE, key = "#user.id") })
+    @Caching(evict = { 
+            @CacheEvict(cacheNames = AppConstants.ACCOUNTS, allEntries = true),
+            @CacheEvict(cacheNames = AppConstants.PROFILE, key = "#user.id"),
+            @CacheEvict(cacheNames = AppConstants.ACCOUNT_DETAIL, key = "#user.id") 
+    })
     @Transactional
     public AccountProfile updateProfile(ProfileRequest request, MultipartFile file, Account user) {
 

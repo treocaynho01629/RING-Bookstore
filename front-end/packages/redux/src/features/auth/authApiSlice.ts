@@ -34,7 +34,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          //Set new auth token after refresh
+          // Set new auth token after refresh
           const { data } = await queryFulfilled;
           const { token } = data;
 
@@ -59,9 +59,9 @@ export const authApiSlice = apiSlice.injectEndpoints({
         } catch (error) {
           console.error(error);
         } finally {
-          //Clear auth anyway to prevent refresh loop
-          dispatch(clearAuth()); //Reset auth state
-          dispatch(apiSlice.util.resetApiState()); //Reset redux
+          // Clear auth anyway to prevent refresh loop
+          dispatch(clearAuth()); // Reset auth state
+          dispatch(apiSlice.util.resetApiState()); // Reset redux
         }
       },
     }),

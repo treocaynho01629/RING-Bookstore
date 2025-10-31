@@ -44,9 +44,9 @@ public interface AccountRepository extends JpaRepository<Account, Long>{
 	 * @return an {@code Optional} containing the account if found, or an empty {@code Optional} if not found
 	 */
 	@Query("""
-		select a from Account a
-		join fetch a.roles r
-		where a.username = :username
+		SELECT a FROM Account a
+		JOIN FETCH a.roles r
+		WHERE a.username = :username
 	""")
 	Optional<Account> findByUsername(String username);
 
@@ -59,11 +59,11 @@ public interface AccountRepository extends JpaRepository<Account, Long>{
 	 * @return an {@link Optional} containing the matching {@link Account} if found, or an empty {@link Optional} if no match is found
 	 */
 	@Query("""
-		select a from Account a
-		join a.refreshTokens t
-		join fetch a.roles r
-		where t.refreshToken = :token
-		and a.username = :username
+		SELECT a FROM Account a
+		JOIN a.refreshTokens t
+		JOIN FETCH a.roles r
+		WHERE t.refreshToken = :token
+		AND a.username = :username
 	""")
 	Optional<Account> findByRefreshTokenAndUsername(String token, String username);
 
@@ -88,12 +88,13 @@ public interface AccountRepository extends JpaRepository<Account, Long>{
 	 *         to the excluded list.
 	 */
 	@Query("""
-		select a.id from Account a
-		join a.roles r
-		where concat (a.email, a.username) ilike %:keyword%
-		and (coalesce(:role) is null or r.roleName = :role)
-		and a.id not in :ids
-		group by a.id
+		SELECT a.id 
+		FROM Account a
+		JOIN a.roles r
+		WHERE CONCAT(a.email, a.username) ILIKE %:keyword%
+		AND (COALESCE(:role) IS NULL OR r.roleName = :role)
+		AND a.id NOT IN :ids
+		GROUP BY a.id
 	""")
 	List<Long> findInverseIds(String keyword, UserRole role, List<Long> ids);
 
@@ -105,13 +106,15 @@ public interface AccountRepository extends JpaRepository<Account, Long>{
 	 *         created in the current month, and the count of accounts created in the previous month.
 	 */
 	@Query("""
-        select t.currentMonth as total, t.currentMonth as currentMonth, t.lastMonth as lastMonth
-        from (select count(a.id) as total,
-			count(case when a.createdDate >= date_trunc('month', current date) then 1 end) as currentMonth,
-			count(case when a.createdDate >= date_trunc('month', current date) - 1 month
-				and a.createdDate < date_trunc('month', current date) then 1 end) lastMonth
-			from Account a
-			where a.createdDate >= date_trunc('month', current date) - 1 month
+        SELECT t.currentMonth AS total, 
+				t.currentMonth AS currentMonth, 
+				t.lastMonth AS lastMonth
+        FROM (SELECT COUNT(a.id) AS total,
+			COUNT(CASE WHEN a.createdDate >= DATE_TRUNC('month', CURRENT DATE) THEN 1 END) AS currentMonth,
+			COUNT(CASE WHEN a.createdDate >= DATE_TRUNC('month', CURRENT DATE) - 1 MONTH
+				AND a.createdDate < DATE_TRUNC('month', CURRENT DATE) THEN 1 END) AS lastMonth
+			FROM Account a
+			WHERE a.createdDate >= DATE_TRUNC('month', CURRENT DATE) - 1 MONTH
         ) t
    	""")
 	IStat getAccountAnalytics();
@@ -125,17 +128,26 @@ public interface AccountRepository extends JpaRepository<Account, Long>{
 	 * @return a page of projections containing account information, including ID, username, email, profile name, phone, roles, and associated image
 	 */
 	@Query("""
-		select distinct t.id as id, t.username as username, t.email as email, p.name as name,
-			p.phone as phone, t.roles as roles, i as image, t.createdDate as createdDate
-		from (select a.id as id, a.username as username, a.email as email, a.createdDate as createdDate,
-			array_agg(r.roleName) over (partition by a.id order by a.id) as roles
-			from Account a
-			join a.roles r
-			where concat (a.email, a.username) ilike %:keyword%
-			and (coalesce(:role) is null or r.roleName = :role)
-			group by a.id, r.roleName) t
-		left join AccountProfile p on p.id = t.id
-		left join p.image i
+		SELECT DISTINCT t.id AS id, 
+			t.username AS username, 
+			t.email AS email, 
+			p.name AS name,
+			p.phone AS phone, 
+			t.roles AS roles, 
+			i AS image, 
+			t.createdDate AS createdDate
+		FROM (SELECT a.id AS id, 
+				a.username AS username, 
+				a.email AS email, 
+				a.createdDate AS createdDate,
+			ARRAY_AGG(r.roleName) OVER (PARTITION BY a.id ORDER BY a.id) AS roles
+			FROM Account a
+			JOIN a.roles r
+			WHERE CONCAT(a.email, a.username) ILIKE %:keyword%
+			AND (COALESCE(:role) IS NULL OR r.roleName = :role)
+			GROUP BY a.id, r.roleName) t
+		LEFT JOIN AccountProfile p ON p.id = t.id
+		LEFT JOIN p.image i
 	""")
 	Page<IAccount> findAccountsWithFilter(String keyword, UserRole role, Pageable pageable);
 
@@ -146,9 +158,9 @@ public interface AccountRepository extends JpaRepository<Account, Long>{
 	 */
 	@Modifying
 	@Query("""
-        update Account a
-        set a.resetToken = null
-        where a.resetToken = :token
+        UPDATE Account a
+        SET a.resetToken = null
+        WHERE a.resetToken = :token
     """)
 	void clearResetToken(String token);
 }

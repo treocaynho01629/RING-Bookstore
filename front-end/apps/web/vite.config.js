@@ -54,17 +54,17 @@ export default defineConfig(({ command, mode }) => {
           changeOrigin: true,
           configure: (proxy, _options) => {
             proxy.on("error", (err, _req, _res) => {
-              console.log("proxy error", err);
+              console.error("Proxy Error:", err);
             });
             proxy.on("proxyReq", (proxyReq, req, _res) => {
-              console.log(
+              console.info(
                 "Sending Request to the Target:",
                 req.method,
                 req.url
               );
             });
             proxy.on("proxyRes", (proxyRes, req, _res) => {
-              console.log(
+              console.info(
                 "Received Response from the Target:",
                 proxyRes.statusCode,
                 req.url

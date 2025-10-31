@@ -1,5 +1,6 @@
 package com.ring.dto.request;
 
+import com.ring.model.enums.CouponCriteria;
 import com.ring.model.enums.CouponType;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,9 @@ public class CouponRequest {
 
 	@NotNull(message = "{validation.constraints.not.blank}")
 	private CouponType type;
+
+	@NotNull(message = "{validation.constraints.not.blank}")
+	private CouponCriteria criteria;
 
 	@Max(value = 9999, message = "{validation.constraints.max}")
 	private Short usage;

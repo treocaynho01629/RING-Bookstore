@@ -4,6 +4,7 @@ import com.ring.model.enums.OrderStatus;
 import com.ring.model.enums.ShippingType;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -21,6 +22,7 @@ public record OrderDTO(Long id,
                 ShippingType shippingType,
                 String note,
                 Integer totalItems,
+                LocalDateTime date,
                 OrderStatus status,
                 List<OrderItemDTO> items) {
 

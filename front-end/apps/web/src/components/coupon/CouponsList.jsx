@@ -12,9 +12,11 @@ import { Link, useSearchParams } from "react-router";
 import { CustomTab, CustomTabs } from "../custom/CustomTabs";
 import { debounce } from "lodash-es";
 import { Message } from "@ring/ui/Components";
-import { getCouponType } from "@ring/shared/enums/coupon";
+import { getCouponCriteria, getCouponType } from "@ring/shared/enums/coupon";
 import { useGetCouponsQuery } from "../../features/coupons/couponsApiSlice";
 import { trackWindowScroll } from "react-lazy-load-image-component";
+import { CouponType } from "@ring/shared/models/couponType";
+import { useTranslation } from "react-i18next";
 import CircularProgress from "@mui/material/CircularProgress";
 import DialogContent from "@mui/material/DialogContent";
 import TextField from "@mui/material/TextField";
@@ -25,23 +27,22 @@ import Loyalty from "@mui/icons-material/Loyalty";
 import CouponItem from "./CouponItem";
 import useCoupon from "../../hooks/useCoupon";
 
-const CouponType = getCouponType();
 const defaultSize = 10;
 const couponItems = [
   {
-    label: "Đã lưu",
+    label: "saved",
     filter: {
       saved: true,
     },
   },
   {
-    label: "RING!",
+    label: "ring",
     filter: {
       byShop: false,
     },
   },
   {
-    label: "Cửa hàng",
+    label: "shop",
     filter: {
       byShop: true,
     },
@@ -50,7 +51,7 @@ const couponItems = [
 
 Object.values(CouponType).forEach((item) => {
   couponItems.push({
-    label: item.label,
+    label: getCouponType(item).label,
     filter: {
       types: [item.value],
     },
@@ -58,13 +59,14 @@ Object.values(CouponType).forEach((item) => {
 });
 
 const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
+  const { t } = useTranslation();
   const { coupons: savedCoupons } = useCoupon();
   const scrollRef = useRef(null);
   const mobileScrollRef = useRef(null);
   const inputRef = useRef(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  //Filters
+  // Filters
   const [tab, setTab] = useState(
     searchParams.get("tab") ? +searchParams.get("tab") : ""
   );
@@ -79,7 +81,7 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
     isMore: true,
   });
 
-  //Fetch coupons
+  // Fetch coupons
   const { data, isLoading, isFetching, isSuccess, isError, error } =
     useGetCouponsQuery({
       byShop: filters.byShop,
@@ -130,7 +132,7 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
     }
   }, []);
 
-  //Change tab
+  // Change tab
   const handleChangeTab = (e, newValue) => {
     setTab(newValue);
     setFilters((prev) => ({ ...prev, keyword: "" }));
@@ -156,7 +158,7 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
     scrollToTop();
   };
 
-  //Show more
+  // Show more
   const handleShowMore = () => {
     if (
       isFetching ||
@@ -211,7 +213,8 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
     couponsContent = ids?.length ? (
       ids?.map((id, index) => {
         const coupon = entities[id];
-        const summary = CouponType[coupon?.type];
+        const meta = getCouponType(coupon?.type);
+        const criteria = getCouponCriteria(coupon?.criteria);
         const isSaved = savedCoupons?.indexOf(coupon?.code) != -1;
 
         return (
@@ -219,7 +222,8 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
             <CouponItem
               {...{
                 coupon,
-                summary,
+                meta,
+                criteria,
                 isSaved,
                 className: "display",
                 scrollPosition,
@@ -262,7 +266,11 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
         >
           <CustomTab label="Tất cả" value="" />
           {couponItems.map((tab, index) => (
-            <CustomTab key={`tab-${index}`} label={tab.label} value={index} />
+            <CustomTab
+              key={`tab-${index}`}
+              label={t(tab?.label)}
+              value={index}
+            />
           ))}
         </CustomTabs>
       </ToggleGroupContainer>

@@ -1,7 +1,9 @@
 import styled from "@emotion/styled";
 import { getCouponType } from "@ring/shared/enums/coupon";
+import { currencyFormat } from "@ring/shared/utils/convert";
 import { iconList } from "@ring/shared/utils/icon";
 import { Suspense } from "react";
+import { useTranslation } from "react-i18next";
 
 //#region styled
 const CouponContainer = styled.div`
@@ -148,23 +150,30 @@ const CouponDesc = styled.b`
 `;
 //#endregion
 
-const CouponType = getCouponType();
-
 const CouponDisplay = ({ coupon }) => {
-  const summary = CouponType[coupon?.type];
-  const Icon = iconList[summary?.icon];
+  const { t } = useTranslation();
+  const meta = getCouponType(coupon?.type);
+  const Icon = iconList[meta?.icon];
 
   return (
     <CouponContainer>
       <CouponIcon
-        color={summary?.color}
+        color={meta?.color}
         className={coupon?.isUsable ? "" : "disabled"}
       >
         <Suspense fallback={null}>
           <Icon />
         </Suspense>
       </CouponIcon>
-      <CouponDesc>{coupon?.summary}</CouponDesc>
+      <CouponDesc>
+        {t(coupon?.discount == 1 ? meta?.summaryFull : meta?.summary, {
+          discount:
+            coupon?.discount == 1
+              ? currencyFormat.format(coupon?.maxDiscount)
+              : coupon?.discount * 100 + "%",
+          max: currencyFormat.format(coupon?.maxDiscount),
+        })}
+      </CouponDesc>
     </CouponContainer>
   );
 };

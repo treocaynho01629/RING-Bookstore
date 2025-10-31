@@ -38,7 +38,7 @@ export const ordersApiSlice = apiSlice.injectEndpoints({
       query: (args) => {
         const { status, keyword, page, size } = args || {};
 
-        //Params
+        // Params
         const params = new URLSearchParams();
         if (status) params.append("status", status);
         if (keyword) params.append("keyword", keyword);

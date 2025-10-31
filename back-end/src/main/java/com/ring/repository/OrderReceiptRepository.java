@@ -30,28 +30,38 @@ public interface OrderReceiptRepository extends JpaRepository<OrderReceipt, Long
      * @return true if the user has purchased the book, false otherwise.
      */
     @Query("""
-                select case when count(o) > 0 then true else false end
-                from OrderReceipt o
-                join o.details od
-                join od.items oi
-                where o.user.id = :userId and oi.book.id = :id
-                and od.status = com.ring.model.enums.OrderStatus.COMPLETED
-            """)
+        SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END
+        FROM OrderReceipt o
+        JOIN o.details od
+        JOIN od.items oi
+        WHERE o.user.id = :userId 
+        AND oi.book.id = :id
+        AND od.status = com.ring.model.enums.OrderStatus.COMPLETED
+    """)
     boolean hasUserBoughtBook(Long id,
             Long userId); // Check if user have bought this book before
 
     @Query("""
-                select o.id as id, a.name as name, a.companyName as companyName,
-                a.city as city, a.address as address, a.phone as phone, o.createdDate as orderedDate,
-                o.lastModifiedDate as date, p.paymentType as paymentType, p.status as paymentStatus,
-                o.total as total, o.totalDiscount as totalDiscount, p.expiredAt as expiredAt
-                from OrderReceipt o
-                join o.payment p
-                join o.address a
-                where o.id = :id
-                and (coalesce(:userId) is null or o.user.id = :userId)
-                group by o.id, a.id, p.id
-            """)
+        SELECT o.id AS id, 
+            a.name AS name, 
+            a.companyName AS companyName,
+            a.city AS city, 
+            a.address AS address, 
+            a.phone AS phone, 
+            o.createdDate AS orderedDate,
+            o.lastModifiedDate AS date, 
+            p.paymentType AS paymentType,
+            p.status AS paymentStatus,
+            o.total AS total, 
+            o.totalDiscount AS totalDiscount, 
+            p.expiredAt AS expiredAt
+        FROM OrderReceipt o
+        JOIN o.payment p
+        JOIN o.address a
+        WHERE o.id = :id
+        AND (COALESCE(:userId) IS NULL OR o.user.id = :userId)
+        GROUP BY o.id, a.id, p.id
+    """)
     Optional<IReceiptDetail> findReceiptDetail(Long id, Long userId);
 
     /**
@@ -72,57 +82,68 @@ public interface OrderReceiptRepository extends JpaRepository<OrderReceipt, Long
      *         summaries matching the criteria
      */
     @Query(value = """
-                select distinct o.id as id, i as image, a.name as name,
-                o.lastModifiedDate as date, o.total - o.totalDiscount as totalPrice,
-                sum(oi.quantity) as totalItems
-                from OrderReceipt o
-                join o.details od
-                join o.address a
-                join od.items oi
-                left join o.user u
-                left join u.profile p
-                left join p.image i
-                left join od.shop s
-                left join oi.book b
-                where (coalesce(:shopId) is null or s.id = :shopId)
-                and (coalesce(:userId) is null or s.owner.id = :userId)
-                and (coalesce(:bookId) is null or b.id = :bookId)
-                group by o.id, i.id, a.name, o.lastModifiedDate
-            """, countQuery = """
-                select count(o.id)
-                from OrderReceipt o
-                join o.details od
-                join od.items oi
-                left join od.shop s
-                left join oi.book b
-                where (coalesce(:shopId) is null or s.id = :shopId)
-                and (coalesce(:userId) is null or s.owner.id = :userId)
-                and (coalesce(:bookId) is null or b.id = :bookId)
-            """)
+        SELECT DISTINCT o.id AS id, 
+            i AS image, 
+            a.name AS name,
+            o.lastModifiedDate AS date, 
+            o.total - o.totalDiscount AS totalPrice,
+        SUM(oi.quantity) AS totalItems
+        FROM OrderReceipt o
+        JOIN o.details od
+        JOIN o.address a
+        JOIN od.items oi
+        LEFT JOIN o.user u
+        LEFT JOIN u.profile p
+        LEFT JOIN p.image i
+        LEFT JOIN od.shop s
+        LEFT JOIN oi.book b
+        WHERE (COALESCE(:shopId) IS NULL OR s.id = :shopId)
+        AND (COALESCE(:userId) IS NULL OR s.owner.id = :userId)
+        AND (COALESCE(:bookId) IS NULL OR b.id = :bookId)
+        GROUP BY o.id, i.id, a.name, o.lastModifiedDate
+    """, 
+    countQuery = """
+        SELECT COUNT(o.id)
+        FROM OrderReceipt o
+        JOIN o.details od
+        JOIN od.items oi
+        LEFT JOIN od.shop s
+        LEFT JOIN oi.book b
+        WHERE (COALESCE(:shopId) IS NULL OR s.id = :shopId)
+        AND (COALESCE(:userId) IS NULL OR s.owner.id = :userId)
+        AND (COALESCE(:bookId) IS NULL OR b.id = :bookId)
+    """)
     Page<IReceiptSummary> findAllSummaries(Long shopId,
             Long userId,
             Long bookId,
             Pageable pageable);
 
     @Query("""
-                select o.id as id, o.email as email, a.phone as phone, a.name as name,
-                    u.username as username, i as image, a.address as address, o.lastModifiedDate as date,
-                    o.total as total, o.totalDiscount as totalDiscount
-                from OrderReceipt o
-                join o.details od
-                join od.items oi
-                join o.address a
-                left join o.user u
-                left join u.profile p
-                left join p.image i
-                left join od.shop s
-                left join Book b on oi.book.id = b.id
-                where (coalesce(:shopId) is null or s.id = :shopId)
-                and (coalesce(:userId) is null or s.owner.id = :userId)
-                and (coalesce(:status) is null or od.status = :status)
-                and concat (b.title, o.id) ilike %:keyword%
-                group by o.id, a.id, u.id, i.id
-            """)
+        SELECT o.id AS id, 
+            o.email AS email, 
+            a.phone AS phone, 
+            a.name AS name,
+            u.username AS username, 
+            i AS image, 
+            a.address AS address, 
+            o.lastModifiedDate AS date,
+            o.total AS total, 
+            o.totalDiscount AS totalDiscount
+        FROM OrderReceipt o
+        JOIN o.details od
+        JOIN od.items oi
+        JOIN o.address a
+        LEFT JOIN o.user u
+        LEFT JOIN u.profile p
+        LEFT JOIN p.image i
+        LEFT JOIN od.shop s
+        LEFT JOIN Book b ON oi.book.id = b.id
+        WHERE (COALESCE(:shopId) IS NULL OR s.id = :shopId)
+        AND (COALESCE(:userId) IS NULL OR s.owner.id = :userId)
+        AND (COALESCE(:status) IS NULL OR od.status = :status)
+        AND CONCAT(b.title, o.id) ILIKE %:keyword%
+        GROUP BY o.id, a.id, u.id, i.id
+    """)
     Page<IOrderReceipt> findAllBy(Long shopId,
             Long userId,
             OrderStatus status,
@@ -145,18 +166,18 @@ public interface OrderReceiptRepository extends JpaRepository<OrderReceipt, Long
      *         discounts (discount)
      */
     @Query("""
-                select month(o.lastModifiedDate) as name,
-                    coalesce(sum(distinct od.discount), 0) as discount,
-                    coalesce(sum(distinct o.total) , 0) as sales
-                from OrderReceipt o
-                join o.details od
-                left join od.shop s
-                where od.status = com.ring.model.enums.OrderStatus.COMPLETED
-                and (coalesce(:shopId) is null or s.id = :shopId)
-                and (coalesce(:userId) is null or s.owner.id = :userId)
-                and (coalesce(:year) is null or year(o.lastModifiedDate) = :year)
-                group by month(o.lastModifiedDate)
-            """)
+        SELECT MONTH(o.lastModifiedDate) AS name,
+            COALESCE(SUM(DISTINCT od.discount), 0) AS discount,
+            COALESCE(SUM(DISTINCT o.total), 0) AS sales
+        FROM OrderReceipt o
+        JOIN o.details od
+        LEFT JOIN od.shop s
+        WHERE od.status = com.ring.model.enums.OrderStatus.COMPLETED
+        AND (COALESCE(:shopId) IS NULL OR s.id = :shopId)
+        AND (COALESCE(:userId) IS NULL OR s.owner.id = :userId)
+        AND (COALESCE(:year) IS NULL OR YEAR(o.lastModifiedDate) = :year)
+        GROUP BY MONTH(o.lastModifiedDate)
+    """)
     List<Map<String, Object>> getMonthlySales(Long shopId,
             Long userId,
             Integer year); // Get monthly sale

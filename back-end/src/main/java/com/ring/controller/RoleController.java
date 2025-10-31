@@ -1,8 +1,11 @@
 package com.ring.controller;
 
+import com.ring.model.entity.PrivilegeGroup;
+import com.ring.model.entity.Role;
 import com.ring.model.enums.PrivilegeType;
 import com.ring.model.enums.UserRole;
 import com.ring.service.RoleService;
+import com.ring.service.impl.MessageService;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,7 @@ import java.util.List;
 public class RoleController {
 
     private final RoleService roleService;
+    private final MessageService messageService;
 
     /**
      * Retrieves all grouped privileges.
@@ -31,8 +35,10 @@ public class RoleController {
      */
     @GetMapping("/privileges")
     @PreAuthorize("hasAnyRole('ADMIN', 'GUEST') and hasAuthority('read:role')")
-    public ResponseEntity<?> getPrivileges() {
-        return new ResponseEntity<>(roleService.getPrivileges(), HttpStatus.OK);
+    public ResponseEntity<List<PrivilegeGroup>> getPrivileges() {
+
+        List<PrivilegeGroup> privileges = roleService.getPrivileges();
+        return new ResponseEntity<>(privileges, HttpStatus.OK);
     }
 
     /**
@@ -43,8 +49,10 @@ public class RoleController {
      */
     @GetMapping("/{name}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('read:role')")
-    public ResponseEntity<?> getRole(@PathVariable("name") UserRole name) {
-        return new ResponseEntity<>(roleService.findRole(name), HttpStatus.OK);
+    public ResponseEntity<Role> getRole(@PathVariable("name") UserRole name) {
+
+        Role role = roleService.findRole(name);
+        return new ResponseEntity<>(role, HttpStatus.OK);
     }
 
     /**
@@ -56,12 +64,16 @@ public class RoleController {
      */
     @PutMapping("/{name}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('update:role')")
-    public ResponseEntity<?> updateRole(@PathVariable("name") UserRole name,
-                                        @RequestPart
-                                        @NotNull(message = "Quyền hạn không được để trống!")
-                                        @NotEmpty(message = "Quyền hạn không được để trống!")
-                                        List<PrivilegeType> privileges) {
+    public ResponseEntity<String> updateRole(
+            @PathVariable("name") UserRole name,
+            @RequestPart
+                @NotNull(message = "{validation.constraints.not.blank}")
+                @NotEmpty(message = "{validation.constraints.not.blank}")
+            List<PrivilegeType> privileges) {
+
         roleService.updateRole(privileges, name);
-        return new ResponseEntity<>("Cập nhật quyền thành công!", HttpStatus.OK);
+        String message = messageService.getMessage("message.update.succeeded");
+        
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 }

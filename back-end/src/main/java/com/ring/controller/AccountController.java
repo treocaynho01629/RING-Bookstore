@@ -1,13 +1,14 @@
 package com.ring.controller;
 
-import com.ring.common.AppConstants;
 import com.ring.config.CurrentAccount;
 import com.ring.dto.request.AccountRequest;
 import com.ring.dto.request.ChangePassRequest;
 import com.ring.dto.request.ProfileRequest;
 import com.ring.dto.response.PagingResponse;
 import com.ring.dto.response.accounts.AccountDTO;
+import com.ring.dto.response.accounts.AccountDetailDTO;
 import com.ring.dto.response.accounts.ProfileDTO;
+import com.ring.dto.response.dashboard.StatDTO;
 import com.ring.model.entity.Account;
 import com.ring.model.entity.AccountProfile;
 import com.ring.model.enums.UserRole;
@@ -55,7 +56,8 @@ public class AccountController {
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','GUEST') and hasAuthority('read:user')")
-    public ResponseEntity<?> getAllAccounts(@RequestParam(value = "pSize", defaultValue = "10") Integer pageSize,
+    public ResponseEntity<PagingResponse<AccountDTO>> getAllAccounts(
+            @RequestParam(value = "pSize", defaultValue = "10") Integer pageSize,
             @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
             @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir,
@@ -79,9 +81,10 @@ public class AccountController {
      */
     @GetMapping("{id}")
     @PreAuthorize("hasAnyRole('ADMIN','GUEST') and hasAuthority('read:user')")
-    public ResponseEntity<?> getAccountById(@PathVariable("id") Long accountId) {
+    public ResponseEntity<AccountDetailDTO> getAccountById(@PathVariable("id") Long accountId) {
 
-        return new ResponseEntity<>(accountService.getAccountById(accountId), HttpStatus.OK);
+        AccountDetailDTO account = accountService.getAccountById(accountId);
+        return new ResponseEntity<>(account, HttpStatus.OK);
     }
 
     /**
@@ -91,9 +94,10 @@ public class AccountController {
      */
     @GetMapping("/analytics")
     @PreAuthorize("hasAnyRole('ADMIN','GUEST') and hasAuthority('read:user')")
-    public ResponseEntity<?> getAccountAnalytics() {
+    public ResponseEntity<StatDTO> getAccountAnalytics() {
 
-        return new ResponseEntity<>(accountService.getAnalytics(), HttpStatus.OK);
+        StatDTO analytics = accountService.getAnalytics();
+        return new ResponseEntity<>(analytics, HttpStatus.OK);
     }
 
     /**
@@ -105,10 +109,12 @@ public class AccountController {
      */
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('create:user')")
-    public ResponseEntity<Account> saveAccount(@Valid @RequestPart AccountRequest request,
+    public ResponseEntity<Account> saveAccount(
+            @Valid @RequestPart AccountRequest request,
             @RequestPart(name = "image", required = false) MultipartFile file) {
 
-        return new ResponseEntity<>(accountService.saveAccount(request, file), HttpStatus.CREATED);
+        Account account = accountService.saveAccount(request, file);
+        return new ResponseEntity<>(account, HttpStatus.CREATED);
     }
 
     /**
@@ -122,16 +128,14 @@ public class AccountController {
      */
     @PutMapping(value = "{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('update:user')")
-    public ResponseEntity<Account> updateAccount(@PathVariable("id") Long accountId,
+    public ResponseEntity<Account> updateAccount(
+            @PathVariable("id") Long accountId,
             @Valid @RequestPart AccountRequest request,
             @CurrentAccount Account currUser,
             @RequestPart(name = "image", required = false) MultipartFile file) {
 
-        return new ResponseEntity<>(accountService.updateAccount(
-                request,
-                file,
-                currUser,
-                accountId), HttpStatus.OK);
+        Account account = accountService.updateAccount(request, file, currUser, accountId);
+        return new ResponseEntity<>(account, HttpStatus.OK);
     }
 
     /**
@@ -158,7 +162,7 @@ public class AccountController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:user')")
-    public ResponseEntity<?> deleteAccounts(@RequestParam("ids") List<Long> ids) {
+    public ResponseEntity<String> deleteAccounts(@RequestParam("ids") List<Long> ids) {
 
         accountService.deleteAccounts(ids);
         String message = messageService.getMessage("message.delete.succeeded");
@@ -177,7 +181,8 @@ public class AccountController {
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:user')")
-    public ResponseEntity<?> deleteAccountsInverse(@RequestParam(value = "keyword", defaultValue = "") String keyword,
+    public ResponseEntity<String> deleteAccountsInverse(
+            @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam(value = "role", required = false) UserRole role,
             @RequestParam("ids") List<Long> ids) {
 
@@ -194,7 +199,7 @@ public class AccountController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:user')")
-    public ResponseEntity<?> deleteAllAccounts() {
+    public ResponseEntity<String> deleteAllAccounts() {
 
         accountService.deleteAllAccounts();
         String message = messageService.getMessage("message.delete.succeeded");
@@ -226,7 +231,8 @@ public class AccountController {
      */
     @PutMapping(value = "/profile", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     @PreAuthorize("hasRole('USER') and hasAuthority('update:profile')")
-    public ResponseEntity<AccountProfile> updateProfile(@Valid @RequestPart ProfileRequest request,
+    public ResponseEntity<AccountProfile> updateProfile(
+            @Valid @RequestPart ProfileRequest request,
             @RequestPart(name = "image", required = false) MultipartFile file,
             @CurrentAccount Account currUser) {
 
@@ -243,7 +249,8 @@ public class AccountController {
      */
     @PutMapping("/change-password")
     @PreAuthorize("hasRole('USER') and hasAuthority('update:profile')")
-    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePassRequest request,
+    public ResponseEntity<String> changePassword(
+            @Valid @RequestBody ChangePassRequest request,
             @CurrentAccount Account currUser) {
 
         accountService.changePassword(request, currUser);

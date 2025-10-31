@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router";
 import { useColorScheme } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
 import ContactSupportOutlined from "@mui/icons-material/ContactSupportOutlined";
 import ContrastOutlined from "@mui/icons-material/ContrastOutlined";
 import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
@@ -69,6 +70,7 @@ const Logo = styled.img`
 
 const SimpleNavbar = () => {
   const { mode, setMode } = useColorScheme();
+  const { i18n } = useTranslation();
 
   //Toggle color mode
   const toggleMode = () => {
@@ -88,6 +90,12 @@ const SimpleNavbar = () => {
       <Link to="/" tabIndex={-1}>
         <Logo src="/full-logo.svg" alt="RING! Logo" />
       </Link>
+      <SimpleButton onClick={() => i18n.changeLanguage("vi")}>
+        <p>VN</p>
+      </SimpleButton>
+      <SimpleButton onClick={() => i18n.changeLanguage("en")}>
+        <p>EN</p>
+      </SimpleButton>
       <SimpleButton>
         <Link to="https://github.com/treocaynho01629/RING-Bookstore/issues">
           <ContactSupportOutlined />

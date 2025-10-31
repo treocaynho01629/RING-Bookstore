@@ -23,10 +23,13 @@ public interface AddressRepository extends JpaRepository<Address, Long>{
      * @return a list of {@link IAddress} objects containing address details and a default flag
      */
     @Query("""
-        select a as address, (case when p.id is null then false else true end) as isDefault
-        from Address a left join AccountProfile p on a.id = p.address.id
-        where a.profile.id = :profileId
-        order by isDefault desc
+        SELECT a AS address, 
+            (CASE WHEN p.id IS NULL THEN FALSE ELSE TRUE END) AS isDefault
+        FROM Address a 
+        LEFT JOIN AccountProfile p 
+        ON a.id = p.address.id
+        WHERE a.profile.id = :profileId
+        ORDER BY isDefault DESC
 	""")
     List<IAddress> findAddressesByProfile(Long profileId);
 
@@ -38,8 +41,9 @@ public interface AddressRepository extends JpaRepository<Address, Long>{
      * @return the address and its default status wrapped in an {@link IAddress} projection
      */
     @Query("""
-        select p.address as address, true as isDefault from AccountProfile p
-        where p.id = :profileId
+        SELECT p.address AS address, 
+        TRUE as isDefault from AccountProfile p
+        WHERE p.id = :profileId
 	""")
     IAddress findAddressByProfile(Long profileId);
 }

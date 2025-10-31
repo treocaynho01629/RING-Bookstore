@@ -2,8 +2,18 @@ package com.ring.controller;
 
 import com.ring.config.CurrentAccount;
 import com.ring.dto.request.ShopRequest;
+import com.ring.dto.response.PagingResponse;
+import com.ring.dto.response.dashboard.StatDTO;
+import com.ring.dto.response.shops.ShopDisplayDTO;
+import com.ring.dto.response.shops.ShopDTO;
+import com.ring.dto.response.shops.ShopInfoDTO;
+import com.ring.dto.response.shops.ShopPreviewDTO;
+import com.ring.dto.response.shops.ShopDetailDTO;
+import com.ring.dto.response.shops.ShopDisplayDetailDTO;
 import com.ring.model.entity.Account;
+import com.ring.model.entity.Shop;
 import com.ring.service.ShopService;
+import com.ring.service.impl.MessageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +35,7 @@ import java.util.List;
 public class ShopController {
 
     private final ShopService shopService;
+    private final MessageService messageService;
 
     /**
      * Retrieves shops for display with pagination, sorting, and optional filters.
@@ -39,7 +50,7 @@ public class ShopController {
      * @return a {@link ResponseEntity} containing the list of shops.
      */
     @GetMapping("/find")
-    public ResponseEntity<?> getDisplayShops(
+    public ResponseEntity<PagingResponse<ShopDisplayDTO>> getDisplayShops(
             @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam(value = "pSize", defaultValue = "15") Integer pageSize,
             @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
@@ -47,14 +58,16 @@ public class ShopController {
             @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir,
             @RequestParam(value = "followed", required = false) Boolean followed,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(shopService.getDisplayShops(
+
+        PagingResponse<ShopDisplayDTO> shops = shopService.getDisplayShops(
                 pageNo,
                 pageSize,
                 sortBy,
                 sortDir,
                 keyword,
                 followed,
-                currUser), HttpStatus.OK);
+                currUser);
+        return new ResponseEntity<>(shops, HttpStatus.OK);
     }
 
     /**
@@ -71,7 +84,7 @@ public class ShopController {
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('SELLER','GUEST') and hasAuthority('read:shop')")
-    public ResponseEntity<?> getShops(
+    public ResponseEntity<PagingResponse<ShopDTO>> getShops(
             @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam(value = "pSize", defaultValue = "15") Integer pageSize,
             @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
@@ -79,14 +92,16 @@ public class ShopController {
             @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir,
             @RequestParam(value = "userId", required = false) Long userId,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(shopService.getShops(
+
+        PagingResponse<ShopDTO> shops = shopService.getShops(
                 pageNo,
                 pageSize,
                 sortBy,
                 sortDir,
                 keyword,
                 userId,
-                currUser), HttpStatus.OK);
+                currUser);
+        return new ResponseEntity<>(shops, HttpStatus.OK);
     }
 
     /**
@@ -97,8 +112,10 @@ public class ShopController {
      */
     @GetMapping("/preview")
     @PreAuthorize("hasAnyRole('SELLER','GUEST') and hasAuthority('read:shop')")
-    public ResponseEntity<?> getPreviewShops(@CurrentAccount Account currUser) {
-        return new ResponseEntity<>(shopService.getShopsPreview(currUser), HttpStatus.OK);
+    public ResponseEntity<List<ShopPreviewDTO>> getPreviewShops(@CurrentAccount Account currUser) {
+
+        List<ShopPreviewDTO> shops = shopService.getShopsPreview(currUser);
+        return new ResponseEntity<>(shops, HttpStatus.OK);
     }
 
     /**
@@ -109,9 +126,12 @@ public class ShopController {
      * @return a {@link ResponseEntity} containing shop information.
      */
     @GetMapping("info/{id}")
-    public ResponseEntity<?> getShopInfo(@PathVariable("id") Long id,
+    public ResponseEntity<ShopInfoDTO> getShopInfo(
+            @PathVariable("id") Long id,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(shopService.getShopInfo(id, currUser), HttpStatus.OK);
+
+        ShopInfoDTO shopInfo = shopService.getShopInfo(id, currUser);
+        return new ResponseEntity<>(shopInfo, HttpStatus.OK);
     }
 
     /**
@@ -122,9 +142,12 @@ public class ShopController {
      * @return a {@link ResponseEntity} containing shop display details.
      */
     @GetMapping("{id}")
-    public ResponseEntity<?> getShopDisplayDetail(@PathVariable("id") Long id,
+    public ResponseEntity<ShopDisplayDetailDTO> getShopDisplayDetail(
+            @PathVariable("id") Long id,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(shopService.getShopDisplayDetail(id, currUser), HttpStatus.OK);
+
+        ShopDisplayDetailDTO shopDisplayDetail = shopService.getShopDisplayDetail(id, currUser);
+        return new ResponseEntity<>(shopDisplayDetail, HttpStatus.OK);
     }
 
     /**
@@ -136,9 +159,12 @@ public class ShopController {
      */
     @GetMapping("/detail/{id}")
     @PreAuthorize("hasAnyRole('SELLER','GUEST') and hasAuthority('read:shop')")
-    public ResponseEntity<?> getShopDetail(@PathVariable("id") Long id,
+    public ResponseEntity<ShopDetailDTO> getShopDetail(
+            @PathVariable("id") Long id,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(shopService.getShopDetail(id, currUser), HttpStatus.OK);
+
+        ShopDetailDTO shopDetail = shopService.getShopDetail(id, currUser);
+        return new ResponseEntity<>(shopDetail, HttpStatus.OK);
     }
 
     /**
@@ -150,9 +176,12 @@ public class ShopController {
      */
     @GetMapping("/analytics")
     @PreAuthorize("hasAnyRole('SELLER','GUEST') and hasAuthority('read:shop')")
-    public ResponseEntity<?> getShopAnalytics(@RequestParam(value = "userId", required = false) Long userId,
+    public ResponseEntity<StatDTO> getShopAnalytics(
+            @RequestParam(value = "userId", required = false) Long userId,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(shopService.getAnalytics(userId, currUser), HttpStatus.OK);
+
+        StatDTO shopAnalytics = shopService.getAnalytics(userId, currUser);
+        return new ResponseEntity<>(shopAnalytics, HttpStatus.OK);
     }
 
     /**
@@ -164,10 +193,14 @@ public class ShopController {
      */
     @PutMapping("/follow/{id}")
     @PreAuthorize("hasRole('USER') and hasAuthority('update:profile')")
-    public ResponseEntity<?> followShop(@PathVariable("id") Long id,
+    public ResponseEntity<String> followShop(
+            @PathVariable("id") Long id,
             @CurrentAccount Account currUser) {
+
         shopService.follow(id, currUser);
-        return new ResponseEntity<>("Shop followed successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.update.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -179,10 +212,14 @@ public class ShopController {
      */
     @PutMapping("/unfollow/{id}")
     @PreAuthorize("hasRole('USER') and hasAuthority('update:profile')")
-    public ResponseEntity<?> unfollowShop(@PathVariable("id") Long id,
+    public ResponseEntity<String> unfollowShop(
+            @PathVariable("id") Long id,
             @CurrentAccount Account currUser) {
+
         shopService.unfollow(id, currUser);
-        return new ResponseEntity<>("Shop unfollowed successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.update.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -195,10 +232,13 @@ public class ShopController {
      */
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     @PreAuthorize("hasRole('SELLER')  and hasAuthority('create:shop')")
-    public ResponseEntity<?> createShop(@Valid @RequestPart("request") ShopRequest request,
+    public ResponseEntity<Shop> createShop(
+            @Valid @RequestPart("request") ShopRequest request,
             @RequestPart(name = "image", required = false) MultipartFile file,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(shopService.addShop(request, file, currUser), HttpStatus.CREATED);
+
+        Shop shop = shopService.addShop(request, file, currUser);
+        return new ResponseEntity<>(shop, HttpStatus.CREATED);
     }
 
     /**
@@ -212,11 +252,14 @@ public class ShopController {
      */
     @PutMapping(value = "/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     @PreAuthorize("hasRole('SELLER')  and hasAuthority('update:shop')")
-    public ResponseEntity<?> updateShop(@PathVariable("id") Long id,
+    public ResponseEntity<Shop> updateShop(
+            @PathVariable("id") Long id,
             @Valid @RequestPart("request") ShopRequest request,
             @RequestPart(name = "image", required = false) MultipartFile file,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(shopService.updateShop(id, request, file, currUser), HttpStatus.CREATED);
+
+        Shop shop = shopService.updateShop(id, request, file, currUser);
+        return new ResponseEntity<>(shop, HttpStatus.CREATED);
     }
 
     /**
@@ -228,8 +271,14 @@ public class ShopController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SELLER')  and hasAuthority('delete:shop')")
-    public ResponseEntity<?> deleteShop(@PathVariable("id") Long id, @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(shopService.deleteShop(id, currUser), HttpStatus.OK);
+    public ResponseEntity<String> deleteShop(
+            @PathVariable("id") Long id,
+            @CurrentAccount Account currUser) {
+
+        shopService.deleteShop(id, currUser);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -241,10 +290,14 @@ public class ShopController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('SELLER')  and hasAuthority('delete:shop')")
-    public ResponseEntity<?> deleteCoupons(@RequestParam("ids") List<Long> ids,
+    public ResponseEntity<String> deleteCoupons(
+            @RequestParam("ids") List<Long> ids,
             @CurrentAccount Account currUser) {
+
         shopService.deleteShops(ids, currUser);
-        return new ResponseEntity<>("Shops deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -258,16 +311,20 @@ public class ShopController {
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('SELLER')  and hasAuthority('delete:shop')")
-    public ResponseEntity<?> deleteCouponsInverse(@RequestParam(value = "keyword", defaultValue = "") String keyword,
+    public ResponseEntity<String> deleteCouponsInverse(
+            @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam("ids") List<Long> ids,
             @CurrentAccount Account currUser) {
+
         shopService.deleteShopsInverse(
                 keyword,
                 userId,
                 ids,
                 currUser);
-        return new ResponseEntity<>("Shops deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -278,8 +335,11 @@ public class ShopController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('SELLER')  and hasAuthority('delete:shop')")
-    public ResponseEntity<?> deleteAllShops(@CurrentAccount Account currUser) {
+    public ResponseEntity<String> deleteAllShops(@CurrentAccount Account currUser) {
+
         shopService.deleteAllShops(currUser);
-        return new ResponseEntity<>("All shops deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+        
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 }

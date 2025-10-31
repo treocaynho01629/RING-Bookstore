@@ -33,4 +33,4 @@ analyse.html
 .vercel
 
 # Orval generated models
-models/*
+shared/src/models/*

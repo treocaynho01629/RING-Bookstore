@@ -167,7 +167,7 @@ const RegisterTab = ({
         <TextField
           label={
             username && !validName
-              ? "4 đến 24 kí tự."
+              ? "4 đến 24 kí tự!"
               : (err?.data?.errors?.username ?? "Tên đăng nhập")
           }
           type="text"
@@ -187,7 +187,7 @@ const RegisterTab = ({
         <TextField
           label={
             email && !validEmail
-              ? "Sai định dạng email."
+              ? "Sai định dạng email!"
               : (err?.data?.errors?.email ?? "Địa chỉ email")
           }
           type="email"
@@ -244,7 +244,7 @@ const RegisterTab = ({
           <PasswordInput
             label={
               matchPass && !validMatch
-                ? "Không trùng mật khẩu."
+                ? "Không trùng mật khẩu!"
                 : "Nhập lại mật khẩu"
             }
             size="small"

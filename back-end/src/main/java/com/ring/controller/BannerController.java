@@ -1,6 +1,5 @@
 package com.ring.controller;
 
-import com.ring.common.AppConstants;
 import com.ring.config.CurrentAccount;
 import com.ring.dto.request.BannerRequest;
 import com.ring.dto.response.PagingResponse;
@@ -47,7 +46,8 @@ public class BannerController {
      * @return a {@link ResponseEntity} containing a paginated list of banners.
      */
     @GetMapping
-    public ResponseEntity<?> getBanners(@RequestParam(value = "shopId", required = false) Long shopId,
+    public ResponseEntity<PagingResponse<BannerDTO>> getBanners(
+            @RequestParam(value = "shopId", required = false) Long shopId,
             @RequestParam(value = "byShop", required = false) Boolean byShop,
             @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam(value = "pSize", defaultValue = "5") Integer pageSize,
@@ -74,7 +74,8 @@ public class BannerController {
      */
     @PostMapping
     @PreAuthorize("hasRole('SELLER') and hasAuthority('create:banner')")
-    public ResponseEntity<?> createBanner(@Valid @RequestPart("request") BannerRequest request,
+    public ResponseEntity<Banner> createBanner(
+            @Valid @RequestPart("request") BannerRequest request,
             @RequestPart("image") MultipartFile file,
             @CurrentAccount Account currUser) {
 
@@ -92,7 +93,8 @@ public class BannerController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('update:banner')")
-    public ResponseEntity<?> updateBanner(@PathVariable("id") Integer id,
+    public ResponseEntity<Banner> updateBanner(
+            @PathVariable("id") Integer id,
             @Valid @RequestPart("request") BannerRequest request,
             @RequestPart(name = "image", required = false) MultipartFile file,
             @CurrentAccount Account currUser) {
@@ -110,7 +112,9 @@ public class BannerController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:banner')")
-    public ResponseEntity<?> deleteBanner(@PathVariable("id") Integer id, @CurrentAccount Account currUser) {
+    public ResponseEntity<String> deleteBanner(
+            @PathVariable("id") Integer id, 
+            @CurrentAccount Account currUser) {
 
         bannerService.deleteBanner(id, currUser);
         String message = messageService.getMessage("message.delete.succeeded");
@@ -127,7 +131,8 @@ public class BannerController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:banner')")
-    public ResponseEntity<?> deleteBanners(@RequestParam("ids") List<Integer> ids,
+    public ResponseEntity<String> deleteBanners(
+            @RequestParam("ids") List<Integer> ids,
             @CurrentAccount Account currUser) {
 
         bannerService.deleteBanners(ids, currUser);
@@ -149,7 +154,8 @@ public class BannerController {
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:banner')")
-    public ResponseEntity<?> deleteCouponsInverse(@RequestParam(value = "shopId", required = false) Long shopId,
+    public ResponseEntity<String> deleteCouponsInverse(
+            @RequestParam(value = "shopId", required = false) Long shopId,
             @RequestParam(value = "byShop", required = false) Boolean byShop,
             @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam("ids") List<Integer> ids,
@@ -170,7 +176,8 @@ public class BannerController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:banner')")
-    public ResponseEntity<?> deleteAllBanners(@RequestParam(value = "shopId", required = false) Long shopId,
+    public ResponseEntity<String> deleteAllBanners(
+            @RequestParam(value = "shopId", required = false) Long shopId,
             @CurrentAccount Account currUser) {
 
         bannerService.deleteAllBanners(shopId, currUser);

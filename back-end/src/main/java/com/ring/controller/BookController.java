@@ -1,13 +1,17 @@
 package com.ring.controller;
 
 import com.ring.config.CurrentAccount;
-import com.ring.common.AppConstants;
 import com.ring.dto.request.BookRequest;
 import com.ring.dto.response.PagingResponse;
+import com.ring.dto.response.books.BookDTO;
+import com.ring.dto.response.books.BookDetailDTO;
 import com.ring.dto.response.books.BookDisplayDTO;
+import com.ring.dto.response.books.BookResponseDTO;
+import com.ring.dto.response.dashboard.StatDTO;
 import com.ring.model.entity.Account;
 import com.ring.model.enums.BookType;
 import com.ring.service.BookService;
+import com.ring.service.impl.MessageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,6 +35,7 @@ import java.util.List;
 public class BookController {
 
     private final BookService bookService;
+    private final MessageService messageService;
 
     /**
      * Retrieves a random selection of books.
@@ -40,7 +45,8 @@ public class BookController {
      * @return a {@link ResponseEntity} containing the list of random books.
      */
     @GetMapping("/random")
-    public ResponseEntity<?> getRandomBooks(@RequestParam(value = "amount", defaultValue = "5") Integer amount,
+    public ResponseEntity<List<BookDisplayDTO>> getRandomBooks(
+            @RequestParam(value = "amount", defaultValue = "5") Integer amount,
             @RequestParam(value = "withDesc", defaultValue = "false") Boolean withDesc) {
 
         List<BookDisplayDTO> books = bookService.getRandomBooks(amount, withDesc);
@@ -54,7 +60,7 @@ public class BookController {
      * @return a {@link ResponseEntity} containing the list of books.
      */
     @GetMapping("/find")
-    public ResponseEntity<?> getBooksInIds(@RequestParam(value = "ids") List<Long> ids) {
+    public ResponseEntity<List<BookDisplayDTO>> getBooksInIds(@RequestParam(value = "ids") List<Long> ids) {
 
         List<BookDisplayDTO> books = bookService.getBooksInIds(ids);
         return new ResponseEntity<>(books, HttpStatus.OK);
@@ -81,7 +87,8 @@ public class BookController {
      * @return a {@link ResponseEntity} containing a paginated list of books.
      */
     @GetMapping
-    public ResponseEntity<?> getBooks(@RequestParam(value = "pSize", defaultValue = "15") Integer pageSize,
+    public ResponseEntity<PagingResponse<BookDisplayDTO>> getBooks(
+            @RequestParam(value = "pSize", defaultValue = "15") Integer pageSize,
             @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
             @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir,
@@ -123,8 +130,10 @@ public class BookController {
      * @return a {@link ResponseEntity} containing the book.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getBook(@PathVariable("id") Long bookId) {
-        return new ResponseEntity<>(bookService.getBook(bookId), HttpStatus.OK);
+    public ResponseEntity<BookDTO> getBook(@PathVariable("id") Long bookId) {
+
+        BookDTO book = bookService.getBook(bookId);
+        return new ResponseEntity<>(book, HttpStatus.OK);
     }
 
     /**
@@ -134,8 +143,10 @@ public class BookController {
      * @return a {@link ResponseEntity} containing the book details.
      */
     @GetMapping("/detail/{id}")
-    public ResponseEntity<?> getBookDetailById(@PathVariable("id") Long bookId) {
-        return new ResponseEntity<>(bookService.getBookDetail(bookId), HttpStatus.OK);
+    public ResponseEntity<BookDetailDTO> getBookDetailById(@PathVariable("id") Long bookId) {
+
+        BookDetailDTO book = bookService.getBookDetail(bookId);
+        return new ResponseEntity<>(book, HttpStatus.OK);
     }
 
     /**
@@ -145,8 +156,10 @@ public class BookController {
      * @return a {@link ResponseEntity} containing the book details.
      */
     @GetMapping("/slug/{slug}")
-    public ResponseEntity<?> getBookDetailBySlug(@PathVariable("slug") String slug) {
-        return new ResponseEntity<>(bookService.getBookDetail(slug), HttpStatus.OK);
+    public ResponseEntity<BookDetailDTO> getBookDetailBySlug(@PathVariable("slug") String slug) {
+
+        BookDetailDTO book = bookService.getBookDetail(slug);
+        return new ResponseEntity<>(book, HttpStatus.OK);
     }
 
     /**
@@ -156,9 +169,10 @@ public class BookController {
      * @return a {@link ResponseEntity} containing list of keyword suggestions.
      */
     @GetMapping("/suggest")
-    public ResponseEntity<?> getBooksSuggestion(@RequestParam(value = "keyword", defaultValue = "") String keyword) {
-        List<String> options = bookService.getBooksSuggestion(keyword);
-        return new ResponseEntity<>(options, HttpStatus.OK);
+    public ResponseEntity<List<String>> getBooksSuggestion(@RequestParam(value = "keyword", defaultValue = "") String keyword) {
+
+        List<String> keywords = bookService.getBooksSuggestion(keyword);
+        return new ResponseEntity<>(keywords, HttpStatus.OK);
     }
 
     /**
@@ -169,9 +183,12 @@ public class BookController {
      */
     @GetMapping("/analytics")
     @PreAuthorize("hasAnyRole('SELLER','GUEST') and hasAuthority('read:book')")
-    public ResponseEntity<?> getBookAnalytics(@RequestParam(value = "shopId", required = false) Long shopId,
+    public ResponseEntity<StatDTO> getBookAnalytics(
+            @RequestParam(value = "shopId", required = false) Long shopId,
             @RequestParam(value = "userId", required = false) Long userId) {
-        return new ResponseEntity<>(bookService.getAnalytics(shopId, userId), HttpStatus.OK);
+
+        StatDTO analytics = bookService.getAnalytics(shopId, userId);
+        return new ResponseEntity<>(analytics, HttpStatus.OK);
     }
 
     /**
@@ -185,12 +202,14 @@ public class BookController {
      */
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     @PreAuthorize("hasRole('SELLER') and hasAuthority('create:book')")
-    public ResponseEntity<?> addBook(@Valid @RequestPart("request") BookRequest request,
+    public ResponseEntity<BookResponseDTO> addBook(
+            @Valid @RequestPart("request") BookRequest request,
             @RequestPart("thumbnail") MultipartFile thumbnail,
             @RequestPart(name = "images", required = false) MultipartFile[] images,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(bookService.addBook(request,
-                thumbnail, images, currUser), HttpStatus.CREATED);
+
+        BookResponseDTO book = bookService.addBook(request, thumbnail, images, currUser);
+        return new ResponseEntity<>(book, HttpStatus.CREATED);
     }
 
     /**
@@ -205,13 +224,15 @@ public class BookController {
      */
     @PutMapping(value = "/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     @PreAuthorize("hasRole('SELLER') and hasAuthority('update:book')")
-    public ResponseEntity<?> updateBook(@PathVariable("id") Long id,
+    public ResponseEntity<BookResponseDTO> updateBook(
+            @PathVariable("id") Long id,
             @Valid @RequestPart("request") BookRequest request,
             @RequestPart(name = "thumbnail", required = false) MultipartFile thumbnail,
             @RequestPart(name = "images", required = false) MultipartFile[] images,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(bookService.updateBook(id,
-                request, thumbnail, images, currUser), HttpStatus.CREATED);
+
+        BookResponseDTO book = bookService.updateBook(id, request, thumbnail, images, currUser);
+        return new ResponseEntity<>(book, HttpStatus.CREATED);
     }
 
     /**
@@ -223,9 +244,14 @@ public class BookController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:book')")
-    public ResponseEntity<?> deleteBook(@PathVariable("id") Long id,
+    public ResponseEntity<String> deleteBook(
+            @PathVariable("id") Long id,
             @CurrentAccount Account currUser) {
-        return new ResponseEntity<>(bookService.deleteBook(id, currUser), HttpStatus.OK);
+
+        bookService.deleteBook(id, currUser);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -237,10 +263,14 @@ public class BookController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:book')")
-    public ResponseEntity<?> deleteBooks(@RequestParam("ids") List<Long> ids,
+    public ResponseEntity<String> deleteBooks(
+            @RequestParam("ids") List<Long> ids,
             @CurrentAccount Account currUser) {
+
         bookService.deleteBooks(ids, currUser);
-        return new ResponseEntity<>("Products deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -262,7 +292,8 @@ public class BookController {
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:book')")
-    public ResponseEntity<?> deleteBooksInverse(@RequestParam(value = "keyword", defaultValue = "") String keyword,
+    public ResponseEntity<String> deleteBooksInverse(
+            @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam(value = "cateId", required = false) Integer cateId,
             @RequestParam(value = "pubIds", required = false) List<Integer> pubIds,
             @RequestParam(value = "types", required = false) List<BookType> types,
@@ -287,7 +318,9 @@ public class BookController {
                 toRange,
                 ids,
                 currUser);
-        return new ResponseEntity<>("Products deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -299,9 +332,13 @@ public class BookController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:book')")
-    public ResponseEntity<?> deleteAllBooks(@RequestParam(value = "shopId", required = false) Long shopId,
+    public ResponseEntity<String> deleteAllBooks(
+            @RequestParam(value = "shopId", required = false) Long shopId,
             @CurrentAccount Account currUser) {
+                
         bookService.deleteAllBooks(shopId, currUser);
-        return new ResponseEntity<>("All products deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 }

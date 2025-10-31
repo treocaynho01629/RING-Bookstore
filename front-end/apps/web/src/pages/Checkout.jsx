@@ -16,11 +16,11 @@ import {
 } from "../features/orders/ordersApiSlice";
 import { isEqual } from "lodash-es";
 import { PHONE_REGEX } from "@ring/shared/utils/regex";
-import { getPaymentType } from "@ring/shared/enums/payment";
 import { getShippingType } from "@ring/shared/enums/shipping";
+import { PaymentType } from "@ring/shared/models/paymentType";
 import useTitle from "@ring/shared/useTitle";
 import useDeepEffect from "@ring/shared/useDeepEffect";
-import useAuth from "../../hooks/useAuth";
+import useAuth from "../hooks/useAuth";
 import useReCaptcha from "@ring/auth/useReCaptcha";
 import Button from "@mui/material/Button";
 import Table from "@mui/material/Table";
@@ -137,7 +137,6 @@ const StyledStepContent = styled(StepContent)(({ theme }) => ({
 //#endregion
 
 const ShippingType = getShippingType();
-const PaymentType = getPaymentType();
 
 const Checkout = () => {
   //#region construct
@@ -149,7 +148,7 @@ const Checkout = () => {
   const [pending, setPending] = useState(false);
   const maxSteps = 3;
 
-  //Cart
+  // Cart
   const { cartProducts, removeProducts } = useCart();
   const { estimateCart, syncCart } = useCheckout();
   const [openWarning, setOpenWarning] = useState(undefined);
@@ -157,7 +156,7 @@ const Checkout = () => {
   const checkoutState = location.state?.checkoutState;
   const selected = checkoutState?.selected;
 
-  //Coupon
+  // Coupon
   const [contextShop, setContextShop] = useState(null);
   const [openCoupon, setOpenCoupon] = useState(false);
   const [contextState, setContextState] = useState(null);
@@ -173,13 +172,13 @@ const Checkout = () => {
   const [shopNote, setShopNote] = useState([]);
   const [checkState, setCheckState] = useState(null);
 
-  //Address
+  // Address
   const [openAddress, setOpenAddress] = useState(false);
   const [addressInfo, setAddressInfo] = useState(null);
   const [errMsg, setErrMsg] = useState("");
   const [err, setErr] = useState([]);
 
-  //Price
+  // Price
   const [estimated, setEstimated] = useState({
     deal: 0,
     subTotal: 0,
@@ -190,23 +189,23 @@ const Checkout = () => {
   const [calculate, { isLoading: calculating, isError }] =
     useCalculateMutation();
 
-  //Recaptcha v2
+  // Recaptcha v2
   const [challenge, setChallenge] = useState(false); //Toggle if marked suspicious by v3
   const [token, setToken] = useState("");
 
-  //Recaptcha
+  // Recaptcha
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
   const recaptchaV3SiteKey = import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY;
   const { reCaptchaLoaded, generateReCaptchaToken, hideBadge } =
     useReCaptcha(recaptchaV3SiteKey);
 
-  //Checkout hook
+  // Checkout hook
   const [checkout, { isLoading }] = useCheckoutMutation();
 
-  //Fetch current profile address
+  // Fetch current profile address
   const { data: address, isLoading: loadAddress } = useGetMyAddressQuery();
 
-  //Other
+  // Other
   const navigate = useNavigate();
 
   useDeepEffect(() => {
@@ -219,35 +218,39 @@ const Checkout = () => {
 
   useEffect(() => {
     hideBadge();
-  }, [reCaptchaLoaded]); //Hide badge cuz it's in the way of stepper
+  }, [reCaptchaLoaded]); // Hide badge cuz it's in the way of stepper
 
-  //Set title
+  // Set title
   useTitle("Thanh toán");
 
   const handleCartChange = () => {
     if (selected?.length > 0 && cartProducts.length > 0) {
-      const checkoutCart = getCheckoutCart(); //Include address, shipping method, payment method ...
-      handleEstimate(checkoutCart); //Estimate price
-      handleCalculate(checkoutCart); //Calculate price
+      const checkoutCart = getCheckoutCart(); // Include address, shipping method, payment method ...
+      handleEstimate(checkoutCart); // Estimate price
+      handleCalculate(checkoutCart); // Calculate price
     } else {
-      //Reset
+      // Reset price state
       handleEstimate(null);
       handleCalculate(null);
       setCalculated(null);
     }
+
+    // Reset error
+    setErr(null);
+    setErrMsg("");
   };
 
-  //Filter out unusable coupons
+  // Filter out unusable coupons
   const getCheckoutCart = () => {
     if (selected?.length > 0 && cartProducts.length > 0) {
-      //Reduce cart
+      // Reduce cart
       const checkoutCart = cartProducts.reduce(
         (result, item) => {
           const { id, shopId } = item;
 
           if (selected?.indexOf(id) !== -1) {
-            //Get selected items in redux store
-            //Find or create shop
+            // Get selected items in redux store
+            // Find or create shop
             let detail = result.cart.find(
               (shopItem) => shopItem.shopId === shopId
             );
@@ -265,7 +268,7 @@ const Checkout = () => {
               result.cart.push(detail);
             }
 
-            //Add items for that shop
+            // Add items for that shop
             detail.items.push(item);
           }
 
@@ -303,7 +306,7 @@ const Checkout = () => {
     [cartProducts]
   );
 
-  //Calculate server side
+  // Calculate server side
   const handleCalculate = useCallback(
     async (cart) => {
       if (
@@ -324,21 +327,18 @@ const Checkout = () => {
         })
         .catch((err) => {
           console.error(err);
+          setErr(err);
           if (!err?.status) {
-            console.error("Server không phản hồi!");
-          } else if (err?.status === 409) {
-            console.error(err?.data?.message);
-          } else if (err?.status === 400) {
-            console.error("Sai định dạng giỏ hàng!");
+            setErrMsg("Server không phản hồi");
           } else {
-            console.error("Tính trước đơn hàng thất bại!");
+            setErrMsg(err?.data?.message);
           }
         });
     },
     [addressInfo]
   );
 
-  //Sync checkout cart between client and server
+  // Sync checkout cart between client and server
   const handleSyncCart = (cart) => {
     syncCart(
       cart,
@@ -352,18 +352,18 @@ const Checkout = () => {
     );
   };
 
-  //Separate by shop
+  // Separate by shop
   const reduceCart = () => {
     let selectedCart = cartProducts.filter((product) =>
       selected?.includes(product.id)
     );
     let resultCart = selectedCart.reduce((result, item) => {
       if (!result[item.shopId]) {
-        //Check if not exists shop >> Add new one
+        // Check if not exists shop >> Add new one
         result[item.shopId] = { shopName: item.shopName, products: [] };
       }
 
-      //Else push
+      // Else push
       result[item.shopId].products.push(item);
       return result;
     }, {});
@@ -467,13 +467,13 @@ const Checkout = () => {
     !loadAddress,
   ].every(Boolean);
 
-  //Submit checkout
+  // Submit checkout
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isLoading || calculating || pending) return;
     setPending(true);
 
-    //Validation
+    // Validation
     const valid = PHONE_REGEX.test(addressInfo?.phone);
 
     if (!valid && addressInfo?.phone) {
@@ -503,7 +503,7 @@ const Checkout = () => {
       .unwrap()
       .then((data) => {
         removeProducts(selected);
-        if (payment == PaymentType.ONLINE_PAYMENT.value) {
+        if (payment == PaymentType.ONLINE_PAYMENT) {
           navigate(`/payment/${data?.id}`, { replace: true });
         } else {
           navigate("/payment?state=success", { replace: true });
@@ -576,10 +576,10 @@ const Checkout = () => {
               >
                 <Step key={0}>
                   <StepLabel
-                    error={errMsg !== "" && err?.status}
+                    error={errMsg !== "" && err?.status === 400}
                     optional={
                       errMsg !== "" &&
-                      err?.status && (
+                      err?.status === 400 && (
                         <Typography variant="caption" color="error">
                           {errMsg}
                         </Typography>
@@ -612,6 +612,7 @@ const Checkout = () => {
                         setAddressInfo,
                         openDialog: openAddress,
                         handleCloseDialog,
+                        err,
                       }}
                     />
                     <Button
@@ -662,9 +663,11 @@ const Checkout = () => {
                             const calculatedShop = calculated?.details?.find(
                               (detail) => detail?.shopId == shopId
                             );
-                            const shippingFee = calculatedShop?.shippingFee;
+                            const shippingFee =
+                              calculatedShop?.shippingFee ??
+                              estimated?.shipping;
                             const shippingDiscount =
-                              calculatedShop?.shippingDiscount;
+                              calculatedShop?.shippingDiscount ?? 0;
 
                             return (
                               <PreviewDetailRow

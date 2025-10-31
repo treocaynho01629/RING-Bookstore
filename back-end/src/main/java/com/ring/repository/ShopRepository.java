@@ -42,20 +42,24 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 	 *         join date, follow status, and shop image.
 	 */
 	@Query("""
-			       	select s.owner.id as ownerId, s.id as id, s.name as name,
-			       		count(r.id) as totalReviews, count(b.id) as totalProducts,
-			size(s.followers) as totalFollowers, s.createdDate as joinedDate,
-			case when f.id is null then false else true end as followed, i as image
-			       	from Shop s
-			       	left join s.image i
-			       	left join s.followers f on f.id = :userId
-			       	left join s.books b
-			       	left join b.bookReviews r
-			       	where concat (s.name, s.owner.username) ilike %:keyword%
-			       	and (coalesce(:followed) is null or case when :followed = true
-			                  		then f.id is not null else f.id is null end)
-			       	group by s.id, s.owner.id, i.id, f.id
-			       """)
+		SELECT s.owner.id AS ownerId, 
+			s.id AS id, 
+			s.name AS name,
+			count(r.id) AS totalReviews, 
+			count(b.id) AS totalProducts,
+			size(s.followers) AS totalFollowers, 
+			s.createdDate AS joinedDate,
+			CASE WHEN f.id IS NULL THEN FALSE ELSE TRUE END AS followed, i AS image
+		FROM Shop s
+		LEFT JOIN s.image i
+		LEFT JOIN s.followers f ON f.id = :userId
+		LEFT JOIN s.books b
+		LEFT JOIN b.bookReviews r
+		WHERE CONCAT(s.name, s.owner.username) ILIKE %:keyword%
+		AND (COALESCE(:followed) IS NULL OR CASE WHEN :followed = TRUE
+						THEN f.id IS NOT NULL ELSE f.id IS NULL END)
+		GROUP BY s.id, s.owner.id, i.id, f.id
+	""")
 	Page<IShopDisplay> findShopsDisplay(String keyword,
 			Boolean followed,
 			Long userId,
@@ -75,22 +79,26 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 	 *         sales data, and an associated image
 	 */
 	@Query("""
-				select s.owner.username as username, s.owner.id as ownerId, s.id as id,
-					s.name as name, size(s.followers) as totalFollowers, s.createdDate as joinedDate,
-					i as image,
-					sum(case when od.status = com.ring.model.enums.OrderStatus.COMPLETED
-						then o.total - o.totalDiscount else 0 end) as sales,
-					sum(case when od.status = com.ring.model.enums.OrderStatus.COMPLETED
-						then oi.quantity else 0 end) as totalSold
-				from Shop s
-				left join s.image i
-				left join OrderDetail od on od.shop.id = s.id
-				left join od.order o
-				left join od.items oi
-				where concat (s.name, s.owner.username) ilike %:keyword%
-				and (coalesce(:userId) is null or s.owner.id = :userId)
-				group by s.id, s.owner.id, s.owner.username, i.id
-			""")
+		SELECT s.owner.username AS username, 
+			s.owner.id AS ownerId, 
+			s.id AS id,
+			s.name AS name, 
+			size(s.followers) AS totalFollowers, 
+			s.createdDate AS joinedDate,
+			i AS image,
+			sum(case when od.status = com.ring.model.enums.OrderStatus.COMPLETED
+				then o.total - o.totalDiscount else 0 end) AS sales,
+			sum(case when od.status = com.ring.model.enums.OrderStatus.COMPLETED
+				then oi.quantity else 0 end) AS totalSold
+		FROM Shop s
+		LEFT JOIN s.image i
+		LEFT JOIN OrderDetail od ON od.shop.id = s.id
+		LEFT JOIN od.order o
+		LEFT JOIN od.items oi
+		WHERE CONCAT(s.name, s.owner.username) ILIKE %:keyword%
+		AND (COALESCE(:userId) IS NULL OR s.owner.id = :userId)
+		GROUP BY s.id, s.owner.id, s.owner.username, i.id
+	""")
 	Page<IShop> findShops(String keyword,
 			Long userId,
 			Pageable pageable);
@@ -105,11 +113,12 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 	 *         name, and image
 	 */
 	@Query("""
-				select s.id as id, s.name as name, i as image
-				from Shop s
-				left join s.image i
-				where s.owner.id = :ownerId
-			""")
+		SELECT s.id AS id, 
+		s.name AS name, i AS image
+		FROM Shop s
+		LEFT JOIN s.image i
+		WHERE s.owner.id = :ownerId
+	""")
 	List<IShopPreview> findShopsPreview(Long ownerId);
 
 	/**
@@ -119,9 +128,10 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 	 * @return a list of Shop entities corresponding to the provided IDs
 	 */
 	@Query("""
-				select s from Shop s left join fetch s.address a
-			       where s.id in :ids
-			""")
+		SELECT s FROM Shop s
+		LEFT JOIN FETCH s.address a
+		WHERE s.id IN :ids
+	""")
 	List<Shop> findShopsInIds(List<Long> ids);
 
 	/**
@@ -133,10 +143,10 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 	 * @return a list of shop IDs that satisfy the criteria
 	 */
 	@Query("""
-				select s.id from Shop s
-				where s.id in :ids
-				and s.owner.id = :ownerId
-			""")
+		SELECT s.id FROM Shop s
+		WHERE s.id IN :ids
+		AND s.owner.id = :ownerId
+	""")
 	List<Long> findShopIdsByInIdsAndOwner(List<Long> ids,
 			Long ownerId);
 
@@ -155,12 +165,13 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 	 *         excluded list.
 	 */
 	@Query("""
-				select s.id from Shop s
-				where concat (s.name, s.owner.username) ilike %:keyword%
-				and (coalesce(:ownerId) is null or s.owner.id = :ownerId)
-				and s.id not in :ids
-				group by s.id
-			""")
+		SELECT s.id 
+		FROM Shop s
+		WHERE CONCAT(s.name, s.owner.username) ILIKE %:keyword%
+		AND (COALESCE(:ownerId) IS NULL OR s.owner.id = :ownerId)
+		AND s.id NOT IN :ids
+		GROUP BY s.id
+	""")
 	List<Long> findInverseIds(String keyword,
 			Long ownerId,
 			List<Long> ids);
@@ -177,19 +188,23 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 	 *         found, or {@code Optional.empty()} if not found.
 	 */
 	@Query("""
-				select s.owner.username as username, s.owner.id as ownerId, s.id as id,
-					s.name as name, s.createdDate as joinedDate, i as image,
-					count(distinct r.id) as totalReviews, count(distinct b.id) as totalProducts,
-					size(s.followers) as totalFollowers,
-					case when f.id is null then false else true end as followed
-				from Shop s
-				left join s.image i
-				left join s.followers f on f.id = :userId
-				left join s.books b
-				left join b.bookReviews r
-				where s.id = :id
-				group by s.id, s.owner.username, s.owner.id, i.id, f.id
-			""")
+		SELECT s.owner.username AS username, 
+			s.owner.id AS ownerId, 
+			s.id AS id,
+			s.name AS name, 
+			s.createdDate AS joinedDate, i AS image,
+			COUNT(DISTINCT r.id) AS totalReviews, 
+			COUNT(DISTINCT b.id) AS totalProducts,
+			SIZE(s.followers) AS totalFollowers,
+			CASE WHEN f.id IS NULL THEN FALSE ELSE TRUE END AS followed
+		FROM Shop s
+		LEFT JOIN s.image i
+		LEFT JOIN s.followers f ON f.id = :userId
+		LEFT JOIN s.books b
+		LEFT JOIN b.bookReviews r
+		WHERE s.id = :id
+		GROUP BY s.id, s.owner.username, s.owner.id, i.id, f.id
+	""")
 	Optional<IShopInfo> findShopInfoById(Long id,
 			Long userId);
 
@@ -208,30 +223,35 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 	 *         or an empty {@link Optional} if no shop with the specified ID exists.
 	 */
 	@Query("""
-				select s.owner.username as username, s.owner.id as ownerId, s.id as id,
-					s.name as name, s.description as description, a as address,
-					sum(case when od.status = com.ring.model.enums.OrderStatus.COMPLETED
-						then oi.quantity else 0 end) as totalSold,
-					coalesce(
-						sum (case when od.status = com.ring.model.enums.OrderStatus.CANCELED
-							or od.status = com.ring.model.enums.OrderStatus.REFUNDED then 1 else 0 end)
-						/ nullif(
-							coalesce(
-								sum(case when od.status = com.ring.model.enums.OrderStatus.COMPLETED
-							then 1 else 0 end), 0), 0), 0) as canceledRate,
-					count(distinct b.id) as totalProducts, avg(r.rating) as rating, count(distinct r.id) as totalReviews,
-					size(s.followers) as totalFollowers, i as image,
-					s.createdDate as joinedDate, case when f.id is null then false else true end as followed
-				from Shop s left join s.image i
-				left join s.address a
-				left join OrderDetail od on od.shop.id = s.id
-				left join od.items oi
-				left join s.books b
-				left join b.bookReviews r
-				left join s.followers f on f.id = :userId
-				where s.id = :id
-				group by s.id, s.owner.username, s.owner.id, i.id, a.id, f.id
-			""")
+		SELECT s.owner.username AS username, 
+			s.owner.id AS ownerId, 
+			s.id AS id,
+			s.name AS name, 
+			s.description AS description, 
+			a AS address,
+			SUM(CASE WHEN od.status = com.ring.model.enums.OrderStatus.COMPLETED
+				THEN oi.quantity ELSE 0 END) AS totalSold,
+			COALESCE(
+				SUM(CASE WHEN od.status = com.ring.model.enums.OrderStatus.CANCELED
+					OR od.status = com.ring.model.enums.OrderStatus.REFUNDED THEN 1 ELSE 0 END)
+				/ NULLIF(
+					COALESCE(
+						SUM(CASE WHEN od.status = com.ring.model.enums.OrderStatus.COMPLETED
+							THEN 1 ELSE 0 END), 0), 0), 0) AS canceledRate,
+			COUNT(DISTINCT b.id) AS totalProducts, AVG(r.rating) AS rating, COUNT(DISTINCT r.id) AS totalReviews,
+			SIZE(s.followers) AS totalFollowers, i AS image,
+			s.createdDate AS joinedDate, CASE WHEN f.id IS NULL THEN FALSE ELSE TRUE END AS followed
+		FROM Shop s
+		LEFT JOIN s.image i
+		LEFT JOIN s.address a
+		LEFT JOIN OrderDetail od ON od.shop.id = s.id
+		LEFT JOIN od.items oi
+		LEFT JOIN s.books b
+		LEFT JOIN b.bookReviews r
+		LEFT JOIN s.followers f ON f.id = :userId
+		WHERE s.id = :id
+		GROUP BY s.id, s.owner.username, s.owner.id, i.id, a.id, f.id
+	""")
 	Optional<IShopDisplayDetail> findShopDisplayDetailById(Long id,
 			Long userId);
 
@@ -250,25 +270,30 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 	 *         details if found, otherwise empty
 	 */
 	@Query("""
-				select s.owner.username as username, s.owner.id as ownerId, s.id as id,
-					s.name as name, s.description as description, a as address,
-					sum(case when od.status = com.ring.model.enums.OrderStatus.COMPLETED
-						then o.total - o.totalDiscount else 0 end) as sales,
-					sum(case when od.status = com.ring.model.enums.OrderStatus.COMPLETED
-						then oi.quantity else 0 end) as totalSold,
-					count(b.id) as totalProducts, count(r.id) as totalReviews, i as image,
-					size(s.followers) as totalFollowers, s.createdDate as joinedDate
-				from Shop s left join s.image i
-				left join s.address a
-				left join OrderDetail od on od.shop.id = s.id
-				left join od.order o
-				left join od.items oi
-				left join Book b on s.id = b.shop.id
-				left join Review r on b.id = r.book.id
-				where s.id = :id
-				and (coalesce(:userId) is null or s.owner.id = :userId)
-				group by s.id, s.owner.username, s.owner.id, i.id, a.id
-			""")
+		SELECT s.owner.username AS username, 
+			s.owner.id as ownerId,
+			s.id AS id,
+			s.name AS name, 
+			s.description AS description, 
+			a as address,
+			SUM(CASE WHEN od.status = com.ring.model.enums.OrderStatus.COMPLETED
+				THEN o.total - o.totalDiscount ELSE 0 END) AS sales,
+			SUM(CASE WHEN od.status = com.ring.model.enums.OrderStatus.COMPLETED
+				THEN oi.quantity ELSE 0 END) AS totalSold,
+			COUNT(b.id) AS totalProducts, COUNT(r.id) AS totalReviews, i AS image,
+			SIZE(s.followers) AS totalFollowers, s.createdDate AS joinedDate
+		from Shop s 
+		LEFT JOIN s.image i
+		LEFT JOIN s.address a
+		LEFT JOIN OrderDetail od ON od.shop.id = s.id
+		LEFT JOIN od.order o
+		LEFT JOIN od.items oi
+		LEFT JOIN Book b ON s.id = b.shop.id
+		LEFT JOIN Review r ON b.id = r.book.id
+		WHERE s.id = :id
+		AND (COALESCE(:userId) IS NULL OR s.owner.id = :userId)
+		GROUP BY s.id, s.owner.username, s.owner.id, i.id, a.id
+	""")
 	Optional<IShopDetail> findShopDetailById(Long id,
 			Long userId);
 
@@ -286,13 +311,13 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 	 *         and the count for the previous month.
 	 */
 	@Query("""
-			      select count(s.id) as total,
-			      count(case when s.createdDate >= date_trunc('month', current date) then 1 end) as currentMonth,
-			      count(case when s.createdDate >= date_trunc('month', current date) - 1 month
-			          and s.createdDate < date_trunc('month', current date) then 1 end) lastMonth
-			      from Shop s
-			where (coalesce(:userId) is null or s.owner.id = :userId)
-			  """)
+		SELECT COUNT(s.id) AS total,
+			COUNT(CASE WHEN s.createdDate >= DATE_TRUNC('month', CURRENT DATE) THEN 1 END) AS currentMonth,
+			COUNT(CASE WHEN s.createdDate >= DATE_TRUNC('month', CURRENT DATE) - 1 MONTH
+			AND s.createdDate < DATE_TRUNC('month', CURRENT DATE) THEN 1 END) AS lastMonth
+		FROM Shop s
+		WHERE (COALESCE(:userId) IS NULL OR s.owner.id = :userId)
+	""")
 	IStat getShopAnalytics(Long userId);
 
 	/**

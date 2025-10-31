@@ -1,0 +1,64 @@
+{
+  "hello": "Hello",
+  "logout": "Log out",
+  "login": "Login",
+  "ring": "RING!",
+  "shop": "Shop",
+  "saved": "Saved",
+  "items": "items",
+  "unknown": "Unknown",
+  "coupon": {
+    "shipping": {
+      "label": "Shipping discount",
+      "summary": {
+        "default": "Save {{discount}} shipping fee - up to {{max}}",
+        "full": "Save {{discount}} shipping fee"
+      }
+    },
+    "product": {
+      "label": "Product discount",
+      "summary": {
+        "default": "Save {{discount}} - up to {{max}}",
+        "full": "Save {{discount}}"
+      }
+    },
+    "condition": {
+      "quantity": {
+        "label": "Quantity"
+      },
+      "value": {
+        "label": "Value"
+      },
+      "default": "Order at least: {{min}} {{unit}}",
+      "all": "For all orders"
+    }
+  },
+  "payment": {
+    "cash": {
+      "label": "Cash on delivery",
+      "summary": "Cash on delivery. Shipping fee: 0đ. Discount on shipping fee (if any) applies to cash on delivery."
+    },
+    "online": {
+      "label": "Online payment",
+      "description": "Scan QR code to pay.",
+      "summary": "Scan the QR code from the online wallet or bank transfer to pay."
+    },
+    "status": {
+      "pending": {
+        "label": "Pending payment"
+      },
+      "paid": {
+        "label": "Paid"
+      },
+      "canceled": {
+        "label": "Canceled"
+      },
+      "pending_refund": {
+        "label": "Pending refund"
+      },
+      "refunded": {
+        "label": "Refunded"
+      }
+    }
+  }
+}

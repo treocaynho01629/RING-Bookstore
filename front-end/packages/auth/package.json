@@ -31,10 +31,10 @@
   "dependencies": {},
   "devDependencies": {
     "@ring/eslint-config": "*",
-    "@types/react": "^19.1.9",
-    "@types/react-dom": "^19.1.7",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
     "tsup": "^8.5.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "@mui/material": "^7.2.0",

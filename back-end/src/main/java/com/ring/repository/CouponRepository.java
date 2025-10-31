@@ -4,6 +4,7 @@ import com.ring.dto.projection.coupons.ICoupon;
 import com.ring.dto.projection.dashboard.IStat;
 import com.ring.model.entity.Account;
 import com.ring.model.entity.Coupon;
+import com.ring.model.enums.CouponCriteria;
 import com.ring.model.enums.CouponType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,12 +29,12 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
      * @return true if the user has used the coupon; false otherwise
      */
     @Query("""
-                select case when count(*) > 0 then true else false end
-                from OrderReceipt o
-                join o.details od
-                where (o.coupon.id = :id or od.coupon.id = :id)
-                and o.user.id = :userId
-            """)
+        SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END
+        FROM OrderReceipt o
+        JOIN o.details od
+        WHERE (o.coupon.id = :id OR od.coupon.id = :id)
+        AND o.user.id = :userId
+    """)
     boolean hasUserUsedCoupon(Long id, Long userId);
 
     /**
@@ -47,6 +48,8 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
      *
      * @param types       a list of {@code CouponType} representing the types of
      *                    coupons to filter by
+     * @param criterias   a list of {@code CouponCriteria} representing the criteria of
+     *                    coupons to filter by
      * @param codes       a list of coupon codes to filter the results by
      * @param code        a specific coupon code to filter the results by
      * @param shopId      the ID of the shop to filter the associated coupons
@@ -56,22 +59,25 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
      * @param showExpired a boolean flag to include expired
      */
     @Query("""
-            	select c as coupon, s.name as shopName, i as shopImage
-                from Coupon c
-                join fetch c.detail cd
-                left join c.shop s
-                left join s.image i
-            	where (coalesce(:showExpired) is null or (cd.expDate > current date and cd.usage > 0))
-            	and (coalesce(:codes) is null or c.code in :codes)
-            	and (coalesce(:code) is null or c.code = :code)
-            	and (coalesce(:types) is null or cd.type in :types)
-            	and (coalesce(:shopId) is null or s.id = :shopId)
-            	and (coalesce(:userId) is null or s.owner.id = :userId)
-            	and (coalesce(:byShop) is null or case when :byShop = true
-            		then s.id is not null else s.id is null end)
-            	group by c.id, cd.id, s.name, i.id
-            """)
+        SELECT c AS coupon, 
+            s.name AS shopName, 
+            i AS shopImage
+        FROM Coupon c
+        JOIN FETCH c.detail cd
+        LEFT JOIN c.shop s
+        LEFT JOIN s.image i
+        WHERE (COALESCE(:showExpired) IS NULL OR (cd.expDate > CURRENT DATE AND cd.usage > 0))
+        AND (COALESCE(:codes) IS NULL OR c.code IN :codes)
+        AND (COALESCE(:code) IS NULL OR c.code = :code)
+        AND (COALESCE(:types) IS NULL OR cd.type IN :types)
+        AND (COALESCE(:criterias) IS NULL OR cd.criteria IN :criterias)
+        AND (COALESCE(:shopId) IS NULL OR s.id = :shopId)
+        AND (COALESCE(:userId) IS NULL OR s.owner.id = :userId)
+        AND (COALESCE(:byShop) IS NULL OR CASE WHEN :byShop = true THEN s.id IS NOT NULL ELSE s.id IS NULL END)
+        GROUP BY c.id, cd.id, s.name, i.id
+    """)
     Page<ICoupon> findCoupons(List<CouponType> types,
+            List<CouponCriteria> criterias,
             List<String> codes,
             String code,
             Long shopId,
@@ -90,16 +96,18 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
      * @return a list of coupon IDs that match the criteria.
      */
     @Query("""
-                select c.id from Coupon c
-                where c.id in :ids
-                and c.shop.owner.id = :ownerId
-            """)
+        SELECT c.id FROM Coupon c
+        WHERE c.id IN :ids
+        AND c.shop.owner.id = :ownerId
+    """)
     List<Long> findCouponIdsByInIdsAndSeller(List<Long> ids, Long ownerId);
 
     /**
      * Retrieves a list of coupon IDs that do not match the specified criteria.
      *
      * @param types  The list of {@code CouponType} to filter by, or {@code null} to
+     *               ignore this filter.
+     * @param criterias The list of {@code CouponCriteria} to filter by, or {@code null} to
      *               ignore this filter.
      * @param codes  The list of coupon codes to filter by, or {@code null} to
      *               ignore this filter.
@@ -110,21 +118,22 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
      * @param byShop A {@code Boolean} determining whether to
      */
     @Query("""
-            	select c.id from Coupon c
-                join c.detail cd
-                left join c.shop s
-            	where (coalesce(:showExpired) is null or (cd.expDate > current date and cd.usage > 0))
-                and (coalesce(:codes) is null or c.code in :codes)
-            	and (coalesce(:code) is null or c.code = :code)
-            	and (coalesce(:types) is null or cd.type in :types)
-            	and (coalesce(:shopId) is null or s.id = :shopId)
-                and (coalesce(:userId) is null or s.owner.id = :userId)
-            	and (coalesce(:byShop) is null or case when :byShop = true
-            		then s.id is not null else s.id is null end)
-            	and c.id not in :ids
-            	group by c.id, cd.id
-            """)
+        SELECT c.id FROM Coupon c
+        JOIN c.detail cd
+        LEFT JOIN c.shop s
+        WHERE (COALESCE(:showExpired) IS NULL OR (cd.expDate > CURRENT DATE AND cd.usage > 0))
+        AND (COALESCE(:codes) IS NULL OR c.code IN :codes)
+        AND (COALESCE(:code) IS NULL OR c.code = :code)
+        AND (COALESCE(:types) IS NULL OR cd.type IN :types)
+        AND (COALESCE(:criterias) IS NULL OR cd.criteria IN :criterias)
+        AND (COALESCE(:shopId) IS NULL OR s.id = :shopId)
+        AND (COALESCE(:userId) IS NULL OR s.owner.id = :userId)
+        AND (COALESCE(:byShop) IS NULL OR CASE WHEN :byShop = true THEN s.id IS NOT NULL ELSE s.id IS NULL END)
+        AND c.id NOT IN :ids
+        GROUP BY c.id, cd.id
+    """)
     List<Long> findInverseIds(List<CouponType> types,
+            List<CouponCriteria> criterias,
             List<String> codes,
             String code,
             Long shopId,
@@ -145,21 +154,24 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
      *         the associated
      */
     @Query("""
-            	select c as coupon, s.name as shopName, i as image
-                from Coupon c
-                join fetch c.detail cd
-                left join c.shop s
-                left join s.image i
-            	join (
-            		select c2.id as id, c2.shop.id as shopId,
-            		row_number() over (partition by c2.shop.id order by c2.shop.id) as rn
-            		from Coupon c2 join c2.detail cd
-            		where (cd.expDate > current date and cd.usage > 0)
-            			and c2.shop.id in :shopIds or c2.shop.id is null
-            	) t on c.id = t.id and t.rn = 1
-            	order by c.detail.type asc, c.detail.attribute asc,
-                        	c.detail.discount desc, c.detail.maxDiscount desc
-            """)
+        SELECT c AS coupon, 
+            s.name AS shopName, 
+            i AS image
+        FROM Coupon c
+        JOIN FETCH c.detail cd
+        LEFT JOIN c.shop s
+        LEFT JOIN s.image i
+        JOIN (
+            SELECT c2.id AS id, 
+                c2.shop.id AS shopId,
+                ROW_NUMBER() OVER (PARTITION BY c2.shop.id ORDER BY c2.shop.id) AS rn
+            FROM Coupon c2 JOIN c2.detail cd
+            WHERE (cd.expDate > CURRENT DATE AND cd.usage > 0)
+            AND c2.shop.id IN :shopIds OR c2.shop.id IS NULL
+        ) t ON c.id = t.id AND t.rn = 1
+        ORDER BY c.detail.type ASC, c.detail.attribute ASC,
+            c.detail.discount DESC, c.detail.maxDiscount DESC
+    """)
     List<ICoupon> recommendCoupons(List<Long> shopIds);
 
     /**
@@ -172,13 +184,15 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
      *         image
      */
     @Query("""
-               select c as coupon, s.name as shopName, i as image
-               from Coupon c
-               join fetch c.detail cd
-               left join c.shop s
-               left join s.image i
-               where c.code in :codes
-            """)
+        SELECT c AS coupon, 
+            s.name AS shopName, 
+            i AS image
+        FROM Coupon c
+        JOIN FETCH c.detail cd
+        LEFT JOIN c.shop s
+        LEFT JOIN s.image i
+        WHERE c.code IN :codes
+    """)
     List<ICoupon> findCouponInCodes(List<String> codes);
 
     /**
@@ -196,21 +210,23 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
      *         exists; otherwise, an empty optional
      */
     @Query("""
-            	select c as coupon, s.name as shopName, i as image
-                from Coupon c
-                join fetch c.detail cd
-                left join c.shop s
-                left join s.image i
-            	where (cd.expDate > current date and cd.usage > 0)
-            	and (case when coalesce(:shopId) is null then s.id is null else s.id = :shopId end)
-            	and (coalesce(:value) is null or (cd.type in (com.ring.model.enums.CouponType.MIN_VALUE,
-            			com.ring.model.enums.CouponType.SHIPPING) and cd.attribute < :value)
-            		or (coalesce(:quantity) is null
-            			or (cd.type = com.ring.model.enums.CouponType.MIN_AMOUNT and cd.attribute < :quantity)))
-            	group by s.id, c.id, cd.id, cd.attribute, cd.discount, cd.maxDiscount, s.name, i.id
-            	order by cd.attribute asc, cd.discount desc, cd.maxDiscount desc
-            	limit 1
-            """)
+        SELECT c AS coupon, 
+            s.name AS shopName, 
+            i AS image
+        FROM Coupon c
+        JOIN FETCH c.detail cd
+        LEFT JOIN c.shop s
+        LEFT JOIN s.image i
+        WHERE (cd.expDate > CURRENT DATE AND cd.usage > 0)
+        AND (CASE WHEN COALESCE(:shopId) IS NULL THEN s.id IS NULL ELSE s.id = :shopId END)
+        AND (COALESCE(:value) IS NULL OR (
+            cd.criteria = com.ring.model.enums.CouponCriteria.VALUE AND cd.attribute < :value)
+            OR (COALESCE(:quantity) IS NULL
+            OR (cd.criteria = com.ring.model.enums.CouponCriteria.QUANTITY AND cd.attribute < :quantity)))
+        GROUP BY s.id, c.id, cd.id, cd.attribute, cd.discount, cd.maxDiscount, s.name, i.id
+        ORDER BY cd.attribute ASC, cd.discount DESC, cd.maxDiscount DESC
+        LIMIT 1
+    """)
     Optional<ICoupon> recommendCoupon(Long shopId, Double value, Integer quantity);
 
     /**
@@ -225,13 +241,15 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
      *         matches the code.
      */
     @Query("""
-            	select c as coupon, s.name as shopName, i as image
-                from Coupon c
-                join fetch c.detail cd
-                left join c.shop s
-                left join s.image i
-            	where c.code = :code
-            """)
+        SELECT c AS coupon, 
+            s.name AS shopName, 
+            i AS image
+        FROM Coupon c
+        JOIN FETCH c.detail cd
+        LEFT JOIN c.shop s
+        LEFT JOIN s.image i
+        WHERE c.code = :code
+    """)
     Optional<ICoupon> findCouponByCode(String code);
 
     /**
@@ -244,13 +262,15 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
      *         or an empty {@link Optional
      */
     @Query("""
-            	select c as coupon, s.name as shopName, i as image
-                from Coupon c
-                join fetch c.detail cd
-                left join c.shop s
-                left join s.image i
-            	where c.id = :id
-            """)
+        SELECT c AS coupon, 
+            s.name AS shopName, 
+            i AS image
+        FROM Coupon c
+        JOIN FETCH c.detail cd
+        LEFT JOIN c.shop s
+        LEFT JOIN s.image i
+        WHERE c.id = :id
+    """)
     Optional<ICoupon> findCouponById(Long id);
 
     /**
@@ -272,15 +292,15 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
      *         month.
      */
     @Query("""
-                select count(c.id) as total,
-                count(case when c.createdDate >= date_trunc('month', current date) then 1 end) as currentMonth,
-                count(case when c.createdDate >= date_trunc('month', current date) - 1 month
-                    and c.createdDate < date_trunc('month', current date) then 1 end) lastMonth
-                from Coupon c
-                left join c.shop s
-                where (coalesce(:shopId) is null or s.id = :shopId)
-                and (coalesce(:userId) is null or s.owner.id = :userId)
-            """)
+        SELECT COUNT(c.id) AS total,
+            COUNT(CASE WHEN c.createdDate >= DATE_TRUNC('month', CURRENT DATE) THEN 1 END)   currentMonth,
+            COUNT(CASE WHEN c.createdDate >= DATE_TRUNC('month', CURRENT DATE) - 1 MONTH
+                AND c.createdDate < DATE_TRUNC('month', CURRENT DATE) THEN 1 END) AS lastMonth
+        FROM Coupon c
+        LEFT JOIN c.shop s
+        WHERE (COALESCE(:shopId) IS NULL OR s.id = :shopId)
+        AND (COALESCE(:userId) IS NULL OR s.owner.id = :userId)
+    """)
     IStat getCouponAnalytics(Long shopId,
             Long userId);
 
@@ -292,8 +312,10 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
      */
     @Modifying
     @Query("""
-                update CouponDetail c set c.usage = c.usage - cast(1 as short) where c.coupon.id = :id
-            """)
+        UPDATE CouponDetail c 
+        SET c.usage = c.usage - CAST(1 AS short) 
+        WHERE c.coupon.id = :id
+    """)
     void decreaseUsage(Long id);
 
     /**

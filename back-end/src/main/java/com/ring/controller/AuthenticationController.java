@@ -1,6 +1,5 @@
 package com.ring.controller;
 
-import com.ring.common.AppConstants;
 import com.ring.dto.request.AuthenticationRequest;
 import com.ring.dto.request.RegisterRequest;
 import com.ring.dto.request.ResetPassRequest;
@@ -44,8 +43,9 @@ public class AuthenticationController {
 	 * @return a {@link ResponseEntity} containing a success or failure message.
 	 */
 	@PostMapping("/register")
-	public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest registerRequest,
-									  HttpServletRequest request) {
+	public ResponseEntity<String> register(
+			@RequestBody @Valid RegisterRequest registerRequest,
+			HttpServletRequest request) {
 
 		registerService.register(registerRequest, request);
 		String message = messageService.getMessage("message.create.succeeded");
@@ -104,7 +104,8 @@ public class AuthenticationController {
 		// Generate access token
 		String jwtToken = tokenService.generateAccessToken(auth);
 
-		return ResponseEntity.ok().body(new AuthenticationResponse(jwtToken));
+		return ResponseEntity.ok()
+				.body(new AuthenticationResponse(jwtToken));
 	}
 
 	/**
@@ -115,8 +116,9 @@ public class AuthenticationController {
 	 * @return a {@link ResponseEntity} containing a success message.
 	 */
 	@PostMapping("/forgot-password")
-	public ResponseEntity<?> forgotPassword(@RequestParam("email") @NotBlank(message = "{validation.constraints.not.blank}") String email,
-											HttpServletRequest request){
+	public ResponseEntity<String> forgotPassword(
+			@RequestParam("email") @NotBlank(message = "{validation.constraints.not.blank}") String email,
+			HttpServletRequest request){
 
 		registerService.forgotPassword(email, request);
 		String message = messageService.getMessage("message.send.email.succeeded");
@@ -133,9 +135,10 @@ public class AuthenticationController {
 	 * @return a {@link ResponseEntity} containing a success message.
 	 */
 	@PutMapping("/reset-password/{token}")
-	public ResponseEntity<?> resetPassword(@PathVariable("token") String token,
-										   @Valid @RequestBody ResetPassRequest resetRequest,
-											HttpServletRequest request){
+	public ResponseEntity<String> resetPassword(
+			@PathVariable("token") String token,
+			@Valid @RequestBody ResetPassRequest resetRequest,
+			HttpServletRequest request){
 												
 		registerService.resetPassword(token, resetRequest, request);
 		String message = messageService.getMessage("message.update.succeeded");

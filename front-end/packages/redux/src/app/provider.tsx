@@ -7,7 +7,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { combineReducers, ReducersMapObject } from "@reduxjs/toolkit";
 import { persistStore } from "redux-persist";
 import { injectStore } from "./storeRef";
-import apiSlice from "../lib/apiSlice";
+import apiSlice, { setBaseUrl } from "../lib/apiSlice";
 
 // Static reducer
 const staticReducer: ReducersMapObject = {
@@ -32,10 +32,8 @@ export default function StoreProvider({
     injectStore(storeRef.current);
   }
 
-  // Change baseUrl in reducers
-  if (reducers && baseUrl) {
-    staticReducer.baseUrl = () => baseUrl;
-  }
+  // Change base url
+  if (reducers && baseUrl) setBaseUrl(baseUrl);
 
   // Replace/inject reducers
   storeRef.current.replaceReducer(

@@ -4,11 +4,9 @@ import { PHONE_REGEX } from "@ring/shared/utils/regex";
 import { getAddressType } from "@ring/shared/enums/address";
 import { location } from "@ring/shared/utils/location";
 import { PatternFormat } from "react-number-format";
-import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -22,6 +20,8 @@ import HomeIcon from "@mui/icons-material/Home";
 import CloseIcon from "@mui/icons-material/Close";
 import Delete from "@mui/icons-material/Delete";
 import Apartment from "@mui/icons-material/Apartment";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import ToggleButton from "@mui/material/ToggleButton";
 
 const AddressType = getAddressType();
 
@@ -31,7 +31,7 @@ const splitAddress = (addressInfo) => {
   let address = "";
 
   if (addressInfo?.address) {
-    //Split address
+    // Split address
     address = addressInfo?.address;
     let addressSplit = addressInfo?.city?.split(", ");
     ward = addressSplit[addressSplit.length - 1];
@@ -68,18 +68,17 @@ const AddressForm = ({
     PHONE_REGEX.test(addressInfo?.phone) || true
   );
   const [currAddress, setCurrAddress] = useState(splitAddress(addressInfo));
-  const [selectDefault, setSelectDefault] = useState(false);
-  const [selectTemp, setSelectTemp] = useState(
-    addressInfo && addressInfo?.isDefault == null
-  );
+  const [setting, setSetting] = useState(() => [
+    addressInfo && addressInfo?.isDefault == null ? "temp" : null,
+  ]);
 
-  //Error message reset when reinput stuff
+  // Error message reset when reinput stuff
   useEffect(() => {
     setErrMsg("");
   }, [currAddress]);
 
   useEffect(() => {
-    //Check phone number
+    // Check phone number
     const result = PHONE_REGEX.test(currAddress.phone);
     setValidPhone(result);
   }, [currAddress.phone]);
@@ -88,7 +87,7 @@ const AddressForm = ({
     e.preventDefault();
     if (pending) return;
 
-    //Validation
+    // Validation
     const isNotValid =
       !currAddress?.name ||
       !currAddress?.phone ||
@@ -112,25 +111,32 @@ const AddressForm = ({
       isDefault: addressInfo?.isDefault,
     };
 
+    const isDefault = setting.includes("default");
+    const isTemp = setting.includes("temp");
+
     if (!addressInfo) {
-      //Create
-      handleCreateAddress(newAddress, selectDefault, selectTemp);
+      // Create
+      handleCreateAddress(newAddress, isDefault, isTemp);
     } else {
-      //Update
+      // Update
       if (addressInfo.isDefault != null) {
-        //Saved address
-        selectTemp
-          ? handleConvertAddress(newAddress, selectTemp)
-          : handleUpdateAddress(newAddress, selectDefault);
+        // Saved address
+        isTemp
+          ? handleConvertAddress(newAddress, isTemp)
+          : handleUpdateAddress(newAddress, isDefault);
       } else {
-        //Stored address
-        selectDefault
+        // Stored address
+        isDefault
           ? handleSetDefault(newAddress)
-          : selectTemp
+          : isTemp
             ? handleUpdateAddress(newAddress)
-            : handleConvertAddress(newAddress, selectTemp);
+            : handleConvertAddress(newAddress, isTemp);
       }
     }
+  };
+
+  const handleSettingChange = (event, newValue) => {
+    setSetting(newValue);
   };
 
   const selectedCity = location.filter((city) => {
@@ -226,7 +232,7 @@ const AddressForm = ({
           <Grid container size="grow" spacing={1}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
-                label="Họ và tên"
+                label={err?.data?.errors?.name ?? "Họ và tên"}
                 type="text"
                 id="fullName"
                 required
@@ -238,7 +244,6 @@ const AddressForm = ({
                   ((errMsg != "" || addressInfo) && !currAddress?.name) ||
                   err?.data?.errors?.name
                 }
-                helperText={err?.data?.errors?.name}
                 size="small"
                 fullWidth
                 slotProps={{
@@ -250,7 +255,11 @@ const AddressForm = ({
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <PatternFormat
-                label="Số điện thoại"
+                label={
+                  currAddress.phone && !validPhone
+                    ? "Sai định dạng số điện thoại!"
+                    : (err?.data?.errors?.phone ?? "Số điện thoại")
+                }
                 id="phone"
                 required
                 onValueChange={(values) =>
@@ -261,11 +270,6 @@ const AddressForm = ({
                   ((errMsg != "" || addressInfo) && !currAddress?.phone) ||
                   (currAddress.phone && !validPhone) ||
                   err?.data?.errors?.phone
-                }
-                helperText={
-                  currAddress.phone && !validPhone
-                    ? "Sai định dạng số điện thoại!"
-                    : err?.data?.errors?.phone
                 }
                 fullWidth
                 size="small"
@@ -281,7 +285,7 @@ const AddressForm = ({
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
-                label="Tên công ty"
+                label={err?.data?.errors?.companyName ?? "Tên công ty"}
                 type="text"
                 id="company"
                 onChange={(e) =>
@@ -292,7 +296,6 @@ const AddressForm = ({
                 }
                 value={currAddress?.companyName}
                 error={err?.data?.errors?.companyName}
-                helperText={err?.data?.errors?.companyName}
                 size="small"
                 fullWidth
                 slotProps={{
@@ -304,14 +307,13 @@ const AddressForm = ({
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
-                label="Loại địa chỉ"
+                label={err?.data?.errors?.type ?? "Loại địa chỉ"}
                 onChange={(e) =>
                   setCurrAddress({ ...currAddress, type: e.target.value })
                 }
                 select
                 value={currAddress?.type || ""}
                 error={err?.data?.errors?.type}
-                helperText={err?.data?.errors?.type}
                 fullWidth
                 size="small"
               >
@@ -327,7 +329,7 @@ const AddressForm = ({
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
-                label="Tỉnh/Thành phố"
+                label={err?.data?.errors?.city ?? "Tỉnh/Thành phố"}
                 required
                 value={currAddress?.city || ""}
                 onChange={(e) =>
@@ -339,7 +341,10 @@ const AddressForm = ({
                 }
                 select
                 defaultValue=""
-                error={(errMsg != "" || addressInfo) && !currAddress?.city}
+                error={
+                  ((errMsg != "" || addressInfo) && !currAddress?.city) ||
+                  err?.data?.errors?.city
+                }
                 fullWidth
                 size="small"
                 slotProps={{
@@ -369,7 +374,7 @@ const AddressForm = ({
             <Grid size={{ xs: 12, sm: 6 }}>{selectWards}</Grid>
             <Grid size={12}>
               <TextField
-                placeholder="Địa chỉ nhận hàng"
+                label={err?.data?.errors?.address ?? "Địa chỉ nhận hàng"}
                 type="text"
                 autoComplete="on"
                 required
@@ -381,15 +386,14 @@ const AddressForm = ({
                   ((errMsg != "" || addressInfo) && !currAddress?.address) ||
                   err?.data?.errors?.address
                 }
-                helperText={err?.data?.errors?.address}
                 fullWidth
                 size="small"
                 multiline
-                minRows={2}
+                minRows={4}
                 slotProps={{
                   inputComponent: TextareaAutosize,
                   inputProps: {
-                    minRows: 2,
+                    minRows: 4,
                     style: { resize: "auto" },
                   },
                   input: {
@@ -398,65 +402,51 @@ const AddressForm = ({
                 }}
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    disableRipple
-                    disableFocusRipple
-                    disabled={
-                      selectTemp || addressInfo?.isDefault || isSelected
-                    }
-                    checked={selectDefault}
-                    color="primary"
-                    inputProps={{ "aria-label": "select" }}
-                    onChange={() => setSelectDefault((prev) => !prev)}
-                  />
-                }
-                label="Chọn làm địa chỉ mặc định"
-              />
-            </Grid>
             <Grid
-              size={{ xs: 12, sm: 6 }}
-              sx={{
-                justifyContent: { xs: "flex-start", sm: "flex-end" },
-                display: "flex",
-              }}
+              size={12}
+              sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}
             >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    disableRipple
-                    disableFocusRipple
-                    disabled={selectDefault}
-                    checked={selectTemp}
-                    color="primary"
-                    inputProps={{ "aria-label": "select" }}
-                    onChange={() => setSelectTemp((prev) => !prev)}
-                  />
-                }
-                label={
-                  addressInfo != null && addressInfo?.isDefault != null
-                    ? "Chuyển về địa chỉ tạm thời"
-                    : "Lưu địa chỉ tạm thời"
-                }
-              />
-            </Grid>
-            {addressInfo && !addressInfo?.isDefault && !isSelected && (
-              <Grid size={{ xs: 12, sm: 5 }}>
+              {addressInfo && !addressInfo?.isDefault && !isSelected && (
                 <Button
                   disabled={addressInfo?.isDefault || isSelected}
-                  variant="contained"
+                  variant="outlined"
                   color="error"
                   size="large"
-                  fullWidth
                   onClick={() => handleClickRemove(addressInfo)}
                 >
-                  Xoá địa chỉ&nbsp;
+                  Xoá&nbsp;
                   <Delete />
                 </Button>
-              </Grid>
-            )}
+              )}
+              <ToggleButtonGroup
+                color="primary"
+                value={setting}
+                onChange={handleSettingChange}
+                sx={{ ml: "auto" }}
+                aria-label="Additional settings"
+              >
+                <ToggleButton
+                  sx={{ py: 1, px: 1.5 }}
+                  value="default"
+                  disabled={
+                    setting.includes("temp") ||
+                    addressInfo?.isDefault ||
+                    isSelected
+                  }
+                  aria-label="Default address"
+                >
+                  Mặc định
+                </ToggleButton>
+                <ToggleButton
+                  sx={{ py: 1, px: 1.5 }}
+                  value="temp"
+                  disabled={setting.includes("default")}
+                  aria-label="Temporary address"
+                >
+                  Tạm thời
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Grid>
           </Grid>
         </form>
       </DialogContent>
@@ -465,7 +455,6 @@ const AddressForm = ({
           variant="outlined"
           color="error"
           size="large"
-          sx={{ marginY: "10px" }}
           onClick={handleClose}
           startIcon={<CloseIcon />}
         >
@@ -475,7 +464,6 @@ const AddressForm = ({
           variant="contained"
           color="primary"
           size="large"
-          sx={{ marginY: "10px" }}
           onClick={handleSubmit}
           startIcon={<Check />}
         >

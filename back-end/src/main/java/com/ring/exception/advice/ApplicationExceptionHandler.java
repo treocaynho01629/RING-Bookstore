@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -115,13 +116,15 @@ public class ApplicationExceptionHandler{
     }
 
     @ExceptionHandler(HttpResponseException.class)
-    public ExceptionResponse handleResponseException(HttpResponseException e) {
+    public ResponseEntity<ExceptionResponse> handleResponseException(HttpResponseException e) {
 
-        return new ExceptionResponse(
+        ExceptionResponse response = new ExceptionResponse(
                 e.getStatus().value(),
                 e.getError(),
                 e.getLocalizedMessage()
         );
+
+        return new ResponseEntity<>(response, e.getStatus());
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)

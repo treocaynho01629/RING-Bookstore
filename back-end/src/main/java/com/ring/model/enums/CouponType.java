@@ -5,6 +5,6 @@ package com.ring.model.enums;
  */
 public enum CouponType {
     SHIPPING,
-    MIN_VALUE,
-    MIN_AMOUNT,
+    PRODUCT,
+    // REFUND, // TODO: Add refund type
 }

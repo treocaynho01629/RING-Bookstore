@@ -38,8 +38,10 @@ public class ImageController {
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','GUEST') and hasAuthority('read:user')")
-    public ResponseEntity<?> getAllImages() {
-        return new ResponseEntity<>(imageService.getAllImages(), HttpStatus.OK);
+    public ResponseEntity<List<Image>> getAllImages() {
+
+        List<Image> images = imageService.getAllImages();
+        return new ResponseEntity<>(images, HttpStatus.OK);
     }
 
     /**
@@ -51,8 +53,10 @@ public class ImageController {
      */
     @PostMapping("/upload")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('create:image')")
-    public ResponseEntity<?> uploadImage(@RequestParam("image") MultipartFile file,
-                                         @RequestParam(value = "folder", required = false) String folder) {
+    public ResponseEntity<String> uploadImage(
+            @RequestParam("image") MultipartFile file,
+            @RequestParam(value = "folder", required = false) String folder) {
+
         Image result = imageService.upload(file, folder);
         return new ResponseEntity<>(result.getUrl(), HttpStatus.OK);
     }
@@ -66,13 +70,16 @@ public class ImageController {
      */
     @PostMapping("/upload-multiple")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('create:image')")
-    public ResponseEntity<?> uploadImages(@RequestParam("images") MultipartFile[] files,
-                                          @RequestParam(value = "folder", required = false) String folder) {
-        List<String> messages = new ArrayList<>();
+    public ResponseEntity<List<String>> uploadImages(
+            @RequestParam("images") MultipartFile[] files,
+            @RequestParam(value = "folder", required = false) String folder) {
 
-        imageService.uploadMultiple(Arrays.asList(files), folder).forEach(image -> {
-            messages.add(image.getName() + " uploaded!");
-        });
+        List<String> messages = new ArrayList<>();
+        imageService.uploadMultiple(Arrays.asList(files), folder)
+            .forEach(image -> {
+                String message = messageService.getMessage("message.uploaded.succeeded", new Object[] { image.getName() });
+                messages.add(message);
+            });
 
         return new ResponseEntity<>(messages, HttpStatus.OK);
     }
@@ -86,8 +93,10 @@ public class ImageController {
      */
     @PutMapping("/replace")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('update:image')")
-    public ResponseEntity<?> replaceImage(@RequestParam("image") MultipartFile file,
-                                          @RequestParam("id") Long id) {
+    public ResponseEntity<String> replaceImage(
+            @RequestParam("image") MultipartFile file,
+            @RequestParam("id") Long id) {
+
         Image result = imageService.replace(file, id);
         return new ResponseEntity<>(result.getUrl(), HttpStatus.OK);
     }
@@ -100,8 +109,9 @@ public class ImageController {
      */
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:image')")
-    public ResponseEntity<?> deleteImage(@RequestParam(name = "publicId", required = false) String publicId,
-                                         @RequestParam(name = "id", required = false) Long id) {
+    public ResponseEntity<String> deleteImage(
+            @RequestParam(name = "publicId", required = false) String publicId,
+            @RequestParam(name = "id", required = false) Long id) {
 
         if (StringUtils.isBlank(publicId) && id == null) {
 
@@ -127,10 +137,12 @@ public class ImageController {
      */
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:image')")
-    public ResponseEntity<?> deleteImage(@PathVariable Long id) {
+    public ResponseEntity<String> deleteImage(@PathVariable Long id) {
 
-        boolean result = imageService.deleteImage(id);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        imageService.deleteImage(id);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -143,8 +155,9 @@ public class ImageController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:image')")
-    public ResponseEntity<?> deleteImages(@RequestParam(value = "publicIds", required = false) List<String> publicIds,
-                                          @RequestParam(value = "ids", required = false) List<Long> ids) {
+    public ResponseEntity<String> deleteImages(
+            @RequestParam(value = "publicIds", required = false) List<String> publicIds,
+            @RequestParam(value = "ids", required = false) List<Long> ids) {
 
         if (publicIds.isEmpty() && ids.isEmpty()) {
 

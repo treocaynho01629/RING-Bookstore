@@ -19,6 +19,7 @@ import com.ring.model.entity.Account;
 import com.ring.model.entity.Coupon;
 import com.ring.model.entity.CouponDetail;
 import com.ring.model.entity.Shop;
+import com.ring.model.enums.CouponCriteria;
 import com.ring.model.enums.CouponType;
 import com.ring.model.enums.UserRole;
 import com.ring.repository.CouponDetailRepository;
@@ -67,6 +68,7 @@ public class CouponServiceImpl implements CouponService {
             String sortBy,
             String sortDir,
             List<CouponType> types,
+            List<CouponCriteria> criterias,
             List<String> codes,
             String code,
             Long shopId,
@@ -83,6 +85,7 @@ public class CouponServiceImpl implements CouponService {
         // Fetch from the database
         Page<ICoupon> couponsList = couponRepo.findCoupons(
                 types,
+                criterias,
                 codes,
                 code,
                 shopId,
@@ -222,6 +225,7 @@ public class CouponServiceImpl implements CouponService {
         var couponDetail = CouponDetail.builder()
                 .coupon(addedCoupon)
                 .type(request.getType())
+                .criteria(request.getCriteria())
                 .usage(request.getUsage())
                 .expDate(request.getExpireDate())
                 .attribute(request.getAttribute())
@@ -285,6 +289,7 @@ public class CouponServiceImpl implements CouponService {
         // Set new details info
         CouponDetail currDetail = coupon.getDetail();
         currDetail.setType(request.getType());
+        currDetail.setCriteria(request.getCriteria());
         currDetail.setUsage(request.getUsage());
         currDetail.setExpDate(request.getExpireDate());
         currDetail.setAttribute(request.getAttribute());
@@ -338,6 +343,7 @@ public class CouponServiceImpl implements CouponService {
             AppConstants.COUPON_ANALYTICS }, allEntries = true) })
     @Transactional
     public void deleteCouponsInverse(List<CouponType> types,
+            List<CouponCriteria> criterias,
             List<String> codes,
             String code,
             Long shopId,
@@ -348,6 +354,7 @@ public class CouponServiceImpl implements CouponService {
             Account user) {
         List<Long> deleteIds = couponRepo.findInverseIds(
                 types,
+                criterias,
                 codes,
                 code,
                 shopId,
@@ -382,6 +389,7 @@ public class CouponServiceImpl implements CouponService {
             Account user) {
         CouponDetail couponDetail = coupon.getDetail();
         CouponType type = couponDetail.getType();
+        CouponCriteria criteria = couponDetail.getCriteria();
         BigDecimal discount = couponDetail.getDiscount();
 
         if (couponRepo.hasUserUsedCoupon(coupon.getId(), user.getId()))
@@ -391,6 +399,7 @@ public class CouponServiceImpl implements CouponService {
         double currValue = request.getValue();
         double shippingFee = request.getShippingFee();
         int currQuantity = request.getQuantity();
+        boolean isDiscounted = false;
 
         // Coupon
         double maxDiscount = couponDetail.getMaxDiscount();
@@ -401,25 +410,28 @@ public class CouponServiceImpl implements CouponService {
         double discountShipping = 0.0;
 
         // Check conditions & apply
-        if (type.equals(CouponType.MIN_AMOUNT)) {
-            if (currQuantity >= attribute)
+        if (criteria.equals(CouponCriteria.QUANTITY)) {
+            isDiscounted = currQuantity >= attribute;
+        } else if (criteria.equals(CouponCriteria.VALUE)) {
+            isDiscounted = currValue >= attribute;
+        }
+
+        if (isDiscounted) {
+            if (type.equals(CouponType.PRODUCT)) {
                 discountValue = currValue * discount.doubleValue();
-        } else if (type.equals(CouponType.MIN_VALUE)) {
-            if (currValue >= attribute)
-                discountValue = currValue * discount.doubleValue();
-        } else if (type.equals(CouponType.SHIPPING)) {
-            if (currValue >= attribute)
+            } else if (type.equals(CouponType.SHIPPING)) {
                 discountShipping = shippingFee * discount.doubleValue();
+            }
         }
 
         // If not usable
-        if (discountValue == 0.0 && discountShipping == 0.0)
+        if (!isDiscounted || (discountValue == 0.0 && discountShipping == 0.0))
             return null;
 
         // Threshold
-        if (discountValue > maxDiscount)
+        if (isDiscounted && discountValue > maxDiscount)
             discountValue = maxDiscount;
-        if (discountShipping > maxDiscount)
+        if (isDiscounted && discountShipping > maxDiscount)
             discountShipping = maxDiscount;
 
         return new CouponDiscountDTO(discountValue, discountShipping);
@@ -451,7 +463,7 @@ public class CouponServiceImpl implements CouponService {
             return result;
 
         CouponDetail couponDetail = coupon.getDetail();
-        CouponType type = couponDetail.getType();
+        CouponCriteria criteria = couponDetail.getCriteria();
         double attribute = couponDetail.getAttribute();
 
         // Current
@@ -459,10 +471,9 @@ public class CouponServiceImpl implements CouponService {
         int currQuantity = request.getQuantity() != null ? request.getQuantity() : -1;
 
         // Check conditions & apply
-        if (type.equals(CouponType.MIN_AMOUNT) && currValue > -1) {
+        if (criteria.equals(CouponCriteria.QUANTITY) && currValue > -1) {
             result = currQuantity >= attribute;
-        } else if (currValue > -1 &&
-                (type.equals(CouponType.MIN_VALUE) || type.equals(CouponType.SHIPPING))) {
+        } else if (criteria.equals(CouponCriteria.VALUE) && currValue > -1) {
             result = currValue >= attribute;
         }
 

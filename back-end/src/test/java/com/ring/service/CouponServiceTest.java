@@ -16,6 +16,7 @@ import com.ring.exception.ResourceNotFoundException;
 import com.ring.mapper.CouponMapper;
 import com.ring.mapper.DashboardMapper;
 import com.ring.model.entity.*;
+import com.ring.model.enums.CouponCriteria;
 import com.ring.model.enums.CouponType;
 import com.ring.model.enums.UserRole;
 import com.ring.repository.CouponDetailRepository;
@@ -76,7 +77,7 @@ public class CouponServiceTest extends AbstractServiceTest {
                         .build();
         private final CouponDetail couponDetail = CouponDetail.builder()
                         .id(1L)
-                        .type(CouponType.MIN_VALUE)
+                        .type(CouponType.PRODUCT)
                         .usage((short) 10)
                         .expDate(LocalDate.now().plusDays(30))
                         .attribute(100.0)
@@ -91,7 +92,7 @@ public class CouponServiceTest extends AbstractServiceTest {
                         .build();
         private final CouponRequest request = CouponRequest.builder()
                         .code("TEST123")
-                        .type(CouponType.MIN_VALUE)
+                        .type(CouponType.PRODUCT)
                         .usage((short) 10)
                         .expireDate(LocalDate.now().plusDays(30))
                         .attribute(100.0)
@@ -124,6 +125,7 @@ public class CouponServiceTest extends AbstractServiceTest {
                 // When
                 when(couponRepo.findCoupons(anyList(),
                                 anyList(),
+                                anyList(),
                                 anyString(),
                                 anyLong(),
                                 anyLong(),
@@ -139,7 +141,8 @@ public class CouponServiceTest extends AbstractServiceTest {
                                 10,
                                 "id",
                                 "desc",
-                                List.of(CouponType.MIN_VALUE),
+                                List.of(CouponType.PRODUCT),
+                                List.of(CouponCriteria.QUANTITY),
                                 List.of("TEST123"),
                                 "TEST123",
                                 1L,
@@ -156,6 +159,7 @@ public class CouponServiceTest extends AbstractServiceTest {
 
                 // Verify
                 verify(couponRepo, times(1)).findCoupons(anyList(),
+                                anyList(),
                                 anyList(),
                                 anyString(),
                                 anyLong(),
@@ -665,6 +669,7 @@ public class CouponServiceTest extends AbstractServiceTest {
                 // When
                 when(couponRepo.findInverseIds(anyList(),
                                 anyList(),
+                                anyList(),
                                 anyString(),
                                 anyLong(),
                                 anyLong(),
@@ -674,7 +679,8 @@ public class CouponServiceTest extends AbstractServiceTest {
                 doNothing().when(couponRepo).deleteAllById(ids);
 
                 // Then
-                couponService.deleteCouponsInverse(List.of(CouponType.MIN_VALUE),
+                couponService.deleteCouponsInverse(List.of(CouponType.PRODUCT),
+                                List.of(CouponCriteria.QUANTITY),
                                 List.of("TEST123"),
                                 "TEST123",
                                 1L,
@@ -686,6 +692,7 @@ public class CouponServiceTest extends AbstractServiceTest {
 
                 // Verify
                 verify(couponRepo, times(1)).findInverseIds(anyList(),
+                                anyList(),
                                 anyList(),
                                 anyString(),
                                 anyLong(),

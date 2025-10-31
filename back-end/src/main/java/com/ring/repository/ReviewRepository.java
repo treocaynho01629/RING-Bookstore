@@ -22,17 +22,22 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 	 *
 	 * @param bookId the ID of the book to filter reviews by; if null,*/
 	@Query("""
-		select r as review, u.id as userId, u.username as username, i as image,
-		b.id as bookId, b.title as bookTitle, b.slug as bookSlug
-		from Review r
-		join r.book b
-		left join r.user u
-		left join u.profile p
-		left join p.image i
-		where (coalesce(:userId) is null or u.id = :userId)
-		and (coalesce(:bookId) is null or r.book.id = :bookId)
-		and (coalesce(:rating) is null or r.rating = :rating)
-		and concat (r.rContent, u.username) ilike %:keyword%
+		SELECT r AS review, 
+			u.id AS userId, 
+			u.username AS username, 
+			i AS image,
+			b.id AS bookId, 
+			b.title AS bookTitle, 
+			b.slug AS bookSlug
+		FROM Review r
+		JOIN r.book b
+		LEFT JOIN r.user u
+		LEFT JOIN u.profile p
+		LEFT JOIN p.image i
+		WHERE (COALESCE(:userId) IS NULL OR u.id = :userId)
+		AND (COALESCE(:bookId) IS NULL OR r.book.id = :bookId)
+		AND (COALESCE(:rating) IS NULL OR r.rating = :rating)
+		AND CONCAT(r.rContent, u.username) ILIKE %:keyword%
 	""")
 	Page<IReview> findReviews(Long bookId,
 							  Long userId,
@@ -46,14 +51,15 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 	 * @param bookId   the ID of the book to filter reviews by; null if the filter is not applied.
 	 */
 	@Query("""
-		select r.id from Review r
-		left join r.user u
-		where (coalesce(:userId) is null or r.user.id = :userId)
-		and (coalesce(:bookId) is null or r.book.id = :bookId)
-		and (coalesce(:rating) is null or  r.rating = :rating)
-		and concat (r.rContent, u.username) ilike %:keyword%
-		and r.id not in :ids
-		group by r.id
+		SELECT r.id 
+		FROM Review r
+		LEFT JOIN r.user u
+		WHERE (COALESCE(:userId) IS NULL OR r.user.id = :userId)
+		AND (COALESCE(:bookId) IS NULL OR r.book.id = :bookId)
+		AND (COALESCE(:rating) IS NULL OR r.rating = :rating)
+		AND CONCAT(r.rContent, u.username) ILIKE %:keyword%
+		AND r.id NOT IN :ids
+		GROUP BY r.id
 	""")
 	List<Long> findInverseIds(Long bookId,
 							  Long userId,
@@ -67,15 +73,21 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 	 * @param id the ID of the book for which reviews are to be retrieved
 	 * @param rating the optional rating value to filter reviews; if null, all ratings are included*/
 	@Query("""
-		select r as review, u.id as userId, u.username as username, i as image,
-		b.id as bookId, b.title as bookTitle, b.slug as bookSlug
-		from Review r join r.book b
-		left join r.user u
-		left join u.profile p
-		left join p.image i
-		where b.id = :id
-		and r.isHidden = false
-		and (coalesce(:rating) is null or  r.rating = :rating)
+		SELECT r AS review, 
+			u.id AS userId, 
+			u.username AS username, 
+			i AS image,
+			b.id AS bookId, 
+			b.title AS bookTitle, 
+			b.slug AS bookSlug
+		FROM Review r
+		JOIN r.book b
+		LEFT JOIN r.user u
+		LEFT JOIN u.profile p
+		LEFT JOIN p.image i
+		WHERE b.id = :id
+		AND r.isHidden = false
+		AND (COALESCE(:rating) IS NULL OR r.rating = :rating)
 	""")
 	Page<IReview> findReviewsByBookId(Long id, Integer rating, Pageable pageable);
 
@@ -86,14 +98,20 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 	 * @param rating the rating filter to apply; if null, reviews of all ratings are included
 	 * @*/
 	@Query("""
-		select r as review, u.id as userId, u.username as username, i as image,
-		b.id as bookId, b.title as bookTitle, b.slug as bookSlug
-		from Review r join r.book b
-		left join r.user u
-		left join u.profile p
-		left join p.image i
-		where r.user.id = :id
-		and (coalesce(:rating) is null or  r.rating = :rating)
+		SELECT r AS review, 
+			u.id AS userId, 
+			u.username AS username, 
+			i AS image,
+			b.id AS bookId, 
+			b.title AS bookTitle, 
+			b.slug AS bookSlug
+		FROM Review r
+		JOIN r.book b
+		LEFT JOIN r.user u
+		LEFT JOIN u.profile p
+		LEFT JOIN p.image i
+		WHERE r.user.id = :id
+		AND (COALESCE(:rating) IS NULL OR r.rating = :rating)
 	""")
 	Page<IReview> findUserReviews(Long id, Integer rating, Pageable pageable);
 
@@ -105,13 +123,19 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 	 * @return an Optional containing the user's review for the specified book, or an empty Optional if no review is found
 	 */
 	@Query("""
-		select r as review, u.id as userId, u.username as username, i as image,
-		b.id as bookId, b.title as bookTitle, b.slug as bookSlug
-		from Review r join r.book b
-		left join r.user u
-		left join u.profile p
-		left join p.image i
-		where r.user.id = :userId and b.id = :bookId
+		SELECT r AS review, 
+			u.id AS userId, 
+			u.username AS username, 
+			i AS image,
+			b.id AS bookId, 
+			b.title AS bookTitle, 
+			b.slug AS bookSlug
+		FROM Review r
+		JOIN r.book b
+		LEFT JOIN r.user u
+		LEFT JOIN u.profile p
+		LEFT JOIN p.image i
+		WHERE r.user.id = :userId AND b.id = :bookId
 	""")
 	Optional<IReview> findUserBookReview(Long bookId, Long userId);
 }

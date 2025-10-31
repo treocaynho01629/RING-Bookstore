@@ -4,24 +4,28 @@
   "license": "MIT",
   "type": "module",
   "private": true,
+  "files": [
+    "src/**"
+  ],
   "exports": {
-    "./base": "./src/base.js",
-    "./next-js": "./src/next.js",
-    "./react-internal": "./src/react-internal.js"
+    "./base": "./src/eslint.base.config.js",
+    "./next": "./src/eslint.next.config.js",
+    "./react": "./src/eslint.react.config.js"
   },
   "scripts": {
     "update-dependencies": "npx npm-check-updates -u"
   },
   "devDependencies": {
-    "@eslint/js": "^9.32.0",
-    "eslint": "^9.32.0",
+    "@eslint/js": "^9.38.0",
+    "eslint": "^9.38.0",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-config-turbo": "^2.5.8",
     "eslint-plugin-only-warn": "^1.1.0",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
-    "eslint-plugin-turbo": "^2.5.5",
-    "eslint-config-turbo": "^2.5.5",
-    "globals": "^16.3.0"
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "eslint-plugin-turbo": "^2.5.8",
+    "globals": "^16.4.0",
+    "typescript-eslint": "^8.46.2"
   }
 }

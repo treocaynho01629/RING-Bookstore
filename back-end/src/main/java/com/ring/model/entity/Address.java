@@ -59,7 +59,4 @@ public class Address {
 	@JoinColumn(name = "profile_id")
 	@JsonIgnore
 	private AccountProfile profile;
-
-	@Transient
-	private Boolean isDefault = false;
 }

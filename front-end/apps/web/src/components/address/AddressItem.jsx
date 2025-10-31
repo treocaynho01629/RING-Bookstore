@@ -19,8 +19,12 @@ const AddressItemContainer = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 20px;
+  padding: ${({ theme }) => theme.spacing(2.5)};
   border: 0.5px solid ${({ theme }) => theme.vars.palette.action.focus};
+
+  ${({ theme }) => theme.breakpoints.down("sm")} {
+    padding: ${({ theme }) => `${theme.spacing(2.5)} ${theme.spacing(1.5)}`};
+  }
 
   &.active {
     border-color: ${({ theme }) => theme.vars.palette.primary.main};
@@ -45,6 +49,11 @@ const AddressTag = styled.div`
   border-color: ${({ theme }) => theme.vars.palette.primary.main};
   color: ${({ theme }) => theme.vars.palette.primary.dark};
   pointer-events: none;
+
+  ${({ theme }) => theme.breakpoints.down("sm")} {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
 
   &.temp {
     border-color: ${({ theme }) => theme.vars.palette.info.dark};
@@ -105,8 +114,20 @@ const StyledRadio = styled(Radio)(({ theme }) => ({
   },
 
   "&.Mui-checked": {
-    backgroundColor: theme.vars.palette.primary.main,
-    color: theme.vars.palette.primary.contrastText,
+    "&.MuiRadio-colorPrimary": {
+      backgroundColor: theme.vars.palette.primary.main,
+      color: theme.vars.palette.primary.contrastText,
+    },
+
+    "&.MuiRadio-colorInfo": {
+      backgroundColor: theme.vars.palette.info.main,
+      color: theme.vars.palette.info.contrastText,
+    },
+
+    "&.MuiRadio-colorError": {
+      backgroundColor: theme.vars.palette.error.main,
+      color: theme.vars.palette.error.contrastText,
+    },
   },
 }));
 //#endregion
@@ -186,8 +207,8 @@ const AddressItem = ({
         <Button
           sx={{
             display: { xs: "none", sm: "flex" },
-            whiteSpace: "nowrap",
-            marginTop: 2,
+            flexShrink: 0,
+            mt: 2,
           }}
           aria-label="toggle address dialog"
           variant="outlined"
@@ -197,10 +218,11 @@ const AddressItem = ({
           Thay đổi
         </Button>
         <IconButton
-          sx={{ display: { xs: "block", sm: "none" } }}
+          sx={{ display: { xs: "flex", sm: "none" }, pr: 0 }}
           aria-label="mobile toggle address dialog"
           onClick={() => handleOpen(addressInfo)}
           color={isNotValid ? "error" : "primary"}
+          size="small"
           edge="end"
         >
           <KeyboardArrowRight />

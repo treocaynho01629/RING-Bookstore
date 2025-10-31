@@ -1,8 +1,13 @@
 package com.ring.controller;
 
 import com.ring.dto.request.CategoryRequest;
+import com.ring.dto.response.PagingResponse;
+import com.ring.dto.response.categories.CategoryDTO;
+import com.ring.dto.response.categories.CategoryDetailDTO;
 import com.ring.dto.response.categories.PreviewCategoryDTO;
+import com.ring.model.entity.Category;
 import com.ring.service.CategoryService;
+import com.ring.service.impl.MessageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +27,7 @@ import java.util.List;
 public class CategoryController {
 
     private final CategoryService cateService;
+    private final MessageService messageService;
 
     /**
      * Retrieves preview categories for quick selection.
@@ -29,7 +35,7 @@ public class CategoryController {
      * @return a {@link ResponseEntity} containing a list of preview categories.
      */
     @GetMapping("/preview")
-    public ResponseEntity<?> getPreviewCategories() {
+    public ResponseEntity<List<PreviewCategoryDTO>> getPreviewCategories() {
         List<PreviewCategoryDTO> categories = cateService.getPreviewCategories();
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
@@ -43,10 +49,13 @@ public class CategoryController {
      * @return a {@link ResponseEntity} containing relevant categories.
      */
     @GetMapping("/relevant/{id}")
-    public ResponseEntity<?> getRelevantCategories(@RequestParam(value = "pSize", defaultValue = "20") Integer pageSize,
-                                                   @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
-                                                   @PathVariable("id") Long shopId) {
-        return new ResponseEntity<>(cateService.getRelevantCategories(pageNo, pageSize, shopId), HttpStatus.OK);
+    public ResponseEntity<PagingResponse<CategoryDTO>> getRelevantCategories(
+            @RequestParam(value = "pSize", defaultValue = "20") Integer pageSize,
+            @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
+            @PathVariable("id") Long shopId) {
+
+        PagingResponse<CategoryDTO> categories = cateService.getRelevantCategories(pageNo, pageSize, shopId);
+        return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
     /**
@@ -61,13 +70,16 @@ public class CategoryController {
      * @return a {@link ResponseEntity} containing paginated categories.
      */
     @GetMapping
-    public ResponseEntity<?> getCategories(@RequestParam(value = "pSize", defaultValue = "20") Integer pageSize,
-                                           @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
-                                           @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
-                                           @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir,
-                                           @RequestParam(value = "include", required = false) String include,
-                                           @RequestParam(value = "parentId", required = false) Integer parentId) {
-        return new ResponseEntity<>(cateService.getCategories(pageNo, pageSize, sortBy, sortDir, include, parentId), HttpStatus.OK);
+    public ResponseEntity<PagingResponse<CategoryDTO>> getCategories(
+            @RequestParam(value = "pSize", defaultValue = "20") Integer pageSize,
+            @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
+            @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir,
+            @RequestParam(value = "include", required = false) String include,
+            @RequestParam(value = "parentId", required = false) Integer parentId) {
+
+        PagingResponse<CategoryDTO> categories = cateService.getCategories(pageNo, pageSize, sortBy, sortDir, include, parentId);
+        return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
     /**
@@ -78,9 +90,12 @@ public class CategoryController {
      * @return a {@link ResponseEntity} containing the category.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCategoryById(@PathVariable("id") Integer id,
-                                             @RequestParam(value = "include", required = false) String include) {
-        return new ResponseEntity<>(cateService.getCategory(id, null, include), HttpStatus.OK);
+    public ResponseEntity<CategoryDetailDTO> getCategoryById(
+            @PathVariable("id") Integer id,
+            @RequestParam(value = "include", required = false) String include) {
+
+        CategoryDetailDTO category = cateService.getCategory(id, null, include);
+        return new ResponseEntity<>(category, HttpStatus.OK);
     }
 
     /**
@@ -91,9 +106,12 @@ public class CategoryController {
      * @return a {@link ResponseEntity} containing the category.
      */
     @GetMapping("/slug/{slug}")
-    public ResponseEntity<?> getCategoryBySlug(@PathVariable("slug") String slug,
-                                             @RequestParam(value = "include", required = false) String include) {
-        return new ResponseEntity<>(cateService.getCategory(null, slug, include), HttpStatus.OK);
+    public ResponseEntity<CategoryDetailDTO> getCategoryBySlug(
+            @PathVariable("slug") String slug,
+            @RequestParam(value = "include", required = false) String include) {
+
+        CategoryDetailDTO category = cateService.getCategory(null, slug, include);
+        return new ResponseEntity<>(category, HttpStatus.OK);
     }
 
     /**
@@ -104,8 +122,10 @@ public class CategoryController {
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('create:category')")
-    public ResponseEntity<?> createCategory(@Valid @RequestPart("request") CategoryRequest request) {
-        return new ResponseEntity<>(cateService.addCategory(request), HttpStatus.CREATED);
+    public ResponseEntity<Category> createCategory(@Valid @RequestPart("request") CategoryRequest request) {
+
+        Category category = cateService.addCategory(request);
+        return new ResponseEntity<>(category, HttpStatus.CREATED);
     }
 
     /**
@@ -117,9 +137,12 @@ public class CategoryController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('update:category')")
-    public ResponseEntity<?> updateCategory(@PathVariable("id") Integer id,
-                                            @Valid @RequestPart("request") CategoryRequest request) {
-        return new ResponseEntity<>(cateService.updateCategory(id, request), HttpStatus.CREATED);
+    public ResponseEntity<Category> updateCategory(
+            @PathVariable("id") Integer id,
+            @Valid @RequestPart("request") CategoryRequest request) {
+
+        Category category = cateService.updateCategory(id, request);
+        return new ResponseEntity<>(category, HttpStatus.CREATED);
     }
 
     /**
@@ -130,9 +153,12 @@ public class CategoryController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:category')")
-    public ResponseEntity<?> deleteCategory(@PathVariable("id") Integer id) {
+    public ResponseEntity<String> deleteCategory(@PathVariable("id") Integer id) {
+
         cateService.deleteCategory(id);
-        return new ResponseEntity<>("Category deleted!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -143,11 +169,15 @@ public class CategoryController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:category')")
-    public ResponseEntity<?> deleteCategories(@RequestParam(value = "parentId", required = false) Integer parentId,
-                                              @RequestParam("ids") List<Integer> ids
-    ) { //FIX
+    public ResponseEntity<String> deleteCategories(
+        @RequestParam(value = "parentId", required = false) Integer parentId,
+        @RequestParam("ids") List<Integer> ids) { 
+
+        // TODO: Fix the method
         cateService.deleteCategories(ids);
-        return new ResponseEntity<>("Categories deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -159,10 +189,14 @@ public class CategoryController {
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:book')")
-    public ResponseEntity<?> deleteCategoriesInverse(@RequestParam(value = "parentId", required = false) Integer parentId,
-                                                     @RequestParam("ids") List<Integer> ids) {
+    public ResponseEntity<String> deleteCategoriesInverse(
+            @RequestParam(value = "parentId", required = false) Integer parentId,
+            @RequestParam("ids") List<Integer> ids) {
+
         cateService.deleteCategoriesInverse(parentId, ids);
-        return new ResponseEntity<>("Categories deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -172,8 +206,11 @@ public class CategoryController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:category')")
-    public ResponseEntity<?> deleteAllCategories() {
+    public ResponseEntity<String> deleteAllCategories() {
+
         cateService.deleteAllCategories();
-        return new ResponseEntity<>("All categories deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 }

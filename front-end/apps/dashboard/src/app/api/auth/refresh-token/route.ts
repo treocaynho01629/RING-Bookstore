@@ -5,7 +5,7 @@ import { getToken } from "next-auth/jwt";
 export async function GET(request: NextRequest) {
   try {
     // Get refresh token
-    const token = await getToken({ req: request });
+    const token = await getToken({ req: request as any });
     const refreshToken = token?.data.tokens.refresh;
 
     if (!refreshToken) {

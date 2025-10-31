@@ -109,22 +109,22 @@ public class AddressServiceImpl implements AddressService {
         return savedAddress;
     }
 
-    @Caching(evict = { @CacheEvict(cacheNames = { AppConstants.ADDRESSES,
-                    AppConstants.USER_ADDRESS },
-                    key = "#user.id") },
-                    put = { @CachePut(cacheNames = AppConstants.ADDRESS,
-                            key = "#id",
-                            condition = "#result != null") })
+    @Caching(
+        evict = { @CacheEvict(cacheNames = { AppConstants.ADDRESSES, AppConstants.USER_ADDRESS }, key = "#user.id") },
+        put = { @CachePut(cacheNames = AppConstants.ADDRESS, key = "#id", condition = "#result != null") })
     @Transactional
     public Address updateAddress(AddressRequest request, Long id, Account user) {
+
         Address address = addressRepo.findById(id)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
                             new Object[]{ new DefaultMessageSourceResolvable("label.user.address") });
                     return new ResourceNotFoundException(errorMsg);
                 });
+
+        AccountProfile addressProfile = address.getProfile();
         AccountProfile profile = user.getProfile();
-        if (profile == null || !address.getProfile().getId().equals(profile.getId())) {
+        if (profile == null || !addressProfile.getId().equals(profile.getId())) {
             var errorMsg = messageService.getMessage("exception.ownership",
                     new Object[]{ new DefaultMessageSourceResolvable("label.user.profile") });
             throw new EntityOwnershipException(errorMsg);
@@ -142,12 +142,17 @@ public class AddressServiceImpl implements AddressService {
         Address updatedAddress = addressRepo.save(address);
 
         // Default address
-        if (request.getIsDefault() && !address.getIsDefault()) {
-            AccountProfile currProfile = address.getProfile();
+        if (request.getIsDefault() 
+            && address.getId() != addressProfile.getAddress().getId()) {
+
+            // Move to address list
+            addressProfile.addAddress(addressProfile.getAddress());
 
             // Set new default
-            currProfile.setAddress(address);
-            profileRepo.save(currProfile); // Save profile
+            addressProfile.setAddress(address);
+
+            // Save profile
+            profileRepo.save(addressProfile); 
         }
 
         return updatedAddress;

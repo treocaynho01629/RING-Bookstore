@@ -14,9 +14,10 @@ import java.util.Optional;
 public interface PaymentInfoRepository extends JpaRepository<PaymentInfo, Integer> {
 
     @Query("""
-        select p from OrderReceipt o
-        join o.payment p
-        where o.id = :id
+        SELECT p 
+        FROM OrderReceipt o
+        JOIN o.payment p
+        WHERE o.id = :id
     """)
     Optional<PaymentInfo> findByOrder(Long id);
 }

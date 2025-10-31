@@ -1,7 +1,11 @@
 package com.ring.controller;
 
 import com.ring.dto.request.PublisherRequest;
+import com.ring.dto.response.PagingResponse;
+import com.ring.dto.response.publishers.PublisherDTO;
+import com.ring.model.entity.Publisher;
 import com.ring.service.PublisherService;
+import com.ring.service.impl.MessageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +27,7 @@ import java.util.List;
 public class PublisherController {
 
     private final PublisherService pubService;
-
+    private final MessageService messageService;
     /**
      * Retrieves all publishers with pagination and sorting.
      *
@@ -34,11 +38,14 @@ public class PublisherController {
      * @return a {@link ResponseEntity} containing paginated publishers.
      */
     @GetMapping
-    public ResponseEntity<?> getPublishers(@RequestParam(value = "pSize", defaultValue = "20") Integer pageSize,
-                                           @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
-                                           @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
-                                           @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir) {
-        return new ResponseEntity<>(pubService.getPublishers(pageNo, pageSize, sortBy, sortDir), HttpStatus.OK);
+    public ResponseEntity<PagingResponse<PublisherDTO>> getPublishers(
+            @RequestParam(value = "pSize", defaultValue = "20") Integer pageSize,
+            @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
+            @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir) {
+
+        PagingResponse<PublisherDTO> publishers = pubService.getPublishers(pageNo, pageSize, sortBy, sortDir);
+        return new ResponseEntity<>(publishers, HttpStatus.OK);
     }
 
     /**
@@ -50,10 +57,13 @@ public class PublisherController {
      * @return a {@link ResponseEntity} containing relevant publishers.
      */
     @GetMapping("/relevant/{id}")
-    public ResponseEntity<?> getRelevantPublishers(@RequestParam(value = "pSize", defaultValue = "20") Integer pageSize,
-                                                   @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
-                                                   @PathVariable("id") Integer cateId) {
-        return new ResponseEntity<>(pubService.getRelevantPublishers(pageNo, pageSize, cateId), HttpStatus.OK);
+    public ResponseEntity<PagingResponse<PublisherDTO>> getRelevantPublishers(
+            @RequestParam(value = "pSize", defaultValue = "20") Integer pageSize,
+            @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
+            @PathVariable("id") Integer cateId) {
+
+        PagingResponse<PublisherDTO> publishers = pubService.getRelevantPublishers(pageNo, pageSize, cateId);
+        return new ResponseEntity<>(publishers, HttpStatus.OK);
     }
 
     /**
@@ -63,8 +73,10 @@ public class PublisherController {
      * @return a {@link ResponseEntity} containing the publisher.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPublisherById(@PathVariable("id") Integer id) {
-        return new ResponseEntity<>(pubService.getPublisher(id), HttpStatus.OK);
+    public ResponseEntity<PublisherDTO> getPublisherById(@PathVariable("id") Integer id) {
+
+        PublisherDTO publisher = pubService.getPublisher(id);
+        return new ResponseEntity<>(publisher, HttpStatus.OK);
     }
 
     /**
@@ -75,9 +87,12 @@ public class PublisherController {
      */
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('create:publisher')")
-    public ResponseEntity<?> createPublisher(@Valid @RequestPart("request") PublisherRequest request,
-                                             @RequestPart(name = "image", required = false) MultipartFile file) {
-        return new ResponseEntity<>(pubService.addPublisher(request, file), HttpStatus.CREATED);
+    public ResponseEntity<Publisher> createPublisher(
+            @Valid @RequestPart("request") PublisherRequest request,
+            @RequestPart(name = "image", required = false) MultipartFile file) {
+
+        Publisher publisher = pubService.addPublisher(request, file);
+        return new ResponseEntity<>(publisher, HttpStatus.CREATED);
     }
 
     /**
@@ -90,10 +105,13 @@ public class PublisherController {
      */
     @PutMapping(value = "/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('update:publisher')")
-    public ResponseEntity<?> updatePublisher(@PathVariable("id") Integer id,
-                                             @Valid @RequestPart("request") PublisherRequest request,
-                                             @RequestPart(name = "image", required = false) MultipartFile file) {
-        return new ResponseEntity<>(pubService.updatePublisher(id, request, file), HttpStatus.CREATED);
+    public ResponseEntity<Publisher> updatePublisher(
+            @PathVariable("id") Integer id,
+            @Valid @RequestPart("request") PublisherRequest request,
+            @RequestPart(name = "image", required = false) MultipartFile file) {
+
+        Publisher publisher = pubService.updatePublisher(id, request, file);
+        return new ResponseEntity<>(publisher, HttpStatus.CREATED);
     }
 
     /**
@@ -104,9 +122,12 @@ public class PublisherController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:publisher')")
-    public ResponseEntity<?> deletePublisher(@PathVariable("id") Integer id) {
+    public ResponseEntity<String> deletePublisher(@PathVariable("id") Integer id) {
+
         pubService.deletePublisher(id);
-        return new ResponseEntity<>("Publisher deleted!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -117,9 +138,12 @@ public class PublisherController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:publisher')")
-    public ResponseEntity<?> deletePublishers(@RequestParam("ids") List<Integer> ids) {
+    public ResponseEntity<String> deletePublishers(@RequestParam("ids") List<Integer> ids) {
+
         pubService.deletePublishers(ids);
-        return new ResponseEntity<>("Publishers deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -130,9 +154,12 @@ public class PublisherController {
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:book')")
-    public ResponseEntity<?> deletePublishersInverse(@RequestParam("ids") List<Integer> ids) {
+    public ResponseEntity<String> deletePublishersInverse(@RequestParam("ids") List<Integer> ids) {
+
         pubService.deletePublishersInverse(ids);
-        return new ResponseEntity<>("Publishers deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /**
@@ -142,8 +169,11 @@ public class PublisherController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:publisher')")
-    public ResponseEntity<?> deleteAllPublishers() {
+    public ResponseEntity<String> deleteAllPublishers() {
+        
         pubService.deleteAllPublishers();
-        return new ResponseEntity<>("All publishers deleted successfully!", HttpStatus.OK);
+        String message = messageService.getMessage("message.delete.succeeded");
+        
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 }

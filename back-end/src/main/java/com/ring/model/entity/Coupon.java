@@ -67,9 +67,11 @@ public class Coupon extends Auditable {
     private List<OrderDetail> couponOrderDetails;
 
     @Transient
+    @Builder.Default
     private Boolean isUsable = false;
 
     @Transient
+    @Builder.Default
     private Boolean isUsed = false;
 
     public void addCouponReceipt(OrderReceipt receipt) {

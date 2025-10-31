@@ -89,7 +89,7 @@ class CouponRepositoryTest extends AbstractRepositoryTest {
                 .maxDiscount(1000.0)
                 .attribute(2.0)
                 .expDate(LocalDate.now().plusMonths(1))
-                .type(CouponType.MIN_AMOUNT)
+                .type(CouponType.PRODUCT)
                 .coupon(coupon)
                 .build();
         CouponDetail detail2 = CouponDetail.builder()
@@ -98,7 +98,7 @@ class CouponRepositoryTest extends AbstractRepositoryTest {
                 .maxDiscount(20000.0)
                 .attribute(20000.0)
                 .expDate(LocalDate.now().plusMonths(1))
-                .type(CouponType.MIN_VALUE)
+                .type(CouponType.PRODUCT)
                 .coupon(coupon2)
                 .build();
         CouponDetail detail3 = CouponDetail.builder()
@@ -203,6 +203,7 @@ class CouponRepositoryTest extends AbstractRepositoryTest {
                 null,
                 null,
                 null,
+                null,
                 false,
                 true,
                 pageable);
@@ -239,6 +240,7 @@ class CouponRepositoryTest extends AbstractRepositoryTest {
                 null,
                 null,
                 null,
+                null,
                 true,
                 pageable);
         List<Long> foundIds = foundCoupons.getContent().stream().map(projection -> projection.getCoupon().getId())
@@ -247,6 +249,7 @@ class CouponRepositoryTest extends AbstractRepositoryTest {
 
         // When
         List<Long> inverseIds = couponRepo.findInverseIds(
+                null,
                 null,
                 null,
                 null,

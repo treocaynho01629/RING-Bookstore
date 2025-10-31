@@ -12,7 +12,7 @@ import CustomDivider from "../components/custom/CustomDivider";
 import ProductContent from "../components/product/detail/ProductContent";
 import CustomBreadcrumbs from "../components/custom/CustomBreadcrumbs";
 import ProductSimple from "../components/product/ProductSimple";
-import LazyLoad from "react-lazyload";
+import LazyLoadComponent from "../components/layout/LazyLoadComponent";
 
 const PendingModal = lazy(() => import("@ring/ui"));
 const ProductsSlider = lazy(
@@ -51,64 +51,49 @@ const RandomList = () => {
 
 const ShopComponent = ({ id, name }) => {
   const { data } = useGetShopInfoQuery(id, { skip: !id });
+  const placeholderProps = {
+    width: "100%",
+    border: ".5px solid",
+    borderColor: "divider",
+    height: { xs: 98, md: 133 },
+  };
+  const placeholder = <Placeholder sx={placeholderProps} />;
 
   return (
-    <LazyLoad
-      offset={50}
-      once
-      placeholder={
-        <Box
-          sx={{
-            width: "100%",
-            border: ".5px solid",
-            borderColor: "divider",
-            height: { xs: 98, md: 133 },
-          }}
-        />
-      }
+    <LazyLoadComponent
+      threshold={0.2}
+      sx={placeholderProps}
+      placeholder={placeholder}
     >
-      <Suspense
-        fallback={
-          <Placeholder
-            sx={{
-              width: "100%",
-              border: ".5px solid",
-              borderColor: "divider",
-              height: { xs: 98, md: 133 },
-            }}
-          />
-        }
-      >
-        <ShopDisplay shop={data} name={name} />
-      </Suspense>
-    </LazyLoad>
+      <ShopDisplay shop={data} name={name} />
+    </LazyLoadComponent>
   );
 };
 
 const ProductDetail = () => {
-  const { slug, id } = useParams(); //Book id/slug
+  const { slug, id } = useParams(); // Book id/slug
   const [searchParams, setSearchParams] = useSearchParams();
   const [isReview, setIsReview] = useState(
     searchParams.get("review") ?? undefined
   ); //Is open review tab
-  const [pending, setPending] = useState(false); //For reviewing & changing address
-  const reviewRef = useRef(null); //Ref for scroll
+  const [pending, setPending] = useState(false); // For reviewing & changing address
+  const reviewRef = useRef(null); // Ref for scroll
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md"));
 
-  //Fetch data
+  // Fetch data
   const { data, isLoading, isFetching, isSuccess, isError, error } =
     useGetBookDetailQuery(slug ? { slug } : id ? { id } : null, {
       skip: !slug && !id,
     });
 
-  //Set title
+  // Set title
   useTitle(`${data?.title ?? "RING - Bookstore!"}`);
 
   useEffect(() => {
     if (isReview) scrollIntoTab();
   }, [isReview]);
 
-  //Toggle review
+  // Toggle review
   const handleToggleReview = (value) => {
     setIsReview(value);
     if (!value) {
@@ -182,11 +167,15 @@ const ProductDetail = () => {
         >
           <Stack spacing={1}>
             <ShopComponent id={data?.shopId} name={data?.shopName} />
-            <LazyLoad
-              offset={50}
-              once
+            <LazyLoadComponent
+              sx={{
+                width: "100%",
+                border: ".5px solid",
+                borderColor: "divider",
+                height: { xs: 610, md: 980 },
+              }}
               placeholder={
-                <Box
+                <Placeholder
                   sx={{
                     width: "100%",
                     border: ".5px solid",
@@ -196,31 +185,18 @@ const ProductDetail = () => {
                 />
               }
             >
-              <Suspense
-                fallback={
-                  <Placeholder
-                    sx={{
-                      width: "100%",
-                      border: ".5px solid",
-                      borderColor: "divider",
-                      height: { xs: 610, md: 980 },
-                    }}
-                  />
-                }
-              >
-                <ProductDetailContainer
-                  {...{
-                    loading: isLoading || isFetching,
-                    book: data,
-                    reviewRef,
-                    scrollIntoTab,
-                    tabletMode,
-                    pending,
-                    setPending,
-                  }}
-                />
-              </Suspense>
-            </LazyLoad>
+              <ProductDetailContainer
+                {...{
+                  loading: isLoading || isFetching,
+                  book: data,
+                  reviewRef,
+                  scrollIntoTab,
+                  tabletMode,
+                  pending,
+                  setPending,
+                }}
+              />
+            </LazyLoadComponent>
           </Stack>
           <Box
             ref={reviewRef}
@@ -228,11 +204,15 @@ const ProductDetail = () => {
               scrollMargin: theme.mixins.toolbar.minHeight,
             })}
           >
-            <LazyLoad
-              offset={50}
-              once
+            <LazyLoadComponent
+              sx={{
+                width: "100%",
+                border: ".5px solid",
+                borderColor: "divider",
+                height: { xs: 310, md: 410 },
+              }}
               placeholder={
-                <Box
+                <Placeholder
                   sx={{
                     width: "100%",
                     border: ".5px solid",
@@ -242,66 +222,42 @@ const ProductDetail = () => {
                 />
               }
             >
-              <Suspense
-                fallback={
-                  <Placeholder
-                    sx={{
-                      width: "100%",
-                      border: ".5px solid",
-                      borderColor: "divider",
-                      height: { xs: 310, md: 410 },
-                    }}
-                  />
-                }
-              >
-                <ReviewComponent
-                  {...{
-                    book: data,
-                    scrollIntoTab,
-                    tabletMode,
-                    pending,
-                    setPending,
-                    isReview,
-                    handleToggleReview,
-                  }}
-                />
-              </Suspense>
-            </LazyLoad>
+              <ReviewComponent
+                {...{
+                  book: data,
+                  scrollIntoTab,
+                  tabletMode,
+                  pending,
+                  setPending,
+                  isReview,
+                  handleToggleReview,
+                }}
+              />
+            </LazyLoadComponent>
           </Box>
         </Stack>
         <CustomDivider>Có thể bạn sẽ thích</CustomDivider>
-        <LazyLoad
-          offset={100}
-          once
+        <LazyLoadComponent
+          sx={{
+            height: "auto",
+            border: ".5px solid",
+            borderColor: "action.hover",
+            ["div"]: { opacity: 0 },
+          }}
           placeholder={
-            <Box
+            <Placeholder
               sx={{
                 height: "auto",
                 border: ".5px solid",
                 borderColor: "action.hover",
-                ["div"]: { opacity: 0 },
               }}
             >
               <ProductSimple />
-            </Box>
+            </Placeholder>
           }
         >
-          <Suspense
-            fallback={
-              <Placeholder
-                sx={{
-                  height: "auto",
-                  border: ".5px solid",
-                  borderColor: "action.hover",
-                }}
-              >
-                <ProductSimple />
-              </Placeholder>
-            }
-          >
-            <RandomList />
-          </Suspense>
-        </LazyLoad>
+          <RandomList />
+        </LazyLoadComponent>
       </Box>
     </>
   );

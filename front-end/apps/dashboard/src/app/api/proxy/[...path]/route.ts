@@ -21,19 +21,6 @@ function handleAuthError(error: any) {
   );
 }
 
-// Helper function to handle backend errors
-function handleBackendError(response: Response, errorText: string) {
-  console.error(`Backend error ${response.status}:`, errorText);
-  return NextResponse.json(
-    {
-      error: "Backend request failed",
-      details: errorText,
-      status: response.status,
-    },
-    { status: response.status }
-  );
-}
-
 async function proxyRequest(
   request: NextRequest,
   pathSegments: string[],
@@ -80,16 +67,19 @@ async function proxyRequest(
     // Prepare headers
     const headers: HeadersInit = {
       "Content-Type": "application/json",
+      // "Accept-Language": request.nextUrl.locale ?? defaultLocale,
       Authorization: `Bearer ${accessToken}`,
     };
 
+    const locale = request.cookies.get("NEXT_LOCALE")?.value;
+    if (locale) headers["Accept-Language"] = locale;
+
     // Copy relevant headers from the original request
     const headersToCopy = [
-      "accept",
-      "accept-language",
-      "user-agent",
-      "x-forwarded-for",
-      "x-real-ip",
+      "Accept",
+      "User-Agent",
+      "X-Forwarded-For",
+      "X-Real-IP",
     ];
 
     headersToCopy.forEach((headerName) => {
@@ -123,8 +113,11 @@ async function proxyRequest(
 
     // Handle other errors
     if (!response.ok) {
-      const errorText = await response.text();
-      return handleBackendError(response, errorText);
+      const errorResponse = await response.json();
+      const nextResponse = NextResponse.json(errorResponse, {
+        status: response.status,
+      });
+      return nextResponse;
     }
 
     // Get response data

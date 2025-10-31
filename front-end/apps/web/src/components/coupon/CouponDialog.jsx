@@ -3,7 +3,8 @@ import {
   useGetCouponQuery,
   useGetCouponsQuery,
 } from "../../features/coupons/couponsApiSlice";
-import { getCouponType } from "@ring/shared/enums/coupon";
+import { getCouponType, getCouponCriteria } from "@ring/shared/enums/coupon";
+import { CouponType } from "@ring/shared/models/couponType";
 import { Instruction, Message } from "@ring/ui/Components";
 import { trackWindowScroll } from "react-lazy-load-image-component";
 import { compact } from "lodash-es";
@@ -74,7 +75,6 @@ const Showmore = styled.div`
 `;
 //#endregion
 
-const CouponType = getCouponType();
 const defaultSize = 4;
 const DEFAULT_PAGINATON = {
   number: 0,
@@ -106,7 +106,7 @@ const CouponDialog = ({
   const [pagination, setPagination] = useState(DEFAULT_PAGINATON);
   const [savedPagination, setSavedPagination] = useState(DEFAULT_PAGINATON);
 
-  //Fetch coupons
+  // Fetch coupons
   const {
     data: shipping,
     currentData: currentShipping,
@@ -117,7 +117,7 @@ const CouponDialog = ({
   } = useGetCouponsQuery(
     {
       shopId,
-      types: [CouponType.SHIPPING.value],
+      types: [CouponType.SHIPPING],
       byShop: shopId != null,
       cValue: checkState?.value,
       cQuantity: checkState?.quantity,
@@ -131,7 +131,7 @@ const CouponDialog = ({
     useGetCouponsQuery(
       {
         shopId,
-        types: [CouponType.MIN_VALUE.value, CouponType.MIN_AMOUNT.value],
+        types: [CouponType.PRODUCT],
         byShop: shopId != null,
         cValue: checkState?.value,
         cQuantity: checkState?.quantity,
@@ -162,7 +162,7 @@ const CouponDialog = ({
     { skip: !isSaved && !selectMode && savedCodes?.length > 0 }
   );
 
-  //Fetch coupon by code
+  // Fetch coupon by code
   const {
     data: code,
     isLoading: loadCode,
@@ -178,14 +178,14 @@ const CouponDialog = ({
     { skip: !couponInput || !selectMode }
   );
 
-  //Reset stuff
+  // Reset stuff
   useEffect(() => {
     setCouponInput("");
     setCurrCoupon(selectedCoupon);
     setTempCoupon(selectedCoupon);
   }, [shopId, selectedCoupon]);
 
-  //Update selected/input coupon
+  // Update selected/input coupon
   useEffect(() => {
     if (couponInput && doneCode && !loadCode && code) {
       setTempCoupon(code);
@@ -281,7 +281,7 @@ const CouponDialog = ({
   const checkDisabled = (coupon) =>
     selectMode && (!loggedIn || !coupon?.isUsable || coupon?.shopId != shopId);
 
-  //Display contents
+  // Display contents
   let coupons;
   let shippingCoupons;
   let savedCoupons;
@@ -301,16 +301,17 @@ const CouponDialog = ({
 
     let content = [];
 
-    if (
-      currCoupon &&
-      CouponType[currCoupon?.type]?.value == CouponType.SHIPPING.value
-    ) {
+    if (currCoupon && currCoupon?.type == CouponType.SHIPPING) {
+      const meta = getCouponType(currCoupon?.type);
+      const criteria = getCouponCriteria(currCoupon?.criteria);
+
       content.push(
         <CouponItem
           key={`coupon-${currCoupon?.id}`}
           {...{
             coupon: currCoupon,
-            summary: CouponType[currCoupon?.type],
+            meta,
+            criteria,
             selectMode,
             isDisabled: checkDisabled(currCoupon),
             isSelected: tempCoupon?.id == currCoupon?.id,
@@ -326,7 +327,8 @@ const CouponDialog = ({
       ? ids?.map((id, index) => {
           if (id != currCoupon?.id) {
             const coupon = entities[id];
-            const summary = CouponType[coupon?.type];
+            const meta = getCouponType(coupon?.type);
+            const criteria = getCouponCriteria(coupon?.criteria);
             const isDisabled = checkDisabled(coupon);
             const isUsed = selectMode && coupon?.isUsed;
             const isSelected = tempCoupon?.id == id;
@@ -337,7 +339,8 @@ const CouponDialog = ({
                 key={`coupon-${id}-${index}`}
                 {...{
                   coupon,
-                  summary,
+                  meta,
+                  criteria,
                   selectMode,
                   isDisabled,
                   isSelected,
@@ -368,16 +371,17 @@ const CouponDialog = ({
 
     let content = [];
 
-    if (
-      currCoupon &&
-      CouponType[currCoupon?.type]?.value != CouponType.SHIPPING.value
-    ) {
+    if (currCoupon && currCoupon?.type != CouponType.SHIPPING) {
+      const meta = getCouponType(currCoupon?.type);
+      const criteria = getCouponCriteria(currCoupon?.criteria);
+
       content.push(
         <CouponItem
           key={`coupon-${currCoupon?.id}`}
           {...{
             coupon: currCoupon,
-            summary: CouponType[currCoupon?.type],
+            meta,
+            criteria,
             selectMode,
             isDisabled: checkDisabled(currCoupon),
             isSelected: tempCoupon?.id == currCoupon?.id,
@@ -393,7 +397,8 @@ const CouponDialog = ({
       ? ids?.map((id, index) => {
           if (id != currCoupon?.id) {
             const coupon = entities[id];
-            const summary = CouponType[coupon?.type];
+            const meta = getCouponType(coupon?.type);
+            const criteria = getCouponCriteria(coupon?.criteria);
             const isDisabled = checkDisabled(coupon);
             const isUsed = selectMode && coupon?.isUsed;
             const isSelected = tempCoupon?.id == id;
@@ -404,7 +409,8 @@ const CouponDialog = ({
                 key={`coupon-${id}-${index}`}
                 {...{
                   coupon,
-                  summary,
+                  meta,
+                  criteria,
                   selectMode,
                   isDisabled,
                   isSelected,
@@ -436,7 +442,8 @@ const CouponDialog = ({
       ? ids?.map((id, index) => {
           if (id != currCoupon?.id) {
             const coupon = entities[id];
-            const summary = CouponType[coupon?.type];
+            const meta = getCouponType(coupon?.type);
+            const criteria = getCouponCriteria(coupon?.criteria);
             const isDisabled = checkDisabled(coupon);
             const isUsed = selectMode && tempCoupon?.isUsed;
             const isSelected = tempCoupon?.id == id;
@@ -447,7 +454,8 @@ const CouponDialog = ({
                 key={`coupon-${id}-${index}`}
                 {...{
                   coupon,
-                  summary,
+                  meta,
+                  criteria,
                   selectMode,
                   isDisabled,
                   isSelected,
@@ -543,7 +551,8 @@ const CouponDialog = ({
               key={`top-coupon-${code?.id}`}
               {...{
                 coupon: code,
-                summary: CouponType[code?.type],
+                meta: getCouponType(code?.type),
+                criteria: getCouponCriteria(code?.criteria),
                 selectMode,
                 isDisabled: checkDisabled(code),
                 isUsed: selectMode && code?.isUsed,

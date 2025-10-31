@@ -2,9 +2,11 @@ import styled from "@emotion/styled";
 import { lazy, Suspense, useState } from "react";
 import { useGetCouponsQuery } from "../../features/coupons/couponsApiSlice";
 import { iconList } from "@ring/shared/utils/icon";
-import { getCouponType } from "@ring/shared/enums/coupon";
+import { getCouponCriteria, getCouponType } from "@ring/shared/enums/coupon";
 import { MobileExtendButton } from "@ring/ui/Components";
 import { trackWindowScroll } from "react-lazy-load-image-component";
+import { useTranslation } from "react-i18next";
+import { currencyFormat } from "@ring/shared/utils/convert";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LabelOff from "@mui/icons-material/LabelOff";
 import Skeleton from "@mui/material/Skeleton";
@@ -198,9 +200,9 @@ const CouponMessage = styled.span`
 //#endregion
 
 const defaultSize = 4;
-const CouponType = getCouponType();
 
 const CouponPreview = ({ shopId, scrollPosition }) => {
+  const { t } = useTranslation();
   const { coupons: savedCoupons } = useCoupon();
   const { data, isLoading, isSuccess, isError } = useGetCouponsQuery(
     { shopId, size: defaultSize },
@@ -208,18 +210,21 @@ const CouponPreview = ({ shopId, scrollPosition }) => {
   );
   const [anchorEl, setAnchorEl] = useState(undefined);
   const [contextCoupon, setContextCoupon] = useState(null);
-  const [contextSummary, setContextSummary] = useState(null);
+  const [contextMeta, setContextMeta] = useState(null);
+  const [contextCriteria, setContextCriteria] = useState(null);
   const [openDialog, setOpenDialog] = useState(undefined);
 
-  const handlePopover = (e, coupon, summary) => {
+  const handlePopover = (e, coupon, meta, criteria) => {
     setAnchorEl(e.currentTarget);
     setContextCoupon(coupon);
-    setContextSummary(summary);
+    setContextMeta(meta);
+    setContextCriteria(criteria);
   };
   const handleClose = () => {
     setAnchorEl(null);
     setContextCoupon(null);
-    setContextSummary(null);
+    setContextMeta(null);
+    setContextCriteria(null);
   };
   const handleOpenDialog = () => {
     setOpenDialog(true);
@@ -251,23 +256,32 @@ const CouponPreview = ({ shopId, scrollPosition }) => {
     coupons = ids?.length ? (
       ids?.map((id, index) => {
         const coupon = entities[id];
-        const summary = CouponType[coupon.type];
-        const Icon = iconList[summary.icon];
+        const meta = getCouponType(coupon?.type);
+        const criteria = getCouponCriteria(coupon?.criteria);
+        const Icon = iconList[meta?.icon];
 
         return (
           <Coupon
             key={`coupon-${id}-${index}`}
             aria-owns={open ? "mouse-over-popover" : undefined}
             aria-haspopup="true"
-            onMouseEnter={(e) => handlePopover(e, coupon, summary)}
+            onMouseEnter={(e) => handlePopover(e, coupon, meta, criteria)}
           >
-            <CouponIcon color={summary.color}>
+            <CouponIcon color={meta?.color}>
               <Suspense fallback={null}>
                 <Icon />
               </Suspense>
             </CouponIcon>
             <CouponContent>
-              <CouponTitle>{coupon?.summary}</CouponTitle>
+              <CouponTitle>
+                {t(coupon?.discount == 1 ? meta?.summaryFull : meta?.summary, {
+                  discount:
+                    coupon?.discount == 1
+                      ? currencyFormat.format(coupon?.maxDiscount)
+                      : coupon?.discount * 100 + "%",
+                  max: currencyFormat.format(coupon?.maxDiscount),
+                })}
+              </CouponTitle>
             </CouponContent>
           </Coupon>
         );
@@ -325,7 +339,8 @@ const CouponPreview = ({ shopId, scrollPosition }) => {
                 >
                   <CouponItem
                     coupon={contextCoupon}
-                    summary={contextSummary}
+                    meta={contextMeta}
+                    criteria={contextCriteria}
                     isSaved={isSaved}
                     scrollPosition={scrollPosition}
                   />

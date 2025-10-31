@@ -15,7 +15,6 @@ import Placeholder from "@ring/ui/Placeholder";
 import Suggest from "../components/other/Suggest";
 import CustomDivider from "../components/custom/CustomDivider";
 import BannersSlider from "../components/other/BannersSlider";
-import LazyLoad from "react-lazyload";
 import BarChart from "@mui/icons-material/BarChart";
 import Book from "@mui/icons-material/Book";
 import Bookmarks from "@mui/icons-material/Bookmarks";
@@ -28,6 +27,8 @@ import Replay from "@mui/icons-material/Replay";
 import TableChart from "@mui/icons-material/TableChart";
 import ThumbUpAlt from "@mui/icons-material/ThumbUpAlt";
 import TrendingUp from "@mui/icons-material/TrendingUp";
+import LazyLoadComponent from "../components/layout/LazyLoadComponent";
+import { LocationDisabledRounded } from "@mui/icons-material";
 
 const ProductsSlider = lazy(
   () => import("../components/product/ProductsSlider")
@@ -233,13 +234,16 @@ const cateToTabs = (cate) => {
   });
 };
 
-const Loadable = ({ children }) => {
+const Loadable = ({ children, height = 300 }) => {
+  const placeholder = <Placeholder sx={{ height }} />;
   return (
-    <LazyLoad offset={100} height={300} once>
-      <Suspense fallback={<Placeholder sx={{ height: 300 }} />}>
-        {children}
-      </Suspense>
-    </LazyLoad>
+    <LazyLoadComponent
+      threshold={0.2}
+      placeholder={placeholder}
+      sx={{ height }}
+    >
+      {children}
+    </LazyLoadComponent>
   );
 };
 
@@ -322,7 +326,7 @@ const ProductsList = ({ tabs, value, title }) => {
   const slug = tabs ? tabs[tabValue]?.slug : null;
 
   return (
-    <Container>
+    <>
       {title && (
         <TitleContainer ref={listRef}>
           {title}
@@ -362,7 +366,7 @@ const ProductsList = ({ tabs, value, title }) => {
           {...{ isLoading, isFetching, data, isSuccess, isError }}
         />
       </SliderContainer>
-    </Container>
+    </>
   );
 };
 
@@ -370,7 +374,7 @@ const RandomList = () => {
   const { data, isLoading, isFetching, isSuccess, isError, refetch } =
     useGetRandomBooksQuery({ amount: 10 });
   return (
-    <Container>
+    <>
       <ProductsSlider
         {...{ isLoading, isFetching, data, isSuccess, isError }}
       />
@@ -399,16 +403,16 @@ const RandomList = () => {
           </Button>
         )}
       </ButtonContainer>
-    </Container>
+    </>
   );
 };
 
 const TopList = ({ categories }) => {
   const listSize = 5;
-  const listRef = useRef(null); //Scroll ref
-  const [tabValue, setTabValue] = useState(categories?.ids[0] ?? null); //Tab
+  const listRef = useRef(null); // Scroll ref
+  const [tabValue, setTabValue] = useState(categories?.ids[0] ?? null); // Tab
 
-  //Products
+  // Products
   const { data, isLoading, isFetching, isSuccess, isError, refetch } =
     useGetBooksQuery(
       {
@@ -460,7 +464,7 @@ const TopList = ({ categories }) => {
   }
 
   return (
-    <Container>
+    <>
       <TitleContainer ref={listRef}>
         <ContainerTitle color="success">
           <BarChart />
@@ -492,7 +496,7 @@ const TopList = ({ categories }) => {
       <ProductsTop
         {...{ isLoading, isFetching, data, isSuccess, isError, size: listSize }}
       />
-    </Container>
+    </>
   );
 };
 
@@ -577,19 +581,21 @@ const Home = () => {
       <SaleContainer>
         <SaleList />
       </SaleContainer>
-      <Loadable key={"toriyama"}>
-        <ProductsList
-          {...{
-            value: { keyword: "toriyama" },
-            title: (
-              <ContainerTitle>
-                <GpsNotFixed color="primary" />
-                &nbsp;Akira Toriyama
-              </ContainerTitle>
-            ),
-          }}
-        />
-      </Loadable>
+      <Container>
+        <Loadable>
+          <ProductsList
+            {...{
+              value: { keyword: "toriyama" },
+              title: (
+                <ContainerTitle>
+                  <GpsNotFixed color="primary" />
+                  &nbsp;Akira Toriyama
+                </ContainerTitle>
+              ),
+            }}
+          />
+        </Loadable>
+      </Container>
       <Container>
         <TitleContainer>
           <ContainerTitle>
@@ -597,13 +603,13 @@ const Home = () => {
             &nbsp;Danh mục sản phẩm
           </ContainerTitle>
         </TitleContainer>
-        <Loadable key={"cates"}>
+        <Loadable height={118} key={"cates"}>
           <Categories />
         </Loadable>
       </Container>
       <CustomDivider>Sản phẩm mới nhất</CustomDivider>
-      <Loadable key={"hot"}>
-        <Container>
+      <Container>
+        <Loadable height={1140} key={"hot"}>
           <Products {...{ isLoading, data, isSuccess, isError }} />
           <ButtonContainer>
             {isError ? (
@@ -630,59 +636,64 @@ const Home = () => {
               </Button>
             )}
           </ButtonContainer>
-        </Container>
-      </Loadable>
-      <Loadable key={"trending"}>
-        <ProductsList
-          key={"trending"}
-          {...{
-            tabs: orderTabs,
-            title: (
-              <ContainerTitle>
-                <TrendingUp color="success" />
-                &nbsp;Trending
-              </ContainerTitle>
-            ),
-          }}
-        />
-      </Loadable>
-      <Loadable key={"top"}>
-        <TopList categories={categories} />
-      </Loadable>
-      <Loadable key={"categories"}>
-        <ProductsList
-          key={"categories"}
-          {...{
-            value: { cateId: cates[0]?.id },
-            title: (
-              <ContainerTitle>
-                <Book color="primary" />
-                &nbsp;{cates[0]?.name}
-              </ContainerTitle>
-            ),
-          }}
-        />
-      </Loadable>
-      <Loadable key={"publishers"}>
-        <ProductsList
-          key={"publishers"}
-          {...{
-            tabs: pubs.slice(0, 4) || [],
-            title: (
-              <ContainerTitle>
-                <TableChart color="warning" />
-                &nbsp;Thương hiệu nổi bật
-              </ContainerTitle>
-            ),
-          }}
-        />
-      </Loadable>
-      <Loadable key={"publishers2"}>
-        <ProductsList
-          key={"publishers2"}
-          {...{ tabs: pubs.slice(5, 9) || [] }}
-        />
-      </Loadable>
+        </Loadable>
+      </Container>
+      <Container>
+        <Loadable key={"trending"}>
+          <ProductsList
+            key={"trending"}
+            {...{
+              tabs: orderTabs,
+              title: (
+                <ContainerTitle>
+                  <TrendingUp color="success" />
+                  &nbsp;Trending
+                </ContainerTitle>
+              ),
+            }}
+          />
+        </Loadable>
+      </Container>
+      <Container>
+        <Loadable height={590}>
+          <TopList categories={categories} />
+        </Loadable>
+      </Container>
+      <Container>
+        <Loadable>
+          <ProductsList
+            {...{
+              value: { cateId: cates[0]?.id },
+              title: (
+                <ContainerTitle>
+                  <Book color="primary" />
+                  &nbsp;{cates[0]?.name}
+                </ContainerTitle>
+              ),
+            }}
+          />
+        </Loadable>
+      </Container>
+      <Container>
+        <Loadable>
+          <ProductsList
+            {...{
+              tabs: pubs.slice(0, 4) || [],
+              title: (
+                <ContainerTitle>
+                  <TableChart color="warning" />
+                  &nbsp;Thương hiệu nổi bật
+                </ContainerTitle>
+              ),
+            }}
+          />
+        </Loadable>
+      </Container>
+      <Container>
+        <Loadable>
+          <ProductsList {...{ tabs: pubs.slice(5, 9) || [] }} />
+        </Loadable>
+      </Container>
       <Container>
         <TitleContainer>
           <ContainerTitle>
@@ -690,7 +701,7 @@ const Home = () => {
             &nbsp;Nhà xuất bản
           </ContainerTitle>
         </TitleContainer>
-        <Loadable key={"pubs"}>
+        <Loadable height={115} key={"pubs"}>
           <Publishers />
         </Loadable>
       </Container>
@@ -700,45 +711,52 @@ const Home = () => {
           const title = cate.name;
 
           return (
-            <Loadable key={`cate-${index}`}>
-              <ProductsList
-                key={`cate-${index}`}
-                {...{
-                  tabs,
-                  title: (
-                    <ContainerTitle>
-                      <Bookmarks color={index % 2 == 0 ? "primary" : "info"} />
-                      &nbsp;{title}
-                    </ContainerTitle>
-                  ),
-                }}
-              />
-            </Loadable>
+            <Container key={`cate-${index}`}>
+              <Loadable>
+                <ProductsList
+                  {...{
+                    tabs,
+                    title: (
+                      <ContainerTitle>
+                        <Bookmarks
+                          color={index % 2 == 0 ? "primary" : "info"}
+                        />
+                        &nbsp;{title}
+                      </ContainerTitle>
+                    ),
+                  }}
+                />
+              </Loadable>
+            </Container>
           );
         }
       })}
       <CustomDivider>Sản phẩm nổi bật</CustomDivider>
-      <Loadable key={"products"}>
+      <Loadable height={430}>
         <BigProductsSlider />
       </Loadable>
-      <Loadable key={"categories3"}>
-        <ProductsList
-          key={"categories3"}
-          {...{
-            tabs: cateToTabs(catesWithChilds[catesWithChilds.length - 1]),
-            title: (
-              <ContainerTitle>
-                <ImportContacts color="success" />
-                &nbsp;{catesWithChilds[catesWithChilds.length - 1]?.name}
-              </ContainerTitle>
-            ),
-          }}
-        />
-      </Loadable>
+      <Container>
+        <Loadable>
+          <ProductsList
+            key={"categories3"}
+            {...{
+              tabs: cateToTabs(catesWithChilds[catesWithChilds.length - 1]),
+              title: (
+                <ContainerTitle>
+                  <ImportContacts color="success" />
+                  &nbsp;{catesWithChilds[catesWithChilds.length - 1]?.name}
+                </ContainerTitle>
+              ),
+            }}
+          />
+        </Loadable>
+      </Container>
       <CustomDivider>Có thể bạn sẽ thích</CustomDivider>
-      <Loadable key={"random"}>
-        <RandomList />
-      </Loadable>
+      <Container>
+        <Loadable>
+          <RandomList />
+        </Loadable>
+      </Container>
     </Wrapper>
   );
 };

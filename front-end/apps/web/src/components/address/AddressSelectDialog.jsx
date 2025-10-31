@@ -81,13 +81,13 @@ const AddressSelectDialog = ({
     "Xoá địa chỉ khỏi sổ địa chỉ?"
   );
 
-  //Fetch addresses
+  // Fetch addresses
   const { data, isLoading, isSuccess, isError, error } = useGetMyAddressesQuery(
     {},
     { skip: !loggedIn }
   );
 
-  //Update address
+  // Update address
   const [createAddress, { isLoading: creating }] = useCreateAddressMutation();
   const [updateAddress, { isLoading: updating }] = useUpdateAddressMutation();
   const [deleteAddress, { isLoading: deleting }] = useDeleteAddressMutation();
@@ -100,7 +100,7 @@ const AddressSelectDialog = ({
     }
   }, [address, storeAddresses]);
 
-  //Dialog
+  // Dialog
   const handleOpen = (addressInfo) => {
     setContextAddress(addressInfo);
     setOpenForm(true);
@@ -112,7 +112,7 @@ const AddressSelectDialog = ({
     setOpenForm(false);
   };
 
-  //Context
+  // Context
   const handleClick = (event, address) => {
     setAnchorEl(event.currentTarget);
     setContextAddress(address);
@@ -178,7 +178,7 @@ const AddressSelectDialog = ({
 
     try {
       if (isTemp) {
-        const { isDefault, ...newAddress } = address; //Remove isDefault
+        const { isDefault, ...newAddress } = address; // Remove isDefault
         addNewAddress(newAddress);
         handleClose();
         setErrMsg("");
@@ -186,7 +186,7 @@ const AddressSelectDialog = ({
         setPending(false);
         enqueueSnackbar("Thêm địa chỉ thành công!", { variant: "success" });
       } else {
-        //Saved address
+        // Saved address
         createAddress({
           name: address.name,
           companyName: address.company,
@@ -210,21 +210,15 @@ const AddressSelectDialog = ({
             setErr(err);
             if (!err?.status) {
               setErrMsg("Server không phản hồi");
-            } else if (err?.status === 400) {
-              setErrMsg("Sai định dạng thông tin!");
-            } else if (err?.status === 409) {
-              setErrMsg(
-                "Vượt quá số lượng cho phép (5), vui lòng xoá bớt hoặc tạm lưu vào bộ nhớ!"
-              );
             } else {
-              setErrMsg("Thêm địa chỉ thất bại");
+              setErrMsg(err?.data?.message);
             }
             setPending(false);
             enqueueSnackbar("Thêm địa chỉ thất bại!", { variant: "error" });
           });
       }
     } catch (err) {
-      //Redux error
+      // Redux error
       console.error(err);
       setErr(err);
       handleClose();
@@ -243,8 +237,8 @@ const AddressSelectDialog = ({
       let isStored = address?.isDefault == null;
 
       if (isStored) {
-        //If stored address
-        const { isDefault, ...newAddress } = address; //Remove isDefault
+        // If stored address
+        const { isDefault, ...newAddress } = address; // Remove isDefault
         addNewAddress({ ...newAddress, id: address?.id });
         handleClose();
         handleCloseContext();
@@ -253,7 +247,7 @@ const AddressSelectDialog = ({
         setPending(false);
         enqueueSnackbar("Cập nhật địa chỉ thành công!", { variant: "success" });
       } else {
-        //Saved address
+        // Saved address
         updateAddress({
           id: address.id,
           updatedAddress: {
@@ -282,17 +276,15 @@ const AddressSelectDialog = ({
             setErr(err);
             if (!err?.status) {
               setErrMsg("Server không phản hồi");
-            } else if (err?.status === 400) {
-              setErrMsg("Sai định dạng thông tin!");
             } else {
-              setErrMsg("Cập nhật thất bại");
+              setErrMsg(err?.data?.message);
             }
             setPending(false);
             enqueueSnackbar("Cập nhật địa chỉ thất bại!", { variant: "error" });
           });
       }
     } catch (err) {
-      //Redux error
+      // Redux error
       console.error(err);
       setErr(err);
       handleClose();
@@ -311,7 +303,7 @@ const AddressSelectDialog = ({
       let isStored = address?.isDefault == null;
 
       if (!isStored && isTemp) {
-        //Convert saved to stored
+        // Convert saved to stored
         const { isDefault, ...newAddress } = address; //Remove isDefault
         handleRemoveAddress(address); //Remove saved address
         addNewAddress(newAddress); //Add to store
@@ -321,7 +313,7 @@ const AddressSelectDialog = ({
         setPending(false);
         enqueueSnackbar("Cập nhật địa chỉ thành công!", { variant: "success" });
       } else if (isStored && !isTemp) {
-        //Convert stored to saved
+        // Convert stored to saved
         createAddress({
           name: address.name,
           companyName: address.company,
@@ -332,7 +324,7 @@ const AddressSelectDialog = ({
         })
           .unwrap()
           .then((data) => {
-            handleRemoveAddress(address); //Remove stored address
+            handleRemoveAddress(address); // Remove stored address
 
             //Reset state
             handleClose();
@@ -363,7 +355,7 @@ const AddressSelectDialog = ({
           });
       }
     } catch (err) {
-      //Redux error
+      // Redux error
       console.error(err);
       setErr(err);
       handleClose();
@@ -382,7 +374,7 @@ const AddressSelectDialog = ({
       let isStored = address?.isDefault == null;
 
       if (isStored) {
-        //If stored address
+        // If stored address
         createAddress({
           name: address.name,
           companyName: address.company,
@@ -394,9 +386,9 @@ const AddressSelectDialog = ({
         })
           .unwrap()
           .then((data) => {
-            handleRemoveAddress(address); //Remove stored address
+            handleRemoveAddress(address); // Remove stored address
 
-            //Reset state
+            // Reset state
             handleClose();
             handleCloseContext();
             setErrMsg("");
@@ -559,9 +551,7 @@ const AddressSelectDialog = ({
             <LocationOn />
             &nbsp;Địa chỉ của bạn
           </DialogTitle>
-          <DialogContent
-            sx={{ padding: { xs: 1, sm: "20px 24px" }, height: "100dvh" }}
-          >
+          <DialogContent sx={{ height: "100dvh" }}>
             {addressesContent}
             {storedContent}
             <Button
@@ -591,7 +581,6 @@ const AddressSelectDialog = ({
               variant="outlined"
               color="error"
               size="large"
-              sx={{ marginY: "10px" }}
               onClick={handleCloseDialog}
               startIcon={<Close />}
             >
@@ -601,7 +590,6 @@ const AddressSelectDialog = ({
               variant="contained"
               color="primary"
               size="large"
-              sx={{ marginY: "10px" }}
               onClick={handleSubmit}
               startIcon={<Check />}
             >
