@@ -12,6 +12,7 @@ import {
 import { currencyFormat } from "@ring/shared/utils/convert";
 import { getImageSize } from "@ring/shared/enums/image";
 import { StyledCheckbox } from "../custom/CartComponents";
+import { useTranslation } from "react-i18next";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
@@ -205,21 +206,16 @@ function ItemRow({
   handleChangeQuantity,
   handleClick,
 }) {
+  const { t } = useTranslation();
   const labelId = `item-checkbox-${product?.id}`;
   const isDisabled = !product || product.amount < 1;
 
   useEffect(() => {
-    if (product.amount < 1 || product.quantity > product.amount)
-      handleDeselect(product.id);
+    if (product.amount < 1 || product.quantity > product.amount) handleDeselect(product.id);
   }, [product.amount]);
 
   return (
-    <StyledItemTableRow
-      role="checkbox"
-      tabIndex={-1}
-      key={`item-${product.id}`}
-      className={isDisabled ? "error" : ""}
-    >
+    <StyledItemTableRow role="checkbox" tabIndex={-1} key={`item-${product.id}`} className={isDisabled ? "error" : ""}>
       <StyledTableCell padding="checkbox">
         <StyledCheckbox
           disabled={isDisabled}
@@ -227,7 +223,11 @@ function ItemRow({
           disableFocusRipple
           color="primary"
           checked={isItemSelected}
-          inputProps={{ "aria-labelledby": labelId }}
+          slotProps={{
+            input: {
+              "aria-labelledby": labelId,
+            },
+          }}
           onClick={() => handleSelect(product.id)}
         />
       </StyledTableCell>
@@ -237,16 +237,12 @@ function ItemRow({
             <StyledLazyImage
               src={product?.image?.srcSet[ImageSize?.SMALL?.value]}
               alt={`${product.title} Cart item`}
-              placeholder={
-                <StyledSkeleton variant="rectangular" animation={false} />
-              }
+              placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
             />
           </Link>
           <ItemSummary>
             <Link to={`/product/${product.slug}`}>
-              <ItemTitle className={isDisabled ? "error" : ""}>
-                {product.title}
-              </ItemTitle>
+              <ItemTitle className={isDisabled ? "error" : ""}>{product.title}</ItemTitle>
             </Link>
             <ItemAction>
               <Box
@@ -257,16 +253,8 @@ function ItemRow({
                   lg: "none",
                 }}
               >
-                <Price>
-                  {currencyFormat.format(
-                    product.price * (1 - (product?.discount || 0))
-                  )}
-                </Price>
-                <Discount>
-                  {product?.discount > 0
-                    ? currencyFormat.format(product.price)
-                    : ""}
-                </Discount>
+                <Price>{currencyFormat.format(product.price * (1 - (product?.discount || 0)))}</Price>
+                <Discount>{product?.discount > 0 ? currencyFormat.format(product.price) : ""}</Discount>
               </Box>
               <Box display={{ xs: "flex", sm: "none" }} mr={3}>
                 <AmountInput
@@ -276,12 +264,8 @@ function ItemRow({
                   max={product.amount ?? MAX_VALUE}
                   value={product.quantity}
                   error={1 > product.quantity > (product.amount ?? MAX_VALUE)}
-                  onChange={(e) =>
-                    handleChangeQuantity(e.target.valueAsNumber, product.id)
-                  }
-                  handleDecrease={() =>
-                    handleDecrease(product.quantity, product.id)
-                  }
+                  onChange={(e) => handleChangeQuantity(e.target.valueAsNumber, product.id)}
+                  handleDecrease={() => handleDecrease(product.quantity, product.id)}
                   handleIncrease={() => increaseAmount(product.id)}
                 />
               </Box>
@@ -300,19 +284,10 @@ function ItemRow({
           },
         }}
       >
-        <Price>
-          {currencyFormat.format(
-            product.price * (1 - (product?.discount || 0))
-          )}
-        </Price>
-        {product?.discount > 0 && (
-          <Discount>{currencyFormat.format(product.price)}</Discount>
-        )}
+        <Price>{currencyFormat.format(product.price * (1 - (product?.discount || 0)))}</Price>
+        {product?.discount > 0 && <Discount>{currencyFormat.format(product.price)}</Discount>}
       </StyledTableCell>
-      <StyledTableCell
-        align="center"
-        sx={{ display: { xs: "none", sm: "table-cell" } }}
-      >
+      <StyledTableCell align="center" sx={{ display: { xs: "none", sm: "table-cell" } }}>
         <AmountInput
           disabled={isDisabled}
           size="small"
@@ -320,24 +295,19 @@ function ItemRow({
           max={product.amount ?? MAX_VALUE}
           value={product.quantity}
           error={1 > product.quantity > (product.amount ?? MAX_VALUE)}
-          onChange={(e) =>
-            handleChangeQuantity(e.target.valueAsNumber, product.id)
-          }
+          onChange={(e) => handleChangeQuantity(e.target.valueAsNumber, product.id)}
           handleDecrease={() => handleDecrease(product.quantity, product.id)}
           handleIncrease={() => increaseAmount(product.id)}
         />
         <AmountLeft>
-          {product.amount > 0 ? `Còn ${product.amount} sản phẩm` : "Hết hàng"}
+          {product.amount > 0
+            ? t("cart.items.left", { quantity: product.amount, ns: "client" })
+            : t("cart.items.out", { ns: "client" })}
         </AmountLeft>
       </StyledTableCell>
-      <StyledTableCell
-        align="right"
-        sx={{ display: { xs: "none", md: "table-cell" } }}
-      >
+      <StyledTableCell align="right" sx={{ display: { xs: "none", md: "table-cell" } }}>
         <Price className="total">
-          {currencyFormat.format(
-            product.price * (1 - (product?.discount || 0)) * product.quantity
-          )}
+          {currencyFormat.format(product.price * (1 - (product?.discount || 0)) * product.quantity)}
         </Price>
       </StyledTableCell>
       <ActionTableCell>
@@ -352,7 +322,6 @@ function ItemRow({
 const CartDetailRow = ({
   shop,
   coupon,
-  discount,
   isSelected,
   isGroupSelected,
   handleSelect,
@@ -364,6 +333,7 @@ const CartDetailRow = ({
   increaseAmount,
   handleOpenDialog,
 }) => {
+  const { t } = useTranslation();
   const shopLabelId = `shop-label-checkbox-${shop?.id}`;
 
   return (
@@ -375,19 +345,17 @@ const CartDetailRow = ({
             color="primary"
             onChange={() => handleSelectShop(shop)}
             checked={isGroupSelected}
-            inputProps={{ "aria-labelledby": shopLabelId }}
+            slotProps={{
+              input: {
+                "aria-labelledby": shopLabelId,
+              },
+            }}
           />
         </StyledTableCell>
-        <StyledTableCell
-          align="left"
-          colSpan={5}
-          component="th"
-          id={shopLabelId}
-          scope="row"
-        >
+        <StyledTableCell align="left" colSpan={5} component="th" id={shopLabelId} scope="row">
           <Link to={`/shop/${shop?.id}`}>
             <Shop>
-              <ShopTag>Đối tác</ShopTag>
+              <ShopTag>{t("partner")}</ShopTag>
               <Storefront />
               &nbsp;{shop?.shopName}
               <KeyboardArrowRight fontSize="small" />
@@ -422,14 +390,19 @@ const CartDetailRow = ({
               <LocalActivityOutlined color="error" />
               &nbsp;
               {coupon
-                ? discount
+                ? coupon?.discount
                   ? isGroupSelected
-                    ? `Đã giảm ${currencyFormat.format(discount)}`
-                    : `Mua thêm để ${coupon?.summary.charAt(0).toLowerCase() + coupon?.summary.slice(1)}`
-                  : coupon?.isUsable
-                    ? `Mua thêm để ${coupon?.summary.charAt(0).toLowerCase() + coupon?.summary.slice(1)}`
-                    : "Đổi mã giảm giá"
-                : "Thêm mã giảm giá"}
+                    ? coupon?.isUsable
+                      ? t("cart.coupon.discount.applied", {
+                          discount: currencyFormat.format(coupon?.discount),
+                          ns: "client",
+                        })
+                      : t("cart.coupon.discount.criteria", { criteria: coupon?.summary, ns: "client" })
+                    : t("cart.coupon.change", { ns: "client" })
+                  : coupon?.isUsed
+                    ? t("cart.coupon.change", { ns: "client" })
+                    : t("cart.coupon.discount.criteria", { criteria: coupon?.summary, ns: "client" })
+                : t("cart.coupon.add", { ns: "client" })}
             </span>
             <KeyboardArrowRight fontSize="small" />
           </CouponButton>

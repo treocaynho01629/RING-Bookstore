@@ -1,5 +1,10 @@
 import { Link } from "react-router";
+import { useState } from "react";
+import { LocaleType } from "@ring/shared/enums/locales";
+import { useTranslation } from "react-i18next";
+import { debounce, upperCase } from "lodash-es";
 import Avatar from "@mui/material/Avatar";
+import Language from "@mui/icons-material/Language";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -10,16 +15,123 @@ import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
 import DeliveryDiningOutlined from "@mui/icons-material/DeliveryDiningOutlined";
 import LockOutlined from "@mui/icons-material/LockOutlined";
 import ContrastOutlined from "@mui/icons-material/ContrastOutlined";
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 
-const ProfilePopover = ({
-  open,
-  image,
-  anchorEl,
-  handleClose,
-  signOut,
-  mode,
-  toggleMode,
-}) => {
+const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, signOut, mode, setMode }) => {
+  const { t, i18n } = useTranslation();
+  const [openSetting, setOpenSetting] = useState(null);
+  const open = Boolean(anchorEl);
+
+  /**
+   * Handle change language
+   */
+  const handleChangeLanguage = (locale) => {
+    setAnchorEl(null);
+    i18n.changeLanguage(locale.value);
+    setOpenSetting(null);
+  };
+
+  /**
+   * Handle change theme
+   */
+  const handleChangeTheme = (theme) => {
+    if (setMode) setMode(theme);
+    setAnchorEl(null);
+    setOpenSetting(null);
+  };
+
+  const mainPopover = [
+    <Link to={"/profile/detail"} key="profile-detail" title={t("profile")}>
+      <MenuItem>
+        <Avatar sx={{ width: 30, height: 30, ml: -0.5, mr: 1 }} src={image ?? null} />
+        {t("profile")}
+      </MenuItem>
+    </Link>,
+    <Link to={"/profile/order"} key="profile-order" title={t("order.label", { ns: "client" })}>
+      <MenuItem>
+        <ListItemIcon>
+          <DeliveryDiningOutlined fontSize="small" />
+        </ListItemIcon>
+        {t("order.label", { ns: "client" })}
+      </MenuItem>
+    </Link>,
+    <Divider key="divider" />,
+    <MenuItem aria-label="Change theme" key="theme" onClick={(e) => setOpenSetting("theme")}>
+      <ListItemIcon>
+        {mode === "dark" ? (
+          <NightlightOutlined fontSize="small" />
+        ) : mode === "light" ? (
+          <LightModeOutlined fontSize="small" />
+        ) : mode === "system" ? (
+          <ContrastOutlined fontSize="small" />
+        ) : (
+          ""
+        )}
+      </ListItemIcon>
+      {t("theme.label")}
+    </MenuItem>,
+    <MenuItem key="language" onClick={() => setOpenSetting("language")}>
+      <ListItemIcon>
+        <Language fontSize="small" />
+      </ListItemIcon>
+      {t("language.label")}: {upperCase(i18n.language)}
+    </MenuItem>,
+    <MenuItem key="logout" onClick={() => signOut()}>
+      <ListItemIcon>
+        <LockOutlined fontSize="small" />
+      </ListItemIcon>
+      {t("logout")}
+    </MenuItem>,
+  ];
+
+  const languagePopover = [
+    <MenuItem key="language-back" onClick={() => setOpenSetting(null)}>
+      <ListItemIcon>
+        <KeyboardArrowLeft fontSize="small" />
+      </ListItemIcon>
+      {t("language.description")}
+    </MenuItem>,
+    <Divider key="divider" />,
+    ...Object.values(LocaleType).map((locale, index) => (
+      <MenuItem
+        key={index}
+        value={locale.value}
+        selected={i18n.language == locale.value}
+        onClick={() => handleChangeLanguage(locale)}
+      >
+        {locale.label}
+      </MenuItem>
+    )),
+  ];
+
+  const themePopover = [
+    <MenuItem key="theme-back" onClick={() => setOpenSetting(null)}>
+      <ListItemIcon>
+        <KeyboardArrowLeft fontSize="small" />
+      </ListItemIcon>
+      {t("theme.description")}
+    </MenuItem>,
+    <Divider key="divider" />,
+    <MenuItem key="theme-light" selected={mode === "light"} onClick={() => handleChangeTheme("light")}>
+      <ListItemIcon>
+        <LightModeOutlined fontSize="small" />
+      </ListItemIcon>
+      {t("theme.light")}
+    </MenuItem>,
+    <MenuItem key="theme-dark" selected={mode === "dark"} onClick={() => handleChangeTheme("dark")}>
+      <ListItemIcon>
+        <NightlightOutlined fontSize="small" />
+      </ListItemIcon>
+      {t("theme.dark")}
+    </MenuItem>,
+    <MenuItem key="theme-system" selected={mode === "system"} onClick={() => handleChangeTheme("system")}>
+      <ListItemIcon>
+        <ContrastOutlined fontSize="small" />
+      </ListItemIcon>
+      {t("theme.system")}
+    </MenuItem>,
+  ];
+
   return (
     <Menu
       id="mouse-over-popover-profile"
@@ -42,6 +154,7 @@ const ProfilePopover = ({
             mt: 1.5,
             borderRadius: 0,
             pointerEvents: "auto",
+            minWidth: 250,
           },
           onMouseLeave: handleClose,
         },
@@ -62,58 +175,7 @@ const ProfilePopover = ({
           zIndex: 0,
         }}
       />
-      <Link to={"/profile/detail"}>
-        <MenuItem>
-          <Avatar
-            sx={{ width: 30, height: 30, ml: -0.5, mr: 1 }}
-            src={image ?? null}
-          />
-          Thông tin tài khoản
-        </MenuItem>
-      </Link>
-      <Link to={"/profile/order"}>
-        <MenuItem>
-          <ListItemIcon>
-            <DeliveryDiningOutlined fontSize="small" />
-          </ListItemIcon>
-          Đơn giao
-        </MenuItem>
-      </Link>
-      <Divider />
-      {mode && (
-        <MenuItem
-          aria-label="toggle-mode"
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleMode();
-          }}
-        >
-          <ListItemIcon>
-            {mode === "dark" ? (
-              <NightlightOutlined fontSize="small" />
-            ) : mode === "light" ? (
-              <LightModeOutlined fontSize="small" />
-            ) : mode === "system" ? (
-              <ContrastOutlined fontSize="small" />
-            ) : (
-              ""
-            )}
-          </ListItemIcon>
-          {mode === "dark"
-            ? "Chủ đề tối"
-            : mode === "light"
-              ? "Chủ đề mặc định"
-              : mode === "system"
-                ? "Theo hệ thống"
-                : ""}
-        </MenuItem>
-      )}
-      <MenuItem onClick={() => signOut()}>
-        <ListItemIcon>
-          <LockOutlined fontSize="small" />
-        </ListItemIcon>
-        Đăng xuất
-      </MenuItem>
+      {openSetting === "language" ? languagePopover : openSetting === "theme" ? themePopover : mainPopover}
     </Menu>
   );
 };

@@ -1,0 +1,38 @@
+{
+  "cart": {
+    "label": "Giỏ hàng",
+    "title": "Sản phẩm trong giỏ hàng",
+    "empty": "Giỏ hàng trống",
+    "empty.description": "Giỏ hàng của bạn đang trống",
+    "checkout": "Thanh toán",
+    "continue": "Tiếp tục mua sắm",
+    "view": "Xem giỏ hàng",
+    "add": "Thêm vào giỏ",
+    "add.success": "Đã thêm sản phẩm vào giỏ hàng!",
+    "discount": "Khuyến mãi",
+    "items.left": "Còn {{quantity}} sản phẩm",
+    "items.out": "Hết hàng",
+    "select.suggestion": "Vui lòng chọn sản phẩm",
+    "estimate": "Đơn dự tính",
+    "find.similar": "Tìm sản phẩm tương tự",
+    "remove": "Xoá khỏi giỏ?",
+    "remove.description": "Xoá sản phẩm đã chọn khỏi giỏ?",
+    "remove.title": "Sản phẩm đã bị gỡ!",
+    "remove.message": "Một số sản phẩm sau đã bị gỡ khỏi trang:",
+    "coupon.add": "Thêm mã giảm giá",
+    "coupon.change": "Chọn mã giảm giá khác",
+    "coupon.discount.applied": "Đã giảm {{discount}}",
+    "coupon.discount.criteria": "Mua thêm để {{criteria}}"
+  },
+  "shop.explore": "Duyệt cửa hàng",
+  "order": {
+    "label": "Đơn giao"
+  },
+  "search.store": "trong cửa hàng",
+  "search.for": "Tìm kiếm {{value}}:",
+  "search.history": "Lịch sử tìm kiếm",
+  "search.remove": "Xóa '{{value}}' khỏi lịch sử tìm kiếm",
+  "search.clear": "Xóa lịch sử tìm kiếm",
+  "search.close": "Đóng hộp thoại tìm kiếm",
+  "search.suggest": "Gợi ý"
+}

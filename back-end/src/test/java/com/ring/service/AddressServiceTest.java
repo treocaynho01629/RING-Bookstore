@@ -217,8 +217,8 @@ class AddressServiceTest extends AbstractServiceTest {
                 .address("004/1")
                 .isDefault(true)
                 .build();
-        Address address = Address.builder().id(1L).isDefault(false).address("001/1").profile(profile).build();
-        Address expected = Address.builder().id(1L).isDefault(true).address("004/1").profile(profile).build();
+        Address address = Address.builder().id(1L).address("001/1").profile(profile).build();
+        Address expected = Address.builder().id(1L).address("004/1").profile(profile).build();
 
         // When
         when(addressRepo.findById(id)).thenReturn(Optional.of(address));
@@ -272,7 +272,7 @@ class AddressServiceTest extends AbstractServiceTest {
                 .build();
         Address address = Address.builder()
                 .id(1L)
-                .isDefault(false)
+                // .isDefault(false)
                 .address("001/1")
                 .profile(AccountProfile.builder().id(2L).build())
                 .build();
@@ -296,7 +296,9 @@ class AddressServiceTest extends AbstractServiceTest {
 
         // Given
         Long id = 1L;
-        Address expected = Address.builder().id(1L).isDefault(true).address("004/1").profile(profile).build();
+        Address expected = Address.builder().id(1L)
+        // .isDefault(true)
+        .address("004/1").profile(profile).build();
 
         // When
         when(addressRepo.findById(id)).thenReturn(Optional.of(expected));
@@ -339,7 +341,7 @@ class AddressServiceTest extends AbstractServiceTest {
         Long id = 1L;
         Address address = Address.builder()
                 .id(1L)
-                .isDefault(false)
+                // .isDefault(false)
                 .address("001/1")
                 .profile(AccountProfile.builder().id(2L).build())
                 .build();

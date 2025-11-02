@@ -1,12 +1,6 @@
 import { useState, useRef, lazy, Suspense } from "react";
 import { useNavigate, useLocation, Link } from "react-router";
-import {
-  AuthActionContainer,
-  AuthHighlight,
-  AuthText,
-  AuthTitle,
-  ConfirmButton,
-} from "@ring/ui/AuthComponents";
+import { AuthActionContainer, AuthHighlight, AuthText, AuthTitle, ConfirmButton } from "@ring/ui/AuthComponents";
 import { useAuthenticateMutation } from "@ring/redux/authApiSlice";
 import { Instruction } from "@ring/ui/Components";
 import { useTranslation } from "react-i18next";
@@ -22,16 +16,10 @@ import PasswordInput from "@ring/ui/PasswordInput";
 
 const ReCaptcha = lazy(() => import("@ring/auth/ReCaptcha"));
 
-const LoginTab = ({
-  pending,
-  setPending,
-  reCaptchaLoaded,
-  generateReCaptchaToken,
-}) => {
+const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken }) => {
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
   const { persist, username: loginedUser, setPersist } = useAuth();
-  const [authenticate, { isLoading, isSuccess, isUninitialized }] =
-    useAuthenticateMutation();
+  const [authenticate, { isLoading, isSuccess, isUninitialized }] = useAuthenticateMutation();
   const signOut = useLogout();
   const { t } = useTranslation();
 
@@ -85,9 +73,7 @@ const LoginTab = ({
     setPending(true);
     const { enqueueSnackbar } = await import("notistack");
 
-    const recaptchaToken = challenge
-      ? token
-      : await generateReCaptchaToken("login");
+    const recaptchaToken = challenge ? token : await generateReCaptchaToken("login");
     authenticate({
       token: recaptchaToken,
       source: challenge ? "v2" : "v3",
@@ -100,7 +86,7 @@ const LoginTab = ({
         if (currPersist) setPersist(true);
 
         // Queue snack
-        enqueueSnackbar("Đăng nhập thành công", { variant: "success" });
+        enqueueSnackbar(t("message.success", { action: t("login") }), { variant: "success" });
         navigate(from, { replace: true, state: fromState }); // Redirect to previous page
         reset();
       })
@@ -108,7 +94,7 @@ const LoginTab = ({
         console.error(err);
         setErr(err);
         if (!err?.status) {
-          setErrMsg("Server không phản hồi");
+          setErrMsg(t("error.server.not.response"));
         } else if (err?.status === 412) {
           setChallenge(true);
           setErrMsg(err?.data?.message);
@@ -122,35 +108,32 @@ const LoginTab = ({
 
   return isUninitialized && (persist || loginedUser) ? (
     <>
-      <AuthTitle>Xin chào {loginedUser}</AuthTitle>
-      <Button
-        color="error"
-        size="large"
-        onClick={() => signOut()}
-        startIcon={<Logout />}
-      >
-        Kết thúc phiên đăng nhập?
+      <AuthTitle>
+        {t("hello")} {loginedUser}
+      </AuthTitle>
+      <Button color="error" size="large" onClick={() => signOut()} startIcon={<Logout />}>
+        {t("logout.end")}
       </Button>
     </>
   ) : (
     <form onSubmit={handleSubmitLogin}>
-      <AuthTitle>Đăng nhập tài khoản</AuthTitle>
+      <AuthTitle>{t("login.title")}</AuthTitle>
       <Instruction ref={errRef} aria-live="assertive">
         {err?.data?.errors?.username ? (
           <span>{err?.data?.errors?.username}</span>
         ) : !validName ? (
-          <span>Tên đăng nhập không được bỏ trống!</span>
+          <span>{t("validation.constraints.not.blank", { ns: "validation", field: t("username") })}</span>
         ) : null}
         {err?.data?.errors?.pass ? (
           <span>{err?.data?.errors?.pass}</span>
         ) : !validPass ? (
-          <span>Mật khẩu không được bỏ trống!</span>
+          <span>{t("validation.constraints.not.blank", { ns: "validation", field: t("password") })}</span>
         ) : null}
         <span>{errMsg != "" ? errMsg : " "}&nbsp;</span>
       </Instruction>
       <Stack spacing={2.5} direction="column">
         <TextField
-          label="Tên đăng nhập"
+          label={t("username")}
           type="text"
           id="username"
           autoComplete="username"
@@ -159,7 +142,7 @@ const LoginTab = ({
           value={username}
         />
         <PasswordInput
-          label="Mật khẩu"
+          label={t("password")}
           autoComplete="password"
           size="small"
           onChange={(e) => setPassword(e.target.value)}
@@ -167,27 +150,18 @@ const LoginTab = ({
         />
         {reCaptchaLoaded && challenge && (
           <Suspense fallback={null}>
-            <ReCaptcha
-              onVerify={(token) => setToken(token)}
-              recaptchaSiteKey={recaptchaSiteKey}
-            />
+            <ReCaptcha onVerify={(token) => setToken(token)} recaptchaSiteKey={recaptchaSiteKey} />
           </Suspense>
         )}
         <AuthActionContainer className="persistCheck">
           <FormControlLabel
             control={
-              <Checkbox
-                checked={currPersist}
-                onChange={togglePersist}
-                disableRipple
-                name="persist"
-                color="primary"
-              />
+              <Checkbox checked={currPersist} onChange={togglePersist} disableRipple name="persist" color="primary" />
             }
-            label="Lưu đăng nhập"
+            label={t("persist")}
           />
           <Link to={"/reset"}>
-            <AuthHighlight color="warning">Quên mật khẩu?</AuthHighlight>
+            <AuthHighlight color="warning">{t("forgot")}</AuthHighlight>
           </Link>
         </AuthActionContainer>
         <ConfirmButton
@@ -201,9 +175,9 @@ const LoginTab = ({
         </ConfirmButton>
       </Stack>
       <AuthText>
-        Chưa có tài khoản?&nbsp;
+        {t("signup.suggestions")}&nbsp;
         <Link to={"/auth/register"}>
-          <AuthHighlight>Đăng ký</AuthHighlight>
+          <AuthHighlight>{t("signup")}</AuthHighlight>
         </Link>
       </AuthText>
     </form>

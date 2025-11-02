@@ -1,11 +1,6 @@
 import styled from "@emotion/styled";
 import { LazyLoadImage } from "react-lazy-load-image-component";
-import {
-  StyledItemTableRow,
-  StyledTableRow,
-  SpaceTableRow,
-  StyledTableCell,
-} from "../custom/TableComponents";
+import { StyledItemTableRow, StyledTableRow, SpaceTableRow, StyledTableCell } from "../custom/TableComponents";
 import { currencyFormat } from "@ring/shared/utils/convert";
 import { getImageSize } from "@ring/shared/enums/image";
 import { getShippingType } from "@ring/shared/enums/shipping";
@@ -235,42 +230,22 @@ function ItemRow({ product, index }) {
   const isDisabled = !product || product.amount < 1;
 
   return (
-    <StyledItemTableRow
-      tabIndex={-1}
-      key={`item-${product.id}-${index}`}
-      className={isDisabled ? "error" : ""}
-    >
+    <StyledItemTableRow tabIndex={-1} key={`item-${product.id}-${index}`} className={isDisabled ? "error" : ""}>
       <StyledTableCell className="preview" component="th" scope="row">
         <ItemContainer>
           <StyledLazyImage
             src={product?.image?.srcSet[ImageSize?.TINY?.value]}
             alt={`${product.title} Cart item`}
-            placeholder={
-              <StyledSkeleton variant="rectangular" animation={false} />
-            }
+            placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
           />
           <ItemSummary>
-            <ItemTitle className={isDisabled ? "error" : ""}>
-              {product.title}
-            </ItemTitle>
+            <ItemTitle className={isDisabled ? "error" : ""}>{product.title}</ItemTitle>
             <ItemAction>
-              <Box
-                display={{ xs: "flex", md: "none", md_lg: "flex", lg: "none" }}
-              >
-                <Price>
-                  {currencyFormat.format(
-                    product.price * (1 - (product?.discount || 0))
-                  )}
-                </Price>
-                <Discount>
-                  {product?.discount > 0
-                    ? currencyFormat.format(product.price)
-                    : ""}
-                </Discount>
+              <Box display={{ xs: "flex", md: "none", md_lg: "flex", lg: "none" }}>
+                <Price>{currencyFormat.format(product.price * (1 - (product?.discount || 0)))}</Price>
+                <Discount>{product?.discount > 0 ? currencyFormat.format(product.price) : ""}</Discount>
               </Box>
-              <Box display={{ xs: "flex", sm: "none" }}>
-                x{product.quantity}
-              </Box>
+              <Box display={{ xs: "flex", sm: "none" }}>x{product.quantity}</Box>
             </ItemAction>
           </ItemSummary>
         </ItemContainer>
@@ -287,31 +262,15 @@ function ItemRow({ product, index }) {
           },
         }}
       >
-        <Price>
-          {currencyFormat.format(
-            product.price * (1 - (product?.discount || 0))
-          )}
-        </Price>
-        {product?.discount > 0 && (
-          <Discount>{currencyFormat.format(product.price)}</Discount>
-        )}
+        <Price>{currencyFormat.format(product.price * (1 - (product?.discount || 0)))}</Price>
+        {product?.discount > 0 && <Discount>{currencyFormat.format(product.price)}</Discount>}
       </StyledTableCell>
-      <StyledTableCell
-        className="preview"
-        align="center"
-        sx={{ display: { xs: "none", sm: "table-cell" } }}
-      >
+      <StyledTableCell className="preview" align="center" sx={{ display: { xs: "none", sm: "table-cell" } }}>
         <Amount>SL: {product.quantity}</Amount>
       </StyledTableCell>
-      <StyledTableCell
-        className="preview"
-        align="right"
-        sx={{ display: { xs: "none", md: "table-cell" } }}
-      >
+      <StyledTableCell className="preview" align="right" sx={{ display: { xs: "none", md: "table-cell" } }}>
         <Price className="total">
-          {currencyFormat.format(
-            product.price * (1 - (product?.discount || 0)) * product.quantity
-          )}
+          {currencyFormat.format(product.price * (1 - (product?.discount || 0)) * product.quantity)}
         </Price>
       </StyledTableCell>
     </StyledItemTableRow>
@@ -333,8 +292,7 @@ const PreviewDetailRow = ({
   // Calculated price for display
   let total = 0;
   let totalQuantity = 0;
-  const shippingSummary =
-    ShippingType[shipping || Object.keys(ShippingType)[0]];
+  const shippingSummary = ShippingType[shipping || Object.keys(ShippingType)[0]];
   const Icon = iconList[shippingSummary?.icon];
 
   for (const product of shop?.products) {
@@ -342,19 +300,11 @@ const PreviewDetailRow = ({
     totalQuantity += product.quantity;
   }
 
-  console.log("test");
-
   return (
     <>
       <SpaceTableRow />
       <StyledTableRow className="top" tabIndex={-1}>
-        <StyledTableCell
-          className="preview"
-          align="left"
-          colSpan={5}
-          component="th"
-          scope="row"
-        >
+        <StyledTableCell className="preview" align="left" colSpan={5} component="th" scope="row">
           <Shop>
             <Inventory />
             &nbsp;Giao từ {shop.shopName}
@@ -387,11 +337,7 @@ const PreviewDetailRow = ({
       </StyledTableRow>
       <StyledTableRow className="center" role="shipping-row">
         <StyledTableCell className="option" align="left" colSpan={6}>
-          <Box
-            display="flex"
-            width="100%"
-            flexDirection={{ xs: "column", sm: "row" }}
-          >
+          <Box display="flex" width="100%" flexDirection={{ xs: "column", sm: "row" }}>
             <NoteInput
               placeholder="Lời nhắn cho người bán ..."
               onChange={(e) =>
@@ -405,9 +351,7 @@ const PreviewDetailRow = ({
               fullWidth
               sx={{ mr: 1 }}
             />
-            <ShippingContainer
-              onClick={() => handleOpenShippingDialog(shop?.id)}
-            >
+            <ShippingContainer onClick={() => handleOpenShippingDialog(shop?.id)}>
               <OptionButton>
                 <ButtonLabel>
                   &nbsp;Vận chuyển:&emsp;
@@ -421,21 +365,9 @@ const PreviewDetailRow = ({
                 <p>&nbsp;{shippingSummary?.label}</p>
                 <span>
                   <ShippingInfo>{shippingSummary?.description}</ShippingInfo>
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="flex-end"
-                  >
-                    <Discount>
-                      {shippingDiscount > 0
-                        ? currencyFormat.format(shippingDiscount)
-                        : ""}
-                    </Discount>
-                    <Price className="shipping">
-                      {currencyFormat.format(
-                        shippingFee - (shippingDiscount || 0)
-                      )}
-                    </Price>
+                  <Box display="flex" alignItems="center" justifyContent="flex-end">
+                    <Discount>{shippingDiscount > 0 ? currencyFormat.format(shippingDiscount) : ""}</Discount>
+                    <Price className="shipping">{currencyFormat.format(shippingFee - (shippingDiscount || 0))}</Price>
                   </Box>
                 </span>
               </Box>

@@ -1,11 +1,21 @@
 import { useState } from "react";
+import type { FC } from "react";
 import ConfirmDialog from "../components/ConfirmDialog";
 
-const useConfirm = (title, message) => {
-  const [promise, setPromise] = useState(null);
+type UseConfirmReturn = [FC, () => Promise<boolean>];
+
+/**
+ * A hook to show a confirmation dialog
+ *
+ * @param title - The title of the confirmation dialog
+ * @param message - The message of the confirmation dialog
+ * @returns A tuple containing the confirmation dialog component and the confirm function
+ */
+const useConfirm = (title?: string, message?: string): UseConfirmReturn => {
+  const [promise, setPromise] = useState<{ resolve: (value: boolean) => void } | null>(null);
 
   const confirm = () =>
-    new Promise((resolve, reject) => {
+    new Promise<boolean>((resolve) => {
       setPromise({ resolve });
     });
 
@@ -23,7 +33,7 @@ const useConfirm = (title, message) => {
     handleClose();
   };
 
-  const ConfirmationDialog = () => (
+  const ConfirmationDialog: FC = () => (
     <ConfirmDialog
       {...{
         open: promise !== null,
@@ -34,6 +44,7 @@ const useConfirm = (title, message) => {
       }}
     />
   );
+
   return [ConfirmationDialog, confirm];
 };
 

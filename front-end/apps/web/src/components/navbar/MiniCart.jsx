@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { currencyFormat } from "@ring/shared/utils/convert";
 import { getImageSize } from "@ring/shared/enums/image";
+import { useTranslation } from "react-i18next";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
@@ -26,6 +27,10 @@ const ItemsContainer = styled.div`
   flex-direction: column;
   align-items: center;
   margin: ${({ theme }) => theme.spacing(1)} 0;
+
+  b {
+    text-transform: uppercase;
+  }
 
   &.empty {
     justify-content: center;
@@ -89,12 +94,15 @@ const ActionContainer = styled.div`
 
 const ImageSize = getImageSize();
 
-const MiniCart = ({ openCart, anchorElCart, handleClose, products }) => {
+const MiniCart = ({ anchorEl, handleClose, products }) => {
+  const { t } = useTranslation();
+  const open = Boolean(anchorEl);
+
   return (
     <Popover
       id="mouse-over-popover-cart"
-      open={openCart}
-      anchorEl={anchorElCart}
+      open={open}
+      anchorEl={anchorEl}
       onClose={handleClose}
       onClick={handleClose}
       disableRestoreFocus
@@ -133,12 +141,12 @@ const MiniCart = ({ openCart, anchorElCart, handleClose, products }) => {
         }}
       />
       <MiniCartContainer>
-        <CartTitle>Sản phẩm trong giỏ hàng</CartTitle>
+        <CartTitle>{t("cart.title", { ns: "client" })}</CartTitle>
         <ItemsContainer className={products?.length == 0 ? "empty" : ""}>
           {products?.length == 0 ? (
             <>
               <RemoveShoppingCartIcon sx={{ fontSize: "50px" }} />
-              <b>GIỎ HÀNG TRỐNG</b>
+              <b>{t("cart.empty", { ns: "client" })}</b>
             </>
           ) : (
             products?.slice(0, 5).map((product, index) => (
@@ -149,20 +157,11 @@ const MiniCart = ({ openCart, anchorElCart, handleClose, products }) => {
                   style={{ objectFit: "contain" }}
                   src={product?.image?.srcSet[ImageSize?.TINY?.value]}
                   alt={`Cart item: ${product?.title}`}
-                  placeholder={
-                    <Skeleton
-                      width={50}
-                      height={50}
-                      animation={false}
-                      variant="rectangular"
-                    />
-                  }
+                  placeholder={<Skeleton width={50} height={50} animation={false} variant="rectangular" />}
                 />
                 <ItemInfo>
                   <ProductTitle>{product?.title}</ProductTitle>
-                  <ProductPrice>
-                    {currencyFormat.format(product?.price)}
-                  </ProductPrice>
+                  <ProductPrice>{currencyFormat.format(product?.price)}</ProductPrice>
                 </ItemInfo>
               </ItemContainer>
             ))
@@ -174,12 +173,12 @@ const MiniCart = ({ openCart, anchorElCart, handleClose, products }) => {
               {products?.length <= 5 ? (
                 <>&nbsp;</>
               ) : (
-                `Còn lại ${products?.length - 5} trong giỏ`
+                `${t("cart.items.left", { ns: "client", quantity: products?.length - 5 })}`
               )}
             </span>
-            <Link to={"/cart"}>
+            <Link to={"/cart"} title={t("cart.view", { ns: "client" })}>
               <Button variant="outlined" color="info" size="medium">
-                Xem giỏ hàng
+                {t("cart.view", { ns: "client" })}
               </Button>
             </Link>
           </ActionContainer>

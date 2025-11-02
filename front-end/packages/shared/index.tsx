@@ -17,6 +17,7 @@ export * from "./src/enums/order";
 export * from "./src/enums/payment";
 export * from "./src/enums/shipping";
 export * from "./src/enums/user";
+export * from "./src/enums/locales";
 
 // Utils
 export * from "./src/utils/convert";

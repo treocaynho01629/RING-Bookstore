@@ -4,6 +4,7 @@ import { useParams } from "react-router";
 import { keyframes } from "@emotion/react";
 import { Grow } from "@mui/material";
 import { TransitionGroup } from "react-transition-group";
+import { useTranslation } from "react-i18next";
 import useTitle from "@ring/shared/useTitle";
 import useReCaptcha from "@ring/auth/useReCaptcha";
 import SimpleNavbar from "../components/navbar/SimpleNavbar";
@@ -61,18 +62,12 @@ const Wave = styled.span`
   border-radius: 43%;
   top: 0;
   left: 14%;
-  background: hsl(
-    from ${({ theme }) => theme.vars.palette.primary.main} calc(h - 30) s l /
-      0.2
-  );
+  background: hsl(from ${({ theme }) => theme.vars.palette.primary.main} calc(h - 30) s l / 0.2);
   animation: ${rotate} 32s infinite steps(480, end);
   transition: all 0.2s ease;
 
   &:nth-of-type(2) {
-    background: hsl(
-      from ${({ theme }) => theme.vars.palette.primary.main} calc(h + 30) s l /
-        0.3
-    );
+    background: hsl(from ${({ theme }) => theme.vars.palette.primary.main} calc(h + 30) s l / 0.3);
     left: 7%;
     animation-delay: -8s;
     animation-duration: 24s;
@@ -80,9 +75,7 @@ const Wave = styled.span`
   }
 
   &:nth-of-type(3) {
-    background: hsl(
-      from ${({ theme }) => theme.vars.palette.primary.main} h s l / 0.4
-    );
+    background: hsl(from ${({ theme }) => theme.vars.palette.primary.main} h s l / 0.4);
     left: 0;
     animation-delay: -3s;
     animation-duration: 28s;
@@ -134,21 +127,21 @@ const Background = styled.div`
 
 function AuthPage() {
   const { tab } = useParams();
+  const { t } = useTranslation();
   const [pending, setPending] = useState(false);
 
-  //Recaptcha
+  // Recaptcha
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY;
-  const { reCaptchaLoaded, generateReCaptchaToken } =
-    useReCaptcha(recaptchaSiteKey);
+  const { reCaptchaLoaded, generateReCaptchaToken } = useReCaptcha(recaptchaSiteKey);
 
-  //Set title
-  useTitle("Chào mừng");
+  // Set title
+  useTitle(t("welcome"));
 
   return (
     <Wrapper>
       {pending && (
         <Suspense fallBack={null}>
-          <PendingModal open={pending} message="Đang gửi yêu cầu..." />
+          <PendingModal open={pending} message={t("pending")} />
         </Suspense>
       )}
       <SimpleNavbar />

@@ -1,36 +1,23 @@
 import { initReactI18next } from "react-i18next";
-import { locales, defaultLocale } from "@ring/i18n/locales";
+import { locales, defaultLocale } from "@ring/shared/enums/locales";
 import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
-
-import en_common from "@ring/i18n/messages/common-en";
-import vi_common from "@ring/i18n/messages/common-vi";
-
-const resources = {
-  en: {
-    common: en_common,
-  },
-  vi: {
-    common: vi_common,
-  },
-};
+import resourcesToBackend from "i18next-resources-to-backend";
 
 i18n
   .use(initReactI18next)
   .use(LanguageDetector)
+  .use(resourcesToBackend((lng, ns) => import(`../../packages/i18n/${ns}-${lng}.json`)))
+  .on("failedLoading", (lng, ns, msg) => console.error(msg))
   .init({
     fallbackLng: defaultLocale,
     supportedLngs: locales,
     defaultNS: "common",
-    ns: ["common"],
-    resources,
-
+    ns: ["common", "validation", "client"],
     interpolation: {
-      escapeValue: false, // react already safes from xss => https://www.i18next.com/translation-function/interpolation#unescape
+      escapeValue: false,
     },
-
     detection: {
-      // Order and from where user language should be detected
       order: [
         "querystring",
         "hash",
@@ -42,9 +29,10 @@ i18n
         "path",
         "subdomain",
       ],
-
-      // Cache user language on
       caches: ["localStorage", "cookie"],
+    },
+    react: {
+      useSuspense: true,
     },
   });
 

@@ -1,0 +1,39 @@
+{
+  "cart": {
+    "label": "Cart",
+    "title": "Products in cart",
+    "empty": "Cart is empty",
+    "empty.description": "Your cart is empty",
+    "checkout": "Checkout",
+    "continue": "Continue shopping",
+    "view": "View cart",
+    "add": "Add to cart",
+    "add.success": "Product added to cart!",
+    "discount": "Discount",
+    "items.left": "{{quantity}} left in stock",
+    "items.out": "Out of stock",
+    "select.suggestion": "Please select a product",
+    "estimate": "Estimated order",
+    "find.similar": "Find similar products",
+    "remove": "Remove from cart?",
+    "remove.description": "Remove selected product from cart?",
+    "remove.title": "Products removed!",
+    "remove.message": "Some of the following products have been taken off the page:",
+    "coupon.add": "Add coupon",
+    "coupon.change": "Change to another coupon",
+    "coupon.discount.applied": "You saved {{discount}}",
+    "coupon.discount.criteria": "Buy more to {{criteria}}"
+  },
+  "shop.explore": "Explore shop",
+  "order": {
+    "label": "Order",
+    "description": "View your orders"
+  },
+  "search.store": "in store",
+  "search.for": "Search {{value}}:",
+  "search.history": "Search history",
+  "search.clear": "Clear search history",
+  "search.remove": "Remove '{{value}}' from history",
+  "search.close": "Close search dialog",
+  "search.suggest": "Suggestions"
+}

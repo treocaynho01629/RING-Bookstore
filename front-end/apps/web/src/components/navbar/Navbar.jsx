@@ -1,15 +1,9 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useMatch } from "react-router";
 import { LogoImage } from "@ring/ui/Components";
 import { debounce } from "lodash-es";
 import { useColorScheme } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
 import useAuth from "../../hooks/useAuth";
 import useLogout from "../../hooks/useLogout";
 import Mail from "@mui/icons-material/Mail";
@@ -245,47 +239,33 @@ const IconText = styled.p`
 `;
 //#endregion
 
-const SearchComponent = ({
-  tabletMode,
-  show,
-  toggle,
-  setToggle,
-  isSearch,
-  isShop,
-  products,
-}) => {
+const SearchComponent = ({ tabletMode, show, toggle, setToggle, isSearch, isShop, products }) => {
   const mobileMode = useMediaQuery((theme) => theme.breakpoints.down("sm"));
+  const { t } = useTranslation();
 
+  /**
+   * Toggle search dialog
+   */
   const toggleSearch = () => {
     setToggle(!show);
   };
 
   return (
-    <Box
-      display="flex"
-      alignItems="center"
-      flex={1}
-      flexDirection={{ xs: "row-reverse", md: "row" }}
-    >
+    <Box display="flex" alignItems="center" flex={1} flexDirection={{ xs: "row-reverse", md: "row" }}>
       {tabletMode && isSearch ? (
-        <Link to={"/"} title="Trang chủ">
+        <Link to={"/"} title={t("home")}>
           <StyledIconButton aria-label="home">
             <HomeOutlined />
           </StyledIconButton>
         </Link>
       ) : (
-        <Link to={"/store"} title="Duyệt cửa hàng">
+        <Link to={"/store"} title={t("shop.explore", { ns: "client" })}>
           <StyledIconButton aria-label="explore">
             <Storefront />
           </StyledIconButton>
         </Link>
       )}
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent={{ xs: "flex-end", md: "flex-start" }}
-        flex={1}
-      >
+      <Box display="flex" alignItems="center" justifyContent={{ xs: "flex-end", md: "flex-start" }} flex={1}>
         <SearchInput
           {...{
             mobileMode,
@@ -296,7 +276,7 @@ const SearchComponent = ({
           }}
         />
         {tabletMode && isSearch ? (
-          <Link to={"/cart"} title="Giỏ hàng">
+          <Link to={"/cart"} title={t("login", { ns: "client" })}>
             <StyledIconButton aria-label="cart">
               <Badge
                 color="primary"
@@ -311,11 +291,7 @@ const SearchComponent = ({
             </StyledIconButton>
           </Link>
         ) : (
-          <StyledIconButton
-            aria-label="search toggle"
-            onClick={toggleSearch}
-            sx={{ mr: { xs: 0.3, md: 0 } }}
-          >
+          <StyledIconButton aria-label="search toggle" onClick={toggleSearch} sx={{ mr: { xs: 0.3, md: 0 } }}>
             {show ? <SearchOff /> : <Search />}
           </StyledIconButton>
         )}
@@ -324,35 +300,44 @@ const SearchComponent = ({
   );
 };
 
-const PopoverComponents = ({
-  mode,
-  toggleMode,
-  cartProducts,
-  username,
-  image,
-  signOut,
-  location,
-}) => {
-  //Anchor for popoever & open state
+const PopoverComponents = ({ mode, setMode, cartProducts, username, image, signOut, location }) => {
+  const { t } = useTranslation();
+
+  // Anchor for popoever & open state
   const [anchorElCart, setAnchorElCart] = useState(undefined);
   const [anchorEl, setAnchorEl] = useState(undefined);
-  const openCart = Boolean(anchorElCart);
-  const open = Boolean(anchorEl);
 
-  const hanldeCartPopover = (e) => {
+  /**
+   * Display cart popover on mouse enter
+   */
+  const handleCartPopover = (e) => {
     handleCartClose.cancel();
     setAnchorElCart(e.currentTarget);
+    setAnchorEl(null);
   };
+
+  /**
+   * Hide cart popover on mouse leave
+   */
   const handleCartClose = useCallback(
     debounce(() => {
       setAnchorElCart(null);
     }, 500),
     [anchorElCart]
   );
+
+  /**
+   * Display profile popover on mouse enter
+   */
   const handleProfilePopover = (e) => {
     handleProfileClose.cancel();
     setAnchorEl(e.currentTarget);
+    setAnchorElCart(null);
   };
+
+  /**
+   * Hide profile popover on mouse leave
+   */
   const handleProfileClose = useCallback(
     debounce(() => {
       setAnchorEl(null);
@@ -370,12 +355,8 @@ const PopoverComponents = ({
       }}
     >
       <NavItem>
-        <Stack
-          direction="row"
-          sx={{ color: "action.active" }}
-          alignItems="center"
-        >
-          <StyledIconButton className="nav" aria-label="notification">
+        <Stack direction="row" sx={{ color: "action.active" }} alignItems="center">
+          <StyledIconButton className="nav" aria-label={t("notification")}>
             <Badge
               badgeContent={0}
               anchorOrigin={{
@@ -385,16 +366,16 @@ const PopoverComponents = ({
             >
               <NotificationsOutlined />
             </Badge>
-            <IconText>Thông báo</IconText>
+            <IconText>{t("notification")}</IconText>
           </StyledIconButton>
           <Box
-            aria-owns={openCart ? "mouse-over-popover-cart" : undefined}
+            aria-owns={anchorElCart ? "mouse-over-popover-cart" : undefined}
             aria-haspopup="true"
-            onMouseEnter={hanldeCartPopover}
+            onMouseEnter={handleCartPopover}
             onMouseLeave={handleCartClose}
           >
-            <Link to={"/cart"} title="Giỏ hàng">
-              <StyledIconButton className="nav" aria-label="cart">
+            <Link to={"/cart"} title={t("cart.label", { ns: "client" })}>
+              <StyledIconButton className="nav" aria-label={t("cart.label", { ns: "client" })}>
                 <Badge
                   color="primary"
                   badgeContent={cartProducts?.length}
@@ -405,15 +386,14 @@ const PopoverComponents = ({
                 >
                   <ShoppingCartOutlined />
                 </Badge>
-                <IconText>Giỏ hàng</IconText>
+                <IconText>{t("cart.label", { ns: "client" })}</IconText>
               </StyledIconButton>
             </Link>
             {anchorElCart !== undefined && (
               <Suspense fallback={null}>
                 <MiniCart
                   {...{
-                    openCart,
-                    anchorElCart,
+                    anchorEl: anchorElCart,
                     handleClose: handleCartClose,
                     products: cartProducts,
                   }}
@@ -423,17 +403,14 @@ const PopoverComponents = ({
           </Box>
           {username ? (
             <Box
-              aria-owns={open ? "mouse-over-popover-profile" : undefined}
+              aria-owns={anchorEl ? "mouse-over-popover-profile" : undefined}
               aria-haspopup="true"
               onMouseEnter={handleProfilePopover}
               onMouseLeave={handleProfileClose}
             >
-              <Link to={"/profile/detail"} title="Tài khoản">
-                <StyledIconButton className="nav" aria-label="profile">
-                  <Avatar
-                    sx={{ width: 24, height: 24, fontSize: "16px" }}
-                    src={image ?? null}
-                  />
+              <Link to={"/profile/detail"} title={t("profile")}>
+                <StyledIconButton className="nav" aria-label={t("profile")}>
+                  <Avatar sx={{ width: 24, height: 24, fontSize: "16px" }} src={image ?? null} />
                   <IconText className="username">{username}</IconText>
                 </StyledIconButton>
               </Link>
@@ -441,12 +418,12 @@ const PopoverComponents = ({
                 <Suspense fallback={null}>
                   <ProfilePopover
                     {...{
-                      open,
                       anchorEl,
+                      setAnchorEl,
                       handleClose: handleProfileClose,
                       signOut,
                       mode,
-                      toggleMode,
+                      setMode,
                       image,
                     }}
                   />
@@ -454,14 +431,10 @@ const PopoverComponents = ({
               )}
             </Box>
           ) : (
-            <Link
-              to={"/auth/login"}
-              state={{ from: location }}
-              title="Đăng nhập"
-            >
-              <StyledIconButton className="nav" aria-label="login">
+            <Link to={"/auth/login"} state={{ from: location }} title={t("login")}>
+              <StyledIconButton className="nav" aria-label={t("login")}>
                 <LockOutlined />
-                <IconText className="username">Đăng nhập</IconText>
+                <IconText className="username">{t("login")}</IconText>
               </StyledIconButton>
             </Link>
           )}
@@ -473,6 +446,7 @@ const PopoverComponents = ({
 
 const Navbar = () => {
   //#region construct
+  const { t } = useTranslation();
   const { cartProducts } = useCart();
   const location = useLocation();
   const isHome = useMatch("/");
@@ -481,40 +455,38 @@ const Navbar = () => {
   const isSearch = isStore || isShop;
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md"));
 
-  //Search
+  // Search
   const [toggle, setToggle] = useState(undefined);
   const show = (isSearch && toggle == undefined) || toggle;
 
-  //Drawer open state
+  // Drawer open state
   const [openDrawer, setOpenDrawer] = useState(undefined);
 
-  //Other
+  // Other
   const { username, image } = useAuth();
   const signOut = useLogout();
 
-  //Toggle drawer open state
+  /**
+   * Set the drawer open state.
+   * @param {boolean} value - The value to set the drawer open state to.
+   */
   const handleToggleDrawer = (value) => {
     setOpenDrawer(value);
   };
 
-  //Toggle color mode
+  /**
+   * Toggle the color mode.
+   */
   const { mode, setMode } = useColorScheme();
-  const toggleMode = () => {
-    if (!mode) {
-      return;
-    } else if (mode === "system") {
-      setMode("light");
-    } else if (mode === "light") {
-      setMode("dark");
-    } else if (mode === "dark") {
-      setMode("system");
-    }
-  };
 
-  //Transparent trigger
+  // Transparent trigger for the navbar.
   const opacityRef = useRef(0);
   const navRef = useRef(null);
 
+  /**
+   * Handle the window scroll event.
+   * @param {Event} e - The event object.
+   */
   const handleWindowScroll = (e) => {
     let body = document.body; //IE 'quirks'
     let element = document.documentElement; //IE with doctype
@@ -531,24 +503,36 @@ const Navbar = () => {
     handleChangeStyles();
   };
 
+  /**
+   * Change the styles of the navbar.
+   */
   const handleChangeStyles = () => {
     if (navRef.current) {
       navRef.current.style.setProperty("--scroll-progress", opacityRef.current);
     }
   };
 
+  /**
+   * Reset the styles of the navbar.
+   */
   const handleResetStyles = () => {
     if (navRef.current) {
       navRef.current.style.setProperty("--scroll-progress", "1");
     }
   };
 
+  /**
+   * Reset the opacity of the navbar.
+   */
   const handleResetOpacity = () => {
     if (navRef.current) {
       navRef.current.style.setProperty("--scroll-progress", "0");
     }
   };
 
+  /**
+   * The window scroll listener.
+   */
   const windowScrollListener = useCallback(handleWindowScroll, []);
 
   useEffect(() => {
@@ -569,7 +553,7 @@ const Navbar = () => {
     }
   }, [location.pathname]);
 
-  //Check for go back button
+  // Check for go back button
   const canGoBack = location.key !== "default";
   const href = canGoBack ? -1 : "/";
   //#endregion
@@ -626,7 +610,7 @@ const Navbar = () => {
                       <Menu />
                     </StyledIconButton>
                   ) : (
-                    <Link to={href} title="Quay lại">
+                    <Link to={href} title={t("back")}>
                       <StyledIconButton>
                         <KeyboardArrowLeft />
                       </StyledIconButton>
@@ -642,7 +626,7 @@ const Navbar = () => {
                         products: cartProducts,
                         signOut,
                         mode,
-                        toggleMode,
+                        setMode,
                         handleOpen: () => handleToggleDrawer(true),
                         handleClose: () => handleToggleDrawer(false),
                       }}
@@ -650,7 +634,7 @@ const Navbar = () => {
                   </Suspense>
                 </Box>
               )}
-              <Link to={"/"} title="Trang chủ">
+              <Link to={"/"} title={t("home")}>
                 <Logo className={show ? "hidden" : ""}>
                   <LogoImage src="/full-logo.svg" alt="RING! logo" />
                 </Logo>
@@ -671,7 +655,7 @@ const Navbar = () => {
               <PopoverComponents
                 {...{
                   mode,
-                  toggleMode,
+                  setMode,
                   cartProducts,
                   username,
                   image,

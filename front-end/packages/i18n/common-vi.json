@@ -1,12 +1,53 @@
 {
+  "theme": {
+    "label": "Giao diện",
+    "description": "Chọn giao diện của bạn",
+    "dark": "Chủ đề tối",
+    "light": "Chủ đề sáng",
+    "system": "Theo hệ thống"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "description": "Chọn ngôn ngữ của bạn"
+  },
+  "welcome": "Chào mừng",
   "hello": "Xin chào",
-  "logout": "Đăng xuất",
   "login": "Đăng nhập",
+  "login.title": "Đăng nhập tài khoản",
+  "email": "email",
+  "email.placeholder": "Địa chỉ email",
+  "username": "Tên đăng nhập",
+  "password": "Mật khẩu",
+  "password.confirm": "Nhập lại mật khẩu",
+  "recaptcha": "Được bảo vệ bởi reCAPTCHA và Google thông qua",
+  "terms": "Điều khoản dịch vụ",
+  "policy": "Chính sách bảo mật",
+  "persist": "Lưu đăng nhập",
+  "forgot": "Quên mật khẩu?",
+  "signup": "Đăng ký",
+  "signup.title": "Đăng ký tài khoản mới",
+  "signup.suggestions": "Chưa có tài khoản?",
+  "help": "Trợ giúp",
+  "logout": "Đăng xuất",
+  "login.suggestions": "Đã có tài khoản?",
+  "logout.end": "Kết thúc phiên đăng nhập?",
+  "notification": "Thông báo",
+  "search": "Tìm kiếm",
+  "store": "cửa hàng",
+  "home": "Trang chủ",
+  "profile": "Thông tin tài khoản",
   "items": "sản phẩm",
   "ring": "RING!",
-  "shop": "Cửa hàng",
   "saved": "Đã lưu",
   "unknown": "Không xác định",
+  "loading": "Đang tải...",
+  "pending": "Đang gửi yêu cầu...",
+  "select.all": "Chọn tất cả",
+  "price": "Đơn giá",
+  "quantity": "Số lượng",
+  "total": "Tổng",
+  "remove": "Xoá",
+  "partner": "Đối tác",
   "coupon": {
     "shipping": {
       "label": "Giảm phí ship",
@@ -60,5 +101,11 @@
         "label": "Đã hoàn tiền"
       }
     }
+  },
+  "message": {
+    "success": "{{action}} thành công"
+  },
+  "error": {
+    "server.not.response": "Server không phản hồi"
   }
 }

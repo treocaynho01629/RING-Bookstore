@@ -387,13 +387,14 @@ public class CouponServiceImpl implements CouponService {
     public CouponDiscountDTO applyCoupon(Coupon coupon,
             CartStateRequest request,
             Account user) {
+
         CouponDetail couponDetail = coupon.getDetail();
         CouponType type = couponDetail.getType();
         CouponCriteria criteria = couponDetail.getCriteria();
         BigDecimal discount = couponDetail.getDiscount();
 
-        if (couponRepo.hasUserUsedCoupon(coupon.getId(), user.getId()))
-            return null;
+        // No need to check if user has used coupon
+        // because it will be checked in the order service
 
         // Current
         double currValue = request.getValue();

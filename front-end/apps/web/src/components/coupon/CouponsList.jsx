@@ -67,9 +67,7 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Filters
-  const [tab, setTab] = useState(
-    searchParams.get("tab") ? +searchParams.get("tab") : ""
-  );
+  const [tab, setTab] = useState(searchParams.get("tab") ? +searchParams.get("tab") : "");
   const [filters, setFilters] = useState({
     ...couponItems[tab]?.filter,
     code: searchParams.get("k") ?? "",
@@ -82,20 +80,15 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
   });
 
   // Fetch coupons
-  const { data, isLoading, isFetching, isSuccess, isError, error } =
-    useGetCouponsQuery({
-      byShop: filters.byShop,
-      code: filters.code,
-      types: filters.types ?? "",
-      codes: filters.saved
-        ? savedCoupons?.length > 0
-          ? savedCoupons
-          : ["temp"]
-        : [],
-      page: pagination?.number,
-      size: pagination?.size,
-      loadMore: pagination?.isMore,
-    });
+  const { data, isLoading, isFetching, isSuccess, isError, error } = useGetCouponsQuery({
+    byShop: filters.byShop,
+    code: filters.code,
+    types: filters.types ?? "",
+    codes: filters.saved ? (savedCoupons?.length > 0 ? savedCoupons : ["temp"]) : [],
+    page: pagination?.number,
+    size: pagination?.size,
+    loadMore: pagination?.isMore,
+  });
 
   useEffect(() => {
     setFilters((prev) => ({
@@ -118,6 +111,9 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
     }
   }, [data]);
 
+  /**
+   * Scroll to top of list
+   */
   const scrollToTop = useCallback(() => {
     if (mobileMode) {
       mobileScrollRef?.current?.scrollIntoView({
@@ -132,18 +128,24 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
     }
   }, []);
 
-  // Change tab
+  /**
+   * Change tab list
+   * @param {Event} e - Event
+   * @param {number} newValue - New value
+   */
   const handleChangeTab = (e, newValue) => {
     setTab(newValue);
     setFilters((prev) => ({ ...prev, keyword: "" }));
-    newValue === ""
-      ? searchParams.delete("tab")
-      : searchParams.set("tab", newValue);
+    newValue === "" ? searchParams.delete("tab") : searchParams.set("tab", newValue);
     searchParams.delete("k");
     setSearchParams(searchParams);
     handleResetPage();
   };
 
+  /**
+   * Change code input
+   * @param {Event} e - Event
+   */
   const handleChangeCode = (e) => {
     e.preventDefault();
     let newValue = inputRef.current.value;
@@ -153,39 +155,42 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
     handleResetPage();
   };
 
+  /**
+   * Reset page
+   */
   const handleResetPage = () => {
     setPagination((prev) => ({ ...prev, number: 0 }));
     scrollToTop();
   };
 
-  // Show more
+  /**
+   * Show more coupons on scroll
+   */
   const handleShowMore = () => {
-    if (
-      isFetching ||
-      typeof data?.page !== "number" ||
-      data?.page < pagination?.number
-    )
-      return;
+    if (isFetching || typeof data?.page !== "number" || data?.page < pagination?.number) return;
     const nextPage = data?.page + 1;
-    if (nextPage < data?.totalPages)
-      setPagination((prev) => ({ ...prev, number: nextPage }));
+    if (nextPage < data?.totalPages) setPagination((prev) => ({ ...prev, number: nextPage }));
   };
 
+  /**
+   * Handle window scroll
+   * @param {Event} e - Event
+   */
   const handleWindowScroll = (e) => {
-    const trigger =
-      document.body.scrollHeight - 300 < window.scrollY + window.innerHeight;
+    const trigger = document.body.scrollHeight - 300 < window.scrollY + window.innerHeight;
     if (trigger) handleShowMore();
   };
 
+  /**
+   * Handle scroll list
+   * @param {Event} e - Event
+   */
   const handleScroll = (e) => {
-    const trigger =
-      e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
+    const trigger = e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
     if (trigger) handleShowMore();
   };
 
-  const windowScrollListener = useCallback(debounce(handleWindowScroll, 500), [
-    data,
-  ]);
+  const windowScrollListener = useCallback(debounce(handleWindowScroll, 500), [data]);
   const scrollListener = useCallback(debounce(handleScroll, 500), [data]);
 
   useEffect(() => {
@@ -258,26 +263,14 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
         &nbsp;Mã giảm giá
       </StyledDialogTitle>
       <ToggleGroupContainer>
-        <CustomTabs
-          value={tab}
-          onChange={handleChangeTab}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
+        <CustomTabs value={tab} onChange={handleChangeTab} variant="scrollable" scrollButtons="auto">
           <CustomTab label="Tất cả" value="" />
           {couponItems.map((tab, index) => (
-            <CustomTab
-              key={`tab-${index}`}
-              label={t(tab?.label)}
-              value={index}
-            />
+            <CustomTab key={`tab-${index}`} label={t(tab?.label)} value={index} />
           ))}
         </CustomTabs>
       </ToggleGroupContainer>
-      <DialogContent
-        sx={{ py: 0, px: { xs: 0, sm: 2, md: 0 } }}
-        onScroll={tabletMode ? scrollListener : undefined}
-      >
+      <DialogContent sx={{ py: 0, px: { xs: 0, sm: 2, md: 0 } }} onScroll={tabletMode ? scrollListener : undefined}>
         <form ref={mobileScrollRef} onSubmit={handleChangeCode}>
           <TextField
             placeholder="Nhập mã giảm giá"
@@ -291,11 +284,7 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
             sx={{ py: { xs: 1, md: 2 } }}
             slotProps={{
               input: {
-                startAdornment: (
-                  <LocalActivityOutlined
-                    style={{ color: "gray", marginRight: "5px" }}
-                  />
-                ),
+                startAdornment: <LocalActivityOutlined style={{ color: "gray", marginRight: "5px" }} />,
               },
             }}
           />
@@ -309,10 +298,9 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
               <CircularProgress size={30} color="primary" />
             </LoadContainer>
           )}
-          {data?.ids?.length > 0 &&
-            data?.ids?.length == data?.totalElements && (
-              <Message color="warning">Không còn mã giảm giá nào!</Message>
-            )}
+          {data?.ids?.length > 0 && data?.ids?.length == data?.totalElements && (
+            <Message color="warning">Không còn mã giảm giá nào!</Message>
+          )}
         </MainContainer>
       </DialogContent>
     </>

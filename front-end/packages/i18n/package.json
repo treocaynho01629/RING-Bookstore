@@ -1,34 +1,9 @@
 {
   "name": "@ring/i18n",
   "version": "0.0.0",
-  "sideEffects": false,
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist/**",
-    "messages/**"
-  ],
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "./locales": {
-      "import": "./dist/src/common/locales.js",
-      "require": "./dist/src/common/locales.cjs"
-    },
-    "./messages/*": "./messages/*.json"
-  },
-  "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "lint": "eslint \"**/*.{ts,tsx,js,jsx}\"",
-    "update-dependencies": "npx npm-check-updates -u"
-  },
-  "devDependencies": {
-    "@ring/eslint-config": "*",
-    "tsup": "^8.5.0",
-    "typescript": "^5.9.3"
+  "license": "MIT",
+  "private": true,
+  "publishConfig": {
+    "access": "public"
   }
 }

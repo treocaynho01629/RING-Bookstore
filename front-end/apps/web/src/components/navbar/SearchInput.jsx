@@ -1,17 +1,11 @@
 import styled from "@emotion/styled";
-import {
-  useCallback,
-  useEffect,
-  useState,
-  lazy,
-  Suspense,
-  useRef,
-} from "react";
+import { useCallback, useEffect, useState, lazy, Suspense, useRef } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { useGetBooksSuggestionQuery } from "../../features/books/booksApiSlice";
 import { debounce } from "lodash-es";
 import { createFilterOptions } from "@mui/material/useAutocomplete";
 import { inputBaseClasses } from "@mui/material/InputBase";
+import { useTranslation } from "react-i18next";
 import Search from "@mui/icons-material/Search";
 import Close from "@mui/icons-material/Close";
 import Storefront from "@mui/icons-material/Storefront";
@@ -242,23 +236,18 @@ const AutocompleteComponent = ({
   id,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [suggestValue, setSuggestValue] = useState(searchParams.get("q") ?? "");
-  const {
-    keywords: historyOptions,
-    addKeyword,
-    removeKeyword,
-    clearKeywords,
-  } = useApp();
-  const { data, isLoading, isFetching, isSuccess, isError, error } =
-    useGetBooksSuggestionQuery(suggestValue, { skip: !suggestValue });
+  const { keywords: historyOptions, addKeyword, removeKeyword, clearKeywords } = useApp();
+  const { data, isLoading, isFetching, isSuccess } = useGetBooksSuggestionQuery(suggestValue, {
+    skip: !suggestValue,
+  });
 
-  //Ignore if there is no more suggestion (< 9 keywords)
+  // Ignore if there is no more suggestion (< 9 keywords)
   const debounceSetSuggest = useCallback(
     debounce((newInputValue) => {
       setSuggestValue((prev) =>
-        prev != "" &&
-        data?.length < 9 &&
-        newInputValue.toLowerCase().startsWith(prev.toLowerCase())
+        prev != "" && data?.length < 9 && newInputValue.toLowerCase().startsWith(prev.toLowerCase())
           ? prev
           : newInputValue
       );
@@ -276,7 +265,7 @@ const AutocompleteComponent = ({
     handleSearch(e, newValue);
   };
 
-  //Confirm search
+  // Confirm search
   const handleSearch = (e, newValue) => {
     e.preventDefault();
 
@@ -305,28 +294,24 @@ const AutocompleteComponent = ({
     removeKeyword(keyword);
   };
 
-  //Focus input (autoFocus option only focus once)
+  // Focus input (autoFocus option only focus once)
   const handleFocus = () => {
     let inputRef = getInputProps().ref;
     if (inputRef.current) inputRef.current.focus();
   };
 
-  //Options
+  // Options
   let options = [];
 
   if (isLoading || isFetching) {
-    options = (tabletMode ? historyOptions : historyOptions.slice(0, 11)).map(
-      (option) => {
-        return { group: "HISTORY", value: option };
-      }
-    );
-    options.push({ value: "Đang tải..." });
+    options = (tabletMode ? historyOptions : historyOptions.slice(0, 11)).map((option) => {
+      return { group: "HISTORY", value: option };
+    });
+    options.push({ value: t("loading") });
   } else if (isSuccess) {
-    options = (tabletMode ? historyOptions : historyOptions.slice(0, 6)).map(
-      (option) => {
-        return { group: "HISTORY", value: option };
-      }
-    );
+    options = (tabletMode ? historyOptions : historyOptions.slice(0, 6)).map((option) => {
+      return { group: "HISTORY", value: option };
+    });
 
     if (suggestValue) {
       options = options.concat(
@@ -348,65 +333,57 @@ const AutocompleteComponent = ({
     }
   }, [show]);
 
-  //Autocomplete
-  const {
-    getRootProps,
-    getInputProps,
-    getListboxProps,
-    getOptionProps,
-    getClearProps,
-    groupedOptions,
-  } = useAutocomplete({
-    id: "autocomplete-input",
-    options: options,
-    freeSolo: true,
-    openOnFocus: !tabletMode,
-    inputValue: inputValue,
-    onInputChange: handleChangeSuggest,
-    onChange: handleSelectSuggest,
-    getOptionLabel: (option) => {
-      // Value selected with enter, right from the input
-      if (typeof option === "string") {
-        return option;
-      }
-      // Add "xxx" option created dynamically
-      if (option.inputValue) {
-        return option.inputValue;
-      }
-      //Groupt
-      if (option.groups?.length) {
-        return "group";
-      }
-      // Regular option
-      return option.value;
-    },
-    filterOptions: (options, params) => {
-      let filtered = filter(options, params);
-      // Suggest search shop instead
-      if (inputValue) {
-        filtered = [
-          { group: isShop && !id ? "STORE" : "SHOP", value: inputValue },
-        ].concat(filtered);
-      }
-
-      return filtered;
-    },
-    ...(tabletMode && {
-      open: true,
-      groupBy: (option) => {
-        return option?.group;
+  // Autocomplete
+  const { getRootProps, getInputProps, getListboxProps, getOptionProps, getClearProps, groupedOptions } =
+    useAutocomplete({
+      id: "autocomplete-input",
+      options: options,
+      freeSolo: true,
+      openOnFocus: !tabletMode,
+      inputValue: inputValue,
+      onInputChange: handleChangeSuggest,
+      onChange: handleSelectSuggest,
+      getOptionLabel: (option) => {
+        // Value selected with enter, right from the input
+        if (typeof option === "string") {
+          return option;
+        }
+        // Add "xxx" option created dynamically
+        if (option.inputValue) {
+          return option.inputValue;
+        }
+        // Groupt
+        if (option.groups?.length) {
+          return "group";
+        }
+        // Regular option
+        return option.value;
       },
-    }),
-  });
+      filterOptions: (options, params) => {
+        let filtered = filter(options, params);
+        // Suggest search shop instead
+        if (inputValue) {
+          filtered = [{ group: isShop && !id ? "STORE" : "SHOP", value: inputValue }].concat(filtered);
+        }
+
+        return filtered;
+      },
+      ...(tabletMode && {
+        open: true,
+        groupBy: (option) => {
+          return option?.group;
+        },
+      }),
+    });
 
   let endAdornment = (
     <AdornmentContainer>
       {inputValue !== "" && (
-        <StyledIconButton {...getClearProps()} aria-label="clear search value">
+        <StyledIconButton {...getClearProps()} aria-label="Clear search value">
           <Close />
         </StyledIconButton>
       )}
-      <SearchButton type="submit" size="small" aria-label="submit search">
+      <SearchButton type="submit" size="small" aria-label="Submit search">
         <Search />
       </SearchButton>
     </AdornmentContainer>
@@ -418,15 +395,12 @@ const AutocompleteComponent = ({
         <>
           <SearchInputContainer>
             {mobileMode && (
-              <StyledIconButton
-                onClick={handleCloseDialog}
-                aria-label="close search dialog"
-              >
+              <StyledIconButton onClick={handleCloseDialog} aria-label="Close search dialog">
                 <KeyboardArrowLeft />
               </StyledIconButton>
             )}
             <StyledSearchInput
-              placeholder={`Tìm kiếm${isShop ? (id ? " trong cửa hàng" : " cửa hàng") : ""}...`}
+              placeholder={`${t("search")}${isShop ? (id ? " " + t("search.store", { ns: "client" }) : " " + t("store")) : ""}...`}
               size="small"
               autoFocus
               slotProps={{
@@ -447,16 +421,13 @@ const AutocompleteComponent = ({
                     <GroupItem key={`group-${group.key}-${group.index}`}>
                       {group?.group == "HISTORY" ? (
                         <GroupHeader>
-                          Lịch sử tìm kiếm
-                          <StyledIconButton
-                            onClick={clearKeywords}
-                            aria-label="remove all from history"
-                          >
+                          {t("search.history", { ns: "client" })}
+                          <StyledIconButton onClick={clearKeywords} aria-label={t("search.clear", { ns: "client" })}>
                             <Delete />
                           </StyledIconButton>
                         </GroupHeader>
                       ) : group?.group == "SUGGEST" ? (
-                        <GroupHeader>Gợi ý</GroupHeader>
+                        <GroupHeader>{t("search.suggest", { ns: "client" })}</GroupHeader>
                       ) : null}
                       <GroupListBox>
                         {group.options.map((option, index) => {
@@ -467,26 +438,21 @@ const AutocompleteComponent = ({
                           return (
                             <ListItem
                               key={`option-${key}-${index}`}
-                              className={
-                                option?.group == "SHOP" ||
-                                option?.group == "STORE"
-                                  ? "alt"
-                                  : ""
-                              }
+                              className={option?.group == "SHOP" || option?.group == "STORE" ? "alt" : ""}
                               {...optionProps}
                             >
                               {option?.group == "SHOP" ? (
                                 <ListLink to={`/shop?q=${option.value}`}>
                                   <ItemTitle>
                                     <Storefront color="success" />
-                                    Tìm cửa hàng: "{option.value}"
+                                    {t("search.for", { ns: "client", value: t("store") })} "{option.value}"
                                   </ItemTitle>
                                 </ListLink>
                               ) : option?.group == "STORE" ? (
                                 <ListLink to={`/store?q=${option.value}`}>
                                   <ItemTitle>
                                     <CategoryOutlined color="success" />
-                                    Tìm sản phẩm: "{option.value}"
+                                    {t("search.for", { ns: "client", value: t("items") })} "{option.value}"
                                   </ItemTitle>
                                 </ListLink>
                               ) : option?.group == "HISTORY" ? (
@@ -496,10 +462,8 @@ const AutocompleteComponent = ({
                                     {option.value}
                                   </ItemTitle>
                                   <StyledIconButton
-                                    onClick={(e) =>
-                                      handleRemoveKeyword(e, option.value)
-                                    }
-                                    aria-label={`remove ${option.value} from history`}
+                                    onClick={(e) => handleRemoveKeyword(e, option.value)}
+                                    aria-label={t("search.remove", { ns: "client", value: option.value })}
                                   >
                                     <Close />
                                   </StyledIconButton>
@@ -529,7 +493,7 @@ const AutocompleteComponent = ({
         <>
           <SearchInputContainer>
             <StyledSearchInput
-              placeholder={`Tìm kiếm${isShop ? (id ? " trong cửa hàng" : " cửa hàng") : ""}...`}
+              placeholder={`${t("search")}${isShop ? (id ? " " + t("search.store", { ns: "client" }) : " " + t("store")) : ""}...`}
               size="small"
               slotProps={{
                 input: {
@@ -552,31 +516,21 @@ const AutocompleteComponent = ({
                   return (
                     <ListItem
                       key={`option-${key}-${index}`}
-                      className={
-                        option?.group == "SHOP" || option?.group == "STORE"
-                          ? "alt"
-                          : ""
-                      }
+                      className={option?.group == "SHOP" || option?.group == "STORE" ? "alt" : ""}
                       {...optionProps}
                     >
                       {option?.group == "SHOP" ? (
-                        <ListLink
-                          className="alt"
-                          to={`/shop?q=${option.value}`}
-                        >
+                        <ListLink className="alt" to={`/shop?q=${option.value}`}>
                           <ItemTitle>
                             <Storefront color="primary" />
-                            Tìm cửa hàng: "{option.value}"
+                            {t("search.for", { ns: "client", value: t("store") })} "{option.value}"
                           </ItemTitle>
                         </ListLink>
                       ) : option?.group == "STORE" ? (
-                        <ListLink
-                          className="alt"
-                          to={`/store?q=${option.value}`}
-                        >
+                        <ListLink className="alt" to={`/store?q=${option.value}`}>
                           <ItemTitle>
                             <CategoryOutlined color="success" />
-                            Tìm sản phẩm: "{option.value}"
+                            {t("search.for", { ns: "client", value: t("items") })} "{option.value}"
                           </ItemTitle>
                         </ListLink>
                       ) : option?.group == "HISTORY" ? (
@@ -586,10 +540,8 @@ const AutocompleteComponent = ({
                             {option.value}
                           </ItemTitle>
                           <StyledIconButton
-                            onClick={(e) =>
-                              handleRemoveKeyword(e, option.value)
-                            }
-                            aria-label={`remove ${option.value} from history`}
+                            onClick={(e) => handleRemoveKeyword(e, option.value)}
+                            aria-label={t("search.remove", { ns: "client", value: option.value })}
                           >
                             <Close />
                           </StyledIconButton>
@@ -618,6 +570,7 @@ const AutocompleteComponent = ({
 
 const SearchInput = ({ mobileMode, tabletMode, show, isFocus, isShop }) => {
   const displayRef = useRef();
+  const { t } = useTranslation();
   const { id } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const [inputValue, setInputValue] = useState(searchParams.get("q") ?? "");
@@ -661,7 +614,7 @@ const SearchInput = ({ mobileMode, tabletMode, show, isFocus, isShop }) => {
       {tabletMode ? (
         <AutocompleteContainer className={show ? "" : "hidden"}>
           <StyledSearchInput
-            placeholder={`Tìm kiếm${isShop ? (id ? " trong cửa hàng" : " cửa hàng") : ""}...`}
+            placeholder={`${t("search")}${isShop ? (id ? " " + t("search.store", { ns: "client" }) : " " + t("store")) : ""}...`}
             size="small"
             value={displayRef.current}
             onClick={handleOpenDialog}
@@ -687,16 +640,12 @@ const SearchInput = ({ mobileMode, tabletMode, show, isFocus, isShop }) => {
                 },
               }}
             >
-              <DialogContent sx={{ height: 500, p: 0 }}>
-                {autocomplete}
-              </DialogContent>
+              <DialogContent sx={{ height: 500, padding: "0 !important" }}>{autocomplete}</DialogContent>
             </Dialog>
           </Suspense>
         </AutocompleteContainer>
       ) : (
-        <AutocompleteContainer className={show ? "" : "hidden"}>
-          {autocomplete}
-        </AutocompleteContainer>
+        <AutocompleteContainer className={show ? "" : "hidden"}>{autocomplete}</AutocompleteContainer>
       )}
     </>
   );

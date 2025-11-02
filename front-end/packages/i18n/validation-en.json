@@ -1,0 +1,14 @@
+{
+  "validation": {
+    "constraints": {
+      "not.blank": "{{field}} cannot be blank!",
+      "pattern": "{{field}} format is invalid!",
+      "size.range": "{{field}} must be between {{min}} and {{max}} characters!",
+      "size.max": "{{field}} cannot exceed {{max}} characters!",
+      "size.min": "{{field}} must be greater than {{min}} characters!",
+      "date.past": "{{field}} must be before today!",
+      "range": "{{field}} must be between {{min}} and {{max}}!",
+      "password.match": "Passwords do not match!"
+    }
+  }
+}

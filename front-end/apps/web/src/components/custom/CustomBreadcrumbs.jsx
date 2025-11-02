@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { Breadcrumbs } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
 
 const BreadcrumbsContainer = styled.div`
@@ -42,12 +43,13 @@ const StyledMainCrumb = styled(Link)`
 `;
 
 export default function CustomBreadcrumbs(props) {
+  const { t } = useTranslation();
   const { children, className, ...leftProps } = props;
 
   return (
     <BreadcrumbsContainer className={className ?? ""}>
       <Breadcrumbs {...leftProps}>
-        <StyledMainCrumb to={"/"}>Trang chủ</StyledMainCrumb>
+        <StyledMainCrumb to={"/"}>{t("home")}</StyledMainCrumb>
         {children}
       </Breadcrumbs>
     </BreadcrumbsContainer>

@@ -1,7 +1,7 @@
 import { withAuth } from "next-auth/middleware";
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
-import { locales, defaultLocale } from "@ring/i18n/locales";
+import { locales, defaultLocale } from "@ring/shared/enums/locales";
 import createMiddleware from "next-intl/middleware";
 
 const intlMiddleware = createMiddleware({

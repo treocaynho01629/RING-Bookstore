@@ -110,6 +110,7 @@ public class AppConstants {
     public static final String PASSWORD_NOT_MATCH = "Password not match";
     public static final String ADDRESS_SIZE_LIMIT = "Address size limit reached";
     public static final String COUPON_EXPIRED = "Coupon expired";
+    public static final String OUT_OF_STOCK = "Product out of stock";
     public static final String PAYMENT_FAILED = "Payment failed";
     public static final String PAYMENT_CANCEL_FAILED = "Payment cancel failed";
     public static final String REFRESH_TOKEN_FAILED = "Refresh token failed";

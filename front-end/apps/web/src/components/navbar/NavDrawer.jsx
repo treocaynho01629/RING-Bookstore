@@ -54,7 +54,7 @@ const NavDrawer = ({
   products,
   signOut,
   mode,
-  toggleMode,
+  setMode,
 }) => {
   return (
     <SwipeableDrawer
@@ -78,11 +78,7 @@ const NavDrawer = ({
         >
           <Link to={"/"} onClick={handleClose}>
             <DrawerLogo>
-              <LogoImage
-                src="/full-logo.svg"
-                className="logo"
-                alt="RING! logo"
-              />
+              <LogoImage src="/full-logo.svg" className="logo" alt="RING! logo" />
             </DrawerLogo>
           </Link>
           <IconButton onClick={handleClose}>
@@ -118,9 +114,7 @@ const NavDrawer = ({
                 <ListItemIcon>
                   <ShoppingCartOutlined />
                 </ListItemIcon>
-                <ListItemText
-                  primary={`Giỏ hàng (${products?.length} sản phẩm)`}
-                />
+                <ListItemText primary={`Giỏ hàng (${products?.length} sản phẩm)`} />
               </ListItemButton>
             </ListItem>
           </Link>
@@ -133,10 +127,7 @@ const NavDrawer = ({
                 <Link to={"/profile/detail"}>
                   <ListItemButton onClick={handleClose}>
                     <ListItemIcon>
-                      <Avatar
-                        sx={{ width: 32, height: 32, ml: -0.5 }}
-                        src={image ?? null}
-                      />
+                      <Avatar sx={{ width: 32, height: 32, ml: -0.5 }} src={image ?? null} />
                     </ListItemIcon>
                     <ListItemText primary={username} />
                   </ListItemButton>
@@ -158,7 +149,7 @@ const NavDrawer = ({
             <List>
               {mode && (
                 <ListItem disablePadding>
-                  <ListItemButton onClick={toggleMode}>
+                  <ListItemButton>
                     <ListItemIcon>
                       {mode === "dark" ? (
                         <NightlightOutlined fontSize="small" />
@@ -168,7 +159,7 @@ const NavDrawer = ({
                         <ContrastOutlined fontSize="small" />
                       ) : (
                         ""
-                      )}{" "}
+                      )}
                     </ListItemIcon>
                     <ListItemText
                       primary={
@@ -196,11 +187,7 @@ const NavDrawer = ({
           </Box>
         ) : (
           <List>
-            <Link
-              to={"/auth/login"}
-              state={{ from: location }}
-              title="Đăng nhập"
-            >
+            <Link to={"/auth/login"} state={{ from: location }} title="Đăng nhập">
               <ListItem disablePadding onClick={handleClose}>
                 <ListItemButton>
                   <ListItemIcon>

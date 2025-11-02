@@ -91,9 +91,9 @@ export const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: ({ theme }) => ({
-          display: "flex",
-          alignItems: "center",
-          textTransform: "none",
+          "display": "flex",
+          "alignItems": "center",
+          "textTransform": "none",
 
           "&.MuiButton-contained": {
             "&:hover": {
@@ -104,18 +104,6 @@ export const theme = createTheme({
               backgroundColor: theme.vars.palette.grey[500],
               color: theme.vars.palette.text.disabled,
             },
-          },
-        }),
-      },
-    },
-    MuiDialogTitle: {
-      styleOverrides: {
-        root: ({ theme }) => ({
-          [theme.breakpoints.down("sm")]: {
-            display: "flex",
-            alignItems: "center",
-            padding: 10,
-            height: theme.mixins.toolbar.minHeight,
           },
         }),
       },
@@ -176,11 +164,26 @@ export const theme = createTheme({
         }),
       },
     },
-    MuiDialogContent: {
+    MuiDialog: {
       styleOverrides: {
-        root: ({ theme }) => ({
-          [theme.breakpoints.down("sm")]: {
-            padding: theme.spacing(1),
+        paperFullScreen: ({ theme }) => ({
+          ["& .MuiDialogTitle-root"]: {
+            [theme.breakpoints.down("sm")]: {
+              display: "flex",
+              alignItems: "center",
+              padding: 10,
+              height: theme.mixins.toolbar.minHeight,
+            },
+          },
+          ["& .MuiDialogContent-root"]: {
+            [theme.breakpoints.down("sm")]: {
+              padding: 10,
+            },
+          },
+          ["& .MuiDialogActions-root"]: {
+            [theme.breakpoints.down("sm")]: {
+              padding: 10,
+            },
           },
         }),
       },
@@ -188,8 +191,9 @@ export const theme = createTheme({
     MuiDialogActions: {
       styleOverrides: {
         root: ({ theme }) => ({
-          [theme.breakpoints.up("sm")]: {
-            padding: `${theme.spacing(2)} ${theme.spacing(3)}`,
+          padding: `${theme.spacing(2)} ${theme.spacing(3)}`,
+          [theme.breakpoints.down("sm")]: {
+            padding: theme.spacing(1),
           },
         }),
       },

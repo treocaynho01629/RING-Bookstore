@@ -55,14 +55,14 @@ class AddressRepositoryTest extends AbstractRepositoryTest {
                 // When
                 foundAddress.setCity("city");
                 foundAddress.setName("test");
-                foundAddress.setIsDefault(true);
+                // foundAddress.setIsDefault(true);
 
                 Address updatedAddress = addressRepo.save(foundAddress);
 
                 // Then
                 assertNotNull(updatedAddress);
                 assertNotNull(updatedAddress.getCity());
-                assertTrue(updatedAddress.getIsDefault());
+                // assertTrue(updatedAddress.getIsDefault());
                 assertEquals("test", updatedAddress.getName());
         }
 

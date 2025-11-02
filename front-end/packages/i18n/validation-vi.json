@@ -1,0 +1,14 @@
+{
+  "validation": {
+    "constraints": {
+      "not.blank": "{{field}} không được để trống!",
+      "pattern": "Sai định dạng {{field}}!",
+      "size.range": "{{field}} phải từ {{min}} đến {{max}} kí tự!",
+      "size.max": "{{field}} không được vượt quá {{max}} kí tự!",
+      "size.min": "{{field}} phải lớn hơn {{min}} kí tự!",
+      "date.past": "{{field}} phải trước ngày hôm nay!",
+      "range": "{{field}} phải từ {{min}} đến {{max}}!",
+      "password.match": "Mật khẩu không trùng khớp!"
+    }
+  }
+}

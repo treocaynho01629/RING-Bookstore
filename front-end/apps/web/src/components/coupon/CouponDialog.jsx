@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  useGetCouponQuery,
-  useGetCouponsQuery,
-} from "../../features/coupons/couponsApiSlice";
+import { useGetCouponQuery, useGetCouponsQuery } from "../../features/coupons/couponsApiSlice";
 import { getCouponType, getCouponCriteria } from "@ring/shared/enums/coupon";
 import { CouponType } from "@ring/shared/models/couponType";
 import { Instruction, Message } from "@ring/ui/Components";
@@ -127,20 +124,19 @@ const CouponDialog = ({
     },
     { skip: (!shopId && !selectMode) || isSaved }
   );
-  const { data, currentData, isLoading, isFetching, isSuccess, isError } =
-    useGetCouponsQuery(
-      {
-        shopId,
-        types: [CouponType.PRODUCT],
-        byShop: shopId != null,
-        cValue: checkState?.value,
-        cQuantity: checkState?.quantity,
-        size: pagination.size,
-        page: pagination.number,
-        loadMore: pagination.isMore,
-      },
-      { skip: (!shopId && !selectMode) || isSaved }
-    );
+  const { data, currentData, isLoading, isFetching, isSuccess, isError } = useGetCouponsQuery(
+    {
+      shopId,
+      types: [CouponType.PRODUCT],
+      byShop: shopId != null,
+      cValue: checkState?.value,
+      cQuantity: checkState?.quantity,
+      size: pagination.size,
+      page: pagination.number,
+      loadMore: pagination.isMore,
+    },
+    { skip: (!shopId && !selectMode) || isSaved }
+  );
   const {
     data: saved,
     currentData: currentSaved,
@@ -232,39 +228,21 @@ const CouponDialog = ({
   };
 
   const handleShowMoreShipping = () => {
-    if (
-      fetchShipping ||
-      typeof shipping?.page !== "number" ||
-      shipping?.page < shipPagination?.number
-    )
-      return;
+    if (fetchShipping || typeof shipping?.page !== "number" || shipping?.page < shipPagination?.number) return;
     const nextPage = shipping?.page + 1;
-    if (nextPage < shipping?.totalPages)
-      setShipPagination((prev) => ({ ...prev, number: nextPage }));
+    if (nextPage < shipping?.totalPages) setShipPagination((prev) => ({ ...prev, number: nextPage }));
   };
 
   const handleShowMore = () => {
-    if (
-      isFetching ||
-      typeof data?.page !== "number" ||
-      data?.page < pagination?.number
-    )
-      return;
+    if (isFetching || typeof data?.page !== "number" || data?.page < pagination?.number) return;
     const nextPage = data?.page + 1;
-    if (nextPage < data?.totalPages)
-      setPagination((prev) => ({ ...prev, number: nextPage }));
+    if (nextPage < data?.totalPages) setPagination((prev) => ({ ...prev, number: nextPage }));
   };
 
   const handleShowMoreSaved = () => {
-    if (
-      fetchSaved ||
-      typeof saved?.page !== "number" ||
-      saved?.page < savedPagination?.number
-    )
-      return;
+    if (fetchSaved || typeof saved?.page !== "number" || saved?.page < savedPagination?.number) return;
     const nextPage = saved?.page + 1;
-    if (nextPage < saved?.totalPages)
-      setSavedPagination((prev) => ({ ...prev, number: nextPage }));
+    if (nextPage < saved?.totalPages) setSavedPagination((prev) => ({ ...prev, number: nextPage }));
   };
 
   const toggleSaved = () => {
@@ -278,20 +256,14 @@ const CouponDialog = ({
     setSavedPagination(DEFAULT_PAGINATON);
   };
 
-  const checkDisabled = (coupon) =>
-    selectMode && (!loggedIn || !coupon?.isUsable || coupon?.shopId != shopId);
+  const checkDisabled = (coupon) => selectMode && (!loggedIn || !coupon?.isUsable || coupon?.shopId != shopId);
 
   // Display contents
   let coupons;
   let shippingCoupons;
   let savedCoupons;
   let loadingComponent = (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      height={{ xs: 85, sm: 155 }}
-    >
+    <Box display="flex" justifyContent="center" alignItems="center" height={{ xs: 85, sm: 155 }}>
       <CircularProgress color="primary" />
     </Box>
   );
@@ -302,21 +274,22 @@ const CouponDialog = ({
     let content = [];
 
     if (currCoupon && currCoupon?.type == CouponType.SHIPPING) {
-      const meta = getCouponType(currCoupon?.type);
-      const criteria = getCouponCriteria(currCoupon?.criteria);
+      const couponInfo = {
+        ...currCoupon,
+        isUsed: selectMode && currCoupon?.isUsed,
+        isSelected: tempCoupon?.id == currCoupon?.id,
+        isSaved: savedCodes?.indexOf(currCoupon?.code) != -1,
+        isDisabled: checkDisabled(currCoupon),
+        meta: getCouponType(currCoupon?.type),
+        criteria: getCouponCriteria(currCoupon?.criteria),
+      };
 
       content.push(
         <CouponItem
           key={`coupon-${currCoupon?.id}`}
           {...{
-            coupon: currCoupon,
-            meta,
-            criteria,
+            coupon: couponInfo,
             selectMode,
-            isDisabled: checkDisabled(currCoupon),
-            isSelected: tempCoupon?.id == currCoupon?.id,
-            isUsed: selectMode && currCoupon?.isUsed,
-            isSaved: savedCodes?.indexOf(currCoupon?.code) != -1,
             onClickApply: setTempCoupon,
           }}
         />
@@ -327,25 +300,22 @@ const CouponDialog = ({
       ? ids?.map((id, index) => {
           if (id != currCoupon?.id) {
             const coupon = entities[id];
-            const meta = getCouponType(coupon?.type);
-            const criteria = getCouponCriteria(coupon?.criteria);
-            const isDisabled = checkDisabled(coupon);
-            const isUsed = selectMode && coupon?.isUsed;
-            const isSelected = tempCoupon?.id == id;
-            const isSaved = savedCodes?.indexOf(coupon?.code) != -1;
+            const couponInfo = {
+              ...coupon,
+              isUsed: selectMode && coupon?.isUsed,
+              isSelected: tempCoupon?.id == id,
+              isSaved: savedCodes?.indexOf(coupon?.code) != -1,
+              isDisabled: checkDisabled(coupon),
+              meta: getCouponType(coupon?.type),
+              criteria: getCouponCriteria(coupon?.criteria),
+            };
 
             return (
               <CouponItem
                 key={`coupon-${id}-${index}`}
                 {...{
-                  coupon,
-                  meta,
-                  criteria,
+                  coupon: couponInfo,
                   selectMode,
-                  isDisabled,
-                  isSelected,
-                  isUsed,
-                  isSaved,
                   onClickApply: setTempCoupon,
                   scrollPosition,
                 }}
@@ -372,21 +342,22 @@ const CouponDialog = ({
     let content = [];
 
     if (currCoupon && currCoupon?.type != CouponType.SHIPPING) {
-      const meta = getCouponType(currCoupon?.type);
-      const criteria = getCouponCriteria(currCoupon?.criteria);
+      const couponInfo = {
+        ...currCoupon,
+        isUsed: selectMode && currCoupon?.isUsed,
+        isSelected: tempCoupon?.id == currCoupon?.id,
+        isSaved: savedCodes?.indexOf(currCoupon?.code) != -1,
+        isDisabled: checkDisabled(currCoupon),
+        meta: getCouponType(currCoupon?.type),
+        criteria: getCouponCriteria(currCoupon?.criteria),
+      };
 
       content.push(
         <CouponItem
           key={`coupon-${currCoupon?.id}`}
           {...{
-            coupon: currCoupon,
-            meta,
-            criteria,
+            coupon: couponInfo,
             selectMode,
-            isDisabled: checkDisabled(currCoupon),
-            isSelected: tempCoupon?.id == currCoupon?.id,
-            isUsed: selectMode && currCoupon?.isUsed,
-            isSaved: savedCodes?.indexOf(currCoupon?.code) != -1,
             onClickApply: setTempCoupon,
           }}
         />
@@ -397,25 +368,22 @@ const CouponDialog = ({
       ? ids?.map((id, index) => {
           if (id != currCoupon?.id) {
             const coupon = entities[id];
-            const meta = getCouponType(coupon?.type);
-            const criteria = getCouponCriteria(coupon?.criteria);
-            const isDisabled = checkDisabled(coupon);
-            const isUsed = selectMode && coupon?.isUsed;
-            const isSelected = tempCoupon?.id == id;
-            const isSaved = savedCodes?.indexOf(coupon?.code) != -1;
+            const couponInfo = {
+              ...coupon,
+              isUsed: selectMode && coupon?.isUsed,
+              isSelected: tempCoupon?.id == id,
+              isSaved: savedCodes?.indexOf(coupon?.code) != -1,
+              isDisabled: checkDisabled(coupon),
+              meta: getCouponType(coupon?.type),
+              criteria: getCouponCriteria(coupon?.criteria),
+            };
 
             return (
               <CouponItem
                 key={`coupon-${id}-${index}`}
                 {...{
-                  coupon,
-                  meta,
-                  criteria,
+                  coupon: couponInfo,
                   selectMode,
-                  isDisabled,
-                  isSelected,
-                  isUsed,
-                  isSaved,
                   onClickApply: setTempCoupon,
                 }}
               />
@@ -442,25 +410,22 @@ const CouponDialog = ({
       ? ids?.map((id, index) => {
           if (id != currCoupon?.id) {
             const coupon = entities[id];
-            const meta = getCouponType(coupon?.type);
-            const criteria = getCouponCriteria(coupon?.criteria);
-            const isDisabled = checkDisabled(coupon);
-            const isUsed = selectMode && tempCoupon?.isUsed;
-            const isSelected = tempCoupon?.id == id;
-            const isSaved = savedCodes?.indexOf(coupon?.code) != -1;
+            const couponInfo = {
+              ...coupon,
+              isUsed: selectMode && coupon?.isUsed,
+              isSelected: tempCoupon?.id == id,
+              isSaved: savedCodes?.indexOf(coupon?.code) != -1,
+              isDisabled: checkDisabled(coupon),
+              meta: getCouponType(coupon?.type),
+              criteria: getCouponCriteria(coupon?.criteria),
+            };
 
             return (
               <CouponItem
                 key={`coupon-${id}-${index}`}
                 {...{
-                  coupon,
-                  meta,
-                  criteria,
+                  coupon: couponInfo,
                   selectMode,
-                  isDisabled,
-                  isSelected,
-                  isUsed,
-                  isSaved,
                   onClickApply: setTempCoupon,
                 }}
               />
@@ -520,11 +485,7 @@ const CouponDialog = ({
               disabled={!numSelected || !loggedIn}
               slotProps={{
                 input: {
-                  startAdornment: (
-                    <LocalActivityOutlined
-                      style={{ color: "gray", marginRight: "5px" }}
-                    />
-                  ),
+                  startAdornment: <LocalActivityOutlined style={{ color: "gray", marginRight: "5px" }} />,
                 },
               }}
             />
@@ -550,13 +511,14 @@ const CouponDialog = ({
             <CouponItem
               key={`top-coupon-${code?.id}`}
               {...{
-                coupon: code,
-                meta: getCouponType(code?.type),
-                criteria: getCouponCriteria(code?.criteria),
+                coupon: {
+                  isUsed: selectMode && code?.isUsed,
+                  isSelected: tempCoupon?.id == code?.id,
+                  isDisabled: checkDisabled(code),
+                  meta: getCouponType(code?.type),
+                  criteria: getCouponCriteria(code?.criteria),
+                },
                 selectMode,
-                isDisabled: checkDisabled(code),
-                isUsed: selectMode && code?.isUsed,
-                isSelected: tempCoupon?.id == code?.id,
                 onClickApply: setTempCoupon,
               }}
             />
@@ -568,25 +530,23 @@ const CouponDialog = ({
           {isSaved ? (
             <>
               {savedCoupons}
-              {!loadSaved &&
-                savedPagination.totalPages > savedPagination.number + 1 && (
-                  <Showmore onClick={handleShowMoreSaved}>
-                    Xem thêm
-                    <ExpandMore />
-                  </Showmore>
-                )}
+              {!loadSaved && savedPagination.totalPages > savedPagination.number + 1 && (
+                <Showmore onClick={handleShowMoreSaved}>
+                  Xem thêm
+                  <ExpandMore />
+                </Showmore>
+              )}
               {fetchSaved && loadingComponent}
             </>
           ) : (
             <>
               {shippingCoupons}
-              {!loadShipping &&
-                shipPagination.totalPages > shipPagination.number + 1 && (
-                  <Showmore onClick={handleShowMoreShipping}>
-                    Xem thêm
-                    <ExpandMore />
-                  </Showmore>
-                )}
+              {!loadShipping && shipPagination.totalPages > shipPagination.number + 1 && (
+                <Showmore onClick={handleShowMoreShipping}>
+                  Xem thêm
+                  <ExpandMore />
+                </Showmore>
+              )}
               {coupons}
               {!isLoading && pagination.totalPages > pagination.number + 1 && (
                 <Showmore onClick={handleShowMore}>
@@ -598,16 +558,8 @@ const CouponDialog = ({
             </>
           )}
           {((isSaved && !savedCoupons && !fetchSaved) ||
-            (!isSaved &&
-              !coupons &&
-              !shippingCoupons &&
-              !isFetching &&
-              !fetchShipping)) && (
-            <Message>
-              {isError || errorShipping || errorSaved
-                ? "Đã xảy ra lỗi!"
-                : "Hiện không có khuyến mãi"}
-            </Message>
+            (!isSaved && !coupons && !shippingCoupons && !isFetching && !fetchShipping)) && (
+            <Message>{isError || errorShipping || errorSaved ? "Đã xảy ra lỗi!" : "Hiện không có khuyến mãi"}</Message>
           )}
         </CouponsContainer>
       </DialogContent>

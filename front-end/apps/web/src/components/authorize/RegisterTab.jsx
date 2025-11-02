@@ -2,29 +2,21 @@ import { useState, useRef, useEffect, Suspense, lazy } from "react";
 import { Grow, Paper, Stack, TextField } from "@mui/material";
 import { useRegisterMutation } from "../../features/auth/authApiSlice";
 import { USER_REGEX, EMAIL_REGEX } from "@ring/shared/utils/regex";
-import {
-  AuthHighlight,
-  AuthText,
-  AuthTitle,
-  ConfirmButton,
-  TermText,
-} from "@ring/ui/AuthComponents";
+import { AuthHighlight, AuthText, AuthTitle, ConfirmButton, TermText } from "@ring/ui/AuthComponents";
 import { Link } from "react-router";
 import { Instruction } from "@ring/ui/Components";
+import { useTranslation } from "react-i18next";
+import { capitalize } from "lodash-es";
 import PasswordInput from "@ring/ui/PasswordInput";
 import PasswordEvaluate from "../custom/PasswordEvaluate";
 
 const ReCaptcha = lazy(() => import("@ring/auth/ReCaptcha"));
 
-const RegisterTab = ({
-  pending,
-  setPending,
-  reCaptchaLoaded,
-  generateReCaptchaToken,
-}) => {
+const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken }) => {
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
   const userRef = useRef();
   const errRef = useRef();
+  const { t } = useTranslation();
 
   // User validation
   const [username, setUsername] = useState(""); // user input
@@ -60,19 +52,19 @@ const RegisterTab = ({
     userRef?.current?.focus();
   }, []);
 
-  // Username
+  // Username validation
   useEffect(() => {
     const result = USER_REGEX.test(username);
     setValidName(result);
   }, [username]);
 
-  //Password
+  //Password validation
   useEffect(() => {
     const match = password === matchPass;
     setValidMatch(match);
   }, [matchPass]);
 
-  // Email
+  // Email validation
   useEffect(() => {
     const result = EMAIL_REGEX.test(email);
     setValidEmail(result);
@@ -100,9 +92,7 @@ const RegisterTab = ({
 
     const { enqueueSnackbar } = await import("notistack");
 
-    const recaptchaToken = challenge
-      ? token
-      : await generateReCaptchaToken("register");
+    const recaptchaToken = challenge ? token : await generateReCaptchaToken("register");
     register({
       token: recaptchaToken,
       source: challenge ? "v2" : "v3",
@@ -124,51 +114,37 @@ const RegisterTab = ({
         setChallenge(false);
 
         // Queue snack
-        enqueueSnackbar("Đăng ký thành công!", { variant: "success" });
+        enqueueSnackbar(t("message.success", { action: t("signup") }), { variant: "success" });
         setPending(false);
       })
       .catch((err) => {
         console.error(err);
         setErr(err);
         if (!err?.status) {
-          setErrMsg("Server không phản hồi");
-        } else if (err?.status === 409) {
-          setErrMsg(err?.data?.message);
-        } else if (err?.status === 400) {
-          setErrMsg(err?.data?.message ?? "Sai định dạng thông tin!");
-        } else if (err?.status === 403) {
-          setErrMsg("Lỗi xác thực!");
-        } else if (err?.status === 412) {
-          setChallenge(true);
-          setErrMsg("Yêu cầu của bạn cần xác thực lại!");
+          setErrMsg(t("error.server.not.response"));
         } else {
-          setErrMsg("Đăng ký thất bại!");
+          setErrMsg(err?.data?.message);
+          if (err?.status === 409) setChallenge(true);
         }
         errRef.current.focus();
         setPending(false);
       });
   };
 
-  const validRegister = [validName, validPass, validMatch, validEmail].every(
-    Boolean
-  );
+  const validRegister = [validName, validPass, validMatch, validEmail].every(Boolean);
 
   return (
     <form style={{ maxHeight: 560 }} onSubmit={handleSubmit}>
-      <AuthTitle>Đăng ký tài khoản mới</AuthTitle>
+      <AuthTitle>{t("signup.title")}</AuthTitle>
       <Instruction ref={errRef} aria-live="assertive">
         {errMsg != "" ? errMsg : " "}&nbsp;
       </Instruction>
-      <Stack
-        spacing={{ xs: 0.75, md: 1.5 }}
-        mt={{ xs: 0.75, md: 1.5 }}
-        direction="column"
-      >
+      <Stack spacing={{ xs: 0.75, md: 1.5 }} mt={{ xs: 0.75, md: 1.5 }} direction="column">
         <TextField
           label={
             username && !validName
-              ? "4 đến 24 kí tự!"
-              : (err?.data?.errors?.username ?? "Tên đăng nhập")
+              ? t("validation.constraints.size.range", { ns: "validation", field: t("username"), min: 4, max: 24 })
+              : (err?.data?.errors?.username ?? t("username"))
           }
           type="text"
           id="new-username"
@@ -180,15 +156,13 @@ const RegisterTab = ({
           aria-invalid={validName ? "false" : "true"}
           onFocus={() => setUserFocus(true)}
           onBlur={() => setUserFocus(false)}
-          error={
-            (username && !validName) || err?.data?.errors?.username != null
-          }
+          error={(username && !validName) || err?.data?.errors?.username != null}
         />
         <TextField
           label={
             email && !validEmail
-              ? "Sai định dạng email!"
-              : (err?.data?.errors?.email ?? "Địa chỉ email")
+              ? capitalize(t("validation.constraints.pattern", { ns: "validation", field: t("email") }))
+              : (err?.data?.errors?.email ?? t("email.placeholder"))
           }
           type="email"
           id="email"
@@ -201,14 +175,10 @@ const RegisterTab = ({
           onBlur={() => setEmailFocus(false)}
           error={(email && !validEmail) || err?.data?.errors?.email != null}
         />
-        <Stack
-          spacing={{ xs: 0.8, md: 1.5 }}
-          direction={challenge ? "row" : "column"}
-          position="relative"
-        >
+        <Stack spacing={{ xs: 0.8, md: 1.5 }} direction={challenge ? "row" : "column"} position="relative">
           <div style={{ width: "100%s" }}>
             <PasswordInput
-              label={err?.data?.errors?.pass ?? "Mật khẩu"}
+              label={err?.data?.errors?.pass ?? t("password")}
               size="small"
               onChange={(e) => setPassword(e.target.value)}
               value={password}
@@ -235,45 +205,38 @@ const RegisterTab = ({
                   borderWidth: 2,
                 }}
               >
-                <PasswordEvaluate
-                  {...{ password, onValid: (value) => setValidPass(value) }}
-                />
+                <PasswordEvaluate {...{ password, onValid: (value) => setValidPass(value) }} />
               </Paper>
             </Grow>
           </div>
           <PasswordInput
             label={
               matchPass && !validMatch
-                ? "Không trùng mật khẩu!"
-                : "Nhập lại mật khẩu"
+                ? t("validation.constraints.password.match", { ns: "validation" })
+                : t("password.confirm")
             }
             size="small"
             onChange={(e) => setMatchPass(e.target.value)}
             value={matchPass}
             aria-invalid={validMatch ? "false" : "true"}
             aria-describedby="confirm new password"
-            error={
-              (matchPass && !validMatch) || err?.data?.errors?.pass != null
-            }
+            error={(matchPass && !validMatch) || err?.data?.errors?.pass != null}
           />
         </Stack>
         {reCaptchaLoaded && challenge && (
           <Suspense fallback={null}>
-            <ReCaptcha
-              onVerify={(token) => setToken(token)}
-              recaptchaSiteKey={recaptchaSiteKey}
-            />
+            <ReCaptcha onVerify={(token) => setToken(token)} recaptchaSiteKey={recaptchaSiteKey} />
           </Suspense>
         )}
         <TermText>
-          Được bảo vệ bởi reCAPTCHA và Google thông qua
+          {t("recaptcha")}
           <br />
           <a href="https://policies.google.com/terms">
-            <AuthHighlight color="warning">Điều khoản dịch vụ</AuthHighlight>
+            <AuthHighlight color="warning">{t("terms")}</AuthHighlight>
           </a>
           &nbsp;&&nbsp;
           <a href="https://policies.google.com/privacy">
-            <AuthHighlight color="warning">Chính sách bảo mật</AuthHighlight>
+            <AuthHighlight color="warning">{t("policy")}</AuthHighlight>
           </a>
         </TermText>
         <ConfirmButton
@@ -283,13 +246,13 @@ const RegisterTab = ({
           aria-label="submit register"
           disabled={!validRegister || isLoading || !reCaptchaLoaded}
         >
-          Đăng ký
+          {t("signup")}
         </ConfirmButton>
       </Stack>
       <AuthText>
-        Đã có tài khoản?&nbsp;
+        {t("login.suggestions")}&nbsp;
         <Link to={"/auth/login"}>
-          <AuthHighlight>Đăng nhập</AuthHighlight>
+          <AuthHighlight>{t("login")}</AuthHighlight>
         </Link>
       </AuthText>
     </form>

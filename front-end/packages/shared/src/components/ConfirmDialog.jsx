@@ -1,5 +1,3 @@
-import Close from "@mui/icons-material/Close";
-import Check from "@mui/icons-material/Check";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -7,47 +5,29 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
-const ConfirmDialog = ({
-  open,
-  title,
-  message,
-  handleConfirm,
-  handleCancel,
-}) => {
+const ConfirmDialog = ({ open, title, message, handleConfirm, handleCancel, maxWidth = "xs", ...props }) => {
   return (
     <Dialog
       open={open}
       onClose={handleCancel}
+      fullWidth
+      maxWidth={maxWidth}
       closeAfterTransition={false}
       aria-labelledby="confirmation-dialog"
+      {...props}
     >
       <DialogTitle id="confirmation-dialog-title">{title}</DialogTitle>
-      <DialogContent sx={{ minWidth: "30vw" }}>
-        <DialogContentText>{message}</DialogContentText>
+      <DialogContent sx={{ minWidth: "30vw" }} dividers={props?.scroll === "paper"}>
+        <DialogContentText sx={{ whiteSpace: "pre-line" }}>{message}</DialogContentText>
       </DialogContent>
       <DialogActions>
         {handleCancel && (
-          <Button
-            variant="outlined"
-            color="error"
-            size="large"
-            autoFocus
-            sx={{ mb: 1 }}
-            onClick={handleCancel}
-            startIcon={<Close />}
-          >
+          <Button color="error" autoFocus onClick={handleCancel}>
             Huỷ
           </Button>
         )}
         {handleConfirm && (
-          <Button
-            variant="contained"
-            size="large"
-            autoFocus
-            sx={{ mb: 1 }}
-            onClick={handleConfirm}
-            startIcon={<Check />}
-          >
+          <Button color="primary" onClick={handleConfirm}>
             Đồng ý
           </Button>
         )}

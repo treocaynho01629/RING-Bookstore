@@ -155,8 +155,7 @@ const ExpText = styled.span`
   font-size: 14px;
   margin-right: ${({ theme }) => theme.spacing(1.25)};
   font-weight: 450;
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.main || theme.vars.palette.text.primary};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.main || theme.vars.palette.text.primary};
   white-space: nowrap;
 
   &::before {
@@ -184,13 +183,9 @@ const ExpText = styled.span`
 const CouponIcon = styled.div`
   height: 80px;
   aspect-ratio: 1/1;
-  background-color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.light || theme.vars.palette.primary.light};
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.contrastText ||
-    theme.vars.palette.primary.contrastText};
-  border-right: 5px dotted
-    ${({ theme }) => theme.vars.palette.background.default};
+  background-color: ${({ theme, color }) => theme.vars.palette[color]?.light || theme.vars.palette.primary.light};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.contrastText || theme.vars.palette.primary.contrastText};
+  border-right: 5px dotted ${({ theme }) => theme.vars.palette.background.default};
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -400,36 +395,31 @@ const CouponContainer = styled.div`
 `;
 //#endregion
 
-const CouponItem = ({
-  coupon,
-  meta,
-  criteria,
-  isDisabled,
-  isUsed,
-  isSelected,
-  isSaved,
-  selectMode,
-  onClickApply,
-  className,
-  scrollPosition,
-}) => {
+const CouponItem = ({ coupon, selectMode, onClickApply, className, scrollPosition }) => {
   const { t } = useTranslation();
   const { addCoupon, removeCoupon } = useCoupon();
   const date = new Date(coupon?.expDate);
   const warnDate = new Date();
   warnDate.setDate(warnDate.getDate() + 2);
+  console.log(coupon);
 
+  /**
+   * Handle click apply coupon
+   */
   const handleClick = () => {
-    isSelected ? onClickApply(null) : onClickApply(coupon);
+    coupon?.isSelected ? onClickApply(null) : onClickApply(coupon);
   };
 
+  /**
+   * Handle save/remove coupon
+   */
   const handleSave = () => {
-    isSaved ? removeCoupon(coupon?.code) : addCoupon(coupon?.code);
+    coupon?.isSaved ? removeCoupon(coupon?.code) : addCoupon(coupon?.code);
   };
 
-  const Icon = iconList[meta?.icon];
+  const Icon = iconList[coupon?.meta?.icon];
   let shopIcon = coupon ? (
-    <CouponIcon color={meta?.color}>
+    <CouponIcon color={coupon?.meta?.color}>
       {coupon?.shopImage ? (
         <ShopImage
           src={coupon.shopImage}
@@ -448,86 +438,49 @@ const CouponItem = ({
     <Wrapper className={className}>
       {coupon ? (
         <CouponContainer
-          className={`${selectMode && isSelected ? "active " : " "}${
-            selectMode && isUsed
-              ? "disabled used"
-              : isDisabled
-                ? "disabled"
-                : className
+          className={`${selectMode && coupon?.isSelected ? "active " : " "}${
+            selectMode && coupon?.isUsed ? "disabled used" : coupon?.isDisabled ? "disabled" : className
           }`}
         >
-          <CouponEdge
-            elevation={className == "display" ? 0 : 24}
-            className="left"
-          />
-          <CouponEdge
-            elevation={className == "display" ? 0 : 24}
-            className="right"
-          />
+          <CouponEdge elevation={className == "display" ? 0 : 24} className="left" />
+          <CouponEdge elevation={className == "display" ? 0 : 24} className="right" />
           <CouponContent>
             <Suspense fallback={null}>
-              {coupon?.shopId ? (
-                <Link to={`/shop/${coupon?.shopId}`}>{shopIcon}</Link>
-              ) : (
-                shopIcon
-              )}
+              {coupon?.shopId ? <Link to={`/shop/${coupon?.shopId}`}>{shopIcon}</Link> : shopIcon}
             </Suspense>
             <CouponMain>
               <div>
                 <h2>
-                  {t(
-                    coupon?.discount == 1 ? meta?.summaryFull : meta?.summary,
-                    {
-                      discount:
-                        coupon?.discount == 1
-                          ? currencyFormat.format(coupon?.maxDiscount)
-                          : coupon?.discount * 100 + "%",
-                      max: currencyFormat.format(coupon?.maxDiscount),
-                    }
-                  )}
+                  {t(coupon?.discount == 1 ? coupon?.meta?.summaryFull : coupon?.meta?.summary, {
+                    discount:
+                      coupon?.discount == 1 ? currencyFormat.format(coupon?.maxDiscount) : coupon?.discount * 100 + "%",
+                    max: currencyFormat.format(coupon?.maxDiscount),
+                  })}
                 </h2>
                 <p>
-                  {t(
-                    coupon?.attribute == 0
-                      ? criteria?.conditionAll
-                      : criteria?.condition,
-                    {
-                      min: criteria?.formatter(coupon?.attribute),
-                      unit: t(criteria?.unit),
-                    }
-                  )}
+                  {t(coupon?.attribute == 0 ? coupon?.criteria?.conditionAll : coupon?.criteria?.condition, {
+                    min: coupon?.criteria?.formatter(coupon?.attribute),
+                    unit: t(coupon?.criteria?.unit),
+                  })}
                 </p>
               </div>
               <Expire>
-                <ExpText
-                  color={date <= warnDate ? "error" : ""}
-                  className="date"
-                >
+                <ExpText color={date <= warnDate ? "error" : ""} className="date">
                   &nbsp;{dateFormatter(date)}
                 </ExpText>
-                {coupon?.usage < 100 && (
-                  <ExpText color="error">&nbsp;{coupon?.usage} lượt</ExpText>
-                )}
+                {coupon?.usage < 100 && <ExpText color="error">&nbsp;{coupon?.usage} lượt</ExpText>}
               </Expire>
             </CouponMain>
           </CouponContent>
-          <CouponAction className={isSaved ? "saved" : ""}>
+          <CouponAction className={coupon?.isSaved ? "saved" : ""}>
             <CouponCode>{coupon?.code}</CouponCode>
             {selectMode ? (
-              <Button
-                disableRipple
-                color={isSelected ? "error" : "primary"}
-                onClick={handleClick}
-              >
-                {isSelected ? "Bỏ chọn" : "Áp dụng"}
+              <Button disableRipple color={coupon?.isSelected ? "error" : "primary"} onClick={handleClick}>
+                {coupon?.isSelected ? "Bỏ chọn" : "Áp dụng"}
               </Button>
             ) : (
-              <Button
-                disableRipple
-                color={isSaved ? "warning" : "primary"}
-                onClick={handleSave}
-              >
-                {isSaved ? "Gỡ" : "Lưu"}
+              <Button disableRipple color={coupon?.isSaved ? "warning" : "primary"} onClick={handleSave}>
+                {coupon?.isSaved ? "Gỡ" : "Lưu"}
               </Button>
             )}
           </CouponAction>

@@ -11,15 +11,17 @@ import {
   replaceInCart,
   removeShopItem,
 } from "../features/cart/cartReducer";
+import { useTranslation } from "react-i18next";
 
 const useCart = () => {
   const dispatch = useDispatch();
   const cartProducts = useSelector(selectCartProducts);
+  const { t } = useTranslation();
 
-  //Cart
+  // Cart
   const addProduct = async (item, quantity) => {
     const { enqueueSnackbar } = await import("notistack");
-    enqueueSnackbar("Đã thêm sản phẩm vào giỏ hàng!", { variant: "success" });
+    enqueueSnackbar(t("cart.add.success", { ns: "client" }), { variant: "success" });
     dispatch(
       addToCart({
         id: item.id,
@@ -51,8 +53,7 @@ const useCart = () => {
   };
   const increaseAmount = (id) => dispatch(increaseQuantity(id));
   const decreaseAmount = (id) => dispatch(decreaseQuantity(id));
-  const changeAmount = ({ id, quantity }) =>
-    dispatch(changeQuantity({ id, quantity }));
+  const changeAmount = ({ id, quantity }) => dispatch(changeQuantity({ id, quantity }));
   const removeProduct = (id) => dispatch(removeItem(id));
   const removeProducts = (ids) => dispatch(removeItems(ids));
   const removeShopProduct = (id) => dispatch(removeShopItem(id));

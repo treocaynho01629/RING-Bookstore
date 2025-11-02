@@ -1,24 +1,15 @@
 import styled from "@emotion/styled";
-import {
-  useEffect,
-  useMemo,
-  useState,
-  Suspense,
-  lazy,
-  useCallback,
-  useRef,
-} from "react";
+import { useEffect, useMemo, useState, Suspense, lazy, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router";
 import { booksApiSlice } from "../../features/books/booksApiSlice";
 import { useCalculateMutation } from "../../features/orders/ordersApiSlice";
-import { debounce, isEqual } from "lodash-es";
+import { debounce, isEqual, toLower } from "lodash-es";
 import { useGetRecommendCouponsQuery } from "../../features/coupons/couponsApiSlice";
-import {
-  ActionTableCell,
-  StyledTableCell,
-  StyledTableHead,
-} from "../custom/TableComponents";
+import { ActionTableCell, StyledTableCell, StyledTableHead } from "../custom/TableComponents";
 import { StyledCheckbox } from "../custom/CartComponents";
+import { useTranslation } from "react-i18next";
+import { currencyFormat, idFormatter } from "@ring/shared/utils/convert";
+import { getCouponType } from "@ring/shared/enums/coupon";
 import useDeepEffect from "@ring/shared/useDeepEffect";
 import useAuth from "../../hooks/useAuth";
 import Button from "@mui/material/Button";
@@ -40,6 +31,7 @@ import CheckoutDialog from "./CheckoutDialog";
 import PropTypes from "prop-types";
 import CartDetailRow from "./CartDetailRow";
 import useCheckout from "../../hooks/useCheckout";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 const Menu = lazy(() => import("@mui/material/Menu"));
 const CouponDialog = lazy(() => import("../coupon/CouponDialog"));
@@ -70,6 +62,7 @@ const Title = styled.h3`
   flex-wrap: wrap;
   align-items: center;
   text-align: center;
+  text-transform: uppercase;
 `;
 
 const StyledDeleteButton = styled(Button)`
@@ -87,12 +80,9 @@ const StyledDeleteButton = styled(Button)`
 `;
 //#endregion
 
-function EnhancedTableHead({
-  onSelectAllClick,
-  numSelected,
-  rowCount,
-  handleDeleteMultiple,
-}) {
+function EnhancedTableHead({ onSelectAllClick, numSelected, rowCount, handleDeleteMultiple }) {
+  const { t } = useTranslation();
+
   let isIndeterminate = numSelected > 0 && numSelected < rowCount;
   let isSelectedAll = rowCount > 0 && numSelected === rowCount;
 
@@ -112,11 +102,15 @@ function EnhancedTableHead({
             indeterminate={isIndeterminate}
             checked={isSelectedAll}
             onChange={onSelectAllClick}
-            inputProps={{ "aria-label": "Select all" }}
+            slotProps={{
+              input: {
+                "aria-label": t("select.all"),
+              },
+            }}
           />
         </StyledTableCell>
         <StyledTableCell align="left">
-          Chọn tất cả ({rowCount} sản phẩm)
+          {t("select.all")} ({rowCount} {t("items")})
         </StyledTableCell>
         <StyledTableCell
           align="left"
@@ -131,7 +125,7 @@ function EnhancedTableHead({
             },
           }}
         >
-          Đơn giá
+          {t("price")}
         </StyledTableCell>
         <StyledTableCell
           align="center"
@@ -141,7 +135,7 @@ function EnhancedTableHead({
             display: { xs: "none", sm: "table-cell" },
           }}
         >
-          Số lượng
+          {t("quantity")}
         </StyledTableCell>
         <StyledTableCell
           align="left"
@@ -151,7 +145,7 @@ function EnhancedTableHead({
             display: { xs: "none", md: "table-cell" },
           }}
         >
-          Tổng
+          {t("total")}
         </StyledTableCell>
         <ActionTableCell>
           <StyledDeleteButton
@@ -161,7 +155,7 @@ function EnhancedTableHead({
             disableRipple
             onClick={handleDeleteMultiple}
           >
-            Xoá
+            {t("remove")}
           </StyledDeleteButton>
         </ActionTableCell>
       </TableRow>
@@ -177,17 +171,15 @@ EnhancedTableHead.propTypes = {
 };
 
 const CartContent = ({ confirm }) => {
-  const {
-    cartProducts,
-    removeProduct,
-    clearCart,
-    decreaseAmount,
-    increaseAmount,
-    changeAmount,
-  } = useCart();
-  const prevPayload = useRef();
+  const { t } = useTranslation();
+  const { cartProducts, removeProduct, clearCart, decreaseAmount, increaseAmount, changeAmount } = useCart();
   const { estimateCart, syncCart } = useCheckout();
   const { username } = useAuth();
+
+  const mobileMode = useMediaQuery((theme) => theme.breakpoints.down("sm"));
+  const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md_lg"));
+  const prevPayload = useRef();
+
   const [selected, setSelected] = useState([]);
   const [shopIds, setShopIds] = useState([]);
   const [coupon, setCoupon] = useState("");
@@ -196,19 +188,19 @@ const CartContent = ({ confirm }) => {
   const [shopDiscount, setShopDiscount] = useState([]);
   const [checkState, setCheckState] = useState(null);
 
-  //Dialog/Menu
+  // Dialog/Menu
   const [contextProduct, setContextProduct] = useState(null);
   const [contextShop, setContextShop] = useState(null);
   const [contextState, setContextState] = useState(null);
   const [contextCoupon, setContextCoupon] = useState(null);
   const [openDialog, setOpenDialog] = useState(undefined);
-  const [openWarning, setOpenWarning] = useState(undefined);
+  const [warningMessage, setWarningMessage] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
 
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
 
-  //Recommend coupons
+  // Recommend coupons
   const {
     data: recommend,
     isLoading: loadRecommend,
@@ -216,10 +208,10 @@ const CartContent = ({ confirm }) => {
     isError: errorRecommend,
   } = useGetRecommendCouponsQuery({ shopIds }, { skip: !shopIds.length });
 
-  //For get similar
+  // For get similar
   const [getBook] = booksApiSlice.useLazyGetBookDetailQuery();
 
-  //Estimate/calculate price
+  // Estimate/calculate price
   const [estimated, setEstimated] = useState({
     deal: 0,
     subTotal: 0,
@@ -231,18 +223,13 @@ const CartContent = ({ confirm }) => {
 
   //#region construct
   useDeepEffect(() => {
-    if (
-      calculating ||
-      !selected.length ||
-      !cartProducts?.length ||
-      cartProducts.length == 0
-    ) {
+    if (calculating || !selected.length || !cartProducts?.length || cartProducts.length == 0) {
       handleCalculate.cancel();
     }
     handleCartChange();
   }, [selected, cartProducts, shopCoupon, coupon]);
 
-  //Set recommend coupons
+  // Set recommend coupons
   useEffect(() => {
     if (recommend && !loadRecommend && doneRecommend) {
       const { ids, entities } = recommend;
@@ -259,26 +246,51 @@ const CartContent = ({ confirm }) => {
     }
   }, [recommend, loadRecommend]);
 
+  /**
+   * Generate error message for warning dialog
+   * @param {string} shopId - Shop ID
+   * @param {string} id - Item ID
+   * @returns {string} - Error message
+   */
+  const generateErrorMessage = (shopId, id) => {
+    let errorMsg = "";
+
+    // If pass in shop id => get all items
+    if (shopId) {
+      const items = cartProducts.filter((item) => item.shopId === shopId);
+      items.forEach((item) => {
+        errorMsg += `- ${idFormatter(item.id)}: ${item.title} \n`;
+      });
+      // If pass in item id => get item
+    } else if (id) {
+      const item = cartProducts.find((item) => item.id === id);
+      errorMsg += `- ${idFormatter(item.id)}: ${item.title} \n`;
+    }
+
+    return errorMsg;
+  };
+
+  /**
+   * Handle cart change event (calculate price, ...)
+   */
   const handleCartChange = () => {
     if (selected.length > 0 && cartProducts.length > 0) {
-      //Reduce cart
+      // Reduce cart
       const selectedCart = cartProducts.reduce(
         (result, item) => {
           const { id, shopId } = item;
 
           if (selected.indexOf(id) !== -1) {
-            //Get selected items in redux store
-            //Find or create shop
-            let detail = result.cart.find(
-              (shopItem) => shopItem.shopId === shopId
-            );
+            // Get selected items in redux store
+            // Find or create shop
+            let detail = result.cart.find((shopItem) => shopItem.shopId === shopId);
 
             if (!detail) {
               detail = { shopId, coupon: shopCoupon[shopId]?.code, items: [] };
               result.cart.push(detail);
             }
 
-            //Add items for that shop
+            // Add items for that shop
             detail.items.push(item);
           }
 
@@ -287,22 +299,27 @@ const CartContent = ({ confirm }) => {
         { coupon: coupon?.code, cart: [] }
       );
 
-      handleEstimate(selectedCart); //Estimate price
-      if (doneRecommend || errorRecommend) handleCalculate(selectedCart); //Calculate price
+      handleEstimate(selectedCart); // Estimate price
+      if (doneRecommend || errorRecommend) handleCalculate(selectedCart); // Calculate price
     } else {
-      //Reset
+      // Reset
       handleEstimate(null);
       handleCalculate(null);
       setCalculated(null);
     }
   };
 
+  /**
+   * Handle clear select items
+   */
   const handleClearSelect = useCallback(() => {
     setSelected([]);
     setCalculated(null);
   }, []);
 
-  //Estimate before receive caculated price from server
+  /**
+   * Estimate price before receive calculated price from server
+   */
   const handleEstimate = useCallback(
     (cart) => {
       const result = estimateCart(cart);
@@ -312,16 +329,12 @@ const CartContent = ({ confirm }) => {
     [cartProducts]
   );
 
-  //Calculate server side
+  /**
+   * Calculate price on server side
+   */
   const handleCalculate = useCallback(
     debounce(async (cart) => {
-      if (
-        calculating ||
-        cart == null ||
-        isEqual(prevPayload.current, cart) ||
-        !username
-      )
-        return;
+      if (calculating || cart == null || isEqual(prevPayload.current, cart) || !username) return;
 
       calculate(cart)
         .unwrap()
@@ -333,20 +346,18 @@ const CartContent = ({ confirm }) => {
         .catch((err) => {
           console.error(err);
           if (!err?.status) {
-            console.error("Server không phản hồi!");
-          } else if (err?.status === 409) {
-            console.error(err?.data?.message);
-          } else if (err?.status === 400) {
-            console.error("Sai định dạng giỏ hàng!");
+            console.error(t("server.not.response"));
           } else {
-            console.error("Tính trước đơn hàng thất bại!");
+            console.error(err?.data?.message);
           }
         });
     }, 500),
     []
   );
 
-  //Sync cart between client and server
+  /**
+   * Sync cart between client and server
+   */
   const handleSyncCart = (cart) => {
     syncCart(
       cart,
@@ -356,21 +367,25 @@ const CartContent = ({ confirm }) => {
       setCoupon,
       shopCoupon,
       setShopCoupon,
-      handleOpenWarning
+      handleOpenWarning,
+      generateErrorMessage,
+      handleClearSelect
     );
   };
 
-  //Separate by shop
+  /**
+   * Separate cart by shop
+   */
   const reduceCart = () => {
     let shopIds = [];
     let resultCart = cartProducts.reduce((result, item) => {
       if (!result[item.shopId]) {
-        //Check if not exists shop >> Add new one
+        // Check if not exists shop >> Add new one
         result[item.shopId] = { shopName: item.shopName, products: [] };
         shopIds.push(item.shopId);
       }
 
-      //Else push
+      // Else push
       result[item.shopId].products.push(item);
       return result;
     }, {});
@@ -380,65 +395,71 @@ const CartContent = ({ confirm }) => {
   };
   const reducedCart = useMemo(() => reduceCart(), [cartProducts]);
   const displayInfo = {
-    deal:
-      calculating || !calculated ? estimated?.deal : calculated?.dealDiscount,
-    subTotal:
-      calculating || !calculated
-        ? estimated?.subTotal
-        : calculated?.productsTotal,
-    shipping:
-      calculating || !calculated
-        ? estimated?.shipping
-        : calculated?.shippingFee,
+    deal: calculating || !calculated ? estimated?.deal : calculated?.dealDiscount,
+    subTotal: calculating || !calculated ? estimated?.subTotal : calculated?.productsTotal,
+    shipping: calculating || !calculated ? estimated?.shipping : calculated?.shippingFee,
     couponDiscount: calculated?.couponDiscount || 0,
     totalDiscount: calculated?.totalDiscount || 0,
     shippingDiscount: calculated?.shippingDiscount || 0,
-    total:
-      calculating || !calculated
-        ? estimated?.total
-        : calculated?.total - calculated?.totalDiscount,
+    total: calculating || !calculated ? estimated?.total : calculated?.total - calculated?.totalDiscount,
   };
 
-  //Open context menu
+  /**
+   * Open context menu
+   */
   const handleClick = (e, product) => {
     setAnchorEl(e.currentTarget);
     setContextProduct(product);
   };
 
-  const handleOpenWarning = () => {
-    setOpenWarning(true);
+  /**
+   * Handle open warning dialog
+   */
+  const handleOpenWarning = (message) => {
+    setWarningMessage(message);
   };
 
+  /**
+   * Handle close context menu
+   */
   const handleClose = () => {
     setAnchorEl(null);
     setContextProduct(null);
   };
 
+  /**
+   * Handle open coupon dialog
+   */
   const handleOpenDialog = (shopId) => {
     setOpenDialog(true);
     setContextShop(shopId);
     setContextState(
-      shopId
-        ? checkState?.details[shopId]
-        : { value: checkState?.value, quantity: checkState?.quantity }
+      shopId ? checkState?.details[shopId] : { value: checkState?.value, quantity: checkState?.quantity }
     );
     setContextCoupon(shopId ? shopCoupon[shopId] : coupon);
   };
 
+  /**
+   * Handle close coupon dialog
+   */
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
 
+  /**
+   * Handle close warning dialog
+   */
   const handleCloseWarning = () => {
-    setOpenWarning(false);
+    setWarningMessage("");
   };
 
-  //Selected?
-  const isShopSelected = (shop) =>
-    shop?.products.some((product) => selected.includes(product.id));
+  // Check if shop is selected
+  const isShopSelected = (shop) => shop?.products.some((product) => selected.includes(product.id));
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
-  //Select all checkboxes
+  /**
+   * Handle select all checkboxes
+   */
   const handleSelectAllClick = (e) => {
     if (e.target.checked) {
       const newSelected = cartProducts?.map((item) => {
@@ -450,7 +471,9 @@ const CartContent = ({ confirm }) => {
     setSelected([]);
   };
 
-  //Select item
+  /**
+   * Handle select item
+   */
   const handleSelect = (id) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
@@ -462,15 +485,15 @@ const CartContent = ({ confirm }) => {
     } else if (selectedIndex === selected.length - 1) {
       newSelected = newSelected.concat(selected.slice(0, -1));
     } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
-      );
+      newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
     }
 
     setSelected(newSelected);
   };
 
+  /**
+   * Handle deselect item
+   */
   const handleDeselect = (id) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
@@ -480,16 +503,15 @@ const CartContent = ({ confirm }) => {
     } else if (selectedIndex === selected.length - 1) {
       newSelected = newSelected.concat(selected.slice(0, -1));
     } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
-      );
+      newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
     }
 
     setSelected(newSelected);
   };
 
-  //Select shop
+  /**
+   * Handle select shop
+   */
   const handleSelectShop = (shop) => {
     let newSelected = [];
     let disabled = [];
@@ -514,43 +536,51 @@ const CartContent = ({ confirm }) => {
     setSelected(newSelected);
   };
 
-  //Delete
+  /**
+   * Handle delete context
+   */
   const handleDeleteContext = () => {
     handleDelete(contextProduct?.id);
     handleClose();
   };
 
+  /**
+   * Handle delete item
+   */
   const handleDelete = async (id) => {
     if (isSelected(id)) handleSelect(id);
     const confirmation = await confirm();
     if (confirmation) {
       removeProduct(id);
       handleClose();
-    } else {
-      console.log("Cancel");
     }
   };
 
+  /**
+   * Handle decrease quantity
+   */
   const handleDecrease = async (quantity, id) => {
     if (quantity == 1) {
       if (isSelected(id)) handleSelect(id); //Unselect if remove
 
       const confirmation = await confirm();
-      if (confirmation) {
-        decreaseAmount(id);
-      } else {
-        console.log("Cancel");
-      }
+      if (confirmation) decreaseAmount(id);
     } else {
       decreaseAmount(id);
     }
   };
 
+  /**
+   * Handle change quantity
+   */
   const handleChangeQuantity = (quantity, id) => {
     if (quantity < 1 && isSelected(id)) handleSelect(id); //Unselect if remove
     changeAmount({ quantity, id });
   };
 
+  /**
+   * Handle delete multiple items
+   */
   const handleDeleteMultiple = async () => {
     const confirmation = await confirm();
     if (confirmation) {
@@ -563,11 +593,12 @@ const CartContent = ({ confirm }) => {
       }
       handleCalculate.cancel();
       handleClearSelect();
-    } else {
-      console.log("Cancel");
     }
   };
 
+  /**
+   * Handle find similar products
+   */
   const handleFindSimilar = async () => {
     getBook({ id: contextProduct?.id })
       .unwrap()
@@ -581,6 +612,9 @@ const CartContent = ({ confirm }) => {
     handleClose();
   };
 
+  /**
+   * Handle change coupon
+   */
   const handleChangeCoupon = (coupon, shopId) => {
     if (shopId) {
       setShopCoupon((prev) => ({ ...prev, [shopId]: coupon }));
@@ -591,16 +625,12 @@ const CartContent = ({ confirm }) => {
   //#endregion
 
   return (
-    <Grid
-      container
-      spacing={2}
-      sx={{ position: "relative", mb: 10, justifyContent: "flex-end" }}
-    >
+    <Grid container spacing={2} sx={{ position: "relative", mb: 10, justifyContent: "flex-end" }}>
       <Grid size={{ xs: 12, md_lg: 8 }} position="relative">
         <TitleContainer>
           <Title>
             <ShoppingCartIcon />
-            &nbsp;GIỎ HÀNG ({cartProducts?.length})
+            &nbsp;{t("cart.label", { ns: "client" })} ({cartProducts?.length})
           </Title>
         </TitleContainer>
         <Table aria-label="cart-table">
@@ -612,8 +642,22 @@ const CartContent = ({ confirm }) => {
           />
           <TableBody>
             {Object.keys(reducedCart).map((shopId, index) => {
+              const coupon = shopCoupon[shopId];
+              const meta = getCouponType(coupon?.type);
               const shop = { ...reducedCart[shopId], id: shopId };
               const isGroupSelected = isShopSelected(shop);
+              const currCoupon = {
+                summary: toLower(
+                  t(coupon?.discount == 1 ? meta?.summaryFull : meta?.summary, {
+                    discount:
+                      coupon?.discount == 1 ? currencyFormat.format(coupon?.maxDiscount) : coupon?.discount * 100 + "%",
+                    max: currencyFormat.format(coupon?.maxDiscount),
+                  })
+                ),
+                isUsable: coupon?.isUsable,
+                isUsed: coupon?.isUsed,
+                discount: shopDiscount[shopId],
+              };
 
               return (
                 <CartDetailRow
@@ -625,8 +669,7 @@ const CartContent = ({ confirm }) => {
                     handleSelect,
                     handleDeselect,
                     handleSelectShop,
-                    coupon: shopCoupon[shopId],
-                    discount: shopDiscount[shopId],
+                    coupon: currCoupon,
                     handleDecrease,
                     increaseAmount,
                     handleChangeQuantity,
@@ -640,25 +683,17 @@ const CartContent = ({ confirm }) => {
         </Table>
         <Box mt={1} display="flex">
           <Link to={"/"}>
-            <Button
-              variant="outlined"
-              color="secondary"
-              startIcon={<ChevronLeft />}
-            >
-              Tiếp tục mua sắm
+            <Button variant="outlined" color="secondary" startIcon={<ChevronLeft />}>
+              {t("cart.continue", { ns: "client" })}
             </Button>
           </Link>
         </Box>
       </Grid>
-      <Grid
-        size={{ xs: 12, md_lg: 4 }}
-        position={{ xs: "sticky", md_lg: "relative" }}
-        bottom={0}
-      >
+      <Grid size={{ xs: 12, md_lg: 4 }} position={{ xs: "sticky", md_lg: "relative" }} bottom={0}>
         <TitleContainer className="end">
           <Title>
             <Sell />
-            &nbsp;ĐƠN DỰ TÍNH
+            &nbsp;{t("cart.estimate", { ns: "client" })}
           </Title>
         </TitleContainer>
         <CheckoutDialog
@@ -672,6 +707,8 @@ const CartContent = ({ confirm }) => {
             displayInfo,
             handleOpenDialog,
             loggedIn: username != null,
+            mobileMode,
+            tabletMode,
           }}
         />
       </Grid>
@@ -706,28 +743,29 @@ const CartContent = ({ confirm }) => {
               <ListItemIcon>
                 <DeleteIcon sx={{ color: "error.main" }} fontSize="small" />
               </ListItemIcon>
-              <ListItemText sx={{ color: "error.main" }}>
-                Xoá khỏi giỏ
-              </ListItemText>
+              <ListItemText sx={{ color: "error.main" }}>{t("cart.remove", { ns: "client" })}</ListItemText>
             </MenuItem>
             <MenuItem onClick={handleFindSimilar}>
               <ListItemIcon>
                 <Search fontSize="small" />
               </ListItemIcon>
-              <ListItemText>Tìm sản phẩm tương tự</ListItemText>
+              <ListItemText>{t("cart.find.similar", { ns: "client" })}</ListItemText>
             </MenuItem>
           </Menu>
         )}
       </Suspense>
       <Suspense fallback={null}>
-        {openWarning !== undefined && (
+        {warningMessage !== "" && (
           <ConfirmDialog
             {...{
-              open: openWarning,
-              title: "Đã gỡ các sản phẩm!",
-              message: "Một số sản phẩm đã bị gỡ khỏi trang!",
+              open: warningMessage !== "",
+              title: t("cart.remove.title", { ns: "client" }),
+              message: `${t("cart.remove.message", { ns: "client" })} \n${warningMessage}`,
               handleConfirm: handleCloseWarning,
             }}
+            fullScreen={mobileMode}
+            maxWidth={"sm"}
+            scroll="paper"
           />
         )}
       </Suspense>

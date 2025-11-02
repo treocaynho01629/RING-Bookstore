@@ -63,11 +63,7 @@ const AddressSelectDialog = ({
   openDialog,
   handleCloseDialog,
 }) => {
-  const {
-    addresses: storeAddresses,
-    addNewAddress,
-    removeAddress,
-  } = useAddress();
+  const { addresses: storeAddresses, addNewAddress, removeAddress } = useAddress();
   const [openForm, setOpenForm] = useState(false); //Dialog open state
   const [err, setErr] = useState("");
   const [errMsg, setErrMsg] = useState("");
@@ -76,16 +72,10 @@ const AddressSelectDialog = ({
   const [selectedValue, setSelectedValue] = useState(-1);
   const openContext = Boolean(anchorEl);
   const fullScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
-  const [ConfirmationDialog, confirm] = useConfirm(
-    "Xoá địa chỉ?",
-    "Xoá địa chỉ khỏi sổ địa chỉ?"
-  );
+  const [ConfirmationDialog, confirm] = useConfirm("Xoá địa chỉ?", "Xoá địa chỉ khỏi sổ địa chỉ?");
 
   // Fetch addresses
-  const { data, isLoading, isSuccess, isError, error } = useGetMyAddressesQuery(
-    {},
-    { skip: !loggedIn }
-  );
+  const { data, isLoading, isSuccess, isError, error } = useGetMyAddressesQuery({}, { skip: !loggedIn });
 
   // Update address
   const [createAddress, { isLoading: creating }] = useCreateAddressMutation();
@@ -100,29 +90,51 @@ const AddressSelectDialog = ({
     }
   }, [address, storeAddresses]);
 
-  // Dialog
+  /**
+   * Open the address form
+   * @param {object} addressInfo - Address object contains the address to open
+   * @returns {void}
+   */
   const handleOpen = (addressInfo) => {
     setContextAddress(addressInfo);
     setOpenForm(true);
   };
 
+  /**
+   * Close the address form
+   * @returns {void}
+   */
   const handleClose = () => {
     setContextAddress(null);
     setErr("");
     setOpenForm(false);
   };
 
-  // Context
+  /**
+   * Handle the click event
+   * @param {object} event - Event object contains the target of the click
+   * @param {object} address - Address object contains the address to set
+   * @returns {void}
+   */
   const handleClick = (event, address) => {
     setAnchorEl(event.currentTarget);
     setContextAddress(address);
   };
 
+  /**
+   * Close the context menu
+   * @returns {void}
+   */
   const handleCloseContext = () => {
     setAnchorEl(null);
     setContextAddress(null);
   };
 
+  /**
+   * Remove address from the list
+   * @param {object} address - Address object contains the id of the address to remove
+   * @returns {void}
+   */
   const handleRemoveAddress = (address) => {
     if (pending || creating || updating || deleting) return;
     setPending(true);
@@ -150,10 +162,8 @@ const AddressSelectDialog = ({
             setErr(err);
             if (!err?.status) {
               setErrMsg("Server không phản hồi");
-            } else if (err?.status === 400) {
-              setErrMsg("Sai định dạng thông tin!");
             } else {
-              setErrMsg("Xoá địa chỉ thất bại");
+              setErrMsg(err?.data?.message);
             }
             setPending(false);
           });
@@ -167,11 +177,14 @@ const AddressSelectDialog = ({
     }
   };
 
-  const handleCreateAddress = async (
-    address,
-    isDefault = false,
-    isTemp = false
-  ) => {
+  /**
+   * Create a new address
+   * @param {object} address - Address object contains the address to create
+   * @param {boolean} isDefault - Whether the address is default
+   * @param {boolean} isTemp - Whether the address is temporary
+   * @returns {void}
+   */
+  const handleCreateAddress = async (address, isDefault = false, isTemp = false) => {
     if (pending || creating || updating || deleting) return;
     setPending(true);
     const { enqueueSnackbar } = await import("notistack");
@@ -228,6 +241,12 @@ const AddressSelectDialog = ({
     }
   };
 
+  /**
+   * Update an existing address
+   * @param {object} address - Address object contains the address to update
+   * @param {boolean} isDefault - Whether the address is default
+   * @returns {void}
+   */
   const handleUpdateAddress = async (address, isDefault = false) => {
     if (pending || creating || updating || deleting) return;
     setPending(true);
@@ -294,6 +313,12 @@ const AddressSelectDialog = ({
     }
   };
 
+  /**
+   * Convert an address from temporary to saved or saved to temporary
+   * @param {object} address - Address object contains the address to convert
+   * @param {boolean} isTemp - Whether the address is temporary
+   * @returns {void}
+   */
   const handleConvertAddress = async (address, isTemp) => {
     if (pending || creating || updating || deleting) return;
     setPending(true);
@@ -344,9 +369,7 @@ const AddressSelectDialog = ({
             } else if (err?.status === 400) {
               setErrMsg("Sai định dạng thông tin!");
             } else if (err?.status === 409) {
-              setErrMsg(
-                "Vượt quá số lượng cho phép (5), vui lòng xoá bớt hoặc tạm lưu vào bộ nhớ!"
-              );
+              setErrMsg("Vượt quá số lượng cho phép (5), vui lòng xoá bớt hoặc tạm lưu vào bộ nhớ!");
             } else {
               setErrMsg("Cập nhật địa chỉ thất bại");
             }
@@ -365,6 +388,11 @@ const AddressSelectDialog = ({
     }
   };
 
+  /**
+   * Set an address as default
+   * @param {object} address - Address object contains the address to set as default
+   * @returns {void}
+   */
   const handleSetDefault = async (address) => {
     if (pending || creating || updating || deleting) return;
     setPending(true);
@@ -406,9 +434,7 @@ const AddressSelectDialog = ({
             } else if (err?.status === 400) {
               setErrMsg("Sai định dạng thông tin!");
             } else if (err?.status === 409) {
-              setErrMsg(
-                "Vượt quá số lượng cho phép (5), vui lòng xoá bớt hoặc tạm lưu vào bộ nhớ!"
-              );
+              setErrMsg("Vượt quá số lượng cho phép (5), vui lòng xoá bớt hoặc tạm lưu vào bộ nhớ!");
             } else {
               setErrMsg("Thêm địa chỉ thất bại");
             }
@@ -427,33 +453,42 @@ const AddressSelectDialog = ({
     }
   };
 
+  /**
+   * Show confirmation dialog to remove address
+   */
   const handleClickRemove = async (address) => {
     const confirmation = await confirm();
-    if (confirmation) {
-      handleRemoveAddress(address);
-    } else {
-      console.log("Cancel");
-    }
+    if (confirmation) handleRemoveAddress(address);
   };
 
+  /**
+   * Set the address to the context
+   * @param {object} address - Address object contains the address to set
+   * @returns {void}
+   */
   const handleSetAddress = (address) => {
     if (address) {
       setAddressInfo(address);
     } else if (`${selectedValue}`.startsWith("s-")) {
-      setAddressInfo(
-        storeAddresses.filter((item) => item.id == selectedValue)[0]
-      );
+      setAddressInfo(storeAddresses.filter((item) => item.id == selectedValue)[0]);
     } else if (data?.ids?.length) {
       setAddressInfo(data?.entities[selectedValue]);
     }
   };
 
+  /**
+   * Handle the submit event
+   * @returns {void}
+   */
   const handleSubmit = () => {
     handleSetAddress();
     handleCloseDialog();
   };
 
+  // Render the addresses content
   let addressesContent;
+
+  // Render the stored addresses content
   let storedContent = storeAddresses?.map((address, index) => (
     <Fragment key={`stored-${address?.id}-${index}`}>
       <AddressItem
@@ -483,8 +518,7 @@ const AddressSelectDialog = ({
         {ids?.length
           ? ids?.map((id, index) => {
               const savedAddress = entities[id];
-              if (savedAddress.isDefault && selectedValue == -1)
-                setSelectedValue(id);
+              if (savedAddress.isDefault && selectedValue == -1) setSelectedValue(id);
 
               return (
                 <Fragment key={`saved-${id}-${index}`}>
@@ -558,41 +592,27 @@ const AddressSelectDialog = ({
               variant="outlined"
               size="large"
               color="primary"
-              sx={{ width: "100%", padding: "10px" }}
+              fullWidth
               onClick={() => handleOpen()}
+              aria-label="Add address button"
             >
               <AddHome />
               &nbsp;Thêm địa chỉ
             </Button>
-            {!isLoading &&
-              !isError &&
-              !data?.ids?.length &&
-              !storeAddresses?.length && (
-                <MessageContainer>
-                  <Message>
-                    <StyledEmptyIcon />
-                    Chưa có địa chỉ nào
-                  </Message>
-                </MessageContainer>
-              )}
+            {!isLoading && !isError && !data?.ids?.length && !storeAddresses?.length && (
+              <MessageContainer>
+                <Message>
+                  <StyledEmptyIcon />
+                  Chưa có địa chỉ nào
+                </Message>
+              </MessageContainer>
+            )}
           </DialogContent>
           <DialogActions>
-            <Button
-              variant="outlined"
-              color="error"
-              size="large"
-              onClick={handleCloseDialog}
-              startIcon={<Close />}
-            >
+            <Button variant="outlined" color="error" size="large" onClick={handleCloseDialog} startIcon={<Close />}>
               Huỷ
             </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              onClick={handleSubmit}
-              startIcon={<Check />}
-            >
+            <Button variant="contained" color="primary" size="large" onClick={handleSubmit} startIcon={<Check />}>
               Chọn
             </Button>
           </DialogActions>
@@ -605,30 +625,22 @@ const AddressSelectDialog = ({
               list: { "aria-labelledby": "basic-button" },
             }}
           >
-            <MenuItem
-              disabled={isSelectedDefault}
-              onClick={() => handleClickRemove(contextAddress)}
-            >
+            <MenuItem disabled={isSelectedDefault} onClick={() => handleClickRemove(contextAddress)}>
               <ListItemIcon>
                 <Delete sx={{ color: "error.main" }} fontSize="small" />
               </ListItemIcon>
-              <ListItemText sx={{ color: "error.main" }}>
-                Xoá địa chỉ
-              </ListItemText>
+              <ListItemText sx={{ color: "error.main" }}>Xoá địa chỉ</ListItemText>
             </MenuItem>
-            <MenuItem
-              disabled={isSelectedDefault}
-              onClick={() => handleSetDefault(contextAddress)}
-            >
+            <MenuItem disabled={isSelectedDefault} onClick={() => handleSetDefault(contextAddress)}>
               <ListItemIcon>
                 <Home fontSize="small" />
               </ListItemIcon>
               <ListItemText>Đặt làm mặc định</ListItemText>
             </MenuItem>
           </Menu>
-          <ConfirmationDialog />
         </>
       )}
+      <ConfirmationDialog />
     </Dialog>
   );
 };

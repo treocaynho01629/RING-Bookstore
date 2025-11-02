@@ -1,8 +1,9 @@
-import styled from "@emotion/styled";
 import { getAddressType } from "@ring/shared/enums/address";
+import styled from "@emotion/styled";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import Skeleton from "@mui/material/Skeleton";
 
 //#region styled
 const Title = styled.h4`
@@ -78,29 +79,28 @@ const AddressDisplay = ({ addressInfo, handleOpen, isValid, loadAddress }) => {
   return (
     <>
       <Title>Giao tới</Title>
-      <AddressDisplayContainer
-        className={!loadAddress && isValid ? "" : !addressInfo ? "" : "error"}
-      >
+      <AddressDisplayContainer className={!loadAddress && isValid ? "" : !addressInfo ? "" : "error"}>
         <AddressContainer>
           {!addressInfo && loadAddress ? (
-            <Address>Đang cập nhật...</Address>
-          ) : (
             <>
               <AddressContent>
                 <UserInfo>
-                  {addressInfo?.companyName ?? addressInfo?.name}&nbsp;
+                  <Skeleton variant="text" width={200} />
                 </UserInfo>
-                {addressInfo?.phone && (
-                  <UserInfo>{`(+84) ${addressInfo.phone}`}</UserInfo>
-                )}
               </AddressContent>
               <Address>
-                {address && (
-                  <AddressTag className={address.color}>
-                    {address.label}
-                  </AddressTag>
-                )}
-                {fullAddress.length > 2 ? fullAddress : "Không xác định"}
+                <Skeleton variant="text" width={300} />
+              </Address>
+            </>
+          ) : (
+            <>
+              <AddressContent>
+                <UserInfo>{addressInfo?.companyName ?? addressInfo?.name}&nbsp;</UserInfo>
+                {addressInfo?.phone && <UserInfo>{`(+84) ${addressInfo.phone}`}</UserInfo>}
+              </AddressContent>
+              <Address>
+                {address && <AddressTag className={address.color}>{address.label}</AddressTag>}
+                {fullAddress}
               </Address>
             </>
           )}
@@ -109,29 +109,17 @@ const AddressDisplay = ({ addressInfo, handleOpen, isValid, loadAddress }) => {
           sx={{ display: { xs: "none", sm: "flex" }, whiteSpace: "nowrap" }}
           aria-label="toggle address dialog"
           variant="outlined"
-          color={
-            !loadAddress && isValid
-              ? "primary"
-              : !addressInfo
-                ? "primary"
-                : "error"
-          }
+          color={!loadAddress && isValid ? "primary" : !addressInfo ? "primary" : "error"}
           disabled={loadAddress}
           onClick={handleOpen}
         >
           Thay đổi
         </Button>
         <IconButton
-          sx={{ mr: -1, display: { xs: "block", sm: "none" } }}
+          sx={{ mr: -1, display: { xs: "flex", sm: "none" } }}
           aria-label="mobile toggle address dialog"
           onClick={handleOpen}
-          color={
-            !loadAddress && isValid
-              ? "primary"
-              : !addressInfo
-                ? "primary"
-                : "error"
-          }
+          color={!loadAddress && isValid ? "primary" : !addressInfo ? "primary" : "error"}
           disabled={loadAddress}
           edge="end"
         >

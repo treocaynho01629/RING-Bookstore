@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { defaultLocale } from "@ring/i18n/locales";
+import { defaultLocale } from "@ring/shared/enums/locales";
 
 const initialState = { keywords: [], lang: defaultLocale };
 
@@ -17,9 +17,7 @@ export const appSlice = createSlice({
       }
     },
     removeKeyword: (state, action) => {
-      state.keywords = state.keywords.filter(
-        (keyword) => keyword !== action.payload
-      );
+      state.keywords = state.keywords.filter((keyword) => keyword !== action.payload);
     },
     resetKeywords: (state) => {
       state.keywords = [];
@@ -30,8 +28,7 @@ export const appSlice = createSlice({
   },
 });
 
-export const { addKeyword, removeKeyword, resetKeywords, setLanguage } =
-  appSlice.actions;
+export const { addKeyword, removeKeyword, resetKeywords, setLanguage } = appSlice.actions;
 export const selectKeywords = (state) => state.app.keywords;
 export const selectLanguage = (state) => state.app.lang;
 

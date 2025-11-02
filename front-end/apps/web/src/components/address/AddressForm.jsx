@@ -64,13 +64,9 @@ const AddressForm = ({
   handleClickRemove,
   handleUpdateAddress,
 }) => {
-  const [validPhone, setValidPhone] = useState(
-    PHONE_REGEX.test(addressInfo?.phone) || true
-  );
+  const [validPhone, setValidPhone] = useState(PHONE_REGEX.test(addressInfo?.phone) || true);
   const [currAddress, setCurrAddress] = useState(splitAddress(addressInfo));
-  const [setting, setSetting] = useState(() => [
-    addressInfo && addressInfo?.isDefault == null ? "temp" : null,
-  ]);
+  const [setting, setSetting] = useState(() => [addressInfo && addressInfo?.isDefault == null ? "temp" : null]);
 
   // Error message reset when reinput stuff
   useEffect(() => {
@@ -83,6 +79,11 @@ const AddressForm = ({
     setValidPhone(result);
   }, [currAddress.phone]);
 
+  /**
+   * Handle the submit event
+   * @param {object} e - Event object contains the target of the submit
+   * @returns {void}
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (pending) return;
@@ -121,9 +122,7 @@ const AddressForm = ({
       // Update
       if (addressInfo.isDefault != null) {
         // Saved address
-        isTemp
-          ? handleConvertAddress(newAddress, isTemp)
-          : handleUpdateAddress(newAddress, isDefault);
+        isTemp ? handleConvertAddress(newAddress, isTemp) : handleUpdateAddress(newAddress, isDefault);
       } else {
         // Stored address
         isDefault
@@ -135,14 +134,25 @@ const AddressForm = ({
     }
   };
 
+  /**
+   * Handle the setting change event
+   * @param {object} event - Event object contains the target of the setting change
+   * @param {string} newValue - The new value of the setting
+   * @returns {void}
+   */
   const handleSettingChange = (event, newValue) => {
     setSetting(newValue);
   };
 
+  /**
+   * Get the selected city
+   * @returns {object} - The selected city
+   */
   const selectedCity = location.filter((city) => {
     return city.name == currAddress?.city;
   });
 
+  // Render the select wards
   let selectWards;
 
   if (!selectedCity) {
@@ -179,9 +189,7 @@ const AddressForm = ({
         label="Phường/Xã"
         required
         value={currAddress?.ward || ""}
-        onChange={(e) =>
-          setCurrAddress({ ...currAddress, ward: e.target.value })
-        }
+        onChange={(e) => setCurrAddress({ ...currAddress, ward: e.target.value })}
         select
         error={(errMsg != "" || addressInfo) && !currAddress?.ward}
         defaultValue=""
@@ -223,10 +231,7 @@ const AddressForm = ({
       </DialogTitle>
       <DialogContent>
         <form style={{ paddingTop: 10 }} onSubmit={handleSubmit}>
-          <Instruction
-            display={errMsg ? "block" : "none"}
-            aria-live="assertive"
-          >
+          <Instruction display={errMsg ? "block" : "none"} aria-live="assertive">
             {errMsg}
           </Instruction>
           <Grid container size="grow" spacing={1}>
@@ -236,14 +241,9 @@ const AddressForm = ({
                 type="text"
                 id="fullName"
                 required
-                onChange={(e) =>
-                  setCurrAddress({ ...currAddress, name: e.target.value })
-                }
+                onChange={(e) => setCurrAddress({ ...currAddress, name: e.target.value })}
                 value={currAddress?.name}
-                error={
-                  ((errMsg != "" || addressInfo) && !currAddress?.name) ||
-                  err?.data?.errors?.name
-                }
+                error={((errMsg != "" || addressInfo) && !currAddress?.name) || err?.data?.errors?.name}
                 size="small"
                 fullWidth
                 slotProps={{
@@ -262,9 +262,7 @@ const AddressForm = ({
                 }
                 id="phone"
                 required
-                onValueChange={(values) =>
-                  setCurrAddress({ ...currAddress, phone: values.value })
-                }
+                onValueChange={(values) => setCurrAddress({ ...currAddress, phone: values.value })}
                 value={currAddress?.phone}
                 error={
                   ((errMsg != "" || addressInfo) && !currAddress?.phone) ||
@@ -308,9 +306,7 @@ const AddressForm = ({
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 label={err?.data?.errors?.type ?? "Loại địa chỉ"}
-                onChange={(e) =>
-                  setCurrAddress({ ...currAddress, type: e.target.value })
-                }
+                onChange={(e) => setCurrAddress({ ...currAddress, type: e.target.value })}
                 select
                 value={currAddress?.type || ""}
                 error={err?.data?.errors?.type}
@@ -341,10 +337,7 @@ const AddressForm = ({
                 }
                 select
                 defaultValue=""
-                error={
-                  ((errMsg != "" || addressInfo) && !currAddress?.city) ||
-                  err?.data?.errors?.city
-                }
+                error={((errMsg != "" || addressInfo) && !currAddress?.city) || err?.data?.errors?.city}
                 fullWidth
                 size="small"
                 slotProps={{
@@ -378,20 +371,18 @@ const AddressForm = ({
                 type="text"
                 autoComplete="on"
                 required
-                onChange={(e) =>
-                  setCurrAddress({ ...currAddress, address: e.target.value })
-                }
+                onChange={(e) => setCurrAddress({ ...currAddress, address: e.target.value })}
                 value={currAddress?.address}
-                error={
-                  ((errMsg != "" || addressInfo) && !currAddress?.address) ||
-                  err?.data?.errors?.address
-                }
+                error={((errMsg != "" || addressInfo) && !currAddress?.address) || err?.data?.errors?.address}
                 fullWidth
                 size="small"
                 multiline
                 minRows={4}
                 slotProps={{
                   inputComponent: TextareaAutosize,
+                  inputComponent: {
+                    "aria-label": "Address textarea",
+                  },
                   inputProps: {
                     minRows: 4,
                     style: { resize: "auto" },
@@ -402,10 +393,7 @@ const AddressForm = ({
                 }}
               />
             </Grid>
-            <Grid
-              size={12}
-              sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}
-            >
+            <Grid size={12} sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
               {addressInfo && !addressInfo?.isDefault && !isSelected && (
                 <Button
                   disabled={addressInfo?.isDefault || isSelected}
@@ -413,6 +401,7 @@ const AddressForm = ({
                   color="error"
                   size="large"
                   onClick={() => handleClickRemove(addressInfo)}
+                  aria-label="Delete button"
                 >
                   Xoá&nbsp;
                   <Delete />
@@ -422,23 +411,20 @@ const AddressForm = ({
                 color="primary"
                 value={setting}
                 onChange={handleSettingChange}
+                size="small"
                 sx={{ ml: "auto" }}
                 aria-label="Additional settings"
               >
                 <ToggleButton
-                  sx={{ py: 1, px: 1.5 }}
+                  sx={{ px: 2, textTransform: "none", fontSize: 15 }}
                   value="default"
-                  disabled={
-                    setting.includes("temp") ||
-                    addressInfo?.isDefault ||
-                    isSelected
-                  }
+                  disabled={setting.includes("temp") || addressInfo?.isDefault || isSelected}
                   aria-label="Default address"
                 >
                   Mặc định
                 </ToggleButton>
                 <ToggleButton
-                  sx={{ py: 1, px: 1.5 }}
+                  sx={{ px: 2, textTransform: "none", fontSize: 15 }}
                   value="temp"
                   disabled={setting.includes("default")}
                   aria-label="Temporary address"
@@ -457,6 +443,7 @@ const AddressForm = ({
           size="large"
           onClick={handleClose}
           startIcon={<CloseIcon />}
+          aria-label="Cancel button"
         >
           Huỷ
         </Button>
@@ -466,6 +453,7 @@ const AddressForm = ({
           size="large"
           onClick={handleSubmit}
           startIcon={<Check />}
+          aria-label="Apply button"
         >
           Áp dụng
         </Button>

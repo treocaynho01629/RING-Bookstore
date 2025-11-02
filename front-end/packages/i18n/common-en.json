@@ -1,12 +1,53 @@
 {
+  "theme": {
+    "label": "Theme",
+    "description": "Select your theme",
+    "dark": "Dark mode",
+    "light": "Light mode",
+    "system": "System"
+  },
+  "language": {
+    "label": "Language",
+    "description": "Select your language"
+  },
+  "welcome": "Welcome",
   "hello": "Hello",
-  "logout": "Log out",
   "login": "Login",
+  "login.title": "Login to your account",
+  "email": "email",
+  "email.placeholder": "Email address",
+  "username": "Username",
+  "password": "Password",
+  "password.confirm": "Confirm password",
+  "recaptcha": "Protected by reCAPTCHA and Google through",
+  "terms": "Terms of service",
+  "policy": "Privacy policy",
+  "persist": "Remember me",
+  "forgot": "Forgot password?",
+  "signup": "Sign up",
+  "signup.title": "Create a new account",
+  "signup.suggestions": "Don't have an account?",
+  "login.suggestions": "Already have an account?",
+  "help": "Help",
+  "logout": "Log out",
+  "logout.end": "Log out of this session?",
+  "notification": "Notification",
+  "profile": "Profile",
   "ring": "RING!",
-  "shop": "Shop",
+  "home": "Home",
+  "search": "Search",
+  "store": "store",
   "saved": "Saved",
   "items": "items",
+  "loading": "Loading...",
+  "pending": "Pending request...",
+  "select.all": "Select all",
+  "price": "Price",
+  "quantity": "Quantity",
+  "total": "Total",
+  "remove": "Remove",
   "unknown": "Unknown",
+  "partner": "Partner",
   "coupon": {
     "shipping": {
       "label": "Shipping discount",
@@ -60,5 +101,11 @@
         "label": "Refunded"
       }
     }
+  },
+  "message": {
+    "success": "{{action}} successfully"
+  },
+  "error": {
+    "server.not.response": "Server did not respond"
   }
 }

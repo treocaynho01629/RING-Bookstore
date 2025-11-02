@@ -9,7 +9,7 @@ export const addressSlice = createSlice({
     //Add address
     addAddress: (state, action) => {
       const item = state.addresses.find(
-        (item) => item.id === action.payload.id,
+        (item) => item.id === action.payload.id
       );
       if (item) {
         //Update old address
@@ -21,7 +21,7 @@ export const addressSlice = createSlice({
         item.type = action.payload.type;
       } else {
         //Add if not exists
-        let address = action.payload;
+        const address = action.payload;
         //Id increament
         const id = state.addresses.length
           ? state.addresses[state.addresses.length - 1].id.substring(2) + 1
@@ -32,7 +32,7 @@ export const addressSlice = createSlice({
     },
     removeStateAddress: (state, action) => {
       state.addresses = state.addresses.filter(
-        (item) => item.id !== action.payload,
+        (item) => item.id !== action.payload
       );
     },
   },
