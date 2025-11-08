@@ -1,9 +1,4 @@
-import {
-  TableCell,
-  tableCellClasses,
-  TableHead,
-  TableRow,
-} from "@mui/material";
+import { TableCell, tableCellClasses, TableHead, TableRow } from "@mui/material";
 import styled from "@emotion/styled";
 
 export const StyledTableCell = styled(TableCell)`
@@ -19,7 +14,7 @@ export const StyledTableCell = styled(TableCell)`
 
   &.${tableCellClasses.head} {
     font-weight: bold;
-    padding: 2px 8px;
+    padding: 2px 16px;
   }
 
   &.${tableCellClasses.paddingCheckbox} {

@@ -14,4 +14,6 @@ public interface ICoupon {
     String getShopName();
 
     IImage getShopImage();
+
+    Boolean getIsUsed();
 }

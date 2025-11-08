@@ -1,18 +1,18 @@
 import styled from "@emotion/styled";
-import { useRef, useState } from "react";
+import { lazy, Suspense, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { getImageSize } from "@ring/shared/enums/image";
 import { currencyFormat } from "@ring/shared/utils/convert";
-import Button from "@mui/material/Button";
+import Button, { buttonClasses } from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Skeleton from "@mui/material/Skeleton";
-import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import AddShoppingCart from "@mui/icons-material/AddShoppingCart";
 import useCart from "../../../hooks/useCart";
 import AmountInput from "../../custom/AmountInput";
 import useOffset from "../../../hooks/useOffset";
+
+const SwipeableDrawer = lazy(() => import("@mui/material/SwipeableDrawer"));
 
 //#region styled
 const AmountCount = styled.span`
@@ -79,6 +79,11 @@ const BuyButton = styled(Button)`
 
   ${({ theme }) => theme.breakpoints.down("md")} {
     margin-top: 0;
+    box-shadow: none;
+
+    .${buttonClasses.startIcon} {
+      margin: 0;
+    }
   }
 `;
 
@@ -89,11 +94,32 @@ const StyledImage = styled.img`
   border: 0.5px solid ${({ theme }) => theme.vars.palette.action.focus};
 `;
 
+const DrawerContainer = styled.div`
+  background-color: ${({ theme }) => theme.vars.palette.background.paper};
+  border-top: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
+  position: relative;
+  width: 100%;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: ${({ theme }) => theme.spacing(1)};
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 5px;
+    border-radius: 3px;
+    background-color: ${({ theme }) => theme.vars.palette.divider};
+  }
+`;
+
 const ProductDetailContainer = styled.div`
-  padding: 20px 10px 0px 10px;
+  padding: ${({ theme }) => theme.spacing(1.5)};
+  padding-bottom: ${({ theme }) => theme.spacing(2)};
   display: flex;
   align-items: flex-end;
   position: relative;
+  border-bottom: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
 `;
 
 const Price = styled.span`
@@ -113,33 +139,61 @@ const ImageSize = getImageSize();
 const MIN_VALUE = 1;
 const MAX_VALUE = 199;
 
-const ProductAction = ({ book }) => {
-  const overlapRef = useRef(null);
+export const ActionButtons = ({ book, outlined = false }) => {
   const navigate = useNavigate();
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md"));
-  const [amountIndex, setAmountIndex] = useState(1); //Amount add to cart
-  const [open, setOpen] = useState(false);
-  const [openNow, setOpenNow] = useState(false);
+  const [amountIndex, setAmountIndex] = useState(1); // Amount add to cart
   const { addProduct } = useCart();
 
-  //Change add amount
+  const [open, setOpen] = useState(false);
+  const [openNow, setOpenNow] = useState(false);
+
+  /**
+   * Change amount add to cart
+   */
   const changeAmount = (n) => {
-    setAmountIndex((prev) =>
-      prev + n < MIN_VALUE
-        ? MIN_VALUE
-        : prev + n > (book?.amount ?? MAX_VALUE)
-          ? (book?.amount ?? MAX_VALUE)
-          : prev + n
-    );
+    setAmountIndex((prev) => {
+      if (+prev + n < MIN_VALUE) return MIN_VALUE;
+      if (+prev + n > (book?.amount ?? MAX_VALUE)) return book?.amount ?? MAX_VALUE;
+      return +prev + n;
+    });
   };
 
-  const handleChangeAmount = (value) => {
-    let newValue = value;
-    if (newValue < MIN_VALUE || !Number.isInteger(newValue))
-      newValue = MIN_VALUE;
-    if (newValue > (book?.amount ?? MAX_VALUE))
-      newValue = book?.amount ?? MAX_VALUE;
+  /**
+   * Handle change amount input
+   */
+  const handleChangeAmount = (e) => {
+    let newValue = e.target.value;
+    if (isNaN(newValue)) newValue = "";
+
+    if (newValue != "") {
+      if (newValue < MIN_VALUE) newValue = MIN_VALUE;
+      if (newValue > (book?.amount ?? MAX_VALUE)) newValue = book?.amount ?? MAX_VALUE;
+    }
+
     setAmountIndex(newValue);
+  };
+
+  /**
+   * Handle blur amount input
+   */
+  const handleBlurAmount = (e) => {
+    let newValue = e.target.value;
+    if (newValue == "" || isNaN(Number(newValue))) {
+      newValue = MIN_VALUE;
+      setAmountIndex(newValue);
+    }
+  };
+
+  // Add to cart
+  const handleAddToCart = (book) => {
+    handleClose();
+    addProduct(book, amountIndex);
+  };
+
+  const handleBuyNow = (book) => {
+    handleAddToCart(book);
+    navigate("/cart");
   };
 
   const handleOpen = () => {
@@ -157,51 +211,35 @@ const ProductAction = ({ book }) => {
     setOpenNow(false);
   };
 
-  //Add to cart
-  const handleAddToCart = (book) => {
-    handleClose();
-    addProduct(book, amountIndex);
-  };
-
-  const handleBuyNow = (book) => {
-    handleAddToCart(book);
-    navigate("/cart");
-  };
-
-  //Prevent overlap
-  useOffset(overlapRef);
-
-  return (
+  return tabletMode ? (
     <>
-      {tabletMode ? (
-        <>
-          <AltFilterContainer ref={overlapRef}>
-            <BuyButton
-              variant="contained"
-              color="secondary"
-              size="large"
-              fullWidth
-              sx={{ maxWidth: { xs: "35%", sm: "45%" }, mr: { xs: 0, sm: 1 } }}
-              disabled={!book || book?.amount == 0}
-              onClick={handleOpen}
-              startIcon={<AddShoppingCart />}
-            >
-              <Box display={{ xs: "none", sm: "block" }}>Thêm vào giỏ</Box>
-            </BuyButton>
-            <BuyButton
-              variant="contained"
-              size="large"
-              fullWidth
-              disabled={!book || book?.amount == 0}
-              onClick={handleOpenNow}
-            >
-              {!book
-                ? "Đang tải"
-                : book?.amount == 0
-                  ? "Hết hàng"
-                  : `Mua ngay (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`}
-            </BuyButton>
-          </AltFilterContainer>
+      <BuyButton
+        variant={outlined ? "outlined" : "contained"}
+        color="secondary"
+        size="large"
+        fullWidth
+        sx={{ maxWidth: { xs: "35%", sm: "45%" }, mr: { xs: 0, sm: 1 } }}
+        disabled={!book || book?.amount == 0}
+        onClick={handleOpen}
+        startIcon={<AddShoppingCart />}
+      >
+        <Box display={{ xs: "none", sm: "block" }}>Thêm vào giỏ</Box>
+      </BuyButton>
+      <BuyButton
+        variant={outlined ? "outlined" : "contained"}
+        size="large"
+        fullWidth
+        disabled={!book || book?.amount == 0}
+        onClick={handleOpenNow}
+      >
+        {!book
+          ? "Đang tải"
+          : book?.amount == 0
+            ? "Hết hàng"
+            : `Mua ngay (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`}
+      </BuyButton>
+      {tabletMode && (
+        <Suspense fallback={null}>
           <SwipeableDrawer
             anchor="bottom"
             open={open || openNow}
@@ -209,146 +247,137 @@ const ProductAction = ({ book }) => {
             onClose={handleClose}
             disableBackdropTransition
             disableSwipeToOpen={true}
+            sx={{ zIndex: (theme) => theme.zIndex.modal + 1 }}
           >
-            <ProductDetailContainer>
-              <StyledImage
-                src={book?.image?.srcSet[ImageSize?.MEDIUM?.value]}
-                alt={`${book?.title} preview image`}
-                sizes="250px"
-              />
-              <Box>
-                <Box display="flex">
-                  <Price>
-                    {currencyFormat.format(book?.price * (1 - book?.discount))}
-                  </Price>
-                  {book?.discount > 0 && (
-                    <Discount>{currencyFormat.format(book?.price)}</Discount>
-                  )}
+            <DrawerContainer>
+              <ProductDetailContainer>
+                <StyledImage
+                  src={book?.image?.srcSet[ImageSize?.MEDIUM?.value]}
+                  alt={`${book?.title} preview image`}
+                  sizes="250px"
+                />
+                <Box>
+                  <Box display="flex">
+                    <Price>{currencyFormat.format(book?.price * (1 - book?.discount))}</Price>
+                    {book?.discount > 0 && <Discount>{currencyFormat.format(book?.price)}</Discount>}
+                  </Box>
+                  <AmountCount className={book?.amount > 0 ? "" : "error"}>
+                    {book?.amount > 0 ? `(${book?.amount}) sản phẩm còn lại` : "Tạm thời hết hàng"}
+                  </AmountCount>
                 </Box>
-                <AmountCount className={book?.amount > 0 ? "" : "error"}>
-                  {book?.amount > 0
-                    ? `(${book?.amount}) sản phẩm còn lại`
-                    : "Tạm thời hết hàng"}
-                </AmountCount>
+              </ProductDetailContainer>
+              <Box display="flex" alignItems="center" justifyContent={"space-between"} px={1.5} pt={2} pb={1}>
+                <DetailTitle>Số lượng:</DetailTitle>
+                <AmountInput
+                  disabled={!book || book?.amount == 0}
+                  size="small"
+                  min={MIN_VALUE}
+                  max={book?.amount ?? MAX_VALUE}
+                  value={amountIndex}
+                  error={1 > amountIndex > (book?.amount ?? MAX_VALUE)}
+                  onChange={handleChangeAmount}
+                  onBlur={handleBlurAmount}
+                  handleDecrease={() => changeAmount(-1)}
+                  handleIncrease={() => changeAmount(1)}
+                />
               </Box>
-            </ProductDetailContainer>
-            <Divider sx={{ my: 2 }} />
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent={"space-between"}
-              padding={"0 10px"}
-              mb={1}
-            >
-              <DetailTitle>Số lượng:</DetailTitle>
-              <AmountInput
-                disabled={!book || book?.amount == 0}
-                size="small"
-                min={MIN_VALUE}
-                max={book?.amount ?? MAX_VALUE}
-                value={amountIndex}
-                error={1 > amountIndex > (book?.amount ?? MAX_VALUE)}
-                onChange={(e) => handleChangeAmount(e.target.valueAsNumber)}
-                handleDecrease={() => changeAmount(-1)}
-                handleIncrease={() => changeAmount(1)}
-              />
-            </Box>
-            {openNow ? (
-              <BuyButton
-                variant="outlined"
-                color="warning"
-                size="large"
-                sx={{ margin: "5px" }}
-                onClick={() => handleBuyNow(book)}
-              >
-                {!book
-                  ? "Đang tải"
-                  : book?.amount == 0
-                    ? "Hết hàng"
-                    : `Mua ngay (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`}
-              </BuyButton>
-            ) : (
-              <BuyButton
-                variant="outlined"
-                color="primary"
-                size="large"
-                sx={{ margin: "5px" }}
-                onClick={() => handleAddToCart(book)}
-              >
-                {!book
-                  ? "Đang tải"
-                  : book?.amount == 0
-                    ? "Hết hàng"
-                    : `Thêm vào giỏ (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`}
-              </BuyButton>
-            )}
+              <Box p={1}>
+                <BuyButton
+                  variant="outlined"
+                  color={openNow ? "warning" : "primary"}
+                  size="large"
+                  fullWidth
+                  onClick={openNow ? () => handleBuyNow(book) : () => handleAddToCart(book)}
+                >
+                  {!book
+                    ? "Đang tải"
+                    : book?.amount == 0
+                      ? "Hết hàng"
+                      : openNow
+                        ? `Mua ngay (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`
+                        : `Thêm vào giỏ (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`}
+                </BuyButton>
+              </Box>
+            </DrawerContainer>
           </SwipeableDrawer>
-        </>
+        </Suspense>
+      )}
+    </>
+  ) : (
+    <>
+      <Box display="flex" alignItems="center" flexWrap="wrap">
+        <DetailTitle style={{ marginRight: 20 }}>Số lượng:</DetailTitle>
+        <Box display="flex" alignItems="center" my={1}>
+          <AmountInput
+            disabled={!book || book?.amount == 0}
+            size="small"
+            min={MIN_VALUE}
+            max={book?.amount ?? MAX_VALUE}
+            value={amountIndex}
+            error={1 > amountIndex > (book?.amount ?? MAX_VALUE)}
+            onChange={handleChangeAmount}
+            onBlur={handleBlurAmount}
+            handleDecrease={() => changeAmount(-1)}
+            handleIncrease={() => changeAmount(1)}
+          />
+          {book ? (
+            <AmountCount className={book?.amount > 0 ? "" : "error"}>
+              {book?.amount > 0 ? `(${book?.amount}) sản phẩm còn lại` : "Tạm thời hết hàng"}
+            </AmountCount>
+          ) : (
+            <Skeleton variant="text" sx={{ fontSize: "14px", marginLeft: 2 }} width={200} />
+          )}
+        </Box>
+      </Box>
+      <Box position="sticky" height={55} bottom={16} bgcolor={"background.paper"}>
+        <Box display="flex" alignItems="center" height={47}>
+          <BuyButton
+            variant="contained"
+            size="large"
+            fullWidth
+            sx={{ maxWidth: "40%", marginRight: 1 }}
+            disabled={!book || book?.amount == 0}
+            onClick={() => handleBuyNow(book)}
+          >
+            Mua ngay
+          </BuyButton>
+          <BuyButton
+            variant="outlined"
+            color="secondary"
+            size="large"
+            fullWidth
+            disabled={!book || book?.amount == 0}
+            onClick={() => handleAddToCart(book)}
+            startIcon={<AddShoppingCart fontSize="small" />}
+          >
+            {!book
+              ? "Đang tải"
+              : book?.amount == 0
+                ? "Hết hàng"
+                : `Thêm vào giỏ (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`}
+          </BuyButton>
+        </Box>
+      </Box>
+    </>
+  );
+};
+
+const ProductAction = ({ book }) => {
+  const overlapRef = useRef(null);
+  const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md"));
+
+  // Prevent overlap
+  useOffset(overlapRef);
+
+  return (
+    <>
+      {tabletMode ? (
+        <AltFilterContainer ref={overlapRef}>
+          <ActionButtons book={book} />
+        </AltFilterContainer>
       ) : (
         <FilterContainer>
-          <Box display="flex" alignItems="center" flexWrap="wrap">
-            <DetailTitle style={{ marginRight: 20 }}>Số lượng:</DetailTitle>
-            <Box display="flex" alignItems="center" my={1}>
-              <AmountInput
-                disabled={!book || book?.amount == 0}
-                size="small"
-                min={MIN_VALUE}
-                max={book?.amount ?? MAX_VALUE}
-                value={amountIndex}
-                error={1 > amountIndex > (book?.amount ?? MAX_VALUE)}
-                onChange={(e) => handleChangeAmount(e.target.valueAsNumber)}
-                handleDecrease={() => changeAmount(-1)}
-                handleIncrease={() => changeAmount(1)}
-              />
-              {book ? (
-                <AmountCount className={book?.amount > 0 ? "" : "error"}>
-                  {book?.amount > 0
-                    ? `(${book?.amount}) sản phẩm còn lại`
-                    : "Tạm thời hết hàng"}
-                </AmountCount>
-              ) : (
-                <Skeleton
-                  variant="text"
-                  sx={{ fontSize: "14px", marginLeft: 2 }}
-                  width={200}
-                />
-              )}
-            </Box>
-          </Box>
-          <Box
-            position="sticky"
-            height={55}
-            bottom={16}
-            bgcolor={"background.paper"}
-          >
-            <Box display="flex" alignItems="center" height={47}>
-              <BuyButton
-                variant="contained"
-                size="large"
-                fullWidth
-                sx={{ maxWidth: "40%", marginRight: 1 }}
-                disabled={!book || book?.amount == 0}
-                onClick={() => handleBuyNow(book)}
-              >
-                Mua ngay
-              </BuyButton>
-              <BuyButton
-                variant="outlined"
-                color="secondary"
-                size="large"
-                fullWidth
-                disabled={!book || book?.amount == 0}
-                onClick={() => handleAddToCart(book)}
-                startIcon={<AddShoppingCart fontSize="small" />}
-              >
-                {!book
-                  ? "Đang tải"
-                  : book?.amount == 0
-                    ? "Hết hàng"
-                    : `Thêm vào giỏ (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`}
-              </BuyButton>
-            </Box>
-          </Box>
+          <ActionButtons book={book} />
         </FilterContainer>
       )}
     </>

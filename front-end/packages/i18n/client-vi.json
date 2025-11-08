@@ -10,9 +10,9 @@
     "add": "Thêm vào giỏ",
     "add.success": "Đã thêm sản phẩm vào giỏ hàng!",
     "discount": "Khuyến mãi",
+    "more": "Và {{quantity}} sản phẩm khác",
     "items.left": "Còn {{quantity}} sản phẩm",
     "items.out": "Hết hàng",
-    "select.suggestion": "Vui lòng chọn sản phẩm",
     "estimate": "Đơn dự tính",
     "find.similar": "Tìm sản phẩm tương tự",
     "remove": "Xoá khỏi giỏ?",
@@ -21,18 +21,43 @@
     "remove.message": "Một số sản phẩm sau đã bị gỡ khỏi trang:",
     "coupon.add": "Thêm mã giảm giá",
     "coupon.change": "Chọn mã giảm giá khác",
-    "coupon.discount.applied": "Đã giảm {{discount}}",
-    "coupon.discount.criteria": "Mua thêm để {{criteria}}"
+    "coupon.saved": "Đã giảm {{discount}}",
+    "coupon.criteria": "Mua thêm để {{criteria}}",
+    "coupon.applied": "Đã áp dụng",
+    "coupon.apply": "Áp dụng mã giảm giá",
+    "saved": "Tiết kiệm {{discount}}",
+    "vat.included": "Đã bao gồm VAT nếu có",
+    "total": "Tổng thanh toán: ({{quantity}} Sản phẩm)",
+    "subtotal": "Tiền hàng",
+    "shipping.fee": "Phí vận chuyển",
+    "shipping.discount": "Khuyến mãi vận chuyển",
+    "product.discount": "Giảm giá sản phẩm",
+    "coupon.discount": "Giảm giá từ coupon"
   },
-  "shop.explore": "Duyệt cửa hàng",
   "order": {
     "label": "Đơn giao"
   },
+  "coupon": {
+    "title": "Thông tin ưu đãi",
+    "discount": "Mã giảm giá",
+    "shipping": "Mã vận chuyển",
+    "saved": "Mã đã lưu",
+    "invalid": "Mã không hợp lệ",
+    "expired.date": "HSD:",
+    "expired.usage": "Còn: {{count}} lượt",
+    "used": "Đã qua sử dụng",
+    "not.usable": "Chưa thoã điều kiện",
+    "add": "Nhập mã giảm giá",
+    "not.found": "Hiện không có khuyến mãi"
+  },
+  "shop.explore": "Duyệt cửa hàng",
   "search.store": "trong cửa hàng",
   "search.for": "Tìm kiếm {{value}}:",
   "search.history": "Lịch sử tìm kiếm",
   "search.remove": "Xóa '{{value}}' khỏi lịch sử tìm kiếm",
   "search.clear": "Xóa lịch sử tìm kiếm",
   "search.close": "Đóng hộp thoại tìm kiếm",
-  "search.suggest": "Gợi ý"
+  "search.suggest": "Gợi ý",
+  "required.login": "Vui lòng đăng nhập để {{action}}",
+  "required.select": "Vui lòng chọn sản phẩm trong giỏ"
 }

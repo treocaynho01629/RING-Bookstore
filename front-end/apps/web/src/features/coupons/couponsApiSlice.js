@@ -10,7 +10,7 @@ export const couponsApiSlice = initialsApiSlice.injectEndpoints({
       query: (args) => {
         const { code, shopId, cValue, cQuantity } = args || {};
 
-        //Params
+        // Params
         const params = new URLSearchParams();
         if (shopId) params.append("shopId", shopId);
         if (cValue) params.append("cValue", cValue);
@@ -23,15 +23,13 @@ export const couponsApiSlice = initialsApiSlice.injectEndpoints({
           },
         };
       },
-      providesTags: (result, error) => [
-        result ? { type: "Coupon", id: result.id } : { type: "Coupon" },
-      ],
+      providesTags: (result, error) => [result ? { type: "Coupon", id: result.id } : { type: "Coupon" }],
     }),
     getRecommendCoupons: builder.query({
       query: (args) => {
         const { shopIds } = args || {};
 
-        //Params
+        // Params
         const params = new URLSearchParams();
         if (shopIds) params.append("shopIds", shopIds);
 
@@ -47,18 +45,11 @@ export const couponsApiSlice = initialsApiSlice.injectEndpoints({
       },
       providesTags: (result, error, arg) => {
         if (result?.ids) {
-          return [
-            { type: "Coupon", id: "LIST" },
-            ...result.ids.map((id) => ({ type: "Coupon", id })),
-          ];
+          return [{ type: "Coupon", id: "LIST" }, ...result.ids.map((id) => ({ type: "Coupon", id }))];
         } else return [{ type: "Coupon", id: "LIST" }];
       },
     }),
   }),
 });
 
-export const {
-  useGetCouponQuery,
-  useGetCouponsQuery,
-  useGetRecommendCouponsQuery,
-} = couponsApiSlice;
+export const { useGetCouponQuery, useGetCouponsQuery, useGetRecommendCouponsQuery } = couponsApiSlice;

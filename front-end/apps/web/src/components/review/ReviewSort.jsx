@@ -8,7 +8,6 @@ import Star from "@mui/icons-material/Star";
 const SortContainer = styled.div`
   display: flex;
   align-items: center;
-  padding: 5px 0;
 `;
 
 const SortLabel = styled.b`
@@ -20,23 +19,11 @@ const SortLabel = styled.b`
 `;
 //#endregion
 
-const ReviewSort = ({
-  sortBy,
-  handleChangeOrder,
-  filterBy,
-  handleChangeFilter,
-  count,
-}) => {
+const ReviewSort = ({ sortBy, handleChangeOrder, filterBy, handleChangeFilter, count }) => {
   return (
     <SortContainer>
       <SortLabel>Lọc theo</SortLabel>
-      <TextField
-        size="small"
-        select
-        value={sortBy}
-        onChange={handleChangeOrder}
-        sx={{ marginRight: 1 }}
-      >
+      <TextField size="small" select value={sortBy} onChange={handleChangeOrder} sx={{ marginRight: 1, width: 190 }}>
         <MenuItem value={"createdDate"}>Xếp theo mới nhất</MenuItem>
         <MenuItem value={"rating"}>Xếp theo đánh giá</MenuItem>
       </TextField>
@@ -45,20 +32,19 @@ const ReviewSort = ({
         select
         value={filterBy}
         onChange={handleChangeFilter}
+        sx={{ width: 190 }}
         slotProps={{
           input: {
-            startAdornment: (
-              <Star fontSize="inherit" sx={{ mr: 1, color: "warning.light" }} />
-            ),
+            startAdornment: <Star fontSize="inherit" sx={{ mr: 1, color: "warning.light" }} />,
           },
         }}
       >
         <MenuItem value={"all"} selected>
-          Tất cả
+          Tất cả đánh giá
         </MenuItem>
-        {Object.entries(rateLabels).map(([value, label]) => (
-          <MenuItem key={`filter-item=${value}`} value={value}>
-            {value} ({label} - {count[value - 1]})
+        {[...Array(5)].map((item, index) => (
+          <MenuItem key={`filter-item=${index}`} value={index + 1}>
+            {index + 1} sao ({count[index]})
           </MenuItem>
         ))}
       </TextField>

@@ -1,22 +1,15 @@
-import {
-  Fragment,
-  Suspense,
-  useCallback,
-  useState,
-  useEffect,
-  lazy,
-} from "react";
+import { Fragment, Suspense, useCallback, useState, useEffect, lazy } from "react";
 import { useGetMyReviewsQuery } from "../../features/reviews/reviewsApiSlice";
-import { Message, Title } from "@ring/ui/Components";
-import { Link } from "react-router";
+import { Message } from "@ring/ui/Components";
 import { debounce } from "lodash-es";
-import useAuth from "../../hooks/useAuth";
 import {
   LoadContainer,
   MessageContainer,
   PlaceholderContainer,
   StyledEmptyIcon,
+  StyledDialogTitle,
 } from "../custom/ProfileComponents";
+import useAuth from "../../hooks/useAuth";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import Try from "@mui/icons-material/Try";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -34,7 +27,7 @@ const ReviewsContainer = styled.div`
 
 const defaultSize = 5;
 
-const ReviewsList = ({ mobileMode, tabletMode, pending, setPending }) => {
+const ReviewsList = ({ mobileMode, tabletMode, pending, setPending, handleClose }) => {
   const { username } = useAuth();
   const [openForm, setOpenForm] = useState(undefined);
   const [contextReview, setContextReview] = useState(null);
@@ -45,24 +38,17 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending }) => {
   });
 
   //Fetch orders
-  const { data, isLoading, isFetching, isSuccess, isError, error } =
-    useGetMyReviewsQuery({
-      page: pagination?.number,
-      size: pagination?.size,
-      loadMore: pagination?.isMore,
-    });
+  const { data, isLoading, isFetching, isSuccess, isError, error } = useGetMyReviewsQuery({
+    page: pagination?.number,
+    size: pagination?.size,
+    loadMore: pagination?.isMore,
+  });
 
   //Show more
   const handleShowMore = () => {
-    if (
-      isFetching ||
-      typeof data?.page !== "number" ||
-      data?.page < pagination?.number
-    )
-      return;
+    if (isFetching || typeof data?.page !== "number" || data?.page < pagination?.number) return;
     const nextPage = data?.page + 1;
-    if (nextPage < data?.totalPages)
-      setPagination((prev) => ({ ...prev, number: nextPage }));
+    if (nextPage < data?.totalPages) setPagination((prev) => ({ ...prev, number: nextPage }));
   };
 
   const handleOpenEdit = (review) => {
@@ -74,20 +60,16 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending }) => {
   };
 
   const handleWindowScroll = (e) => {
-    const trigger =
-      document.body.scrollHeight - 300 < window.scrollY + window.innerHeight;
+    const trigger = document.body.scrollHeight - 300 < window.scrollY + window.innerHeight;
     if (trigger) handleShowMore();
   };
 
   const handleScroll = (e) => {
-    const trigger =
-      e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
+    const trigger = e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
     if (trigger) handleShowMore();
   };
 
-  const windowScrollListener = useCallback(debounce(handleWindowScroll, 500), [
-    data,
-  ]);
+  const windowScrollListener = useCallback(debounce(handleWindowScroll, 500), [data]);
   const scrollListener = useCallback(debounce(handleScroll, 500), [data]);
 
   useEffect(() => {
@@ -120,11 +102,7 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending }) => {
 
             return (
               <Fragment key={`${id}-${index}`}>
-                <ReviewItem
-                  review={review}
-                  isPreview={true}
-                  handleClick={() => handleOpenEdit(review)}
-                />
+                <ReviewItem review={review} isPreview={true} handleClick={() => handleOpenEdit(review)} />
               </Fragment>
             );
           })
@@ -148,15 +126,15 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending }) => {
 
   return (
     <>
-      <Title color="primary">
-        <Link to={-1}>
+      <StyledDialogTitle>
+        <a onClick={handleClose}>
           <KeyboardArrowLeft />
-        </Link>
+        </a>
         <Try />
         &nbsp;ĐÁNH GIÁ CỦA BẠN
-      </Title>
+      </StyledDialogTitle>
       <DialogContent
-        sx={{ py: 0, px: { xs: 1, sm: 2, md: 0 } }}
+        sx={{ py: 0, px: { xs: 1, sm: 2, md: 0 }, height: { xs: "100dvh", md: "auto" } }}
         onScroll={tabletMode ? scrollListener : undefined}
       >
         <ReviewsContainer>
@@ -166,10 +144,9 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending }) => {
               <CircularProgress size={30} color="primary" />
             </LoadContainer>
           )}
-          {data?.ids?.length > 0 &&
-            data?.ids?.length == data?.totalElements && (
-              <Message color="warning">Không còn đánh giá nào!</Message>
-            )}
+          {data?.ids?.length > 0 && data?.ids?.length == data?.totalElements && (
+            <Message color="warning">Không còn đánh giá nào!</Message>
+          )}
         </ReviewsContainer>
       </DialogContent>
       {openForm !== undefined && (

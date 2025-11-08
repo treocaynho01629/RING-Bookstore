@@ -1,8 +1,8 @@
 import styled from "@emotion/styled";
-import { useCallback, useEffect, useState, lazy, Suspense, useRef } from "react";
+import { useCallback, useEffect, useState, lazy, Suspense, useRef, forwardRef } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { useGetBooksSuggestionQuery } from "../../features/books/booksApiSlice";
-import { debounce } from "lodash-es";
+import { debounce, capitalize } from "lodash-es";
 import { createFilterOptions } from "@mui/material/useAutocomplete";
 import { inputBaseClasses } from "@mui/material/InputBase";
 import { useTranslation } from "react-i18next";
@@ -19,6 +19,7 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import useAutocomplete from "@mui/material/useAutocomplete";
 import useApp from "../../hooks/useApp";
+import Slide from "@mui/material/Slide";
 
 const Dialog = lazy(() => import("@mui/material/Dialog"));
 const DialogContent = lazy(() => import("@mui/material/DialogContent"));
@@ -400,7 +401,9 @@ const AutocompleteComponent = ({
               </StyledIconButton>
             )}
             <StyledSearchInput
-              placeholder={`${t("search")}${isShop ? (id ? " " + t("search.store", { ns: "client" }) : " " + t("store")) : ""}...`}
+              placeholder={capitalize(
+                `${t("search")} ${isShop ? (id ? t("search.store", { ns: "client" }) : t("store")) : ""}...`
+              )}
               size="small"
               autoFocus
               slotProps={{
@@ -445,14 +448,14 @@ const AutocompleteComponent = ({
                                 <ListLink to={`/shop?q=${option.value}`}>
                                   <ItemTitle>
                                     <Storefront color="success" />
-                                    {t("search.for", { ns: "client", value: t("store") })} "{option.value}"
+                                    {capitalize(t("search.for", { ns: "client", value: t("store") }))} "{option.value}"
                                   </ItemTitle>
                                 </ListLink>
                               ) : option?.group == "STORE" ? (
                                 <ListLink to={`/store?q=${option.value}`}>
                                   <ItemTitle>
                                     <CategoryOutlined color="success" />
-                                    {t("search.for", { ns: "client", value: t("items") })} "{option.value}"
+                                    {capitalize(t("search.for", { ns: "client", value: t("items") }))} "{option.value}"
                                   </ItemTitle>
                                 </ListLink>
                               ) : option?.group == "HISTORY" ? (
@@ -493,7 +496,9 @@ const AutocompleteComponent = ({
         <>
           <SearchInputContainer>
             <StyledSearchInput
-              placeholder={`${t("search")}${isShop ? (id ? " " + t("search.store", { ns: "client" }) : " " + t("store")) : ""}...`}
+              placeholder={capitalize(
+                `${t("search")} ${isShop ? (id ? t("search.store", { ns: "client" }) : t("store")) : ""}...`
+              )}
               size="small"
               slotProps={{
                 input: {
@@ -523,14 +528,14 @@ const AutocompleteComponent = ({
                         <ListLink className="alt" to={`/shop?q=${option.value}`}>
                           <ItemTitle>
                             <Storefront color="primary" />
-                            {t("search.for", { ns: "client", value: t("store") })} "{option.value}"
+                            {capitalize(t("search.for", { ns: "client", value: t("store") }))} "{option.value}"
                           </ItemTitle>
                         </ListLink>
                       ) : option?.group == "STORE" ? (
                         <ListLink className="alt" to={`/store?q=${option.value}`}>
                           <ItemTitle>
                             <CategoryOutlined color="success" />
-                            {t("search.for", { ns: "client", value: t("items") })} "{option.value}"
+                            {capitalize(t("search.for", { ns: "client", value: t("items") }))} "{option.value}"
                           </ItemTitle>
                         </ListLink>
                       ) : option?.group == "HISTORY" ? (
@@ -567,6 +572,10 @@ const AutocompleteComponent = ({
     </SearchForm>
   );
 };
+
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="left" ref={ref} {...props} />;
+});
 
 const SearchInput = ({ mobileMode, tabletMode, show, isFocus, isShop }) => {
   const displayRef = useRef();
@@ -614,7 +623,9 @@ const SearchInput = ({ mobileMode, tabletMode, show, isFocus, isShop }) => {
       {tabletMode ? (
         <AutocompleteContainer className={show ? "" : "hidden"}>
           <StyledSearchInput
-            placeholder={`${t("search")}${isShop ? (id ? " " + t("search.store", { ns: "client" }) : " " + t("store")) : ""}...`}
+            placeholder={capitalize(
+              `${t("search")} ${isShop ? (id ? t("search.store", { ns: "client" }) : t("store")) : ""}...`
+            )}
             size="small"
             value={displayRef.current}
             onClick={handleOpenDialog}
@@ -634,6 +645,9 @@ const SearchInput = ({ mobileMode, tabletMode, show, isFocus, isShop }) => {
               fullScreen={mobileMode}
               aria-labelledby="search-dialog"
               closeAfterTransition={false}
+              slots={{
+                transition: Transition,
+              }}
               slotProps={{
                 paper: {
                   elevation: 2,

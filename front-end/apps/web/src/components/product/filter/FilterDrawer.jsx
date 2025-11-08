@@ -1,14 +1,8 @@
 import styled from "@emotion/styled";
 import { Fragment, useState, useEffect, memo, useRef } from "react";
 import { getBookType } from "@ring/shared/enums/book";
-import {
-  useGetCategoriesQuery,
-  useGetRelevantCategoriesQuery,
-} from "../../../features/categories/categoriesApiSlice";
-import {
-  useGetPublishersQuery,
-  useGetRelevantPublishersQuery,
-} from "../../../features/publishers/publishersApiSlice";
+import { useGetCategoriesQuery, useGetRelevantCategoriesQuery } from "../../../features/categories/categoriesApiSlice";
+import { useGetPublishersQuery, useGetRelevantPublishersQuery } from "../../../features/publishers/publishersApiSlice";
 import { suggestPrices } from "../../../utils/filters";
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
@@ -190,7 +184,7 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
     }
   }, [data]);
 
-  //Open sub cate
+  // Open sub cate
   const handleCateChange = (cate) => {
     onChangeCate({ id: cate?.id ?? "", slug: cate?.slug ?? "" });
   };
@@ -234,8 +228,7 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
 
       ids?.forEach((id, index) => {
         const cate = entities[id];
-        const containedSelected =
-          cate?.children && cate?.children.some((child) => child.id == cateId);
+        const containedSelected = cate?.children && cate?.children.some((child) => child.id == cateId);
         if (containedSelected) childContainedRef.current = id;
         const item = (
           <Fragment key={`cate-${id}-${index}`}>
@@ -248,29 +241,15 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
                 open[id] ? (
                   <ExpandLess onClick={(e) => handleClick(e, id)} />
                 ) : (
-                  <Badge
-                    color="primary"
-                    variant="dot"
-                    invisible={!containedSelected}
-                  >
+                  <Badge color="primary" variant="dot" invisible={!containedSelected}>
                     <ExpandMore onClick={(e) => handleClick(e, id)} />
                   </Badge>
                 )
               ) : null}
             </StyledButton>
             {cate?.children && (
-              <Collapse
-                in={open[id]}
-                sx={{ width: "100%" }}
-                timeout="auto"
-                unmountOnExit
-              >
-                <StyledStack
-                  spacing={1}
-                  direction="row"
-                  useFlexGap
-                  flexWrap="wrap"
-                >
+              <Collapse in={open[id]} sx={{ width: "100%" }} timeout="auto" unmountOnExit>
+                <StyledStack spacing={1} direction="row" useFlexGap flexWrap="wrap">
                   {cate.children?.map((child, subIndex) => (
                     <StyledButton
                       key={`${child?.id}-${subIndex}`}
@@ -296,18 +275,8 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
       catesContent = (
         <>
           {limitContent}
-          <Collapse
-            in={showmore}
-            sx={{ width: "100%" }}
-            timeout="auto"
-            unmountOnExit
-          >
-            <Stack
-              spacing={{ xs: 1 }}
-              direction="row"
-              useFlexGap
-              flexWrap="wrap"
-            >
+          <Collapse in={showmore} sx={{ width: "100%" }} timeout="auto" unmountOnExit>
+            <Stack spacing={{ xs: 1 }} direction="row" useFlexGap flexWrap="wrap">
               {collapseContent}
             </Stack>
           </Collapse>
@@ -340,11 +309,7 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
           {!showmore || isMore ? (
             <>
               Xem thêm
-              <Badge
-                color="primary"
-                variant="dot"
-                invisible={!containedSelected()}
-              >
+              <Badge color="primary" variant="dot" invisible={!containedSelected()}>
                 <ExpandMore />
               </Badge>
             </>
@@ -363,7 +328,7 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
   const [selectedPub, setSelectedPub] = useState(pubs || []);
   const [showmore, setShowmore] = useState(false);
   const [pagination, setPagination] = useState({
-    isMore: true, //Merge new data
+    isMore: true, // Merge new data
     number: 0,
     totalPages: 0,
     totalElements: 0,
@@ -392,7 +357,7 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
     }
   }, [data]);
 
-  //Change pub
+  // Change pub
   const handleChangePub = (id) => {
     const selectedIndex = selectedPub.indexOf(id);
     let newSelected = [];
@@ -404,10 +369,7 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
     } else if (selectedIndex === selectedPub.length - 1) {
       newSelected = newSelected.concat(selectedPub.slice(0, -1));
     } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selectedPub.slice(0, selectedIndex),
-        selectedPub.slice(selectedIndex + 1)
-      );
+      newSelected = newSelected.concat(selectedPub.slice(0, selectedIndex), selectedPub.slice(selectedIndex + 1));
     }
 
     setSelectedPub(newSelected);
@@ -454,8 +416,7 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
       ids?.forEach((id, index) => {
         const pub = entities[id];
         const isItemSelected = isSelected(`${id}`);
-        if (isItemSelected && !containedSelected)
-          containedSelected = isContained(id);
+        if (isItemSelected && !containedSelected) containedSelected = isContained(id);
 
         const item = (
           <StyledButton
@@ -477,18 +438,8 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
       pubsContent = (
         <>
           {limitContent}
-          <Collapse
-            in={showmore}
-            sx={{ width: "100%" }}
-            timeout="auto"
-            unmountOnExit
-          >
-            <Stack
-              spacing={{ xs: 1 }}
-              direction="row"
-              useFlexGap
-              flexWrap="wrap"
-            >
+          <Collapse in={showmore} sx={{ width: "100%" }} timeout="auto" unmountOnExit>
+            <Stack spacing={{ xs: 1 }} direction="row" useFlexGap flexWrap="wrap">
               {collapseContent}
             </Stack>
           </Collapse>
@@ -518,11 +469,7 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
           {!showmore || isMore ? (
             <>
               Xem thêm
-              <Badge
-                color="primary"
-                variant="dot"
-                invisible={!containedSelected}
-              >
+              <Badge color="primary" variant="dot" invisible={!containedSelected}>
                 <ExpandMore />
               </Badge>
             </>
@@ -540,20 +487,19 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
 const RangeFilter = memo(({ value, onChangeRange }) => {
   const [valueInput, setValueInput] = useState(value || [0, 10000000]);
 
-  //Change
+  // Change
   const handleUpdateRange = (newValue) => {
     if (onChangeRange) onChangeRange(newValue);
   };
   const handleTouchDrag = (e) => {
     e.nativeEvent.defaultMuiPrevented = true;
-  }; //Prevent drag slider along with drawer
+  }; // Prevent drag slider along with drawer
   const handleChangeRange = (value) => {
     setValueInput(value);
     handleUpdateRange(value);
   };
 
-  const isSelected = (currValue) =>
-    valueInput[0] == currValue[0] && valueInput[1] == currValue[1];
+  const isSelected = (currValue) => valueInput[0] == currValue[0] && valueInput[1] == currValue[1];
 
   return (
     <Filter>
@@ -602,10 +548,7 @@ const TypeFilter = memo(({ types, onChangeType }) => {
     } else if (selectedIndex === selectedType.length - 1) {
       newSelected = newSelected.concat(selectedType.slice(0, -1));
     } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selectedType.slice(0, selectedIndex),
-        selectedType.slice(selectedIndex + 1)
-      );
+      newSelected = newSelected.concat(selectedType.slice(0, selectedIndex), selectedType.slice(selectedIndex + 1));
     }
 
     setSelectedType(newSelected);
@@ -670,18 +613,10 @@ const RateFilter = memo(({ rating, onChangeRate }) => {
   );
 });
 
-const FilterDrawer = ({
-  filters,
-  onApplyFilters,
-  onResetFilters,
-  open,
-  handleClose,
-  handleOpen,
-  defaultFilters,
-}) => {
+const FilterDrawer = ({ filters, onApplyFilters, onResetFilters, open, handleClose, handleOpen, defaultFilters }) => {
   const [currFilters, setCurrFilters] = useState(filters);
 
-  //Update
+  // Update
   useEffect(() => {
     setCurrFilters(filters);
   }, [filters]);
@@ -709,7 +644,7 @@ const FilterDrawer = ({
     }));
   };
 
-  //Apply
+  // Apply
   const handleApplyFilter = () => {
     handleClose();
     if (onApplyFilters) onApplyFilters(currFilters);
@@ -733,10 +668,7 @@ const FilterDrawer = ({
     >
       <DrawerContainer>
         <DialogTitle>BỘ LỌC</DialogTitle>
-        <DialogContent
-          dividers
-          sx={{ px: 2, py: 1, flex: "1 1 auto", overflowY: "auto" }}
-        >
+        <DialogContent dividers sx={{ px: 2, py: 1, flex: "1 1 auto", overflowY: "auto" }}>
           <CateFilter
             {...{
               cateId: currFilters?.cate.id,
@@ -767,13 +699,7 @@ const FilterDrawer = ({
           >
             Xoá bộ lọc
           </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            onClick={handleApplyFilter}
-            startIcon={<Check />}
-          >
+          <Button variant="contained" color="primary" size="large" onClick={handleApplyFilter} startIcon={<Check />}>
             Áp dụng
           </Button>
         </DialogActions>

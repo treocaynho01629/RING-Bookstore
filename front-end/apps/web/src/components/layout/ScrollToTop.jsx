@@ -1,8 +1,10 @@
 import { useCallback, useLayoutEffect } from "react";
 import { useLocation } from "react-router";
+import { useTranslation } from "react-i18next";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import styled from "@emotion/styled";
+import Button from "@mui/material/Button";
 
 //#region styled
 const ButtonContainer = styled.div`
@@ -36,24 +38,10 @@ const ButtonContainer = styled.div`
   }
 `;
 
-const StyledButton = styled.button`
-  border-radius: 0;
-  border: none;
-  outline: none;
+const StyledButton = styled(Button)`
   width: 48px;
   height: 48px;
-  color: ${({ theme }) => theme.vars.palette.primary.contrastText};
-  background-color: ${({ theme }) => theme.vars.palette.primary.main};
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.vars.palette.grey[300]};
-    color: ${({ theme }) => theme.vars.palette.text.primary};
-  }
+  min-width: 35px;
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
     width: 35px;
@@ -66,6 +54,7 @@ const StyledButton = styled.button`
 const ScrollToTop = () => {
   const trigger = useScrollTrigger({ disableHysteresis: true, threshold: 100 });
   const { pathname } = useLocation(); // Extracts pathname
+  const { t } = useTranslation();
 
   const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -77,13 +66,9 @@ const ScrollToTop = () => {
   }, [pathname]);
 
   return (
-    <ButtonContainer
-      role="presentation"
-      className={trigger ? "" : "hidden"}
-      id="scroll-to-top"
-    >
-      <StyledButton onClick={scrollToTop} aria-label="scroll back to top">
-        <KeyboardArrowUp sx={{ fontSize: 30 }} />
+    <ButtonContainer role="presentation" className={`mui-fixed ${trigger ? "" : "hidden"}`} id="scroll-to-top">
+      <StyledButton variant="contained" color="primary" tabIndex={-1} onClick={scrollToTop} aria-label={t("scroll")}>
+        <KeyboardArrowUp fontSize="medium" />
       </StyledButton>
     </ButtonContainer>
   );

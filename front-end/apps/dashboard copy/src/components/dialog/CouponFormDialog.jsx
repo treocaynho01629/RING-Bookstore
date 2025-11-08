@@ -19,51 +19,39 @@ import { NumberFormatBase, NumericFormat } from "react-number-format";
 import { Instruction, DatePicker } from "@ring/ui";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
-import {
-  useCreateCouponMutation,
-  useUpdateCouponMutation,
-} from "../../features/coupons/couponsApiSlice";
+import { useCreateCouponMutation, useUpdateCouponMutation } from "../../features/coupons/couponsApiSlice";
 
 const CouponType = getCouponType();
 
-const NumericFormatCustom = forwardRef(
-  function NumericFormatCustom(props, ref) {
-    const { onChange, ...other } = props;
+const NumericFormatCustom = forwardRef(function NumericFormatCustom(props, ref) {
+  const { onChange, ...other } = props;
 
-    const format = (numStr) => {
-      if (numStr === "") return "";
-      return currencyFormat.format(numStr);
-    };
+  const format = (numStr) => {
+    if (numStr === "") return "";
+    return currencyFormat.format(numStr);
+  };
 
-    return (
-      <NumberFormatBase
-        {...other}
-        getInputRef={ref}
-        onValueChange={(values, sourceInfo) => {
-          let newValue = values.floatValue;
+  return (
+    <NumberFormatBase
+      {...other}
+      getInputRef={ref}
+      onValueChange={(values, sourceInfo) => {
+        let newValue = values.floatValue;
 
-          //Threshold
-          if (newValue < 0) newValue = 0;
-          if (newValue > 10000000) newValue = 10000000;
+        //Threshold
+        if (newValue < 0) newValue = 0;
+        if (newValue > 10000000) newValue = 10000000;
 
-          if (onChange) onChange({ target: { value: newValue } });
-        }}
-        format={format}
-      />
-    );
-  }
-);
+        if (onChange) onChange({ target: { value: newValue } });
+      }}
+      format={format}
+    />
+  );
+});
 
 NumericFormatCustom.propTypes = { onChange: PropTypes.func.isRequired };
 
-const CouponFormDialog = ({
-  coupon = null,
-  open,
-  handleClose,
-  shop,
-  pending,
-  setPending,
-}) => {
+const CouponFormDialog = ({ coupon = null, open, handleClose, shop, pending, setPending }) => {
   //#region construct
   const fullScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const [code, setCode] = useState("");
@@ -237,9 +225,7 @@ const CouponFormDialog = ({
       </DialogTitle>
       <DialogContent sx={{ pt: 0, px: { xs: 1, sm: 3 } }}>
         <form onSubmit={handleSubmit}>
-          <Instruction display={errMsg ? "block" : "none"}>
-            {errMsg}
-          </Instruction>
+          <Instruction display={errMsg ? "block" : "none"}>{errMsg}</Instruction>
           <Grid container size="grow" spacing={1}>
             <Grid size={12}>
               <Title>Thông tin mã giảm giá</Title>
@@ -399,10 +385,7 @@ const CouponFormDialog = ({
                   <em>--Cửa hàng--</em>
                 </MenuItem>
                 {coupon && (
-                  <MenuItem
-                    key={`shop-${coupon?.shopId}`}
-                    value={coupon?.shopId}
-                  >
+                  <MenuItem key={`shop-${coupon?.shopId}`} value={coupon?.shopId}>
                     {coupon?.shopName}
                   </MenuItem>
                 )}
@@ -421,24 +404,10 @@ const CouponFormDialog = ({
         </form>
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="outlined"
-          color="error"
-          size="large"
-          sx={{ marginY: "10px" }}
-          onClick={handleClose}
-          startIcon={<CloseIcon />}
-        >
+        <Button variant="outlined" color="error" size="large" onClick={handleClose} startIcon={<CloseIcon />}>
           Huỷ
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          sx={{ marginY: "10px" }}
-          onClick={handleSubmit}
-          startIcon={<Check />}
-        >
+        <Button variant="contained" color="primary" size="large" onClick={handleSubmit} startIcon={<Check />}>
           Áp dụng
         </Button>
       </DialogActions>

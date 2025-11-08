@@ -2,9 +2,8 @@ import { debounce } from "lodash-es";
 import { useCallback, useEffect } from "react";
 
 const useOffset = (overlapRef) => {
-  //Offset scroll to top button on overlapping
+  // Offset scroll to top button on overlapping
   const changeOffset = () => {
-    //Ik it is not recommended but I ran out of brainjuice for this
     let scrollEl = document.getElementById("scroll-to-top");
 
     if (overlapRef.current) {
@@ -14,8 +13,7 @@ const useOffset = (overlapRef) => {
       const overlapY = scrollRect.bottom >= elRect.top;
       const overlapX = scrollRect.left <= elRect.right;
       const passY = scrollRect.bottom >= elRect.bottom + elRect.height / 2;
-      const overY =
-        scrollEl.style.getPropertyValue("--offset") != elRect.height;
+      const overY = scrollEl.style.getPropertyValue("--offset") != elRect.height;
 
       if (!passY && overlapY && overlapX) {
         scrollEl.style.setProperty("--offset", elRect.height);
@@ -32,7 +30,7 @@ const useOffset = (overlapRef) => {
   useEffect(() => {
     let scrollEl = document.getElementById("scroll-to-top");
 
-    //Check initially
+    // Check initially
     scrollListener();
 
     window.removeEventListener("scroll", scrollListener);

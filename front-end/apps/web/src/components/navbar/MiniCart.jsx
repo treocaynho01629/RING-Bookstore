@@ -173,7 +173,7 @@ const MiniCart = ({ anchorEl, handleClose, products }) => {
               {products?.length <= 5 ? (
                 <>&nbsp;</>
               ) : (
-                `${t("cart.items.left", { ns: "client", quantity: products?.length - 5 })}`
+                `${t("cart.more", { ns: "client", quantity: products?.length - 5 })}`
               )}
             </span>
             <Link to={"/cart"} title={t("cart.view", { ns: "client" })}>

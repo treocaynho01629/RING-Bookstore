@@ -1,4 +1,4 @@
-//Books
+// Books
 export const marks = [
   {
     value: 0,
@@ -75,7 +75,7 @@ export const booksAmount = [
   },
 ];
 
-//Shops
+// Shops
 export const sortShopsBy = [
   {
     value: "totalFollowers",
@@ -107,7 +107,7 @@ export const filterShopsValue = {
   FOLLOWED: true,
 };
 
-//Reviews
+// Reviews
 export const rateLabels = {
   1: "Cực tệ",
   2: "Tệ",
@@ -116,5 +116,5 @@ export const rateLabels = {
   5: "Cực hài lòng",
 };
 
-//Other
+// Other
 export const pageSizes = [12, 24, 48];

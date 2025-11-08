@@ -243,11 +243,7 @@ const NavItem = styled(NavLink)`
     border-radius: 5px;
     font-size: 2.6rem;
     color: ${({ theme }) => theme.vars.palette.primary.dark};
-    background-color: color-mix(
-      in srgb,
-      ${({ theme }) => theme.vars.palette.primary.light},
-      transparent 70%
-    );
+    background-color: color-mix(in srgb, ${({ theme }) => theme.vars.palette.primary.light}, transparent 70%);
   }
 `;
 //#endregion
@@ -310,10 +306,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
                   {username}
                   {loading ? (
                     <Name>
-                      <Skeleton
-                        variant="text"
-                        sx={{ fontSize: "inherit", width: 95 }}
-                      />
+                      <Skeleton variant="text" sx={{ fontSize: "inherit", width: 95 }} />
                     </Name>
                   ) : (
                     <Name>{profile?.name || "Sửa hồ sơ"}</Name>
@@ -329,22 +322,13 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
             {loading ? (
               <>
                 <Additional>
-                  <Skeleton
-                    variant="text"
-                    sx={{ fontSize: "inherit", width: 110 }}
-                  />
+                  <Skeleton variant="text" sx={{ fontSize: "inherit", width: 110 }} />
                 </Additional>
                 <Additional>
-                  <Skeleton
-                    variant="text"
-                    sx={{ fontSize: "inherit", width: 110 }}
-                  />
+                  <Skeleton variant="text" sx={{ fontSize: "inherit", width: 110 }} />
                 </Additional>
                 <Additional>
-                  <Skeleton
-                    variant="text"
-                    sx={{ fontSize: "inherit", width: 115 }}
-                  />
+                  <Skeleton variant="text" sx={{ fontSize: "inherit", width: 115 }} />
                 </Additional>
               </>
             ) : (
@@ -378,11 +362,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
           <>
             <NavLink to={"/profile/detail"}>
               {({ isActive }) => (
-                <StyledListItemButton
-                  selected={isActive}
-                  onClick={toggleOpen}
-                  tabIndex={-1}
-                >
+                <StyledListItemButton selected={isActive} onClick={toggleOpen} tabIndex={-1}>
                   <ItemText>
                     <PersonIcon />
                     &nbsp;Tài khoản của tôi
@@ -395,10 +375,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
               <List component="div" disablePadding>
                 <NavLink to={"/profile/detail/info"} end>
                   {({ isActive }) => (
-                    <StyledListItemButton
-                      selected={isActive}
-                      className="secondary"
-                    >
+                    <StyledListItemButton selected={isActive} className="secondary">
                       <ItemText>Hồ sơ</ItemText>
                     </StyledListItemButton>
                   )}
@@ -407,10 +384,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
               <List component="div" disablePadding>
                 <NavLink to={"/profile/detail/address"} end>
                   {({ isActive }) => (
-                    <StyledListItemButton
-                      selected={isActive}
-                      className="secondary"
-                    >
+                    <StyledListItemButton selected={isActive} className="secondary">
                       <ItemText>Sổ địa chỉ</ItemText>
                     </StyledListItemButton>
                   )}
@@ -419,10 +393,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
               <List component="div" disablePadding>
                 <NavLink to={"/profile/detail/password"} end>
                   {({ isActive }) => (
-                    <StyledListItemButton
-                      selected={isActive}
-                      className="secondary"
-                    >
+                    <StyledListItemButton selected={isActive} className="secondary">
                       <ItemText>Đổi mật khẩu</ItemText>
                     </StyledListItemButton>
                   )}
@@ -437,7 +408,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
               <ItemText>
                 <ReceiptLongOutlined />
                 &nbsp;Đơn hàng
-                <MobileExtendButton>
+                <MobileExtendButton className="transparent">
                   <KeyboardArrowRight fontSize="small" />
                 </MobileExtendButton>
               </ItemText>
@@ -461,7 +432,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
               <ItemText>
                 <RateReviewOutlined />
                 &nbsp;Đánh giá
-                <MobileExtendButton>
+                <MobileExtendButton className="transparent">
                   <KeyboardArrowRight fontSize="small" />
                 </MobileExtendButton>
               </ItemText>
@@ -475,7 +446,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
               <ItemText>
                 <LocalActivityOutlined />
                 &nbsp;Mã giảm giá
-                <MobileExtendButton>
+                <MobileExtendButton className="transparent">
                   <KeyboardArrowRight fontSize="small" />
                 </MobileExtendButton>
               </ItemText>

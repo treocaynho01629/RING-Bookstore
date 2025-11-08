@@ -1,15 +1,7 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useNavigation } from "react-router";
 import { styled } from "@mui/material/styles";
-import LinearProgress, {
-  linearProgressClasses,
-} from "@mui/material/LinearProgress";
+import LinearProgress, { linearProgressClasses } from "@mui/material/LinearProgress";
 
 const fillSpeed = 410;
 const trickleSpeed = 200;
@@ -21,7 +13,7 @@ const StyledProgress = styled(LinearProgress)(({ theme }) => ({
   width: "100%",
   top: 0,
   left: 0,
-  zIndex: theme.zIndex.modal,
+  zIndex: theme.zIndex.snackbar,
   height: 3,
   [`&.${linearProgressClasses.colorPrimary}`]: {
     backgroundColor: theme.vars.palette.grey[200],
@@ -53,7 +45,7 @@ const LoadingProgress = () => {
   const [progress, setProgress] = useState(null);
 
   useEffect(() => {
-    //Reset progress after completed
+    // Reset progress after completed
     if (progress == 100) {
       const timeout = setTimeout(() => {
         setProgress(null);
@@ -64,13 +56,12 @@ const LoadingProgress = () => {
   }, [progress]);
 
   useLayoutEffect(() => {
-    //Display when loading page's content
-    if (navigation.state == "loading" || navigation.state == "submitting")
-      start();
+    // Display when loading page's content
+    if (navigation.state == "loading" || navigation.state == "submitting") start();
     if (navigation.state == "idle") done();
   }, [navigation.state]);
 
-  //Display when changing path
+  // Display when changing path
   useLayoutEffect(() => {
     start();
   }, [pathname]);
@@ -84,7 +75,7 @@ const LoadingProgress = () => {
     status.current = newValue;
 
     if (n === 100) {
-      //Set progress bar's state
+      // Set progress bar's state
       setProgress(100);
     } else {
       setProgress(newValue);
@@ -109,12 +100,12 @@ const LoadingProgress = () => {
   const done = useCallback((force) => {
     if (!force && !status.current) return this;
     const fillValue = 80 + 20 * Math.random();
-    increase(fillValue); //Quickly fill up to 100
+    increase(fillValue); // Quickly fill up to 100
     return setValue(100);
   }, []);
 
   const increase = useCallback((amount) => {
-    //Increase random amount
+    // Increase random amount
     let n = status.current;
 
     if (!n) {
@@ -122,7 +113,7 @@ const LoadingProgress = () => {
     } else if (n > 100) {
       return;
     } else {
-      //Progressively slower
+      // Progressively slower
       if (amount == null) {
         if (n >= 0 && n < 20) {
           amount = 10;
@@ -137,7 +128,7 @@ const LoadingProgress = () => {
         }
       }
 
-      n = clamp(n + amount, 0, 84.4); //Cap at 84.4
+      n = clamp(n + amount, 0, 84.4); // Cap at 84.4
       return setValue(n);
     }
   }, []);
@@ -146,8 +137,7 @@ const LoadingProgress = () => {
     return increase();
   }, []);
 
-  if (progress)
-    return <StyledProgress variant="determinate" value={progress} />;
+  if (progress) return <StyledProgress variant="determinate" value={progress} />;
 };
 
 export default LoadingProgress;

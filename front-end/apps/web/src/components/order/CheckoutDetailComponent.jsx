@@ -1,12 +1,8 @@
 import styled from "@emotion/styled";
-import { Suspense, lazy, useState } from "react";
+import { Suspense, lazy, useState, forwardRef } from "react";
 import { StyledDialogTitle } from "../custom/ProfileComponents";
 import { getPaymentStatus, getPaymentType } from "@ring/shared/enums/payment";
-import {
-  idFormatter,
-  timeFormatter,
-  dateFormatter,
-} from "@ring/shared/utils/convert";
+import { idFormatter, timeFormatter, dateFormatter } from "@ring/shared/utils/convert";
 import { Link } from "react-router";
 import { MobileExtendButton } from "@ring/ui/Components";
 import { StatusContent } from "../custom/OrderComponents";
@@ -25,10 +21,9 @@ import Receipt from "@mui/icons-material/Receipt";
 import Sell from "@mui/icons-material/Sell";
 import CurrencyExchange from "@mui/icons-material/CurrencyExchange";
 import OrderReceiptDetails from "./OrderReceiptDetails";
+import Slide from "@mui/material/Slide";
 
-const CancelAndUpdateOrderForm = lazy(
-  () => import("./CancelAndUpdateOrderForm")
-);
+const CancelAndUpdateOrderForm = lazy(() => import("./CancelAndUpdateOrderForm"));
 
 //#region styled
 const TitleContainer = styled.div`
@@ -91,8 +86,7 @@ const ShippingTag = styled.span`
   display: flex;
   align-items: center;
   font-weight: 450;
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.dark || theme.vars.palette.primary.dark};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.dark || theme.vars.palette.primary.dark};
 `;
 
 const StuffContainer = styled.div`
@@ -236,12 +230,7 @@ function getStepContent(receipt) {
     case PaymentStatus.PENDING.value:
       return {
         summary: `Đang chờ thanh toán đơn hàng ${
-          expiredDate
-            ? "trước " +
-              timeFormatter(expiredDate) +
-              " " +
-              dateFormatter(expiredDate)
-            : ""
+          expiredDate ? "trước " + timeFormatter(expiredDate) + " " + dateFormatter(expiredDate) : ""
         } .`,
       };
     case PaymentStatus.PAID.value:
@@ -263,13 +252,11 @@ function getStepContent(receipt) {
   }
 }
 
-const CheckoutDetailComponent = ({
-  receipt,
-  pending,
-  setPending,
-  tabletMode,
-  mobileMode,
-}) => {
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="left" ref={ref} {...props} />;
+});
+
+const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mobileMode }) => {
   const [openCancel, setOpenCancel] = useState(undefined);
   const [openUpdate, setOpenUpdate] = useState(undefined);
   const open = Boolean(openCancel || openUpdate);
@@ -303,26 +290,16 @@ const CheckoutDetailComponent = ({
           </Link>
           <Receipt />
           &nbsp;Mã vận đơn&nbsp;
-          {!receipt ? (
-            <Skeleton variant="text" width={100} />
-          ) : (
-            idFormatter(receipt?.id)
-          )}
+          {!receipt ? <Skeleton variant="text" width={100} /> : idFormatter(receipt?.id)}
           &emsp;
           {!receipt ? (
             <StatusTag color="secondary">Đang tải</StatusTag>
           ) : (
-            <StatusTag color={paymentStatus?.color}>
-              {paymentStatus?.label}
-            </StatusTag>
+            <StatusTag color={paymentStatus?.color}>{paymentStatus?.label}</StatusTag>
           )}
         </TitleContainer>
         <SubTitle>
-          {!receipt ? (
-            <Skeleton variant="text" width={130} />
-          ) : (
-            `${timeFormatter(date)} ${dateFormatter(date)}`
-          )}
+          {!receipt ? <Skeleton variant="text" width={130} /> : `${timeFormatter(date)} ${dateFormatter(date)}`}
         </SubTitle>
       </StyledDialogTitle>
       <DialogContent sx={{ px: { xs: 0, sm: 2, md: 0 }, mt: { xs: 1, md: 0 } }}>
@@ -338,23 +315,11 @@ const CheckoutDetailComponent = ({
           <SummaryContainer>
             <Box display="flex" justifyContent="space-between">
               <Box>
-                <SubText>
-                  {!receipt ? (
-                    <Skeleton variant="text" width={280} />
-                  ) : (
-                    stepContent?.summary
-                  )}
-                </SubText>
+                <SubText>{!receipt ? <Skeleton variant="text" width={280} /> : stepContent?.summary}</SubText>
               </Box>
               <Box>
                 {!receipt ? (
-                  <MainButton
-                    disabled
-                    variant="contained"
-                    color="secondary"
-                    size="large"
-                    fullWidth
-                  >
+                  <MainButton disabled variant="contained" color="secondary" size="large" fullWidth>
                     Đang tải
                   </MainButton>
                 ) : (
@@ -380,16 +345,9 @@ const CheckoutDetailComponent = ({
                       >
                         Thay đổi hình thức thanh toán
                       </MainButton>
-                      {receipt?.paymentType ==
-                        PaymentType.ONLINE_PAYMENT.value && (
+                      {receipt?.paymentType == PaymentType.ONLINE_PAYMENT.value && (
                         <Link to={`/payment/${receipt?.id}`}>
-                          <MainButton
-                            variant="contained"
-                            color="info"
-                            size="large"
-                            fullWidth
-                            sx={{ mt: 1 }}
-                          >
+                          <MainButton variant="contained" color="info" size="large" fullWidth sx={{ mt: 1 }}>
                             Thanh toán
                           </MainButton>
                         </Link>
@@ -409,19 +367,9 @@ const CheckoutDetailComponent = ({
           <InfoContainer>
             <div>
               <Name>
-                {!receipt ? (
-                  <Skeleton variant="text" width={150} />
-                ) : (
-                  (receipt?.companyName ?? receipt?.name) + " "
-                )}
+                {!receipt ? <Skeleton variant="text" width={150} /> : (receipt?.companyName ?? receipt?.name) + " "}
               </Name>
-              <InfoText>
-                {!receipt ? (
-                  <Skeleton variant="text" width={140} />
-                ) : (
-                  `(+84) ${receipt?.phone}`
-                )}
-              </InfoText>
+              <InfoText>{!receipt ? <Skeleton variant="text" width={140} /> : `(+84) ${receipt?.phone}`}</InfoText>
             </div>
             <InfoText>
               {!receipt ? (
@@ -476,13 +424,7 @@ const CheckoutDetailComponent = ({
         {tabletMode &&
           (!receipt ? (
             <MainButtonContainer>
-              <MainButton
-                disabled
-                variant="contained"
-                color="secondary"
-                size="large"
-                fullWidth
-              >
+              <MainButton disabled variant="contained" color="secondary" size="large" fullWidth>
                 Đang tải
               </MainButton>
             </MainButtonContainer>
@@ -491,12 +433,7 @@ const CheckoutDetailComponent = ({
             receipt?.paymentType == PaymentType.ONLINE_PAYMENT.value && (
               <Link to={`/payment/${receipt?.id}`}>
                 <MainButtonContainer>
-                  <MainButton
-                    variant="contained"
-                    color="info"
-                    size="large"
-                    fullWidth
-                  >
+                  <MainButton variant="contained" color="info" size="large" fullWidth>
                     Thanh toán
                   </MainButton>
                 </MainButtonContainer>
@@ -512,6 +449,9 @@ const CheckoutDetailComponent = ({
         fullScreen={mobileMode}
         closeAfterTransition={false}
         aria-labelledby="cancel-refund-dialog"
+        slots={{
+          transition: Transition,
+        }}
       >
         {open && (
           <Suspense fallback={null}>

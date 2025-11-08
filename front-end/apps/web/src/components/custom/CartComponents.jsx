@@ -20,7 +20,7 @@ export const CheckoutContainer = styled.div`
 
 export const CheckoutBox = styled.div`
   border: 0.5px solid ${({ theme }) => theme.vars.palette.action.focus};
-  padding: 20px 16px;
+  padding: ${({ theme }) => `${theme.spacing(2.5)} ${theme.spacing(2)}`};
   margin-bottom: ${({ theme }) => theme.spacing(2)};
   background-color: ${({ theme }) => theme.vars.palette.background.paper};
 
@@ -32,9 +32,41 @@ export const CheckoutBox = styled.div`
     z-index: 1;
   }
 
+  &.drawer {
+    border: none;
+    border-top: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
+    padding: ${({ theme }) => `${theme.spacing(2.5)} ${theme.spacing(16)}`};
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: ${({ theme }) => theme.spacing(1)};
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 5px;
+      border-radius: 3px;
+      background-color: ${({ theme }) => theme.vars.palette.divider};
+    }
+  }
+
+  ${({ theme }) => theme.breakpoints.down("md")} {
+    &.drawer {
+      padding: ${({ theme }) => `${theme.spacing(2.5)} ${theme.spacing(2)}`};
+    }
+  }
+
   ${({ theme }) => theme.breakpoints.down("md_lg")} {
     margin: 0;
-    padding-top: ${({ theme }) => theme.spacing(1)};
+
+    &:not(.drawer) {
+      padding-top: ${({ theme }) => theme.spacing(1)};
+    }
+  }
+
+  ${({ theme }) => theme.breakpoints.down("sm_md")} {
+    border-left: none;
+    border-right: none;
   }
 `;
 
@@ -81,11 +113,13 @@ export const CheckoutTitle = styled.span`
   font-weight: bold;
   display: flex;
   justify-content: space-between;
+  text-transform: uppercase;
 
   span {
     font-size: 12px;
     color: ${({ theme }) => theme.vars.palette.text.secondary};
     font-style: italic;
+    text-transform: none;
   }
 `;
 
@@ -100,8 +134,7 @@ export const CheckoutText = styled.span`
   font-size: 14px;
   font-weight: 400;
   white-space: nowrap;
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.main || theme.vars.palette.text.primary};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.main || theme.vars.palette.text.primary};
 `;
 
 export const PriceContainer = styled.div`
@@ -112,13 +145,10 @@ export const PriceContainer = styled.div`
   align-items: end;
 
   ${({ theme }) => theme.breakpoints.down("md_lg")} {
-    flex-direction: row;
-    align-items: center;
-  }
-
-  ${({ theme }) => theme.breakpoints.down("sm")} {
-    flex-direction: column;
-    align-items: end;
+    &.row {
+      flex-direction: row;
+      align-items: center;
+    }
   }
 `;
 

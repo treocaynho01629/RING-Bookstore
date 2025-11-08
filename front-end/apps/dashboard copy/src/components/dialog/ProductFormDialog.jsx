@@ -12,27 +12,15 @@ import {
   TextareaAutosize,
   Grid,
 } from "@mui/material";
-import {
-  Check,
-  Add,
-  Close as CloseIcon,
-  AutoStories as AutoStoriesIcon,
-} from "@mui/icons-material";
+import { Check, Add, Close as CloseIcon, AutoStories as AutoStoriesIcon } from "@mui/icons-material";
 import { getBookLanguage, getBookType } from "@ring/shared";
 import { Title } from "../custom/Components";
 import { publishersApiSlice } from "../../features/publishers/publishersApiSlice";
 import { categoriesApiSlice } from "../../features/categories/categoriesApiSlice";
 import { useGetPreviewShopsQuery } from "../../features/shops/shopsApiSlice";
 import { currencyFormat } from "@ring/shared";
-import {
-  NumberFormatBase,
-  NumericFormat,
-  PatternFormat,
-} from "react-number-format";
-import {
-  useCreateBookMutation,
-  useUpdateBookMutation,
-} from "../../features/books/booksApiSlice";
+import { NumberFormatBase, NumericFormat, PatternFormat } from "react-number-format";
+import { useCreateBookMutation, useUpdateBookMutation } from "../../features/books/booksApiSlice";
 import { Instruction, DatePicker } from "@ring/ui";
 import CustomDropZone from "../custom/CustomDropZone";
 import dayjs from "dayjs";
@@ -41,44 +29,35 @@ import PropTypes from "prop-types";
 const BookLanguage = getBookLanguage();
 const BookType = getBookType();
 
-const NumericFormatCustom = forwardRef(
-  function NumericFormatCustom(props, ref) {
-    const { onChange, ...other } = props;
+const NumericFormatCustom = forwardRef(function NumericFormatCustom(props, ref) {
+  const { onChange, ...other } = props;
 
-    const format = (numStr) => {
-      if (numStr === "") return "";
-      return currencyFormat.format(numStr);
-    };
+  const format = (numStr) => {
+    if (numStr === "") return "";
+    return currencyFormat.format(numStr);
+  };
 
-    return (
-      <NumberFormatBase
-        {...other}
-        getInputRef={ref}
-        onValueChange={(values, sourceInfo) => {
-          let newValue = values.floatValue;
+  return (
+    <NumberFormatBase
+      {...other}
+      getInputRef={ref}
+      onValueChange={(values, sourceInfo) => {
+        let newValue = values.floatValue;
 
-          //Threshold
-          if (newValue < 0) newValue = 0;
-          if (newValue > 10000000) newValue = 10000000;
+        //Threshold
+        if (newValue < 0) newValue = 0;
+        if (newValue > 10000000) newValue = 10000000;
 
-          if (onChange) onChange({ target: { value: newValue } });
-        }}
-        format={format}
-      />
-    );
-  }
-);
+        if (onChange) onChange({ target: { value: newValue } });
+      }}
+      format={format}
+    />
+  );
+});
 
 NumericFormatCustom.propTypes = { onChange: PropTypes.func.isRequired };
 
-const ProductFormDialog = ({
-  product = null,
-  open,
-  handleClose,
-  shop,
-  pending,
-  setPending,
-}) => {
+const ProductFormDialog = ({ product = null, open, handleClose, shop, pending, setPending }) => {
   //#region construct
   const fullScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const [files, setFiles] = useState([]);
@@ -120,10 +99,8 @@ const ProductFormDialog = ({
     {},
     { skip: product != null || (!currShop && !openShop) }
   );
-  const [getPublishers, { data: pubs }] =
-    publishersApiSlice.useLazyGetPublishersQuery();
-  const [getCategories, { data: cates }] =
-    categoriesApiSlice.useLazyGetCategoriesQuery();
+  const [getPublishers, { data: pubs }] = publishersApiSlice.useLazyGetPublishersQuery();
+  const [getCategories, { data: cates }] = categoriesApiSlice.useLazyGetCategoriesQuery();
   const [createBook, { isLoading: creating }] = useCreateBookMutation();
   const [updateBook, { isLoading: updating }] = useUpdateBookMutation();
 
@@ -283,8 +260,7 @@ const ProductFormDialog = ({
     if (discountValue < 0) discountValue = 0;
     if (discountValue > 1) discountValue = 1;
 
-    if (discountValue != price.discount)
-      setPrice((prev) => ({ ...prev, discount: discountValue }));
+    if (discountValue != price.discount) setPrice((prev) => ({ ...prev, discount: discountValue }));
   };
 
   const handleDiscountChange = (e) => {
@@ -334,8 +310,7 @@ const ProductFormDialog = ({
         //Update
         if (!thumbnailId) {
           formData.append("thumbnail", files[0]);
-          if (files?.length > 1)
-            formData.append("images", files.splice(1, files?.length - 1));
+          if (files?.length > 1) formData.append("images", files.splice(1, files?.length - 1));
         } else {
           files.forEach((file, i) => {
             formData.append("images", file);
@@ -435,9 +410,7 @@ const ProductFormDialog = ({
       </DialogTitle>
       <DialogContent sx={{ pt: 0, px: { xs: 1, sm: 3 } }}>
         <form onSubmit={handleSubmit}>
-          <Instruction display={errMsg ? "block" : "none"}>
-            {errMsg}
-          </Instruction>
+          <Instruction display={errMsg ? "block" : "none"}>{errMsg}</Instruction>
           <Grid container size="grow" spacing={1}>
             <Grid size={12}>
               <Title>Thông tin sản phẩm</Title>
@@ -499,10 +472,7 @@ const ProductFormDialog = ({
                   <em>--Tất cả--</em>
                 </MenuItem>
                 {product && !cates && (
-                  <MenuItem
-                    key={`cate-${product?.category?.id}`}
-                    value={product?.category?.id}
-                  >
+                  <MenuItem key={`cate-${product?.category?.id}`} value={product?.category?.id}>
                     {product?.category?.name}
                   </MenuItem>
                 )}
@@ -533,11 +503,7 @@ const ProductFormDialog = ({
                 })}
                 {catesPagination?.totalPages > catesPagination?.number + 1 && (
                   <Box display="flex" justifyContent="center">
-                    <Button
-                      onClick={handleShowMoreCates}
-                      endIcon={<Add />}
-                      fullWidth
-                    >
+                    <Button onClick={handleShowMoreCates} endIcon={<Add />} fullWidth>
                       Tải thêm
                     </Button>
                   </Box>
@@ -570,10 +536,7 @@ const ProductFormDialog = ({
                 }}
               >
                 {product && !pubs && (
-                  <MenuItem
-                    key={`pub-${product?.publisher?.id}`}
-                    value={product?.publisher?.id}
-                  >
+                  <MenuItem key={`pub-${product?.publisher?.id}`} value={product?.publisher?.id}>
                     {product?.publisher?.name}
                   </MenuItem>
                 )}
@@ -588,11 +551,7 @@ const ProductFormDialog = ({
                 })}
                 {pubsPagination?.totalPages > pubsPagination?.number + 1 && (
                   <Box display="flex" justifyContent="center">
-                    <Button
-                      onClick={handleShowMorePubs}
-                      endIcon={<Add />}
-                      fullWidth
-                    >
+                    <Button onClick={handleShowMorePubs} endIcon={<Add />} fullWidth>
                       Tải thêm
                     </Button>
                   </Box>
@@ -628,10 +587,7 @@ const ProductFormDialog = ({
                   <em>--Cửa hàng--</em>
                 </MenuItem>
                 {product && (
-                  <MenuItem
-                    key={`shop-${product?.shopId}`}
-                    value={product?.shopId}
-                  >
+                  <MenuItem key={`shop-${product?.shopId}`} value={product?.shopId}>
                     {product?.shopName}
                   </MenuItem>
                 )}
@@ -655,8 +611,7 @@ const ProductFormDialog = ({
                   setThumbnailId,
                   remove,
                   setRemove,
-                  isMissing:
-                    !(files.length > 0) && err?.data?.errors?.thumbnail,
+                  isMissing: !(files.length > 0) && err?.data?.errors?.thumbnail,
                   images: product
                     ? product?.previews
                       ? [product?.image].concat(product?.previews)
@@ -846,24 +801,10 @@ const ProductFormDialog = ({
         </form>
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="outlined"
-          color="error"
-          size="large"
-          sx={{ marginY: "10px" }}
-          onClick={handleClose}
-          startIcon={<CloseIcon />}
-        >
+        <Button variant="outlined" color="error" size="large" onClick={handleClose} startIcon={<CloseIcon />}>
           Huỷ
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          sx={{ marginY: "10px" }}
-          onClick={handleSubmit}
-          startIcon={<Check />}
-        >
+        <Button variant="contained" color="primary" size="large" onClick={handleSubmit} startIcon={<Check />}>
           Áp dụng
         </Button>
       </DialogActions>

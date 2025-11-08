@@ -1,17 +1,10 @@
 import styled from "@emotion/styled";
-import { useState, lazy, Suspense, Fragment, memo } from "react";
-import {
-  useGetReviewByBookIdQuery,
-  useGetReviewsByBookIdQuery,
-} from "../../features/reviews/reviewsApiSlice";
-import {
-  Message,
-  MobileExtendButton,
-  Showmore,
-  Title,
-} from "@ring/ui/Components";
+import { useState, lazy, Suspense, Fragment, memo, forwardRef } from "react";
+import { useGetReviewByBookIdQuery, useGetReviewsByBookIdQuery } from "../../features/reviews/reviewsApiSlice";
+import { Message, MobileExtendButton, Showmore, Title } from "@ring/ui/Components";
 import { numFormat } from "@ring/shared/utils/convert";
 import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
+import { ActionButtons } from "../product/detail/ProductAction";
 import useAuth from "../../hooks/useAuth";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
@@ -24,8 +17,7 @@ import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import Star from "@mui/icons-material/Star";
 import StarBorder from "@mui/icons-material/StarBorder";
 import EditOutlined from "@mui/icons-material/EditOutlined";
-
-import Progress from "@ring/ui/Progress";
+import Slide from "@mui/material/Slide";
 import Placeholder from "@ring/ui/Placeholder";
 import ReviewItem from "./ReviewItem";
 
@@ -48,15 +40,24 @@ const ReviewsWrapper = styled.div`
   }
 `;
 
-const ReviewsContainer = styled.div`
+const PreviewContainer = styled.div`
   position: relative;
 
   ${({ theme }) => theme.breakpoints.down("md")} {
     margin-bottom: ${({ theme }) => theme.spacing(2.5)};
+    margin-top: -10px;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
     max-height: 200px;
+  }
+`;
+
+const ReviewsContainer = styled.div`
+  position: relative;
+
+  ${({ theme }) => theme.breakpoints.down("md")} {
+    padding: 10px;
   }
 `;
 
@@ -93,16 +94,11 @@ const StyledEmptyIcon = styled(EmptyIcon)`
 //#endregion
 
 const Pagination = memo(AppPagination);
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="left" ref={ref} {...props} />;
+});
 
-const ReviewComponent = ({
-  book,
-  scrollIntoTab,
-  tabletMode,
-  pending,
-  setPending,
-  isReview,
-  handleToggleReview,
-}) => {
+const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending, isReview, handleToggleReview }) => {
   //#region construct
   const { username } = useAuth();
   const [openForm, setOpenForm] = useState(undefined);
@@ -126,15 +122,7 @@ const ReviewComponent = ({
     book?.id, //User's review of this product
     { skip: !username || !book }
   );
-  const {
-    data,
-    isLoading,
-    isFetching,
-    isSuccess,
-    isUninitialized,
-    isError,
-    error,
-  } = useGetReviewsByBookIdQuery(
+  const { data, isLoading, isFetching, isSuccess, isUninitialized, isError, error } = useGetReviewsByBookIdQuery(
     {
       id: book?.id,
       page: pagination?.number,
@@ -175,36 +163,19 @@ const ReviewComponent = ({
   let mainContent;
 
   if (isLoading && !isUninitialized) {
-    reviewsContent = (
-      <>
-        {loading && (
-          <Progress
-            color={`${isError || isUninitialized ? "error" : "primary"}`}
-          />
-        )}
-        {[
-          ...Array(
-            productReviewsCount > pagination?.size
-              ? pagination?.size
-              : productReviewsCount
-          ),
-        ].map((item, index) => (
-          <Fragment key={`temp-review-${index}`}>
-            <ReviewItem />
-          </Fragment>
-        ))}
-      </>
+    reviewsContent = [...Array(productReviewsCount > pagination?.size ? pagination?.size : productReviewsCount)].map(
+      (item, index) => (
+        <Fragment key={`temp-review-${index}`}>
+          <ReviewItem />
+        </Fragment>
+      )
     );
   } else if (isSuccess) {
     const { ids, entities } = data;
 
     reviewsContent = (
       <>
-        {doneReview && userReview && (
-          <ReviewItem
-            {...{ username, review: userReview, handleClick: handleOpenForm }}
-          />
-        )}
+        {doneReview && userReview && <ReviewItem {...{ username, review: userReview, handleClick: handleOpenForm }} />}
         {ids?.length ? (
           ids?.map((id, index) => {
             const review = entities[id];
@@ -213,9 +184,7 @@ const ReviewComponent = ({
               //User's review exclude cuz it already on top
               return (
                 <Fragment key={`${id}-${index}`}>
-                  <ReviewItem
-                    {...{ username, review, handleClick: handleOpenForm }}
-                  />
+                  <ReviewItem {...{ username, review, handleClick: handleOpenForm }} />
                 </Fragment>
               );
             }
@@ -226,15 +195,11 @@ const ReviewComponent = ({
             Chưa có đánh giá nào, hãy trở thành người đầu tiên!
           </Message>
         )}
-        {ids?.length > 0 && ids?.length < pagination.size && (
-          <Message color="warning">Không còn đánh giá nào!</Message>
-        )}
+        {ids?.length > 0 && ids?.length < pagination.size && <Message color="warning">Không còn đánh giá nào!</Message>}
       </>
     );
   } else if (isError) {
-    reviewsContent = (
-      <Message color="error">{error?.error || "Đã xảy ra lỗi"}</Message>
-    );
+    reviewsContent = <Message color="error">{error?.error || "Đã xảy ra lỗi"}</Message>;
   } else if (isUninitialized && productReviewsCount == 0) {
     reviewsContent = (
       <Message>
@@ -259,11 +224,8 @@ const ReviewComponent = ({
                 }}
                 width={64}
               />
-              <Skeleton
-                variant="rectangular"
-                sx={{ mr: 1, height: 40, width: 178 }}
-              />
-              <Skeleton variant="rectangular" sx={{ height: 40, width: 115 }} />
+              <Skeleton variant="rectangular" sx={{ mr: 1, height: 40, width: 190 }} />
+              <Skeleton variant="rectangular" sx={{ height: 40, width: 190 }} />
             </Box>
           }
         >
@@ -278,7 +240,7 @@ const ReviewComponent = ({
           />
         </Suspense>
       )}
-      {reviewsContent}
+      <ReviewsContainer>{reviewsContent}</ReviewsContainer>
       {book?.reviewsInfo?.total > pagination.size && (
         <Suspense fallback={null}>
           <Pagination
@@ -295,15 +257,14 @@ const ReviewComponent = ({
   );
   //#endregion
 
+  const isReviewable = !book || errorReview?.status != 403;
+  const isEditable = haveReviews && userReview != null;
+
   return (
     <ReviewsWrapper>
       <Title>
         <TitleContainer>
-          {book ? (
-            "Đánh giá sản phẩm"
-          ) : (
-            <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="40%" />
-          )}
+          {book ? "Đánh giá sản phẩm" : <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="40%" />}
           {tabletMode ? (
             <ReviewSummary>
               {book ? (
@@ -317,68 +278,50 @@ const ReviewComponent = ({
                     emptyIcon={<StarBorder sx={{ fontSize: 16 }} />}
                   />
                   <Label>{(book?.reviewsInfo?.rating ?? 0).toFixed(1)}/5</Label>
-                  <Label className="secondary">
-                    ({numFormat.format(productReviewsCount ?? 0)} đánh giá)
-                  </Label>
+                  <Label className="secondary">({numFormat.format(productReviewsCount ?? 0)} đánh giá)</Label>
                 </>
               ) : (
-                <Skeleton
-                  variant="text"
-                  sx={{ fontSize: "16px" }}
-                  width={200}
-                />
+                <Skeleton variant="text" sx={{ fontSize: "16px" }} width={200} />
               )}
             </ReviewSummary>
           ) : (
-            <Suspense
-              fallback={<Placeholder sx={{ height: { xs: 131, md: 140 } }} />}
-            >
+            <Suspense fallback={<Placeholder sx={{ height: { xs: 131, md: 140 } }} />}>
               <ReviewInfo
                 {...{
                   handleClick: handleOpenForm,
                   book,
-                  disabled: errorReview?.status == 403,
-                  editable: haveReviews && userReview != null,
+                  disabled: isReviewable,
+                  editable: isEditable,
                 }}
               />
             </Suspense>
           )}
         </TitleContainer>
         {tabletMode && (
-          <MobileExtendButton
-            disabled={!book}
-            onClick={() => handleToggleReview(true)}
-          >
+          <MobileExtendButton disabled={!book} onClick={() => handleToggleReview(true)}>
             {book ? (
               <Label>
                 Xem tất cả <KeyboardArrowRight fontSize="small" />
               </Label>
             ) : (
               <Label>
-                <Skeleton
-                  variant="text"
-                  sx={{ fontSize: "inherit" }}
-                  width={80}
-                />
+                <Skeleton variant="text" sx={{ fontSize: "inherit" }} width={80} />
               </Label>
             )}
           </MobileExtendButton>
         )}
       </Title>
-      <ReviewsContainer>
-        {tabletMode ? reviewsContent : mainContent}
-      </ReviewsContainer>
+      <PreviewContainer>{tabletMode ? reviewsContent : mainContent}</PreviewContainer>
       {tabletMode &&
         book?.reviewsInfo?.total > 0 && ( //View all
           <Showmore onClick={() => handleToggleReview(true)}>
             <Label>
-              Xem tất cả ({numFormat.format(productReviewsCount ?? 0)} đánh giá){" "}
-              <KeyboardArrowRight fontSize="small" />
+              Xem tất cả ({numFormat.format(productReviewsCount ?? 0)} đánh giá) <KeyboardArrowRight fontSize="small" />
             </Label>
           </Showmore>
         )}
       {isReview !== undefined &&
-        tabletMode && ( //Mobile component
+        tabletMode && ( // Mobile component
           <Suspense fallback={null}>
             <Dialog
               fullScreen
@@ -386,39 +329,35 @@ const ReviewComponent = ({
               closeAfterTransition={false}
               open={isReview}
               onClose={() => handleToggleReview(false)}
+              slots={{
+                transition: Transition,
+              }}
             >
               <DialogTitle sx={{ display: "flex", alignItems: "center" }}>
-                <KeyboardArrowLeft
-                  onClick={() => handleToggleReview(false)}
-                  style={{ marginRight: "4px" }}
-                />
+                <KeyboardArrowLeft onClick={() => handleToggleReview(false)} style={{ marginRight: "4px" }} />
                 Đánh giá
               </DialogTitle>
               <Suspense fallback={<Placeholder />}>
-                <DialogContent
-                  dividers={true}
-                  sx={{ padding: 1, paddingTop: 0 }}
-                >
+                <DialogContent dividers={true} sx={{ px: "0 !important" }}>
                   <ReviewInfo book={book} />
-                  {mainContent}
+                  <ReviewsContainer>{mainContent}</ReviewsContainer>
                 </DialogContent>
               </Suspense>
               <DialogActions>
-                <Button
-                  variant="outlined"
-                  size="large"
-                  fullWidth
-                  sx={{ marginY: "10px" }}
-                  disabled={!book || errorReview?.status == 403}
-                  onClick={() => setOpenForm(true)}
-                  startIcon={<EditOutlined />}
-                >
-                  {errorReview?.status == 403
-                    ? "Mua sản phẩm"
-                    : haveReviews && userReview != null
-                      ? "Sửa đánh giá"
-                      : "Viết đánh giá"}
-                </Button>
+                {!isReviewable ? (
+                  <ActionButtons book={book} outlined={true} />
+                ) : (
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    fullWidth
+                    disabled={isReviewable}
+                    onClick={() => setOpenForm(true)}
+                    startIcon={<EditOutlined />}
+                  >
+                    {isEditable ? "Sửa đánh giá" : "Viết đánh giá"}
+                  </Button>
+                )}
               </DialogActions>
             </Dialog>
           </Suspense>

@@ -8,7 +8,7 @@ import {
   StyledEmptyIcon,
   ToggleGroupContainer,
 } from "../custom/ProfileComponents";
-import { Link, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { CustomTab, CustomTabs } from "../custom/CustomTabs";
 import { debounce } from "lodash-es";
 import { Message } from "@ring/ui/Components";
@@ -42,7 +42,7 @@ const couponItems = [
     },
   },
   {
-    label: "shop",
+    label: "store",
     filter: {
       byShop: true,
     },
@@ -58,7 +58,7 @@ Object.values(CouponType).forEach((item) => {
   });
 });
 
-const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
+const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) => {
   const { t } = useTranslation();
   const { coupons: savedCoupons } = useCoupon();
   const scrollRef = useRef(null);
@@ -87,6 +87,8 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
     codes: filters.saved ? (savedCoupons?.length > 0 ? savedCoupons : ["temp"]) : [],
     page: pagination?.number,
     size: pagination?.size,
+    showUsed: true,
+    showExpired: true,
     loadMore: pagination?.isMore,
   });
 
@@ -218,18 +220,19 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
     couponsContent = ids?.length ? (
       ids?.map((id, index) => {
         const coupon = entities[id];
-        const meta = getCouponType(coupon?.type);
-        const criteria = getCouponCriteria(coupon?.criteria);
-        const isSaved = savedCoupons?.indexOf(coupon?.code) != -1;
+        const couponInfo = {
+          ...coupon,
+          isUsed: coupon?.isUsed,
+          isSaved: savedCoupons?.indexOf(coupon?.code) != -1,
+          meta: getCouponType(coupon?.type),
+          criteria: getCouponCriteria(coupon?.criteria),
+        };
 
         return (
-          <Grid key={`coupon-${id}-${index}`} size={{ xs: 12, md_lg: 6 }}>
+          <Grid key={`coupon-${id}-${index}`} size={{ xs: 12, sm_md: 6, md: 12, md_lg: 6 }}>
             <CouponItem
               {...{
-                coupon,
-                meta,
-                criteria,
-                isSaved,
+                coupon: couponInfo,
                 className: "display",
                 scrollPosition,
               }}
@@ -256,9 +259,9 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
   return (
     <>
       <StyledDialogTitle ref={scrollRef}>
-        <Link to={-1}>
+        <a onClick={handleClose}>
           <KeyboardArrowLeft />
-        </Link>
+        </a>
         <Loyalty />
         &nbsp;Mã giảm giá
       </StyledDialogTitle>
@@ -270,7 +273,10 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
           ))}
         </CustomTabs>
       </ToggleGroupContainer>
-      <DialogContent sx={{ py: 0, px: { xs: 0, sm: 2, md: 0 } }} onScroll={tabletMode ? scrollListener : undefined}>
+      <DialogContent
+        sx={{ py: 0, px: { xs: 0, sm: 2, md: 0 }, height: { xs: "100dvh", md: "auto" } }}
+        onScroll={tabletMode ? scrollListener : undefined}
+      >
         <form ref={mobileScrollRef} onSubmit={handleChangeCode}>
           <TextField
             placeholder="Nhập mã giảm giá"

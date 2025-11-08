@@ -1,9 +1,6 @@
 import { Instruction } from "@ring/ui/Components";
 import { useEffect, useState } from "react";
-import {
-  useCancelOrderMutation,
-  useRefundOrderMutation,
-} from "../../features/orders/ordersApiSlice";
+import { useCancelOrderMutation, useRefundOrderMutation } from "../../features/orders/ordersApiSlice";
 import Check from "@mui/icons-material/Check";
 import Close from "@mui/icons-material/Close";
 import HelpOutline from "@mui/icons-material/HelpOutline";
@@ -35,16 +32,8 @@ const refundOptions = [
   "Không còn nhu cầu sử dụng (sẽ trả nguyên trạng sản phẩm)",
 ];
 
-const CancelAndRefundDetailForm = ({
-  id,
-  pending,
-  setPending,
-  handleClose,
-  isRefund,
-}) => {
-  const [value, setValue] = useState(
-    isRefund ? refundOptions[0] : cancelOptions[0]
-  );
+const CancelAndRefundDetailForm = ({ id, pending, setPending, handleClose, isRefund }) => {
+  const [value, setValue] = useState(isRefund ? refundOptions[0] : cancelOptions[0]);
   const [otherReason, setOtherReason] = useState("");
   const [err, setErr] = useState([]);
   const [errMsg, setErrMsg] = useState("");
@@ -107,19 +96,13 @@ const CancelAndRefundDetailForm = ({
 
   return (
     <>
-      <DialogTitle
-        id="cancel-dialog-title"
-        sx={{ display: "flex", alignItems: "center" }}
-      >
+      <DialogTitle id="cancel-dialog-title" sx={{ display: "flex", alignItems: "center" }}>
         <HelpOutline />
         &nbsp;{isRefund ? "Chọn lý do hoàn trả" : "Chọn lý do huỷ đơn"}
       </DialogTitle>
       <DialogContent>
         <form onSubmit={handleSubmit}>
-          <Instruction
-            display={errMsg ? "block" : "none"}
-            aria-live="assertive"
-          >
+          <Instruction display={errMsg ? "block" : "none"} aria-live="assertive">
             {errMsg}
           </Instruction>
           <RadioGroup
@@ -129,12 +112,7 @@ const CancelAndRefundDetailForm = ({
             onChange={(e) => setValue(e.target.value)}
           >
             {(isRefund ? refundOptions : cancelOptions).map((option, index) => (
-              <FormControlLabel
-                key={index}
-                value={option}
-                label={option}
-                control={<Radio />}
-              />
+              <FormControlLabel key={index} value={option} label={option} control={<Radio />} />
             ))}
             <FormControlLabel value="" label="Khác" control={<Radio />} />
           </RadioGroup>
@@ -160,25 +138,10 @@ const CancelAndRefundDetailForm = ({
         </form>
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="outlined"
-          color="error"
-          size="large"
-          autoFocus
-          sx={{ mb: 1 }}
-          onClick={handleClose}
-          startIcon={<Close />}
-        >
+        <Button variant="outlined" color="error" size="large" autoFocus onClick={handleClose} startIcon={<Close />}>
           Huỷ
         </Button>
-        <Button
-          variant="contained"
-          size="large"
-          autoFocus
-          sx={{ mb: 1 }}
-          onClick={handleSubmit}
-          startIcon={<Check />}
-        >
+        <Button variant="contained" size="large" onClick={handleSubmit} startIcon={<Check />}>
           Đồng ý
         </Button>
       </DialogActions>

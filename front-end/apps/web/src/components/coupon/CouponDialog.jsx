@@ -4,7 +4,8 @@ import { getCouponType, getCouponCriteria } from "@ring/shared/enums/coupon";
 import { CouponType } from "@ring/shared/models/couponType";
 import { Instruction, Message } from "@ring/ui/Components";
 import { trackWindowScroll } from "react-lazy-load-image-component";
-import { compact } from "lodash-es";
+import { compact, capitalize } from "lodash-es";
+import { useTranslation } from "react-i18next";
 import Check from "@mui/icons-material/Check";
 import Close from "@mui/icons-material/Close";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -24,6 +25,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CouponItem from "./CouponItem";
 import styled from "@emotion/styled";
 import useCoupon from "../../hooks/useCoupon";
+import SimpleBar from "simplebar-react";
+import ErrorOutline from "@mui/icons-material/ErrorOutline";
 
 //#region styled
 const TitleContainer = styled.div`
@@ -31,8 +34,27 @@ const TitleContainer = styled.div`
   align-items: center;
 `;
 
+const StyledSimpleBar = styled(SimpleBar)`
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  padding: inherit;
+
+  .simplebar-track {
+    &.simplebar-vertical {
+      .simplebar-scrollbar {
+        &:before {
+          background-color: ${({ theme }) => theme.vars.palette.divider};
+        }
+      }
+    }
+  }
+`;
+
 const DetailTitle = styled.h4`
-  margin: 10px 0;
+  margin: 5px 0;
   font-size: 17px;
   font-weight: 600;
 
@@ -42,18 +64,22 @@ const DetailTitle = styled.h4`
 `;
 
 const CouponContainer = styled.div`
-  padding: ${({ theme }) => `${theme.spacing(1)} ${theme.spacing(3)}`};
+  padding: ${({ theme }) => `${theme.spacing(1)} ${theme.spacing(3)} 0`};
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
-    padding: ${({ theme }) => `${theme.spacing(0)} ${theme.spacing(1)}`};
+    padding: ${({ theme }) => `${theme.spacing(0)} ${theme.spacing(1)} 0`};
   }
 `;
 
-const InputContainer = styled.div`
+const InputContainer = styled.form`
   display: flex;
 `;
 
-const CouponsContainer = styled.div``;
+const CouponsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+`;
 
 const Showmore = styled.div`
   font-size: 14px;
@@ -92,6 +118,7 @@ const CouponDialog = ({
   onSubmit,
   scrollPosition,
 }) => {
+  const { t } = useTranslation();
   const { coupons: savedCodes } = useCoupon();
   const fullScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const inputRef = useRef(null);
@@ -108,7 +135,7 @@ const CouponDialog = ({
     data: shipping,
     currentData: currentShipping,
     isLoading: loadShipping,
-    isFetching: fetchShipping,
+    isFetching: fetchingShipping,
     isSuccess: doneShipping,
     isError: errorShipping,
   } = useGetCouponsQuery(
@@ -120,6 +147,8 @@ const CouponDialog = ({
       cQuantity: checkState?.quantity,
       size: shipPagination.size,
       page: shipPagination.number,
+      showUsed: false,
+      showExpired: false,
       loadMore: shipPagination.isMore,
     },
     { skip: (!shopId && !selectMode) || isSaved }
@@ -133,6 +162,8 @@ const CouponDialog = ({
       cQuantity: checkState?.quantity,
       size: pagination.size,
       page: pagination.number,
+      showUsed: false,
+      showExpired: false,
       loadMore: pagination.isMore,
     },
     { skip: (!shopId && !selectMode) || isSaved }
@@ -141,7 +172,7 @@ const CouponDialog = ({
     data: saved,
     currentData: currentSaved,
     isLoading: loadSaved,
-    isFetching: fetchSaved,
+    isFetching: fetchingSaved,
     isSuccess: doneSaved,
     isError: errorSaved,
   } = useGetCouponsQuery(
@@ -153,6 +184,8 @@ const CouponDialog = ({
       cQuantity: checkState?.quantity,
       size: savedPagination.size,
       page: savedPagination.number,
+      showUsed: true,
+      showExpired: true,
       loadMore: savedPagination.isMore,
     },
     { skip: !isSaved && !selectMode && savedCodes?.length > 0 }
@@ -219,7 +252,8 @@ const CouponDialog = ({
     }
   }, [saved]);
 
-  const handleChangeInput = () => {
+  const handleChangeInput = (e) => {
+    e.preventDefault();
     setCouponInput(inputRef?.current?.value);
   };
   const handleClickApply = (coupon, shopId) => {
@@ -228,7 +262,7 @@ const CouponDialog = ({
   };
 
   const handleShowMoreShipping = () => {
-    if (fetchShipping || typeof shipping?.page !== "number" || shipping?.page < shipPagination?.number) return;
+    if (fetchingShipping || typeof shipping?.page !== "number" || shipping?.page < shipPagination?.number) return;
     const nextPage = shipping?.page + 1;
     if (nextPage < shipping?.totalPages) setShipPagination((prev) => ({ ...prev, number: nextPage }));
   };
@@ -240,7 +274,7 @@ const CouponDialog = ({
   };
 
   const handleShowMoreSaved = () => {
-    if (fetchSaved || typeof saved?.page !== "number" || saved?.page < savedPagination?.number) return;
+    if (fetchingSaved || typeof saved?.page !== "number" || saved?.page < savedPagination?.number) return;
     const nextPage = saved?.page + 1;
     if (nextPage < saved?.totalPages) setSavedPagination((prev) => ({ ...prev, number: nextPage }));
   };
@@ -330,7 +364,7 @@ const CouponDialog = ({
 
     shippingCoupons = (
       <>
-        {content?.length > 0 && <DetailTitle>Mã vận chuyển</DetailTitle>}
+        {content?.length > 0 && <DetailTitle>{t("coupon.shipping", { ns: "client" })}</DetailTitle>}
         {content}
       </>
     );
@@ -397,7 +431,7 @@ const CouponDialog = ({
 
     coupons = (
       <>
-        {content?.length > 0 && <DetailTitle>Mã giảm giá</DetailTitle>}
+        {content?.length > 0 && <DetailTitle>{t("coupon.discount", { ns: "client" })}</DetailTitle>}
         {content}
       </>
     );
@@ -438,11 +472,24 @@ const CouponDialog = ({
 
     savedCoupons = (
       <>
-        {content?.length > 0 && <DetailTitle>Mã đã lưu</DetailTitle>}
+        {content?.length > 0 && <DetailTitle>{t("coupon.saved", { ns: "client" })}</DetailTitle>}
         {content}
       </>
     );
   }
+
+  let errorMessage = errorCode
+    ? t("coupon.invalid", { ns: "client" })
+    : !loggedIn
+      ? capitalize("required.login", { ns: "client", action: t("cart.coupon.apply", { ns: "client" }) })
+      : !numSelected
+        ? t("required.select", { ns: "client" })
+        : "";
+
+  const savedEmpty = isSaved && saved?.ids?.length == 0 && !fetchingSaved;
+  const couponsEmpty =
+    !isSaved && data?.ids?.length == 0 && shipping?.ids?.length == 0 && !isFetching && !fetchingShipping;
+  const errorFlag = isError || errorShipping || errorSaved;
 
   return (
     <Dialog
@@ -458,7 +505,7 @@ const CouponDialog = ({
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <TitleContainer>
           <Loyalty />
-          &nbsp;Thông tin ưu đãi
+          &nbsp;{t("coupon.title", { ns: "client" })}
         </TitleContainer>
         {selectMode && (
           <Button
@@ -467,15 +514,15 @@ const CouponDialog = ({
             startIcon={isSaved ? <KeyboardArrowLeft /> : <SaveAlt />}
             onClick={toggleSaved}
           >
-            {isSaved ? "Trở về" : "Đã lưu"}
+            {isSaved ? t("back") : t("saved")}
           </Button>
         )}
       </DialogTitle>
       {selectMode && (
         <CouponContainer>
-          <InputContainer>
+          <InputContainer onSubmit={handleChangeInput}>
             <TextField
-              placeholder="Nhập mã giảm giá"
+              placeholder={t("coupon.add", { ns: "client" })}
               type="text"
               id="coupon"
               inputRef={inputRef}
@@ -495,23 +542,15 @@ const CouponDialog = ({
               disabled={!numSelected || !loggedIn}
               onClick={handleChangeInput}
             >
-              Áp dụng
+              {t("apply")}
             </Button>
           </InputContainer>
-          <Instruction>
-            {errorCode
-              ? "Mã không hợp lệ"
-              : !loggedIn
-                ? "Vui lòng đăng nhập để áp dụng mã"
-                : !numSelected
-                  ? "Vui lòng chọn sản phẩm để sử dụng mã"
-                  : ""}
-          </Instruction>
           {couponInput && code && (
             <CouponItem
               key={`top-coupon-${code?.id}`}
               {...{
                 coupon: {
+                  ...code,
                   isUsed: selectMode && code?.isUsed,
                   isSelected: tempCoupon?.id == code?.id,
                   isDisabled: checkDisabled(code),
@@ -520,70 +559,73 @@ const CouponDialog = ({
                 },
                 selectMode,
                 onClickApply: setTempCoupon,
+                style: { marginTop: "8px" },
               }}
             />
           )}
+          <Instruction>
+            {errorMessage ? (
+              <>
+                <ErrorOutline fontSize="small" />
+                &nbsp;{errorMessage}
+              </>
+            ) : null}
+          </Instruction>
         </CouponContainer>
       )}
-      <DialogContent sx={{ pt: 0, px: { xs: 1, sm: 3 }, height: "100dvh" }}>
-        <CouponsContainer>
-          {isSaved ? (
-            <>
-              {savedCoupons}
-              {!loadSaved && savedPagination.totalPages > savedPagination.number + 1 && (
-                <Showmore onClick={handleShowMoreSaved}>
-                  Xem thêm
-                  <ExpandMore />
-                </Showmore>
-              )}
-              {fetchSaved && loadingComponent}
-            </>
-          ) : (
-            <>
-              {shippingCoupons}
-              {!loadShipping && shipPagination.totalPages > shipPagination.number + 1 && (
-                <Showmore onClick={handleShowMoreShipping}>
-                  Xem thêm
-                  <ExpandMore />
-                </Showmore>
-              )}
-              {coupons}
-              {!isLoading && pagination.totalPages > pagination.number + 1 && (
-                <Showmore onClick={handleShowMore}>
-                  Xem thêm
-                  <ExpandMore />
-                </Showmore>
-              )}
-              {(isFetching || fetchShipping) && loadingComponent}
-            </>
-          )}
-          {((isSaved && !savedCoupons && !fetchSaved) ||
-            (!isSaved && !coupons && !shippingCoupons && !isFetching && !fetchShipping)) && (
-            <Message>{isError || errorShipping || errorSaved ? "Đã xảy ra lỗi!" : "Hiện không có khuyến mãi"}</Message>
-          )}
-        </CouponsContainer>
+      <DialogContent sx={{ height: "100dvh", position: "relative" }} dividers={true}>
+        <StyledSimpleBar>
+          <CouponsContainer>
+            {isSaved ? (
+              <>
+                {savedCoupons}
+                {!loadSaved && savedPagination.totalPages > savedPagination.number + 1 && (
+                  <Showmore onClick={handleShowMoreSaved}>
+                    {t("show.more")}
+                    <ExpandMore />
+                  </Showmore>
+                )}
+                {fetchingSaved && loadingComponent}
+              </>
+            ) : (
+              <>
+                {shippingCoupons}
+                {!loadShipping && shipPagination.totalPages > shipPagination.number + 1 && (
+                  <Showmore onClick={handleShowMoreShipping}>
+                    {t("show.more")}
+                    <ExpandMore />
+                  </Showmore>
+                )}
+                {coupons}
+                {!isLoading && pagination.totalPages > pagination.number + 1 && (
+                  <Showmore onClick={handleShowMore}>
+                    {t("show.more")}
+                    <ExpandMore />
+                  </Showmore>
+                )}
+                {(isFetching || fetchingShipping) && loadingComponent}
+              </>
+            )}
+            {savedEmpty ||
+              (couponsEmpty && (
+                <Message>{errorFlag ? t("error.general") : t("coupon.not.found", { ns: "client" })}</Message>
+              ))}
+          </CouponsContainer>
+        </StyledSimpleBar>
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="outlined"
-          color="error"
-          size="large"
-          sx={{ marginY: "10px" }}
-          startIcon={<Close />}
-          onClick={onClose}
-        >
-          Đóng
+        <Button variant="outlined" color="error" size="large" startIcon={<Close />} onClick={onClose}>
+          {t("close")}
         </Button>
         {selectMode && (
           <Button
             variant="contained"
             color="primary"
             size="large"
-            sx={{ marginY: "10px" }}
             startIcon={<Check />}
             onClick={() => handleClickApply(tempCoupon, shopId)}
           >
-            Chọn
+            {t("select")}
           </Button>
         )}
       </DialogActions>

@@ -53,6 +53,8 @@ public class CouponController {
      * @param pageNo        page number.
      * @param sortBy        sorting field.
      * @param sortDir       sorting direction.
+     * @param showUsed      whether to include used coupons.
+     * @param user          the authenticated user.
      * @return paginated and filtered list of coupons.
      */
     @GetMapping
@@ -62,7 +64,7 @@ public class CouponController {
             @RequestParam(value = "shopId", required = false) Long shopId,
             @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "byShop", required = false) Boolean byShop,
-            @RequestParam(value = "showExpired", required = false) Boolean showExpired,
+            @RequestParam(value = "showExpired", defaultValue = "false") Boolean showExpired,
             @RequestParam(value = "codes", required = false) List<String> codes,
             @RequestParam(value = "code", required = false) String code,
             @RequestParam(value = "cValue", required = false) Double checkValue,
@@ -70,7 +72,9 @@ public class CouponController {
             @RequestParam(value = "pSize", defaultValue = "5") Integer pageSize,
             @RequestParam(value = "pageNo", defaultValue = "0") Integer pageNo,
             @RequestParam(value = "sortBy", defaultValue = "detail.discount") String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir) {
+            @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir,
+            @RequestParam(value = "showUsed", defaultValue = "false") Boolean showUsed,
+            @CurrentAccount Account user) {
 
         PagingResponse<CouponDTO> coupons = couponService.getCoupons(
                 pageNo,
@@ -86,7 +90,9 @@ public class CouponController {
                 byShop,
                 showExpired,
                 checkValue,
-                checkQuantity);
+                checkQuantity,
+                showUsed,
+                user);
         return new ResponseEntity<>(coupons, HttpStatus.OK);
     }
 
@@ -117,9 +123,10 @@ public class CouponController {
             @PathVariable("code") String code,
             @RequestParam(value = "shopId", required = false) Long shopId,
             @RequestParam(value = "cValue", required = false) Double checkValue,
-            @RequestParam(value = "cQuantity", required = false) Integer checkQuantity) {
+            @RequestParam(value = "cQuantity", required = false) Integer checkQuantity,
+            @CurrentAccount Account user) {
 
-        CouponDTO coupon = couponService.getCouponByCode(code, shopId, checkValue, checkQuantity);
+        CouponDTO coupon = couponService.getCouponByCode(code, shopId, checkValue, checkQuantity, user);
         return new ResponseEntity<>(coupon, HttpStatus.OK);
     }
 
@@ -127,12 +134,17 @@ public class CouponController {
      * Recommends coupons based on provided shop IDs.
      *
      * @param shopIds list of shop IDs.
+     * @param checkValue  the cart value.
+     * @param checkQuantity the cart quantity.
+     * @param user    the authenticated user.
      * @return recommended coupons for the shops.
      */
     @GetMapping("/recommend")
-    public ResponseEntity<List<CouponDTO>> recommendCoupons(@RequestParam("shopIds") List<Long> shopIds) {
+    public ResponseEntity<List<CouponDTO>> recommendCoupons(
+            @RequestParam("shopIds") List<Long> shopIds,
+            @CurrentAccount Account user) {
 
-        List<CouponDTO> coupons = couponService.recommendCoupons(shopIds);
+        List<CouponDTO> coupons = couponService.recommendCoupons(shopIds, user);
         return new ResponseEntity<>(coupons, HttpStatus.OK);
     }
 

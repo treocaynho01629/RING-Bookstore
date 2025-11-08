@@ -147,6 +147,7 @@ const NavDrawer = ({
             </List>
             <Divider />
             <List>
+              // TODO: Update theme selector & language selector
               {mode && (
                 <ListItem disablePadding>
                   <ListItemButton>

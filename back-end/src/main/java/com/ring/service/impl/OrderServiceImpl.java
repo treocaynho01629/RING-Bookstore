@@ -808,7 +808,7 @@ public class OrderServiceImpl implements OrderService {
                 ? null // Null => User not select any coupon
                 : coupons.containsKey(orderCoupon) 
                     ? coupons.get(orderCoupon)
-                    : couponRepo.recommendCoupon(null, totalPrice - totalDealDiscount, totalQuantity).orElse(null);
+                    : couponRepo.recommendCoupon(null, totalPrice - totalDealDiscount, totalQuantity, user.getId()).orElse(null);
 
         Coupon coupon = cProjection != null ? cProjection.getCoupon() : null;
         if (coupon != null && coupon.getShop() == null
@@ -1023,7 +1023,7 @@ public class OrderServiceImpl implements OrderService {
                 ? null // Null => User not select any coupon
                 : coupons.containsKey(detail.getCoupon()) 
                     ? coupons.get(detail.getCoupon())
-                    : couponRepo.recommendCoupon(shop.getId(), detailTotal - discountDeal, detailQuantity).orElse(null);
+                    : couponRepo.recommendCoupon(shop.getId(), detailTotal - discountDeal, detailQuantity, user.getId()).orElse(null);
 
         // Validate + apply coupon
         if (shopCoupon != null

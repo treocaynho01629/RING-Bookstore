@@ -96,10 +96,6 @@ export const theme = createTheme({
           "textTransform": "none",
 
           "&.MuiButton-contained": {
-            "&:hover": {
-              backgroundColor: theme.vars.palette.grey[300],
-            },
-
             "&:disabled": {
               backgroundColor: theme.vars.palette.grey[500],
               color: theme.vars.palette.text.disabled,

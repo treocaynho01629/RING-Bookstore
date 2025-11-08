@@ -59,31 +59,44 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
      * @param showExpired a boolean flag to include expired
      */
     @Query("""
-        SELECT c AS coupon, 
+        SELECT DISTINCT c AS coupon, 
             s.name AS shopName, 
-            i AS shopImage
+            i AS shopImage,
+            CASE WHEN COALESCE(:userId) IS NULL OR o.id IS NOT NULL 
+                THEN TRUE 
+                ELSE FALSE END 
+            AS isUsed
         FROM Coupon c
         JOIN FETCH c.detail cd
         LEFT JOIN c.shop s
         LEFT JOIN s.image i
-        WHERE (COALESCE(:showExpired) IS NULL OR (cd.expDate > CURRENT DATE AND cd.usage > 0))
+        LEFT JOIN OrderDetail od 
+            ON od.coupon.id = c.id
+        LEFT JOIN OrderReceipt o 
+            ON o.id = od.order.id
+            OR o.coupon.id = c.id
+            AND o.user.id = :userId
+        WHERE (CASE WHEN :showExpired = false THEN (cd.expDate > CURRENT DATE AND cd.usage > 0) ELSE TRUE END)
         AND (COALESCE(:codes) IS NULL OR c.code IN :codes)
         AND (COALESCE(:code) IS NULL OR c.code = :code)
         AND (COALESCE(:types) IS NULL OR cd.type IN :types)
         AND (COALESCE(:criterias) IS NULL OR cd.criteria IN :criterias)
         AND (COALESCE(:shopId) IS NULL OR s.id = :shopId)
-        AND (COALESCE(:userId) IS NULL OR s.owner.id = :userId)
+        AND (COALESCE(:ownerId) IS NULL OR s.owner.id = :ownerId)
         AND (COALESCE(:byShop) IS NULL OR CASE WHEN :byShop = true THEN s.id IS NOT NULL ELSE s.id IS NULL END)
-        GROUP BY c.id, cd.id, s.name, i.id
+        AND (CASE WHEN :showUsed = false THEN o.id IS NULL ELSE TRUE END)
+        GROUP BY c.id, cd.id, s.name, i.id, o.id, od.id
     """)
     Page<ICoupon> findCoupons(List<CouponType> types,
             List<CouponCriteria> criterias,
             List<String> codes,
             String code,
             Long shopId,
-            Long userId,
+            Long ownerId,
             Boolean byShop,
             Boolean showExpired,
+            Boolean showUsed,
+            Long userId,
             Pageable pageable);
 
     /**
@@ -143,36 +156,49 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
             List<Long> ids);
 
     /**
-     * Recommends a list of coupons based on the provided shop IDs. The method
-     * retrieves the top-ranked coupon for each shop based on various criteria
-     * such as expiration date, usage conditions, and discount attributes.
+     * Recommends a list of coupons for the provided shop IDs while excluding coupons
+     * already used by the specified user (if provided). For anonymous users, pass null
+     * for {@code userId} and no exclusion will be applied. 
      *
-     * @param shopIds the list of shop IDs for which coupons are to be recommended;
-     *                can include null to retrieve coupons not associated with any
-     *                shop
-     * @return a list of recommended coupons, where each entry includes the coupon,
-     *         the associated
+     * @param shopIds the list of shop IDs; may include null to include global coupons
+     * @param userId  the current user ID to exclude already-used coupons; nullable
+     * @return a list of recommended coupons (one per shop and one for global if present)
      */
     @Query("""
-        SELECT c AS coupon, 
-            s.name AS shopName, 
+        SELECT c AS coupon,
+            s.name AS shopName,
             i AS image
         FROM Coupon c
         JOIN FETCH c.detail cd
         LEFT JOIN c.shop s
         LEFT JOIN s.image i
         JOIN (
-            SELECT c2.id AS id, 
+            SELECT c2.id AS id,
                 c2.shop.id AS shopId,
-                ROW_NUMBER() OVER (PARTITION BY c2.shop.id ORDER BY c2.shop.id) AS rn
-            FROM Coupon c2 JOIN c2.detail cd
-            WHERE (cd.expDate > CURRENT DATE AND cd.usage > 0)
-            AND c2.shop.id IN :shopIds OR c2.shop.id IS NULL
-        ) t ON c.id = t.id AND t.rn = 1
-        ORDER BY c.detail.type ASC, c.detail.attribute ASC,
-            c.detail.discount DESC, c.detail.maxDiscount DESC
+                ROW_NUMBER() OVER (
+                    PARTITION BY c2.shop.id
+                    ORDER BY 
+                        CASE WHEN cd2.type = com.ring.model.enums.CouponType.PRODUCT THEN 0
+                             WHEN cd2.type = com.ring.model.enums.CouponType.SHIPPING THEN 1
+                             ELSE 2 END ASC,
+                        CASE WHEN cd2.criteria = com.ring.model.enums.CouponCriteria.VALUE THEN 0
+                             WHEN cd2.criteria = com.ring.model.enums.CouponCriteria.QUANTITY THEN 1
+                             ELSE 2 END ASC,
+                        cd2.attribute ASC,
+                        (cd2.discount * cd2.maxDiscount) DESC
+                ) AS rn
+            FROM Coupon c2
+            JOIN c2.detail cd2
+            WHERE (cd2.expDate > CURRENT DATE AND cd2.usage > 0)
+            AND ((c2.shop.id IN :shopIds) OR c2.shop.id IS NULL)
+            AND (COALESCE(:userId) IS NULL OR NOT EXISTS (
+                    SELECT 1 FROM OrderReceipt o
+                    JOIN o.details od
+                    WHERE (o.coupon.id = c2.id OR od.coupon.id = c2.id)
+                    AND o.user.id = :userId))
+        ) t ON c.id = t.id AND t.rn = 1 
     """)
-    List<ICoupon> recommendCoupons(List<Long> shopIds);
+    List<ICoupon> recommendCoupons(List<Long> shopIds, Long userId);
 
     /**
      * Retrieves a list of coupons, along with associated shop names and shop
@@ -212,22 +238,28 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
     @Query("""
         SELECT c AS coupon, 
             s.name AS shopName, 
-            i AS image
+            i AS image,
+            FALSE AS isUsed
         FROM Coupon c
         JOIN FETCH c.detail cd
         LEFT JOIN c.shop s
         LEFT JOIN s.image i
         WHERE (cd.expDate > CURRENT DATE AND cd.usage > 0)
+        AND (COALESCE(:userId) IS NULL OR NOT EXISTS (
+            SELECT 1 FROM OrderReceipt o
+            JOIN o.details od
+            WHERE (o.coupon.id = c.id OR od.coupon.id = c.id)
+            AND o.user.id = :userId))
         AND (CASE WHEN COALESCE(:shopId) IS NULL THEN s.id IS NULL ELSE s.id = :shopId END)
-        AND (COALESCE(:value) IS NULL OR (
-            cd.criteria = com.ring.model.enums.CouponCriteria.VALUE AND cd.attribute < :value)
+        AND (COALESCE(:value) IS NULL 
+            OR (cd.criteria = com.ring.model.enums.CouponCriteria.VALUE AND cd.attribute < :value)
             OR (COALESCE(:quantity) IS NULL
             OR (cd.criteria = com.ring.model.enums.CouponCriteria.QUANTITY AND cd.attribute < :quantity)))
         GROUP BY s.id, c.id, cd.id, cd.attribute, cd.discount, cd.maxDiscount, s.name, i.id
         ORDER BY cd.attribute ASC, cd.discount DESC, cd.maxDiscount DESC
         LIMIT 1
     """)
-    Optional<ICoupon> recommendCoupon(Long shopId, Double value, Integer quantity);
+    Optional<ICoupon> recommendCoupon(Long shopId, Double value, Integer quantity, Long userId);
 
     /**
      * Finds a coupon by its unique code.
@@ -235,6 +267,7 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
      * and the shop's linked image (if any).
      *
      * @param code The unique code of the coupon to retrieve.
+     * @param userId The ID of the user to check if the coupon has been used.
      * @return An {@code Optional} containing {@code ICoupon} details including the
      *         coupon,
      *         shop name, and shop image, or an empty {@code Optional} if no coupon
@@ -243,14 +276,20 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
     @Query("""
         SELECT c AS coupon, 
             s.name AS shopName, 
-            i AS image
+            i AS image,
+            CASE WHEN EXISTS (
+                SELECT 1 FROM OrderReceipt o
+                JOIN o.details od
+                WHERE (o.coupon.id = c.id OR od.coupon.id = c.id)
+                AND o.user.id = :userId
+            ) THEN TRUE ELSE FALSE END AS isUsed
         FROM Coupon c
         JOIN FETCH c.detail cd
         LEFT JOIN c.shop s
         LEFT JOIN s.image i
         WHERE c.code = :code
     """)
-    Optional<ICoupon> findCouponByCode(String code);
+    Optional<ICoupon> findCouponByCode(String code, Long userId);
 
     /**
      * Finds a Coupon by its unique identifier and retrieves associated details,

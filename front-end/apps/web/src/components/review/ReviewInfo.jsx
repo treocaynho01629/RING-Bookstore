@@ -16,7 +16,8 @@ const ReviewsInfoContainer = styled.div`
   text-transform: none;
 
   ${({ theme }) => theme.breakpoints.down("md")} {
-    padding-bottom: 10px;
+    margin-top: 0;
+    padding: 0 10px 10px;
     justify-content: center;
     border-bottom: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
   }
@@ -154,27 +155,16 @@ const ReviewInfo = ({ handleClick, book, disabled, editable }) => {
               icon={<Star fontSize="inherit" />}
               emptyIcon={<StarBorder fontSize="inherit" />}
             />
-            <TotalLabel>
-              ({numFormat.format(book?.reviewsInfo?.total ?? 0)} đánh giá)
-            </TotalLabel>
+            <TotalLabel>({numFormat.format(book?.reviewsInfo?.total ?? 0)} đánh giá)</TotalLabel>
           </>
         ) : (
           <>
             <Score>
-              <Skeleton
-                variant="text"
-                sx={{ fontSize: "inherit", width: { xs: 60, md: 100 } }}
-              />
+              <Skeleton variant="text" sx={{ fontSize: "inherit", width: { xs: 60, md: 100 } }} />
             </Score>
-            <Skeleton
-              variant="text"
-              sx={{ fontSize: { xs: 18, md: 24 }, width: { xs: 90, md: 120 } }}
-            />
+            <Skeleton variant="text" sx={{ fontSize: { xs: 18, md: 24 }, width: { xs: 90, md: 120 } }} />
             <TotalLabel>
-              <Skeleton
-                variant="text"
-                sx={{ fontSize: "inherit", width: { xs: 80, md: 100 } }}
-              />
+              <Skeleton variant="text" sx={{ fontSize: "inherit", width: { xs: 80, md: 100 } }} />
             </TotalLabel>
           </>
         )}
@@ -210,11 +200,7 @@ const ReviewInfo = ({ handleClick, book, disabled, editable }) => {
             onClick={handleClick}
             startIcon={<EditOutlined />}
           >
-            {disabled
-              ? "Mua sản phẩm"
-              : editable
-                ? "Sửa đánh giá"
-                : "Viết đánh giá"}
+            {disabled ? "Mua sản phẩm" : editable ? "Sửa đánh giá" : "Viết đánh giá"}
           </Button>
         ) : (
           <Skeleton variant="rectangular" sx={{ height: 42, width: 160 }} />

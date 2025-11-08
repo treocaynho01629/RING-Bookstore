@@ -20,9 +20,7 @@ import ProductAction from "./ProductAction";
 
 const CouponPreview = lazy(() => import("../../coupon/CouponPreview"));
 const AddressPreview = lazy(() => import("../../address/AddressPreview"));
-const AddressSelectDialog = lazy(
-  () => import("../../address/AddressSelectDialog")
-);
+const AddressSelectDialog = lazy(() => import("../../address/AddressSelectDialog"));
 const ProductPolicies = lazy(() => import("./ProductPolicies"));
 
 //#region styled
@@ -108,8 +106,8 @@ const UserInfoContainer = styled.div`
 `;
 
 const StyledRating = styled(Rating)(({ theme }) => ({
-  color: theme.vars.palette.warning.main,
-  fontSize: 18,
+  "color": theme.vars.palette.warning.main,
+  "fontSize": 18,
   "& .MuiRating-iconFilled": {
     color: theme.vars.palette.warning.light,
   },
@@ -249,16 +247,8 @@ const addressPlaceholder = (
         width: { xs: "100%", md: 150 },
       }}
     />
-    <Skeleton
-      variant="text"
-      sx={{ fontSize: "16px", display: { xs: "none", md: "block" } }}
-      width="80%"
-    />
-    <Skeleton
-      variant="text"
-      sx={{ fontSize: "16px", display: { xs: "none", md: "block" } }}
-      width="45%"
-    />
+    <Skeleton variant="text" sx={{ fontSize: "16px", display: { xs: "none", md: "block" } }} width="80%" />
+    <Skeleton variant="text" sx={{ fontSize: "16px", display: { xs: "none", md: "block" } }} width="45%" />
   </Box>
 );
 
@@ -273,21 +263,9 @@ const policiesPlaceholder = (
       }}
       width={150}
     />
-    <Skeleton
-      variant="text"
-      sx={{ fontSize: "14px", marginRight: "10px" }}
-      width="40%"
-    />
-    <Skeleton
-      variant="text"
-      sx={{ fontSize: "14px", marginRight: "10px" }}
-      width="40%"
-    />
-    <Skeleton
-      variant="text"
-      sx={{ fontSize: "14px", marginRight: "10px" }}
-      width="40%"
-    />
+    <Skeleton variant="text" sx={{ fontSize: "14px", marginRight: "10px" }} width="40%" />
+    <Skeleton variant="text" sx={{ fontSize: "14px", marginRight: "10px" }} width="40%" />
+    <Skeleton variant="text" sx={{ fontSize: "14px", marginRight: "10px" }} width="40%" />
   </Box>
 );
 //#endregion
@@ -306,10 +284,7 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
   const [openDialog, setOpenDialog] = useState(false);
 
   //Fetch address
-  const { data: address, isLoading: loadAddress } = useGetMyAddressQuery(
-    {},
-    { skip: !username }
-  );
+  const { data: address, isLoading: loadAddress } = useGetMyAddressQuery({}, { skip: !username });
 
   const handleViewReview = (value) => {
     if (handleToggleReview) handleToggleReview(value);
@@ -322,9 +297,7 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
   };
 
   //Images
-  let initialImages = book?.previews
-    ? [].concat(book?.image, book?.previews)
-    : [].concat(book?.image);
+  let initialImages = book?.previews ? [].concat(book?.image, book?.previews) : [].concat(book?.image);
   let images = initialImages.map((image, index) => {
     const srcSet = image?.srcSet;
 
@@ -348,38 +321,20 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
   });
 
   return (
-    <Grid
-      container
-      size="grow"
-      spacing={{ xs: 0, md: 1, lg: 2 }}
-      position="relative"
-    >
+    <Grid container size="grow" spacing={{ xs: 0, md: 1, lg: 2 }} position="relative">
       <Grid size={{ xs: 12, md: 5.5, lg: 5 }} position="relative">
-        <ImageContainer>
-          {!book ? <ProductImages /> : <ProductImages images={images} />}
-        </ImageContainer>
+        <ImageContainer>{!book ? <ProductImages /> : <ProductImages images={images} />}</ImageContainer>
       </Grid>
       <Grid size={{ xs: 12, md: 6.5, lg: 7 }}>
         <InfoContainer>
-          <Box
-            className="product-main"
-            display="flex"
-            flexDirection={{ xs: "column-reverse", md: "column" }}
-          >
+          <Box className="product-main" display="flex" flexDirection={{ xs: "column-reverse", md: "column" }}>
             <Box className="product-title">
               {book ? (
                 <BookTitle>{book?.title}</BookTitle>
               ) : (
                 <Box sx={{ margin: { xs: "10px 0", md: "0 0 20px" } }}>
-                  <Skeleton
-                    variant="text"
-                    sx={{ fontSize: { xs: "16px", md: "22px" } }}
-                  />
-                  <Skeleton
-                    variant="text"
-                    sx={{ fontSize: { xs: "16px", md: "22px" } }}
-                    width="30%"
-                  />
+                  <Skeleton variant="text" sx={{ fontSize: { xs: "16px", md: "22px" } }} />
+                  <Skeleton variant="text" sx={{ fontSize: { xs: "16px", md: "22px" } }} width="30%" />
                 </Box>
               )}
               <Stack
@@ -397,32 +352,20 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
                     {book ? (
                       <>
                         Nhà xuất bản:&nbsp;
-                        <Link to={`/store?pubs=${book?.publisher?.id}`}>
-                          {book?.publisher?.name}
-                        </Link>
+                        <Link to={`/store?pubs=${book?.publisher?.id}`}>{book?.publisher?.name}</Link>
                       </>
                     ) : (
-                      <Skeleton
-                        variant="text"
-                        sx={{ fontSize: "14px" }}
-                        width="90%"
-                      />
+                      <Skeleton variant="text" sx={{ fontSize: "14px" }} width="90%" />
                     )}
                   </Detail>
                   <Detail>
                     {book ? (
                       <>
                         Tác giả: &nbsp;
-                        <Link to={`/store?q=${book?.author}`}>
-                          {book?.author}
-                        </Link>
+                        <Link to={`/store?q=${book?.author}`}>{book?.author}</Link>
                       </>
                     ) : (
-                      <Skeleton
-                        variant="text"
-                        sx={{ fontSize: "14px" }}
-                        width="90%"
-                      />
+                      <Skeleton variant="text" sx={{ fontSize: "14px" }} width="90%" />
                     )}
                   </Detail>
                 </Box>
@@ -430,25 +373,14 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
                   {book ? (
                     <>
                       Hình thức bìa: &nbsp;
-                      <Link to={`/store?types=${book?.type}`}>
-                        {BookType[book?.type]?.label}
-                      </Link>
+                      <Link to={`/store?types=${book?.type}`}>{BookType[book?.type]?.label}</Link>
                     </>
                   ) : (
-                    <Skeleton
-                      variant="text"
-                      sx={{ fontSize: "14px" }}
-                      width="90%"
-                    />
+                    <Skeleton variant="text" sx={{ fontSize: "14px" }} width="90%" />
                   )}
                 </Detail>
               </Stack>
-              <Stack
-                className="user-info"
-                direction="row"
-                useFlexGap
-                sx={{ flexWrap: "wrap" }}
-              >
+              <Stack className="user-info" direction="row" useFlexGap sx={{ flexWrap: "wrap" }}>
                 {book ? (
                   <>
                     <UserInfoContainer
@@ -459,61 +391,34 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
                       <StyledRating
                         name="product-rating"
                         value={book?.reviewsInfo?.rating ?? 0}
-                        getLabelText={(value) =>
-                          `${value} star${value !== 1 ? "s" : ""}`
-                        }
+                        getLabelText={(value) => `${value} star${value !== 1 ? "s" : ""}`}
                         precision={0.5}
                         icon={<StarIcon fontSize="18" />}
                         emptyIcon={<StarBorderIcon fontSize="18" />}
                         readOnly
                       />
                       {book?.reviewsInfo?.rating > 0 ? (
-                        <StarIcon
-                          fontSize="18"
-                          sx={{ display: { xs: "block", md_lg: "none" } }}
-                        />
+                        <StarIcon fontSize="18" sx={{ display: { xs: "block", md_lg: "none" } }} />
                       ) : (
-                        <StarBorderIcon
-                          fontSize="18"
-                          sx={{ display: { xs: "block", md_lg: "none" } }}
-                        />
+                        <StarBorderIcon fontSize="18" sx={{ display: { xs: "block", md_lg: "none" } }} />
                       )}
-                      <Divider
-                        orientation="vertical"
-                        sx={{ mx: { xs: 0.7, md: 1 } }}
-                        flexItem
-                      />
+                      <Divider orientation="vertical" sx={{ mx: { xs: 0.7, md: 1 } }} flexItem />
                       <UserInfoText className="rate">
                         {book?.reviewsInfo?.total > 0
                           ? `(${numFormat.format(book?.reviewsInfo?.total)}) Đánh giá`
                           : "Chưa có đánh giá"}
                       </UserInfoText>
                     </UserInfoContainer>
-                    <Divider
-                      orientation="vertical"
-                      sx={{ mx: 1, display: { xs: "none", md: "block" } }}
-                      flexItem
-                    />
+                    <Divider orientation="vertical" sx={{ mx: 1, display: { xs: "none", md: "block" } }} flexItem />
                     <UserInfoText className="hide-on-mobile">
                       Đã bán: {numFormat.format(book?.totalOrders)}
                     </UserInfoText>
                     <UserInfoText className="end">Tố cáo</UserInfoText>
                   </>
                 ) : (
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    width="100%"
-                  >
-                    <Skeleton
-                      variant="text"
-                      sx={{ fontSize: "16px", width: { xs: "40%", md: "70%" } }}
-                    />
-                    <Skeleton
-                      variant="text"
-                      sx={{ fontSize: "16px" }}
-                      width="20%"
-                    />
+                  <Box display="flex" justifyContent="space-between" width="100%">
+                    <Skeleton variant="text" sx={{ fontSize: "16px", width: { xs: "40%", md: "70%" } }} />
+                    <Skeleton variant="text" sx={{ fontSize: "16px" }} width="20%" />
                   </Box>
                 )}
               </Stack>
@@ -522,18 +427,14 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
               <PriceContainer>
                 {book ? (
                   <>
-                    <Price>
-                      {currencyFormat.format(book.price * (1 - book.discount))}
-                    </Price>
+                    <Price>{currencyFormat.format(book.price * (1 - book.discount))}</Price>
                     {book?.discount > 0 && (
                       <>
                         <Discount>{currencyFormat.format(book.price)}</Discount>
                         <Percentage>-{book.discount * 100}%</Percentage>
                       </>
                     )}
-                    <UserInfoText className="end mobile">
-                      Đã bán: {numFormat.format(book?.totalOrders)}
-                    </UserInfoText>
+                    <UserInfoText className="end mobile">Đã bán: {numFormat.format(book?.totalOrders)}</UserInfoText>
                   </>
                 ) : (
                   <Box
@@ -542,11 +443,7 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
                     justifyContent="space-between"
                     sx={{ marginBottom: { xs: "5px", md: 0 } }}
                   >
-                    <Skeleton
-                      variant="text"
-                      sx={{ fontSize: "21px" }}
-                      width={200}
-                    />
+                    <Skeleton variant="text" sx={{ fontSize: "21px" }} width={200} />
                     <Skeleton
                       variant="text"
                       sx={{
@@ -560,9 +457,7 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
               </PriceContainer>
               <Divider sx={{ my: 1, display: { xs: "none", md: "block" } }} />
               {book ? (
-                <Suspense fallback={couponPlaceholder}>
-                  {book && <CouponPreview shopId={book?.shopId} />}
-                </Suspense>
+                <Suspense fallback={couponPlaceholder}>{book && <CouponPreview shopId={book?.shopId} />}</Suspense>
               ) : (
                 couponPlaceholder
               )}
@@ -599,18 +494,11 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
               addressPlaceholder
             )}
           </Box>
-          <Box
-            className="product-action"
-            display="flex"
-            flexDirection="column"
-            position="relative"
-          >
+          <Box className="product-action" display="flex" flexDirection="column" position="relative">
             <ProductAction book={book} />
             <Divider sx={{ my: 1 }} />
             {book ? (
-              <Suspense fallback={policiesPlaceholder}>
-                {book && <ProductPolicies />}
-              </Suspense>
+              <Suspense fallback={policiesPlaceholder}>{book && <ProductPolicies />}</Suspense>
             ) : (
               policiesPlaceholder
             )}

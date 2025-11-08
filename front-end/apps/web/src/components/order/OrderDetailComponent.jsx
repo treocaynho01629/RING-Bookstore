@@ -1,12 +1,7 @@
 import styled from "@emotion/styled";
-import { Suspense, lazy, useState } from "react";
+import { Suspense, lazy, useState, forwardRef } from "react";
 import { StyledDialogTitle } from "../custom/ProfileComponents";
-import {
-  currencyFormat,
-  dateFormatter,
-  idFormatter,
-  timeFormatter,
-} from "@ring/shared/utils/convert";
+import { currencyFormat, dateFormatter, idFormatter, timeFormatter } from "@ring/shared/utils/convert";
 import { getOrderStatus } from "@ring/shared/enums/order";
 import { getPaymentStatus } from "@ring/shared/enums/payment";
 import { getShippingType } from "@ring/shared/enums/shipping";
@@ -32,11 +27,10 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 import SellIcon from "@mui/icons-material/Sell";
 import OrderDetailItems from "./OrderDetailItems";
 import useCart from "../../hooks/useCart";
+import Slide from "@mui/material/Slide";
 
 const OrderProgress = lazy(() => import("./OrderProgress"));
-const CancelAndRefundDetailForm = lazy(
-  () => import("./CancelAndRefundDetailForm")
-);
+const CancelAndRefundDetailForm = lazy(() => import("./CancelAndRefundDetailForm"));
 
 //#region styled
 const TitleContainer = styled.div`
@@ -99,8 +93,7 @@ const ShippingTag = styled.span`
   display: flex;
   align-items: center;
   font-weight: 450;
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.dark || theme.vars.palette.primary.dark};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.dark || theme.vars.palette.primary.dark};
 `;
 
 const StuffContainer = styled.div`
@@ -233,6 +226,10 @@ const OrderStatus = getOrderStatus();
 const PaymentStatus = getPaymentStatus();
 const ShippingType = getShippingType();
 
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="left" ref={ref} {...props} />;
+});
+
 function getStepContent(detail) {
   const date = new Date(detail?.date);
 
@@ -280,20 +277,13 @@ function getStepContent(detail) {
   }
 }
 
-const OrderDetailComponent = ({
-  order,
-  pending,
-  setPending,
-  tabletMode,
-  mobileMode,
-}) => {
+const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMode }) => {
   const { addProduct } = useCart();
   const [openCancel, setOpenCancel] = useState(undefined);
   const [openRefund, setOpenRefund] = useState(undefined);
   const open = Boolean(openCancel || openRefund);
   const detailStatus = OrderStatus[order?.status];
-  const [getBought, { isLoading: fetching }] =
-    booksApiSlice.useLazyGetBooksByIdsQuery();
+  const [getBought, { isLoading: fetching }] = booksApiSlice.useLazyGetBooksByIdsQuery();
   const [confirmOrder, { isLoading: confirming }] = useConfirmOrderMutation();
   const [ConfirmationDialog, confirm] = useConfirm(
     "Xác nhận đơn hàng",
@@ -388,18 +378,12 @@ const OrderDetailComponent = ({
           </Link>
           <ReceiptIcon />
           &nbsp;Mã vận đơn&nbsp;
-          {!order ? (
-            <Skeleton variant="text" width={100} />
-          ) : (
-            idFormatter(order?.orderId)
-          )}
+          {!order ? <Skeleton variant="text" width={100} /> : idFormatter(order?.orderId)}
           &emsp;
           {!order ? (
             <StatusTag color="secondary">Đang tải</StatusTag>
           ) : (
-            <StatusTag color={detailStatus?.color}>
-              {detailStatus?.label}
-            </StatusTag>
+            <StatusTag color={detailStatus?.color}>{detailStatus?.label}</StatusTag>
           )}
         </TitleContainer>
         <SubTitle>
@@ -468,23 +452,11 @@ const OrderDetailComponent = ({
           <SummaryContainer>
             <Box display="flex" justifyContent="space-between">
               <Box>
-                <SubText>
-                  {!order ? (
-                    <Skeleton variant="text" width={280} />
-                  ) : (
-                    stepContent?.summary
-                  )}
-                </SubText>
+                <SubText>{!order ? <Skeleton variant="text" width={280} /> : stepContent?.summary}</SubText>
               </Box>
               <Box>
                 {!order ? (
-                  <MainButton
-                    disabled
-                    variant="contained"
-                    color="secondary"
-                    size="large"
-                    fullWidth
-                  >
+                  <MainButton disabled variant="contained" color="secondary" size="large" fullWidth>
                     Đang tải
                   </MainButton>
                 ) : order?.status == OrderStatus.PENDING.value ? (
@@ -500,42 +472,28 @@ const OrderDetailComponent = ({
                       Huỷ đơn hàng
                     </MainButton>
                   </>
-                ) : order?.status == OrderStatus.SHIPPING.value &&
-                  order?.paymentStatus == PaymentStatus.PAID.value ? (
-                  <MainButton
-                    variant="contained"
-                    color="success"
-                    size="large"
-                    fullWidth
-                    onClick={handleConfirmOrder}
-                  >
+                ) : order?.status == OrderStatus.SHIPPING.value && order?.paymentStatus == PaymentStatus.PAID.value ? (
+                  <MainButton variant="contained" color="success" size="large" fullWidth onClick={handleConfirmOrder}>
                     Đã nhận hàng
                   </MainButton>
                 ) : (
                   <>
-                    <MainButton
-                      variant="contained"
-                      color="primary"
-                      size="large"
-                      fullWidth
-                      onClick={handleAddToCart}
-                    >
+                    <MainButton variant="contained" color="primary" size="large" fullWidth onClick={handleAddToCart}>
                       Mua lại
                     </MainButton>
-                    {order?.status == OrderStatus.COMPLETED.value &&
-                      isRefundable && (
-                        <MainButton
-                          variant="outlined"
-                          color="warning"
-                          size="large"
-                          fullWidth
-                          sx={{ mt: 1 }}
-                          onClick={handleRefundOrder}
-                          disabled={!isRefundable}
-                        >
-                          Hoàn trả hàng
-                        </MainButton>
-                      )}
+                    {order?.status == OrderStatus.COMPLETED.value && isRefundable && (
+                      <MainButton
+                        variant="outlined"
+                        color="warning"
+                        size="large"
+                        fullWidth
+                        sx={{ mt: 1 }}
+                        onClick={handleRefundOrder}
+                        disabled={!isRefundable}
+                      >
+                        Hoàn trả hàng
+                      </MainButton>
+                    )}
                   </>
                 )}
               </Box>
@@ -566,19 +524,9 @@ const OrderDetailComponent = ({
               <InfoContainer>
                 <div>
                   <Name>
-                    {!order ? (
-                      <Skeleton variant="text" width={150} />
-                    ) : (
-                      (order?.companyName ?? order?.name) + " "
-                    )}
+                    {!order ? <Skeleton variant="text" width={150} /> : (order?.companyName ?? order?.name) + " "}
                   </Name>
-                  <InfoText>
-                    {!order ? (
-                      <Skeleton variant="text" width={140} />
-                    ) : (
-                      `(+84) ${order?.phone}`
-                    )}
-                  </InfoText>
+                  <InfoText>{!order ? <Skeleton variant="text" width={140} /> : `(+84) ${order?.phone}`}</InfoText>
                 </div>
                 <InfoText>
                   {!order ? (
@@ -667,10 +615,7 @@ const OrderDetailComponent = ({
                   &nbsp;Hoàn trả đơn hàng
                 </span>
                 <MobileExtendButton>
-                  <KeyboardArrowRightIcon
-                    fontSize="small"
-                    disabled={!isRefundable}
-                  />
+                  <KeyboardArrowRightIcon fontSize="small" disabled={!isRefundable} />
                 </MobileExtendButton>
               </MobileButton>
             )
@@ -679,33 +624,15 @@ const OrderDetailComponent = ({
         {tabletMode && (
           <MainButtonContainer>
             {!order ? (
-              <MainButton
-                disabled
-                variant="contained"
-                color="secondary"
-                size="large"
-                fullWidth
-              >
+              <MainButton disabled variant="contained" color="secondary" size="large" fullWidth>
                 Đang tải
               </MainButton>
             ) : order?.status == OrderStatus.SHIPPING.value ? (
-              <MainButton
-                variant="contained"
-                color="success"
-                size="large"
-                fullWidth
-                onClick={handleConfirmOrder}
-              >
+              <MainButton variant="contained" color="success" size="large" fullWidth onClick={handleConfirmOrder}>
                 Đã nhận hàng
               </MainButton>
             ) : (
-              <MainButton
-                variant="contained"
-                color="primary"
-                size="large"
-                fullWidth
-                onClick={handleAddToCart}
-              >
+              <MainButton variant="contained" color="primary" size="large" fullWidth onClick={handleAddToCart}>
                 Mua lại
               </MainButton>
             )}
@@ -720,6 +647,9 @@ const OrderDetailComponent = ({
         fullScreen={mobileMode}
         closeAfterTransition={false}
         aria-labelledby="cancel-refund-dialog"
+        slots={{
+          transition: Transition,
+        }}
       >
         {open && (
           <Suspense fallback={null}>

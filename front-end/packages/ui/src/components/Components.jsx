@@ -7,7 +7,8 @@ export const Instruction = styled.p`
   overflow: hidden;
   text-overflow: ellipsis;
   color: ${({ theme }) => theme.vars.palette.error.main};
-  display: ${({ display }) => display};
+  display: ${({ display }) => display || "flex"};
+  align-items: center;
 
   span:not(:first-of-type) {
     display: none;
@@ -50,10 +51,7 @@ export const MobileExtendButton = styled.div`
   max-height: 30px;
   font-size: 14px;
   cursor: pointer;
-  color: ${({ theme, disabled }) =>
-    disabled
-      ? theme.vars.palette.text.disabled
-      : theme.vars.palette.text.secondary};
+  color: ${({ theme, disabled }) => (disabled ? theme.vars.palette.text.disabled : theme.vars.palette.text.secondary)};
   pointer-events: ${({ theme, disabled }) => (disabled ? "none" : "all")};
   overflow: hidden;
   z-index: 1;
@@ -75,6 +73,12 @@ export const MobileExtendButton = styled.div`
     z-index: -1;
   }
 
+  &.transparent {
+    &::before {
+      display: none;
+    }
+  }
+
   ${({ theme }) => theme.breakpoints.up("md")} {
     display: none;
   }
@@ -89,13 +93,9 @@ export const Title = styled.h3`
   text-transform: uppercase;
   margin: 0 0 20px;
   padding: 15px 0;
-  border-bottom: 0.5px solid
-    ${({ theme, color }) =>
-      theme.vars.palette[color]?.main || theme.vars.palette.divider};
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.main || theme.vars.palette.text.primary};
-  border-color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.main || theme.vars.palette.primary.main};
+  border-bottom: 0.5px solid ${({ theme, color }) => theme.vars.palette[color]?.main || theme.vars.palette.divider};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.main || theme.vars.palette.text.primary};
+  border-color: ${({ theme, color }) => theme.vars.palette[color]?.main || theme.vars.palette.primary.main};
   width: 100%;
 
   a {
@@ -166,6 +166,5 @@ export const Message = styled.span`
   justify-content: center;
   text-align: center;
   white-space: wrap;
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.main || theme.vars.palette.text.primary};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.main || theme.vars.palette.text.primary};
 `;

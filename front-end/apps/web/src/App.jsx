@@ -7,17 +7,19 @@ import FallbackLogo from "@ring/ui/FallbackLogo";
 import RequireAuth from "./components/authorize/RequireAuth";
 import PersistLogin from "./components/authorize/PersistLogin";
 import PageLayout from "./components/layout/PageLayout";
+import Layout from "./components/layout/Layout";
 import "react-multi-carousel/lib/styles.css";
 import "simplebar-react/dist/simplebar.min.css";
 
 function App() {
-  useReachable(import.meta.env.VITE_API_URL); //Test connection to server
+  useReachable(import.meta.env.VITE_API_URL); // Test connection to server
   useGetEnums();
 
   const router = createBrowserRouter(
     [
       {
         path: "/",
+        element: <Layout />,
         hydrateFallbackElement: <FallbackLogo />,
         children: [
           {
@@ -111,16 +113,7 @@ function App() {
                     },
                   },
                   {
-                    element: (
-                      <RequireAuth
-                        allowedRoles={[
-                          "ROLE_USER",
-                          "ROLE_SELLER",
-                          "ROLE_ADMIN",
-                          "ROLE_GUEST",
-                        ]}
-                      />
-                    ),
+                    element: <RequireAuth allowedRoles={["ROLE_USER", "ROLE_SELLER", "ROLE_ADMIN", "ROLE_GUEST"]} />,
                     children: [
                       {
                         path: "checkout",
@@ -131,9 +124,7 @@ function App() {
                       },
                       {
                         lazy: async () => {
-                          let ProfileLayout = await import(
-                            "./components/layout/ProfileLayout"
-                          );
+                          let ProfileLayout = await import("./components/layout/ProfileLayout");
                           return { Component: ProfileLayout.default };
                         },
                         children: [
@@ -154,18 +145,14 @@ function App() {
                           {
                             path: "profile/order/detail/:id",
                             lazy: async () => {
-                              let OrderDetail = await import(
-                                "./pages/OrderDetail"
-                              );
+                              let OrderDetail = await import("./pages/OrderDetail");
                               return { Component: OrderDetail.default };
                             },
                           },
                           {
                             path: "profile/order/checkout/:id",
                             lazy: async () => {
-                              let CheckoutDetail = await import(
-                                "./pages/CheckoutDetail"
-                              );
+                              let CheckoutDetail = await import("./pages/CheckoutDetail");
                               return { Component: CheckoutDetail.default };
                             },
                           },

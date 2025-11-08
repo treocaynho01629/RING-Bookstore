@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { lazy, Suspense, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { useGetBooksQuery } from "../../../features/books/booksApiSlice";
 import { MobileExtendButton, Showmore, Title } from "@ring/ui/Components";
@@ -12,8 +12,7 @@ import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
 import ProductsScroll from "../ProductsScroll";
-
-const SwipeableDrawer = lazy(() => import("@mui/material/SwipeableDrawer"));
+import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 
 //#region styled
 const DetailContainer = styled.div`
@@ -24,6 +23,26 @@ const DetailContainer = styled.div`
 
   ${({ theme }) => theme.breakpoints.down("md")} {
     padding: 0 12px;
+  }
+`;
+
+const DrawerContainer = styled.div`
+  padding: ${({ theme }) => `0 ${theme.spacing(1.5)}`};
+  background-color: ${({ theme }) => theme.vars.palette.background.paper};
+  border-top: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
+  position: relative;
+  width: 100%;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: ${({ theme }) => theme.spacing(1)};
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 5px;
+    border-radius: 3px;
+    background-color: ${({ theme }) => theme.vars.palette.divider};
   }
 `;
 
@@ -104,7 +123,7 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
   const descRef = useRef(null);
   const [overflowed, setOverflowed] = useState(false);
   const [minimize, setMinimize] = useState(true);
-  const [openDetail, setOpenDetail] = useState(undefined);
+  const [openDetail, setOpenDetail] = useState(false);
 
   //Fetch related books
   const {
@@ -191,9 +210,7 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
               <InfoText className="secondary">Ngôn ngữ: </InfoText>
             </InfoTitle>
             <InfoStack>
-              <InfoText>
-                {BookLanguage[book?.language]?.label ?? "Đang cập nhật"}
-              </InfoText>
+              <InfoText>{BookLanguage[book?.language]?.label ?? "Đang cập nhật"}</InfoText>
             </InfoStack>
           </tr>
           <tr>
@@ -201,21 +218,15 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
               <InfoText className="secondary">Trọng lượng (gr): </InfoText>
             </InfoTitle>
             <InfoStack>
-              <InfoText>
-                {book?.weight ? `${book.weight} gr` : "Đang cập nhật"}
-              </InfoText>
+              <InfoText>{book?.weight ? `${book.weight} gr` : "Đang cập nhật"}</InfoText>
             </InfoStack>
           </tr>
           <tr>
             <InfoTitle>
-              <InfoText className="secondary">
-                Kích thước bao bì (cm):{" "}
-              </InfoText>
+              <InfoText className="secondary">Kích thước bao bì (cm): </InfoText>
             </InfoTitle>
             <InfoStack>
-              <InfoText>
-                {book?.size ? `${book.size} cm` : "Đang cập nhật"}
-              </InfoText>
+              <InfoText>{book?.size ? `${book.size} cm` : "Đang cập nhật"}</InfoText>
             </InfoStack>
           </tr>
           <tr>
@@ -245,83 +256,47 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
         <tbody>
           <tr>
             <td>
-              <Skeleton
-                variant="text"
-                sx={{ fontSize: "14px", my: "8px" }}
-                width="30%"
-              />
+              <Skeleton variant="text" sx={{ fontSize: "14px", my: "8px" }} width="30%" />
             </td>
           </tr>
           <tr>
             <td>
-              <Skeleton
-                variant="text"
-                sx={{ fontSize: "14px", my: "8px" }}
-                width="35%"
-              />
+              <Skeleton variant="text" sx={{ fontSize: "14px", my: "8px" }} width="35%" />
             </td>
           </tr>
           <tr>
             <td>
-              <Skeleton
-                variant="text"
-                sx={{ fontSize: "14px", my: "8px" }}
-                width="40%"
-              />
+              <Skeleton variant="text" sx={{ fontSize: "14px", my: "8px" }} width="40%" />
             </td>
           </tr>
           <tr>
             <td>
-              <Skeleton
-                variant="text"
-                sx={{ fontSize: "14px", my: "8px" }}
-                width="40%"
-              />
+              <Skeleton variant="text" sx={{ fontSize: "14px", my: "8px" }} width="40%" />
             </td>
           </tr>
           <tr>
             <td>
-              <Skeleton
-                variant="text"
-                sx={{ fontSize: "14px", my: "8px" }}
-                width="30%"
-              />
+              <Skeleton variant="text" sx={{ fontSize: "14px", my: "8px" }} width="30%" />
             </td>
           </tr>
           <tr>
             <td>
-              <Skeleton
-                variant="text"
-                sx={{ fontSize: "14px", my: "8px" }}
-                width="30%"
-              />
+              <Skeleton variant="text" sx={{ fontSize: "14px", my: "8px" }} width="30%" />
             </td>
           </tr>
           <tr>
             <td>
-              <Skeleton
-                variant="text"
-                sx={{ fontSize: "14px", my: "8px" }}
-                width="40%"
-              />
+              <Skeleton variant="text" sx={{ fontSize: "14px", my: "8px" }} width="40%" />
             </td>
           </tr>
           <tr>
             <td>
-              <Skeleton
-                variant="text"
-                sx={{ fontSize: "14px", my: "8px" }}
-                width="30%"
-              />
+              <Skeleton variant="text" sx={{ fontSize: "14px", my: "8px" }} width="30%" />
             </td>
           </tr>
           <tr>
             <td>
-              <Skeleton
-                variant="text"
-                sx={{ fontSize: "14px", my: "8px" }}
-                width="40%"
-              />
+              <Skeleton variant="text" sx={{ fontSize: "14px", my: "8px" }} width="40%" />
             </td>
           </tr>
         </tbody>
@@ -330,77 +305,43 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
   }
 
   return (
-    <Grid
-      container
-      size={12}
-      spacing={1}
-      display="flex"
-      flexDirection={{ xs: "column-reverse", md: "row" }}
-    >
+    <Grid container size={12} spacing={1} display="flex" flexDirection={{ xs: "column-reverse", md: "row" }}>
       <Grid size={{ xs: 12, md: "grow" }}>
         <DetailContainer>
           <Box position="relative" mb={-2}>
             <Title>
-              {book ? (
-                "Thông tin chi tiết"
-              ) : (
-                <Skeleton
-                  variant="text"
-                  sx={{ fontSize: "inherit" }}
-                  width="40%"
-                />
-              )}
+              {book ? "Thông tin chi tiết" : <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="40%" />}
             </Title>
-            <MobileExtendButton
-              disabled={loading || !book}
-              onClick={() => setOpenDetail(true)}
-            >
+            <MobileExtendButton disabled={loading || !book} onClick={() => setOpenDetail(true)}>
               {book ? (
                 <>
-                  Tác giả, Nhà xuất bản,...{" "}
-                  <KeyboardArrowRight fontSize="small" />
+                  Tác giả, Nhà xuất bản,... <KeyboardArrowRight fontSize="small" />
                 </>
               ) : (
-                <Skeleton
-                  variant="text"
-                  sx={{ fontSize: "inherit" }}
-                  width="35%"
-                />
+                <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="35%" />
               )}
             </MobileExtendButton>
           </Box>
           {tabletMode ? (
-            <Suspense fallback={<></>}>
-              {openDetail !== undefined && (
-                <SwipeableDrawer
-                  anchor="bottom"
-                  open={openDetail}
-                  onOpen={() => setOpenDetail(true)}
-                  onClose={() => setOpenDetail(false)}
-                  disableSwipeToOpen={true}
-                >
-                  <Box sx={{ padding: "0 12px" }}>
-                    <Title>Thông tin chi tiết</Title>
-                    <Box mt={-2} mb={2}>
-                      {details}
-                    </Box>
-                  </Box>
-                </SwipeableDrawer>
-              )}
-            </Suspense>
+            <SwipeableDrawer
+              anchor="bottom"
+              open={openDetail}
+              onOpen={() => setOpenDetail(true)}
+              onClose={() => setOpenDetail(false)}
+              disableSwipeToOpen={true}
+            >
+              <DrawerContainer>
+                <Title>Thông tin chi tiết</Title>
+                <Box mt={-2} mb={2}>
+                  {details}
+                </Box>
+              </DrawerContainer>
+            </SwipeableDrawer>
           ) : (
             details
           )}
           <Title>
-            {book ? (
-              "Mô tả sản phẩm"
-            ) : (
-              <Skeleton
-                variant="text"
-                sx={{ fontSize: "inherit" }}
-                width="40%"
-              />
-            )}
+            {book ? "Mô tả sản phẩm" : <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="40%" />}
           </Title>
           <DescTitle>{book?.title}</DescTitle>
           <DescriptionContainer>
@@ -409,39 +350,16 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
                 book?.description
               ) : (
                 <>
-                  <Skeleton
-                    variant="text"
-                    sx={{ fontSize: "16px", mb: "15px" }}
-                    width="60%"
-                  />
-                  <Skeleton
-                    variant="text"
-                    sx={{ fontSize: "inherit" }}
-                    width="100%"
-                  />
-                  <Skeleton
-                    variant="text"
-                    sx={{ fontSize: "inherit" }}
-                    width="100%"
-                  />
-                  <Skeleton
-                    variant="text"
-                    sx={{ fontSize: "inherit" }}
-                    width="100%"
-                  />
-                  <Skeleton
-                    variant="text"
-                    sx={{ fontSize: "inherit" }}
-                    width="40%"
-                  />
+                  <Skeleton variant="text" sx={{ fontSize: "16px", mb: "15px" }} width="60%" />
+                  <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="100%" />
+                  <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="100%" />
+                  <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="100%" />
+                  <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="40%" />
                 </>
               )}
             </Description>
             {overflowed && (
-              <Showmore
-                className={minimize ? "" : "expand"}
-                onClick={toggleMinimize}
-              >
+              <Showmore className={minimize ? "" : "expand"} onClick={toggleMinimize}>
                 {minimize ? (
                   <>
                     Xem thêm <KeyboardArrowDown />
@@ -460,15 +378,7 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
         <ProductsContainer>
           <Box padding={{ xs: "0 12px", md: "10px 20px 0" }}>
             <Title>
-              {book ? (
-                "Sản phẩm khác"
-              ) : (
-                <Skeleton
-                  variant="text"
-                  sx={{ fontSize: "inherit" }}
-                  width={150}
-                />
-              )}
+              {book ? "Sản phẩm khác" : <Skeleton variant="text" sx={{ fontSize: "inherit" }} width={150} />}
             </Title>
           </Box>
           <ProductsScroll

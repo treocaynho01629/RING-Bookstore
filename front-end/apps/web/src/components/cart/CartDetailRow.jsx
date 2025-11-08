@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { Link } from "react-router";
 import {
@@ -201,34 +201,80 @@ function ItemRow({
   handleSelect,
   handleDeselect,
   isItemSelected,
-  handleDecrease,
+  decreaseAmount,
   increaseAmount,
-  handleChangeQuantity,
+  changeAmount,
+  handleDelete,
   handleClick,
 }) {
   const { t } = useTranslation();
   const labelId = `item-checkbox-${product?.id}`;
   const isDisabled = !product || product.amount < 1;
+  const [quantity, setQuantity] = useState(product.quantity ?? MIN_VALUE);
+
+  const onChangeQuantity = (e) => {
+    let newValue = e.target.value;
+    if (isNaN(newValue)) newValue = "";
+
+    if (newValue != "") {
+      if (newValue < MIN_VALUE) newValue = MIN_VALUE;
+      if (newValue > (product.amount ?? MAX_VALUE)) newValue = product.amount ?? MAX_VALUE;
+    }
+
+    setQuantity(newValue);
+  };
+
+  const onBlurQuantity = (e) => {
+    let newValue = e.target.value;
+    if (newValue == "" || isNaN(Number(newValue)) || newValue < MIN_VALUE) {
+      if (handleDelete) handleDelete(product.id, true);
+      setQuantity(MIN_VALUE);
+    } else {
+      changeAmount({ quantity: +newValue, id: product.id });
+    }
+  };
+
+  const onDecreaseQuantity = () => {
+    if (increaseAmount) {
+      if (quantity - 1 < MIN_VALUE) {
+        if (handleDelete) handleDelete(product.id);
+      } else {
+        decreaseAmount(product.id);
+      }
+    }
+  };
+
+  const onIncreaseQuantity = () => {
+    if (increaseAmount) increaseAmount(product.id);
+  };
+
+  const onSelect = () => {
+    if (handleSelect) handleSelect(product.id);
+  };
 
   useEffect(() => {
     if (product.amount < 1 || product.quantity > product.amount) handleDeselect(product.id);
   }, [product.amount]);
 
+  useEffect(() => {
+    setQuantity(product.quantity ?? MIN_VALUE);
+  }, [product.quantity]);
+
   return (
     <StyledItemTableRow role="checkbox" tabIndex={-1} key={`item-${product.id}`} className={isDisabled ? "error" : ""}>
-      <StyledTableCell padding="checkbox">
+      <StyledTableCell padding="checkbox" sx={{ width: "40px" }}>
         <StyledCheckbox
           disabled={isDisabled}
           disableRipple
           disableFocusRipple
           color="primary"
           checked={isItemSelected}
+          onClick={onSelect}
           slotProps={{
             input: {
               "aria-labelledby": labelId,
             },
           }}
-          onClick={() => handleSelect(product.id)}
         />
       </StyledTableCell>
       <StyledTableCell component="th" id={labelId} scope="row">
@@ -262,11 +308,12 @@ function ItemRow({
                   size="small"
                   min={MIN_VALUE}
                   max={product.amount ?? MAX_VALUE}
-                  value={product.quantity}
-                  error={1 > product.quantity > (product.amount ?? MAX_VALUE)}
-                  onChange={(e) => handleChangeQuantity(e.target.valueAsNumber, product.id)}
-                  handleDecrease={() => handleDecrease(product.quantity, product.id)}
-                  handleIncrease={() => increaseAmount(product.id)}
+                  value={quantity}
+                  error={MIN_VALUE > product.quantity > (product.amount ?? MAX_VALUE)}
+                  onChange={onChangeQuantity}
+                  onBlur={onBlurQuantity}
+                  handleDecrease={onDecreaseQuantity}
+                  handleIncrease={onIncreaseQuantity}
                 />
               </Box>
             </ItemAction>
@@ -276,6 +323,7 @@ function ItemRow({
       <StyledTableCell
         align="right"
         sx={{
+          width: "110px",
           display: {
             xs: "none",
             md: "table-cell",
@@ -287,17 +335,18 @@ function ItemRow({
         <Price>{currencyFormat.format(product.price * (1 - (product?.discount || 0)))}</Price>
         {product?.discount > 0 && <Discount>{currencyFormat.format(product.price)}</Discount>}
       </StyledTableCell>
-      <StyledTableCell align="center" sx={{ display: { xs: "none", sm: "table-cell" } }}>
+      <StyledTableCell align="center" sx={{ display: { xs: "none", sm: "table-cell" }, width: "140px" }}>
         <AmountInput
           disabled={isDisabled}
           size="small"
           min={MIN_VALUE}
           max={product.amount ?? MAX_VALUE}
-          value={product.quantity}
-          error={1 > product.quantity > (product.amount ?? MAX_VALUE)}
-          onChange={(e) => handleChangeQuantity(e.target.valueAsNumber, product.id)}
-          handleDecrease={() => handleDecrease(product.quantity, product.id)}
-          handleIncrease={() => increaseAmount(product.id)}
+          value={quantity}
+          error={MIN_VALUE > product.quantity > (product.amount ?? MAX_VALUE)}
+          onChange={onChangeQuantity}
+          onBlur={onBlurQuantity}
+          handleDecrease={onDecreaseQuantity}
+          handleIncrease={onIncreaseQuantity}
         />
         <AmountLeft>
           {product.amount > 0
@@ -305,9 +354,9 @@ function ItemRow({
             : t("cart.items.out", { ns: "client" })}
         </AmountLeft>
       </StyledTableCell>
-      <StyledTableCell align="right" sx={{ display: { xs: "none", md: "table-cell" } }}>
+      <StyledTableCell align="right" sx={{ display: { xs: "none", md: "table-cell" }, width: "130px" }}>
         <Price className="total">
-          {currencyFormat.format(product.price * (1 - (product?.discount || 0)) * product.quantity)}
+          {currencyFormat.format(product.price * (1 - (product?.discount || 0)) * quantity)}
         </Price>
       </StyledTableCell>
       <ActionTableCell>
@@ -327,23 +376,50 @@ const CartDetailRow = ({
   handleSelect,
   handleDeselect,
   handleSelectShop,
-  handleDecrease,
-  handleChangeQuantity,
   handleClick,
   increaseAmount,
+  decreaseAmount,
+  changeAmount,
+  handleDelete,
   handleOpenDialog,
 }) => {
   const { t } = useTranslation();
   const shopLabelId = `shop-label-checkbox-${shop?.id}`;
 
+  const onSelectShop = () => {
+    if (handleSelectShop) handleSelectShop(shop);
+  };
+
+  const getCouponText = () => {
+    return coupon
+      ? // Have coupon
+        coupon?.discount
+        ? // Discount applied
+          isGroupSelected
+          ? // Group selected
+            coupon?.isUsable
+            ? // Coupon is usable
+              t("cart.coupon.saved", {
+                discount: currencyFormat.format(coupon?.discount),
+                ns: "client",
+              })
+            : t("cart.coupon.criteria", { criteria: coupon?.summary, ns: "client" }) // Coupon is not usable
+          : t("cart.coupon.change", { ns: "client" }) // Group not selected
+        : // Discount not applied
+          coupon?.isUsed
+          ? t("cart.coupon.change", { ns: "client" }) // Coupon is used
+          : t("cart.coupon.criteria", { criteria: coupon?.summary, ns: "client" }) // Coupon is not usable
+      : t("cart.coupon.add", { ns: "client" }); // No coupon
+  };
+
   return (
     <>
       <SpaceTableRow />
       <StyledTableRow role="shop-checkbox" tabIndex={-1}>
-        <StyledTableCell padding="checkbox">
+        <StyledTableCell padding="checkbox" sx={{ width: "40px" }}>
           <StyledCheckbox
             color="primary"
-            onChange={() => handleSelectShop(shop)}
+            onChange={onSelectShop}
             checked={isGroupSelected}
             slotProps={{
               input: {
@@ -374,10 +450,11 @@ const CartDetailRow = ({
               handleSelect,
               handleDeselect,
               isItemSelected,
-              handleDecrease,
-              handleChangeQuantity,
               handleClick,
+              changeAmount,
+              decreaseAmount,
               increaseAmount,
+              handleDelete,
             }}
           />
         );
@@ -387,22 +464,7 @@ const CartDetailRow = ({
           <CouponButton onClick={() => handleOpenDialog(shop?.id)}>
             <span>
               &nbsp;
-              <LocalActivityOutlined color="error" />
-              &nbsp;
-              {coupon
-                ? coupon?.discount
-                  ? isGroupSelected
-                    ? coupon?.isUsable
-                      ? t("cart.coupon.discount.applied", {
-                          discount: currencyFormat.format(coupon?.discount),
-                          ns: "client",
-                        })
-                      : t("cart.coupon.discount.criteria", { criteria: coupon?.summary, ns: "client" })
-                    : t("cart.coupon.change", { ns: "client" })
-                  : coupon?.isUsed
-                    ? t("cart.coupon.change", { ns: "client" })
-                    : t("cart.coupon.discount.criteria", { criteria: coupon?.summary, ns: "client" })
-                : t("cart.coupon.add", { ns: "client" })}
+              <LocalActivityOutlined color="error" /> &nbsp;{getCouponText()}
             </span>
             <KeyboardArrowRight fontSize="small" />
           </CouponButton>

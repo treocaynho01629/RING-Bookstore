@@ -5,6 +5,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
+// TODO: Move this
 const ConfirmDialog = ({ open, title, message, handleConfirm, handleCancel, maxWidth = "xs", ...props }) => {
   return (
     <Dialog
@@ -17,7 +18,7 @@ const ConfirmDialog = ({ open, title, message, handleConfirm, handleCancel, maxW
       {...props}
     >
       <DialogTitle id="confirmation-dialog-title">{title}</DialogTitle>
-      <DialogContent sx={{ minWidth: "30vw" }} dividers={props?.scroll === "paper"}>
+      <DialogContent dividers={props?.scroll === "paper"}>
         <DialogContentText sx={{ whiteSpace: "pre-line" }}>{message}</DialogContentText>
       </DialogContent>
       <DialogActions>

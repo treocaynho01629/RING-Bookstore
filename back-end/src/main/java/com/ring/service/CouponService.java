@@ -31,11 +31,13 @@ public interface CouponService {
      * @param codes        the list of coupon codes to filter by
      * @param code         the specific coupon code to filter by
      * @param shopId       the shop ID to filter by
-     * @param userId       the user ID to filter by
+     * @param ownerId      the owner ID to filter by
      * @param byShop       whether to filter by shop or not
      * @param showExpired  whether to include expired coupons
      * @param cValue       the cart value filter
      * @param cQuantity    the cart quantity filter
+     * @param showUsed     whether to include used coupons
+     * @param user         the authenticated user
      * @return a paginated list of {@link CouponDTO} objects
      */
     PagingResponse<CouponDTO> getCoupons(Integer pageNo,
@@ -47,11 +49,13 @@ public interface CouponService {
             List<String> codes,
             String code,
             Long shopId,
-            Long userId,
+            Long ownerId,
             Boolean byShop,
             Boolean showExpired,
             Double cValue,
-            Integer cQuantity);
+            Integer cQuantity,
+            Boolean showUsed,
+            Account user);
 
     /**
      * Retrieves detailed coupon information by ID.
@@ -68,30 +72,38 @@ public interface CouponService {
      * @param shopId    the shop ID
      * @param cValue    the cart value filter
      * @param cQuantity the cart quantity filter
+     * @param user      the authenticated user
      * @return the {@link CouponDTO} object
      */
     CouponDTO getCouponByCode(String code,
             Long shopId,
             Double cValue,
-            Integer cQuantity);
+            Integer cQuantity,
+            Account user);
 
     /**
      * Recommends coupons for the given shop IDs.
      *
      * @param shopIds the list of shop IDs
+     * @param user    the authenticated user
      * @return a list of recommended {@link CouponDTO} objects
      */
-    List<CouponDTO> recommendCoupons(List<Long> shopIds);
+    List<CouponDTO> recommendCoupons(List<Long> shopIds,
+            Account user);
 
     /**
      * Recommends a single coupon for a specific shop and cart state.
      *
      * @param shopId the shop ID
-     * @param state  the cart state
+     * @param value  the cart value
+     * @param quantity the cart quantity
+     * @param user   the authenticated user
      * @return the recommended {@link CouponDTO} object
      */
     CouponDTO recommendCoupon(Long shopId,
-            CartStateRequest state);
+            Double value,
+            Integer quantity,
+            Account user);
 
     /**
      * Retrieves coupon analytics data.

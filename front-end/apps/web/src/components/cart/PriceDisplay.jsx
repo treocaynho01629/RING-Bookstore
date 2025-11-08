@@ -1,55 +1,44 @@
 import { Collapse } from "@mui/material";
 import { TransitionGroup } from "react-transition-group";
-import {
-  CheckoutRow,
-  CheckoutText,
-  DetailContainer,
-} from "../custom/CartComponents";
+import { CheckoutRow, CheckoutText, DetailContainer } from "../custom/CartComponents";
 import { currencyFormat } from "@ring/shared/utils/convert";
+import { useTranslation } from "react-i18next";
 
 const PriceDisplay = ({ displayInfo, loggedIn }) => {
+  const { t } = useTranslation();
+
   return (
     <DetailContainer>
       <CheckoutRow>
-        <CheckoutText>Tiền hàng:</CheckoutText>
-        <CheckoutText>
-          {currencyFormat.format(displayInfo.subTotal)}
-        </CheckoutText>
+        <CheckoutText>{t("cart.subtotal", { ns: "client" })}:</CheckoutText>
+        <CheckoutText>{currencyFormat.format(displayInfo.subTotal)}</CheckoutText>
       </CheckoutRow>
       <CheckoutRow>
-        <CheckoutText>Phí vận chuyển:</CheckoutText>
-        <CheckoutText>
-          {currencyFormat.format(displayInfo.shipping)}
-        </CheckoutText>
+        <CheckoutText>{t("cart.shipping.fee", { ns: "client" })}:</CheckoutText>
+        <CheckoutText>{currencyFormat.format(displayInfo.shipping)}</CheckoutText>
       </CheckoutRow>
       <TransitionGroup>
         {displayInfo.shippingDiscount > 0 && (
           <Collapse key={"shipping-discount"}>
             <CheckoutRow>
-              <CheckoutText>Khuyến mãi vận chuyển:</CheckoutText>
-              <CheckoutText>
-                -{currencyFormat.format(displayInfo.shippingDiscount)}
-              </CheckoutText>
+              <CheckoutText>{t("cart.shipping.discount", { ns: "client" })}:</CheckoutText>
+              <CheckoutText>-{currencyFormat.format(displayInfo.shippingDiscount)}</CheckoutText>
             </CheckoutRow>
           </Collapse>
         )}
         {displayInfo.deal > 0 && (
           <Collapse key={"product-discount"}>
             <CheckoutRow>
-              <CheckoutText>Giảm giá sản phẩm:</CheckoutText>
-              <CheckoutText>
-                -{currencyFormat.format(displayInfo.deal)}
-              </CheckoutText>
+              <CheckoutText>{t("cart.product.discount", { ns: "client" })}:</CheckoutText>
+              <CheckoutText>-{currencyFormat.format(displayInfo.deal)}</CheckoutText>
             </CheckoutRow>
           </Collapse>
         )}
         {displayInfo.couponDiscount > 0 && (
           <Collapse key={"coupon-discount"}>
             <CheckoutRow>
-              <CheckoutText>Giảm giá từ coupon:</CheckoutText>
-              <CheckoutText>
-                -{currencyFormat.format(displayInfo.couponDiscount)}
-              </CheckoutText>
+              <CheckoutText>{t("cart.coupon.discount", { ns: "client" })}:</CheckoutText>
+              <CheckoutText>-{currencyFormat.format(displayInfo.couponDiscount)}</CheckoutText>
             </CheckoutRow>
           </Collapse>
         )}
@@ -60,7 +49,7 @@ const PriceDisplay = ({ displayInfo, loggedIn }) => {
               <CheckoutText color="warning">
                 &nbsp;
                 <br />
-                Đăng nhập để có thể áp dụng mã
+                {t("required.login", { ns: "client", action: t("cart.coupon.apply", { ns: "client" }) })}
               </CheckoutText>
             </CheckoutRow>
           </Collapse>

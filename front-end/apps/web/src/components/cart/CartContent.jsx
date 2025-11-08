@@ -1,10 +1,9 @@
 import styled from "@emotion/styled";
-import { useEffect, useMemo, useState, Suspense, lazy, useCallback, useRef } from "react";
+import { useMemo, useState, Suspense, lazy, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router";
 import { booksApiSlice } from "../../features/books/booksApiSlice";
 import { useCalculateMutation } from "../../features/orders/ordersApiSlice";
 import { debounce, isEqual, toLower } from "lodash-es";
-import { useGetRecommendCouponsQuery } from "../../features/coupons/couponsApiSlice";
 import { ActionTableCell, StyledTableCell, StyledTableHead } from "../custom/TableComponents";
 import { StyledCheckbox } from "../custom/CartComponents";
 import { useTranslation } from "react-i18next";
@@ -80,6 +79,8 @@ const StyledDeleteButton = styled(Button)`
 `;
 //#endregion
 
+const MIN_VALUE = 1;
+
 function EnhancedTableHead({ onSelectAllClick, numSelected, rowCount, handleDeleteMultiple }) {
   const { t } = useTranslation();
 
@@ -116,7 +117,7 @@ function EnhancedTableHead({ onSelectAllClick, numSelected, rowCount, handleDele
           align="left"
           className={numSelected > 0 ? "hidden" : ""}
           sx={{
-            width: "100px",
+            width: "110px",
             display: {
               xs: "none",
               md: "table-cell",
@@ -141,7 +142,7 @@ function EnhancedTableHead({ onSelectAllClick, numSelected, rowCount, handleDele
           align="left"
           className={numSelected > 0 ? "hidden" : ""}
           sx={{
-            width: "100px",
+            width: "130px",
             display: { xs: "none", md: "table-cell" },
           }}
         >
@@ -175,14 +176,14 @@ const CartContent = ({ confirm }) => {
   const { cartProducts, removeProduct, clearCart, decreaseAmount, increaseAmount, changeAmount } = useCart();
   const { estimateCart, syncCart } = useCheckout();
   const { username } = useAuth();
+  const calCount = useRef(0);
 
   const mobileMode = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md_lg"));
   const prevPayload = useRef();
 
   const [selected, setSelected] = useState([]);
-  const [shopIds, setShopIds] = useState([]);
-  const [coupon, setCoupon] = useState("");
+  const [coupon, setCoupon] = useState(""); // Set as "" will be replaced by a recommended coupon server side
   const [shopCoupon, setShopCoupon] = useState([]);
   const [discount, setDiscount] = useState(0);
   const [shopDiscount, setShopDiscount] = useState([]);
@@ -199,14 +200,6 @@ const CartContent = ({ confirm }) => {
 
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
-
-  // Recommend coupons
-  const {
-    data: recommend,
-    isLoading: loadRecommend,
-    isSuccess: doneRecommend,
-    isError: errorRecommend,
-  } = useGetRecommendCouponsQuery({ shopIds }, { skip: !shopIds.length });
 
   // For get similar
   const [getBook] = booksApiSlice.useLazyGetBookDetailQuery();
@@ -228,23 +221,6 @@ const CartContent = ({ confirm }) => {
     }
     handleCartChange();
   }, [selected, cartProducts, shopCoupon, coupon]);
-
-  // Set recommend coupons
-  useEffect(() => {
-    if (recommend && !loadRecommend && doneRecommend) {
-      const { ids, entities } = recommend;
-
-      ids.forEach((id) => {
-        const coupon = entities[id];
-
-        if (coupon?.shopId) {
-          setShopCoupon((prev) => ({ ...prev, [coupon?.shopId]: coupon }));
-        } else {
-          setCoupon(coupon);
-        }
-      });
-    }
-  }, [recommend, loadRecommend]);
 
   /**
    * Generate error message for warning dialog
@@ -286,7 +262,7 @@ const CartContent = ({ confirm }) => {
             let detail = result.cart.find((shopItem) => shopItem.shopId === shopId);
 
             if (!detail) {
-              detail = { shopId, coupon: shopCoupon[shopId]?.code, items: [] };
+              detail = { shopId, coupon: shopCoupon[shopId] != "" ? shopCoupon[shopId]?.code : "", items: [] };
               result.cart.push(detail);
             }
 
@@ -296,11 +272,11 @@ const CartContent = ({ confirm }) => {
 
           return result;
         },
-        { coupon: coupon?.code, cart: [] }
+        { coupon: coupon != "" ? coupon?.code : "", cart: [] }
       );
 
       handleEstimate(selectedCart); // Estimate price
-      if (doneRecommend || errorRecommend) handleCalculate(selectedCart); // Calculate price
+      handleCalculate(selectedCart); // Calculate price
     } else {
       // Reset
       handleEstimate(null);
@@ -334,7 +310,11 @@ const CartContent = ({ confirm }) => {
    */
   const handleCalculate = useCallback(
     debounce(async (cart) => {
-      if (calculating || cart == null || isEqual(prevPayload.current, cart) || !username) return;
+      calCount.current++;
+
+      const skipCalculate =
+        calculating || cart == null || isEqual(prevPayload.current, cart) || !username || calCount.current == 3;
+      if (skipCalculate) return;
 
       calculate(cart)
         .unwrap()
@@ -377,12 +357,15 @@ const CartContent = ({ confirm }) => {
    * Separate cart by shop
    */
   const reduceCart = () => {
-    let shopIds = [];
     let resultCart = cartProducts.reduce((result, item) => {
       if (!result[item.shopId]) {
         // Check if not exists shop >> Add new one
         result[item.shopId] = { shopName: item.shopName, products: [] };
-        shopIds.push(item.shopId);
+
+        // Set as "" will be replaced by a recommended coupon server side
+        if (shopCoupon[item.shopId] == null) {
+          setShopCoupon((prev) => ({ ...prev, [item.shopId]: "" }));
+        }
       }
 
       // Else push
@@ -390,7 +373,6 @@ const CartContent = ({ confirm }) => {
       return result;
     }, {});
 
-    setShopIds(shopIds);
     return resultCart;
   };
   const reducedCart = useMemo(() => reduceCart(), [cartProducts]);
@@ -547,35 +529,15 @@ const CartContent = ({ confirm }) => {
   /**
    * Handle delete item
    */
-  const handleDelete = async (id) => {
-    if (isSelected(id)) handleSelect(id);
+  const handleDelete = async (id, changeQuantity = false) => {
     const confirmation = await confirm();
     if (confirmation) {
+      if (isSelected(id)) handleSelect(id);
       removeProduct(id);
       handleClose();
-    }
-  };
-
-  /**
-   * Handle decrease quantity
-   */
-  const handleDecrease = async (quantity, id) => {
-    if (quantity == 1) {
-      if (isSelected(id)) handleSelect(id); //Unselect if remove
-
-      const confirmation = await confirm();
-      if (confirmation) decreaseAmount(id);
     } else {
-      decreaseAmount(id);
+      if (changeQuantity) changeAmount({ quantity: MIN_VALUE, id });
     }
-  };
-
-  /**
-   * Handle change quantity
-   */
-  const handleChangeQuantity = (quantity, id) => {
-    if (quantity < 1 && isSelected(id)) handleSelect(id); //Unselect if remove
-    changeAmount({ quantity, id });
   };
 
   /**
@@ -643,21 +605,27 @@ const CartContent = ({ confirm }) => {
           <TableBody>
             {Object.keys(reducedCart).map((shopId, index) => {
               const coupon = shopCoupon[shopId];
-              const meta = getCouponType(coupon?.type);
               const shop = { ...reducedCart[shopId], id: shopId };
               const isGroupSelected = isShopSelected(shop);
-              const currCoupon = {
-                summary: toLower(
-                  t(coupon?.discount == 1 ? meta?.summaryFull : meta?.summary, {
-                    discount:
-                      coupon?.discount == 1 ? currencyFormat.format(coupon?.maxDiscount) : coupon?.discount * 100 + "%",
-                    max: currencyFormat.format(coupon?.maxDiscount),
-                  })
-                ),
-                isUsable: coupon?.isUsable,
-                isUsed: coupon?.isUsed,
-                discount: shopDiscount[shopId],
-              };
+              let currCoupon = null;
+
+              if (coupon) {
+                const meta = getCouponType(coupon?.type);
+                currCoupon = {
+                  summary: toLower(
+                    t(coupon?.discount == 1 ? meta?.summaryFull : meta?.summary, {
+                      discount:
+                        coupon?.discount == 1
+                          ? currencyFormat.format(coupon?.maxDiscount)
+                          : coupon?.discount * 100 + "%",
+                      max: currencyFormat.format(coupon?.maxDiscount),
+                    })
+                  ),
+                  isUsable: coupon?.isUsable,
+                  isUsed: coupon?.isUsed,
+                  discount: shopDiscount[shopId],
+                };
+              }
 
               return (
                 <CartDetailRow
@@ -670,9 +638,10 @@ const CartContent = ({ confirm }) => {
                     handleDeselect,
                     handleSelectShop,
                     coupon: currCoupon,
-                    handleDecrease,
+                    handleDelete,
+                    decreaseAmount,
                     increaseAmount,
-                    handleChangeQuantity,
+                    changeAmount,
                     handleClick,
                     handleOpenDialog,
                   }}

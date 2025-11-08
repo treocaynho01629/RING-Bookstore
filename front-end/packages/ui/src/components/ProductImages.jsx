@@ -146,8 +146,7 @@ const StyledSmallLazyImage = styled(LazyLoadImage)`
   width: 100%;
   aspect-ratio: 1/1;
   max-height: 85px;
-  background-color: ${({ theme }) =>
-    theme.vars.palette.action.disabledBackground};
+  background-color: ${({ theme }) => theme.vars.palette.action.disabledBackground};
 `;
 
 const StyledSmallSkeleton = styled(Skeleton)`
@@ -204,12 +203,10 @@ const responsiveGroup = {
     partialVisibilityGutter: 5,
   },
 };
-//Custom stuff
+
+// Custom stuff
 const CustomArrow = ({ onClick, className, direction }) => (
-  <CustomArrowButton
-    className={`${className ?? ""} ${direction}`}
-    onClick={onClick}
-  >
+  <CustomArrowButton className={`${className ?? ""} ${direction}`} onClick={onClick}>
     {direction == "left" ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
   </CustomArrowButton>
 );
@@ -235,17 +232,10 @@ const ButtonGroup = ({ images, goToSlide, currentSlide, responsive }) => {
               >
                 <StyledSmallLazyImage
                   src={image?.src}
-                  srcSet={image?.srcSet
-                    .map((item) => `${item.src} ${item.width}w`)
-                    .join(", ")}
+                  srcSet={image?.srcSet.map((item) => `${item.src} ${item.width}w`).join(", ")}
                   sizes="70px"
                   alt={image?.alt}
-                  placeholder={
-                    <StyledSmallSkeleton
-                      variant="rectangular"
-                      animation={false}
-                    />
-                  }
+                  placeholder={<StyledSmallSkeleton variant="rectangular" animation={false} />}
                 />
               </SmallImageSlide>
             ))
@@ -297,15 +287,11 @@ const ProductImages = ({ images }) => {
           <ImageSlide key={index} onClick={handleOpen}>
             <StyledLazyImage
               src={image?.src}
-              srcSet={image?.srcSet
-                .map((item) => `${item.src} ${item.width}w`)
-                .join(", ")}
+              srcSet={image?.srcSet.map((item) => `${item.src} ${item.width}w`).join(", ")}
               sizes={image?.sizes}
               alt={image?.alt}
               visibleByDefault={index == 0}
-              placeholder={
-                <StyledSkeleton variant="rectangular" animation={false} />
-              }
+              placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
             />
           </ImageSlide>
         ))
@@ -339,11 +325,7 @@ const ProductImages = ({ images }) => {
           }}
         />
       </ImgContainer>
-      <Suspense fallback={null}>
-        {open !== undefined && (
-          <LightboxImages {...{ images, open, handleClose }} />
-        )}
-      </Suspense>
+      <Suspense fallback={null}>{open !== undefined && <LightboxImages {...{ images, open, handleClose }} />}</Suspense>
     </>
   );
 };

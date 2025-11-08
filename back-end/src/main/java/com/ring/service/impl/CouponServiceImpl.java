@@ -72,11 +72,13 @@ public class CouponServiceImpl implements CouponService {
             List<String> codes,
             String code,
             Long shopId,
-            Long userId,
+            Long ownerId,
             Boolean byShop,
             Boolean showExpired,
             Double cValue,
-            Integer cQuantity) {
+            Integer cQuantity,
+            Boolean showUsed,
+            Account user) {
         Pageable pageable = PageRequest.of(pageNo, pageSize,
                 sortDir.equals(AppConstants.ASCENDING)
                         ? Sort.by(sortBy).ascending()
@@ -89,9 +91,11 @@ public class CouponServiceImpl implements CouponService {
                 codes,
                 code,
                 shopId,
-                userId,
+                ownerId,
                 byShop,
                 showExpired,
+                showUsed,
+                user != null ? user.getId() : null,
                 pageable);
 
         // Check usable
@@ -140,8 +144,9 @@ public class CouponServiceImpl implements CouponService {
     public CouponDTO getCouponByCode(String code,
             Long shopId,
             Double cValue,
-            Integer cQuantity) {
-        ICoupon projection = couponRepo.findCouponByCode(code)
+            Integer cQuantity,
+            Account user) {
+        ICoupon projection = couponRepo.findCouponByCode(code, user != null ? user.getId() : null)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
                             new Object[]{ new DefaultMessageSourceResolvable("label.coupon") });
@@ -159,18 +164,21 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Cacheable(cacheNames = AppConstants.COUPONS)
-    public List<CouponDTO> recommendCoupons(List<Long> shopIds) {
-        List<ICoupon> couponsList = couponRepo.recommendCoupons(shopIds);
+    public List<CouponDTO> recommendCoupons(List<Long> shopIds, 
+            Account user) {
+        List<ICoupon> couponsList = couponRepo.recommendCoupons(shopIds, user.getId());
         return couponsList.stream()
                 .map(couponMapper::couponToDTO)
                 .collect(Collectors.toList());
     }
 
     @Cacheable(cacheNames = AppConstants.COUPON)
-    public CouponDTO recommendCoupon(Long shopId, CartStateRequest state) {
-        ICoupon coupon = couponRepo.recommendCoupon(shopId, state.getValue(), state.getQuantity())
+    public CouponDTO recommendCoupon(Long shopId,
+            Double value,
+            Integer quantity,
+            Account user) {
+        ICoupon coupon = couponRepo.recommendCoupon(shopId, value, quantity, user.getId())
                 .orElse(null);
-        if (coupon == null) return null;
         return couponMapper.couponToDTO(coupon);
     }
 

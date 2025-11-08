@@ -10,9 +10,9 @@
     "add": "Add to cart",
     "add.success": "Product added to cart!",
     "discount": "Discount",
+    "more": "And {{quantity}} more in cart",
     "items.left": "{{quantity}} left in stock",
     "items.out": "Out of stock",
-    "select.suggestion": "Please select a product",
     "estimate": "Estimated order",
     "find.similar": "Find similar products",
     "remove": "Remove from cart?",
@@ -21,13 +21,36 @@
     "remove.message": "Some of the following products have been taken off the page:",
     "coupon.add": "Add coupon",
     "coupon.change": "Change to another coupon",
-    "coupon.discount.applied": "You saved {{discount}}",
-    "coupon.discount.criteria": "Buy more to {{criteria}}"
+    "coupon.saved": "You saved {{discount}}",
+    "coupon.criteria": "Buy more to {{criteria}}",
+    "coupon.apply": "Apply coupon",
+    "coupon.applied": "Applied",
+    "saved": "Saved {{discount}}",
+    "vat.included": "VAT included if applicable",
+    "total": "Total payment: ({{quantity}} Products)",
+    "subtotal": "Subtotal",
+    "shipping.fee": "Shipping fee",
+    "shipping.discount": "Shipping discount",
+    "product.discount": "Product discount",
+    "coupon.discount": "Coupon discount"
   },
   "shop.explore": "Explore shop",
   "order": {
     "label": "Order",
     "description": "View your orders"
+  },
+  "coupon": {
+    "title": "Coupon listing",
+    "discount": "Discount coupons",
+    "shipping": "Shipping coupons",
+    "saved": "Saved coupons",
+    "invalid": "Invalid coupon",
+    "expired.date": "EXP:",
+    "expired.usage": "Usage: {{count}} left",
+    "used": "Already used",
+    "not.usable": "Not applicable",
+    "add": "Enter coupon code",
+    "not.found": "No coupons found"
   },
   "search.store": "in store",
   "search.for": "Search {{value}}:",
@@ -35,5 +58,7 @@
   "search.clear": "Clear search history",
   "search.remove": "Remove '{{value}}' from history",
   "search.close": "Close search dialog",
-  "search.suggest": "Suggestions"
+  "search.suggest": "Suggestions",
+  "required.login": "Please login to {{action}}",
+  "required.select": "Please select any items in cart"
 }

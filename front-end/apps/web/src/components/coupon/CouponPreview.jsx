@@ -84,16 +84,12 @@ const CouponIcon = styled.div`
   border-radius: 6px;
   border: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
   border-right: none;
-  background-color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.light || theme.vars.palette.primary.light};
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.contrastText ||
-    theme.vars.palette.primary.contrastText};
+  background-color: ${({ theme, color }) => theme.vars.palette[color]?.light || theme.vars.palette.primary.light};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.contrastText || theme.vars.palette.primary.contrastText};
 
   ${({ theme }) => theme.breakpoints.down("md")} {
     height: 22px;
-    color: ${({ theme, color }) =>
-      theme.vars.palette[color]?.dark || theme.vars.palette.primary.dark};
+    color: ${({ theme, color }) => theme.vars.palette[color]?.dark || theme.vars.palette.primary.dark};
 
     svg {
       font-size: 15px;
@@ -182,8 +178,7 @@ const MoreButton = styled.span`
   font-weight: 500;
   display: flex;
   align-items: end;
-  color: ${({ theme, disabled }) =>
-    disabled ? theme.vars.palette.text.disabled : theme.vars.palette.info.main};
+  color: ${({ theme, disabled }) => (disabled ? theme.vars.palette.text.disabled : theme.vars.palette.info.main)};
   pointer-events: ${({ disabled }) => (disabled ? "none" : "all")};
   cursor: pointer;
 `;
@@ -204,27 +199,18 @@ const defaultSize = 4;
 const CouponPreview = ({ shopId, scrollPosition }) => {
   const { t } = useTranslation();
   const { coupons: savedCoupons } = useCoupon();
-  const { data, isLoading, isSuccess, isError } = useGetCouponsQuery(
-    { shopId, size: defaultSize },
-    { skip: !shopId }
-  );
+  const { data, isLoading, isSuccess, isError } = useGetCouponsQuery({ shopId, size: defaultSize }, { skip: !shopId });
   const [anchorEl, setAnchorEl] = useState(undefined);
   const [contextCoupon, setContextCoupon] = useState(null);
-  const [contextMeta, setContextMeta] = useState(null);
-  const [contextCriteria, setContextCriteria] = useState(null);
   const [openDialog, setOpenDialog] = useState(undefined);
 
-  const handlePopover = (e, coupon, meta, criteria) => {
+  const handlePopover = (e, coupon) => {
     setAnchorEl(e.currentTarget);
     setContextCoupon(coupon);
-    setContextMeta(meta);
-    setContextCriteria(criteria);
   };
   const handleClose = () => {
     setAnchorEl(null);
     setContextCoupon(null);
-    setContextMeta(null);
-    setContextCriteria(null);
   };
   const handleOpenDialog = () => {
     setOpenDialog(true);
@@ -259,13 +245,15 @@ const CouponPreview = ({ shopId, scrollPosition }) => {
         const meta = getCouponType(coupon?.type);
         const criteria = getCouponCriteria(coupon?.criteria);
         const Icon = iconList[meta?.icon];
+        const isSaved = savedCoupons?.indexOf(coupon?.code) != -1;
+        const couponInfo = { ...coupon, meta, criteria, isSaved };
 
         return (
           <Coupon
             key={`coupon-${id}-${index}`}
             aria-owns={open ? "mouse-over-popover" : undefined}
             aria-haspopup="true"
-            onMouseEnter={(e) => handlePopover(e, coupon, meta, criteria)}
+            onMouseEnter={(e) => handlePopover(e, couponInfo)}
           >
             <CouponIcon color={meta?.color}>
               <Suspense fallback={null}>
@@ -276,9 +264,7 @@ const CouponPreview = ({ shopId, scrollPosition }) => {
               <CouponTitle>
                 {t(coupon?.discount == 1 ? meta?.summaryFull : meta?.summary, {
                   discount:
-                    coupon?.discount == 1
-                      ? currencyFormat.format(coupon?.maxDiscount)
-                      : coupon?.discount * 100 + "%",
+                    coupon?.discount == 1 ? currencyFormat.format(coupon?.maxDiscount) : coupon?.discount * 100 + "%",
                   max: currencyFormat.format(coupon?.maxDiscount),
                 })}
               </CouponTitle>
@@ -293,8 +279,6 @@ const CouponPreview = ({ shopId, scrollPosition }) => {
       </CouponMessage>
     );
   }
-
-  let isSaved = savedCoupons?.indexOf(contextCoupon?.code) != -1;
 
   return (
     <CouponWrapper>
@@ -337,13 +321,7 @@ const CouponPreview = ({ shopId, scrollPosition }) => {
                   }}
                   anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
                 >
-                  <CouponItem
-                    coupon={contextCoupon}
-                    meta={contextMeta}
-                    criteria={contextCriteria}
-                    isSaved={isSaved}
-                    scrollPosition={scrollPosition}
-                  />
+                  <CouponItem coupon={contextCoupon} scrollPosition={scrollPosition} />
                 </Popover>
               )}
             </Suspense>
@@ -354,11 +332,7 @@ const CouponPreview = ({ shopId, scrollPosition }) => {
         </MobileExtendButton>
       </CouponContainer>
       <Suspense fallback={<></>}>
-        {openDialog !== undefined && (
-          <CouponDialog
-            {...{ open: openDialog, handleClose: handleCloseDialog, shopId }}
-          />
-        )}
+        {openDialog !== undefined && <CouponDialog {...{ open: openDialog, handleClose: handleCloseDialog, shopId }} />}
       </Suspense>
     </CouponWrapper>
   );

@@ -17,6 +17,8 @@ import {
   SubText,
 } from "../custom/CartComponents";
 import { currencyFormat } from "@ring/shared/utils/convert";
+import { capitalize } from "lodash-es";
+import { useTranslation } from "react-i18next";
 import NumberFlow from "@number-flow/react";
 import PriceDisplay from "./PriceDisplay";
 import useOffset from "../../hooks/useOffset";
@@ -41,6 +43,7 @@ const CheckoutDialog = ({
   tabletMode,
 }) => {
   const overlapRef = useRef(null);
+  const { t } = useTranslation();
   const [open, setOpen] = useState(undefined);
   const numSelected = selected?.length;
   const checkoutCart = {
@@ -62,11 +65,11 @@ const CheckoutDialog = ({
       <PriceDisplay displayInfo={displayInfo} loggedIn={loggedIn} />
       <CheckoutRow>
         {!numSelected ? (
-          <CheckoutText color="error">Vui lòng chọn sản phẩm</CheckoutText>
+          <CheckoutText color="error">{t("required.select", { ns: "client" })}</CheckoutText>
         ) : (
           <PriceContainer>
             <CheckoutPrice>
-              <b>Tổng:</b>
+              <b>{t("total")}:</b>
               <NumberFlow
                 value={displayInfo.total}
                 format={{ style: "currency", currency: "VND" }}
@@ -77,14 +80,23 @@ const CheckoutDialog = ({
               />
             </CheckoutPrice>
             {!calculating && displayInfo.totalDiscount > 0 && (
-              <SavePrice>Tiết kiệm {currencyFormat.format(displayInfo.totalDiscount)}</SavePrice>
+              <SavePrice>
+                {t("cart.saved", { ns: "client", discount: currencyFormat.format(displayInfo.totalDiscount) })}
+              </SavePrice>
             )}
-            <SubText>(Đã bao gồm VAT nếu có)</SubText>
+            <SubText>{t("cart.vat.included", { ns: "client" })}</SubText>
           </PriceContainer>
         )}
       </CheckoutRow>
     </>
   );
+
+  const couponText =
+    coupon && discount && numSelected > 0
+      ? t("cart.coupon.saved", { ns: "client", discount: currencyFormat.format(discount) })
+      : !coupon
+        ? t("cart.coupon.add", { ns: "client" })
+        : t("cart.coupon.change", { ns: "client" });
 
   return (
     <>
@@ -96,9 +108,7 @@ const CheckoutDialog = ({
                 <span>
                   <LocalActivityOutlined color="error" />
                   &nbsp;
-                  {coupon && discount && numSelected > 0
-                    ? `Đã giảm ${currencyFormat.format(discount)}`
-                    : `Chọn mã giảm giá ${coupon != null ? "khác" : ""}`}
+                  {couponText}
                 </span>
                 <MiniCouponContainer>
                   <Suspense fallback={null}>{coupon && numSelected > 0 && <CouponDisplay coupon={coupon} />}</Suspense>
@@ -109,11 +119,11 @@ const CheckoutDialog = ({
             <CheckoutStack>
               <AltCheckoutBox onClick={() => toggleDrawer(true)}>
                 {!numSelected ? (
-                  <CheckoutText color="error">Vui lòng chọn sản phẩm</CheckoutText>
+                  <CheckoutText color="error">{t("required.select", { ns: "client" })}</CheckoutText>
                 ) : (
                   <PriceContainer>
                     <CheckoutPrice>
-                      <b>Tổng:</b>
+                      <b>{t("total")}:</b>
                       <NumberFlow
                         value={displayInfo.total}
                         format={{ style: "currency", currency: "VND" }}
@@ -125,8 +135,10 @@ const CheckoutDialog = ({
                     </CheckoutPrice>
                     {!calculating && displayInfo.totalDiscount > 0 && (
                       <SavePrice>
-                        Tiết kiệm&nbsp;
-                        {currencyFormat.format(displayInfo.totalDiscount)}
+                        {t("cart.saved", {
+                          ns: "client",
+                          discount: currencyFormat.format(displayInfo.totalDiscount),
+                        })}
                       </SavePrice>
                     )}
                   </PriceContainer>
@@ -144,7 +156,7 @@ const CheckoutDialog = ({
                   })
                 }
               >
-                {loggedIn ? `Thanh toán (${numSelected})` : "Đăng nhập"}
+                {loggedIn ? `${t("cart.checkout", { ns: "client" })} (${numSelected})` : t("login")}
               </CheckoutButton>
             </CheckoutStack>
           </div>
@@ -155,9 +167,7 @@ const CheckoutDialog = ({
                 <span>
                   <LocalActivityOutlined color="error" />
                   &nbsp;
-                  {coupon && discount && numSelected > 0
-                    ? `Đã giảm ${currencyFormat.format(discount)}`
-                    : `Chọn mã giảm giá ${coupon != null ? "khác" : ""}`}
+                  {couponText}
                 </span>
                 <MiniCouponContainer>
                   <Suspense fallback={null}>{coupon && numSelected > 0 && <CouponDisplay coupon={coupon} />}</Suspense>
@@ -166,13 +176,13 @@ const CheckoutDialog = ({
               </CouponButton>
             </CheckoutStack>
             <CheckoutStack>
-              <CheckoutPriceContainer>
-                <PriceContainer>
-                  <CheckoutText>Tổng thanh toán: ({numSelected} Sản phẩm)&emsp;</CheckoutText>
-                  {numSelected > 0 && <SubText>(Đã bao gồm VAT)</SubText>}
+              <CheckoutPriceContainer onClick={() => toggleDrawer(true)}>
+                <PriceContainer className="row">
+                  <CheckoutText>{t("cart.total", { ns: "client", quantity: numSelected })}&emsp;</CheckoutText>
+                  {numSelected > 0 && <SubText>{t("cart.vat.included", { ns: "client" })}</SubText>}
                 </PriceContainer>
-                <PriceContainer>
-                  <CheckoutPrice onClick={() => toggleDrawer(true)}>
+                <PriceContainer className="row">
+                  <CheckoutPrice>
                     <NumberFlow
                       value={displayInfo.total}
                       format={{ style: "currency", currency: "VND" }}
@@ -184,7 +194,12 @@ const CheckoutDialog = ({
                   </CheckoutPrice>
                   &emsp;
                   {!calculating && displayInfo.totalDiscount > 0 && (
-                    <SavePrice>Tiết kiệm {currencyFormat.format(displayInfo.totalDiscount)}</SavePrice>
+                    <SavePrice>
+                      {t("cart.saved", {
+                        ns: "client",
+                        discount: currencyFormat.format(displayInfo.totalDiscount),
+                      })}
+                    </SavePrice>
                   )}
                 </PriceContainer>
               </CheckoutPriceContainer>
@@ -201,7 +216,7 @@ const CheckoutDialog = ({
                 }
                 startIcon={<ShoppingCartCheckout />}
               >
-                {loggedIn ? "Thanh toán" : "Đăng nhập"}
+                {loggedIn ? t("cart.checkout", { ns: "client" }) : t("login")}
               </CheckoutButton>
             </CheckoutStack>
           </CheckoutBox>
@@ -209,8 +224,8 @@ const CheckoutDialog = ({
           <>
             <CheckoutBox>
               <CheckoutTitle>
-                KHUYẾN MÃI
-                {coupon && numSelected > 0 && <span>Đã áp dụng</span>}
+                {t("cart.discount", { ns: "client" })}
+                {coupon && numSelected > 0 && <span>{t("cart.coupon.applied", { ns: "client" })}</span>}
               </CheckoutTitle>
               <CheckoutRow>
                 <Suspense fallback={null}>{coupon && numSelected > 0 && <CouponDisplay coupon={coupon} />}</Suspense>
@@ -219,15 +234,13 @@ const CheckoutDialog = ({
                 <span>
                   <LocalActivityOutlined color="error" />
                   &nbsp;
-                  {coupon && discount && numSelected > 0
-                    ? `Đã giảm ${currencyFormat.format(discount)}`
-                    : `Chọn mã giảm giá ${coupon != null ? "khác" : ""}`}
+                  {couponText}
                 </span>
                 <KeyboardArrowRight fontSize="small" />
               </CouponButton>
             </CheckoutBox>
             <CheckoutBox className="sticky">
-              <CheckoutTitle>THANH TOÁN</CheckoutTitle>
+              <CheckoutTitle>{t("cart.checkout", { ns: "client" })}</CheckoutTitle>
               {checkoutDetail}
               <CheckoutButton
                 variant="contained"
@@ -242,14 +255,16 @@ const CheckoutDialog = ({
                 }
                 startIcon={<ShoppingCartCheckout />}
               >
-                {loggedIn ? `Thanh toán (${numSelected})` : "Đăng nhập để Thanh toán"}
+                {loggedIn
+                  ? `${t("cart.checkout", { ns: "client" })} (${numSelected})`
+                  : capitalize(t("required.login", { ns: "client", action: t("cart.checkout", { ns: "client" }) }))}
               </CheckoutButton>
             </CheckoutBox>
           </>
         )}
       </CheckoutContainer>
       <Suspense fallback={null}>
-        {open != undefined && (
+        {tabletMode && (
           <SwipeableDrawer
             anchor="bottom"
             open={open}
@@ -257,8 +272,8 @@ const CheckoutDialog = ({
             onClose={() => toggleDrawer(false)}
             disableSwipeToOpen={true}
           >
-            <CheckoutBox>
-              <CheckoutTitle>THANH TOÁN</CheckoutTitle>
+            <CheckoutBox className="drawer">
+              <CheckoutTitle>{t("cart.checkout", { ns: "client" })}</CheckoutTitle>
               {checkoutDetail}
             </CheckoutBox>
           </SwipeableDrawer>

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation, useMatch } from "react-router";
+import { Link, matchRoutes, useLocation, useMatch } from "react-router";
 import { LogoImage } from "@ring/ui/Components";
 import { debounce } from "lodash-es";
 import { useColorScheme } from "@mui/material/styles";
@@ -449,15 +449,16 @@ const Navbar = () => {
   const { t } = useTranslation();
   const { cartProducts } = useCart();
   const location = useLocation();
-  const isHome = useMatch("/");
-  const isStore = useMatch("/store");
-  const isShop = useMatch("/shop");
-  const isSearch = isStore || isShop;
+  const showMenu = useMatch("/");
+  const isTransparent = matchRoutes([{ path: "/" }, { path: "/product/*" }], location);
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md"));
 
   // Search
+  const isStore = useMatch("/store");
+  const isShop = useMatch("/shop/*");
+  const isSearch = isStore || isShop;
   const [toggle, setToggle] = useState(undefined);
-  const show = (isSearch && toggle == undefined) || toggle;
+  const showSearch = (isSearch && toggle == undefined) || toggle;
 
   // Drawer open state
   const [openDrawer, setOpenDrawer] = useState(undefined);
@@ -504,7 +505,7 @@ const Navbar = () => {
   };
 
   /**
-   * Change the styles of the navbar.
+   * Change the styles of the navbar base on scroll progress.
    */
   const handleChangeStyles = () => {
     if (navRef.current) {
@@ -513,7 +514,7 @@ const Navbar = () => {
   };
 
   /**
-   * Reset the styles of the navbar.
+   * Reset the styles of the navbar to full scroll.
    */
   const handleResetStyles = () => {
     if (navRef.current) {
@@ -522,7 +523,7 @@ const Navbar = () => {
   };
 
   /**
-   * Reset the opacity of the navbar.
+   * Reset the navbar style to default top position.
    */
   const handleResetOpacity = () => {
     if (navRef.current) {
@@ -537,17 +538,17 @@ const Navbar = () => {
 
   useEffect(() => {
     window.removeEventListener("scroll", windowScrollListener);
-    if (tabletMode) window.addEventListener("scroll", windowScrollListener);
+    if (tabletMode && isTransparent) window.addEventListener("scroll", windowScrollListener);
     handleResetStyles();
 
     return () => {
       window.removeEventListener("scroll", windowScrollListener);
       handleResetStyles();
     };
-  }, [tabletMode]);
+  }, [tabletMode, isTransparent]);
 
   useEffect(() => {
-    if (tabletMode) {
+    if (tabletMode && isTransparent) {
       handleResetOpacity();
       setToggle(undefined);
     }
@@ -592,7 +593,7 @@ const Navbar = () => {
           </Grid>
         </Grid>
       </TopHeader>
-      <StyledAppBar elevation={0} ref={navRef} enableColorOnDark>
+      <StyledAppBar position="sticky" elevation={0} ref={navRef} enableColorOnDark>
         <Wrapper>
           <Grid container size="grow">
             <Grid
@@ -604,8 +605,8 @@ const Navbar = () => {
               }}
             >
               {tabletMode && (
-                <Box display="flex" alignItems="center" flex={show ? 0 : 1}>
-                  {isHome ? (
+                <Box display="flex" alignItems="center" flex={showSearch ? 0 : 1}>
+                  {showMenu ? (
                     <StyledIconButton onClick={() => handleToggleDrawer(true)}>
                       <Menu />
                     </StyledIconButton>
@@ -635,14 +636,14 @@ const Navbar = () => {
                 </Box>
               )}
               <Link to={"/"} title={t("home")}>
-                <Logo className={show ? "hidden" : ""}>
+                <Logo className={showSearch ? "hidden" : ""}>
                   <LogoImage src="/full-logo.svg" alt="RING! logo" />
                 </Logo>
               </Link>
               <SearchComponent
                 {...{
                   tabletMode,
-                  show,
+                  show: showSearch,
                   toggle,
                   setToggle,
                   isSearch,

@@ -4,7 +4,7 @@ import Navbar from "../navbar/Navbar";
 import Footer from "./Footer";
 import styled from "@emotion/styled";
 
-const LayoutWrapper = styled.div`
+const LayoutWrapper = styled.main`
   position: relative;
   min-height: 80dvh;
 
@@ -29,8 +29,8 @@ export default function PageLayout() {
   return (
     <>
       <Navbar />
-      <ScrollToTop />
       <LayoutWrapper>
+        <ScrollToTop />
         <Outlet />
       </LayoutWrapper>
       <Footer />

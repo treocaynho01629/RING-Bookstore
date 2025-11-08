@@ -2,30 +2,44 @@ import useTitle from "@ring/shared/useTitle";
 import Dialog from "@mui/material/Dialog";
 import { useNavigate, useOutletContext } from "react-router";
 import { TabContentContainer } from "../components/custom/ProfileComponents";
+import { forwardRef, useState } from "react";
 import OrdersList from "../components/order/OrdersList";
+import Slide from "@mui/material/Slide";
+
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="left" ref={ref} {...props} />;
+});
 
 const Orders = () => {
   const { tabletMode, mobileMode, pending, setPending } = useOutletContext();
   const navigate = useNavigate();
+  const [open, setOpen] = useState(true);
 
-  //Set title
+  // Set title
   useTitle("Đơn hàng");
 
-  let content = (
-    <OrdersList {...{ pending, setPending, mobileMode, tabletMode }} />
-  );
+  const handleClose = (e) => {
+    e.preventDefault();
+    setOpen(false);
+    navigate(-1);
+  };
+
+  let content = <OrdersList {...{ pending, setPending, mobileMode, tabletMode, handleClose }} />;
 
   return (
     <>
       {tabletMode ? (
         <Dialog
-          open={tabletMode}
-          onClose={() => navigate(-1)}
+          open={open}
+          onClose={handleClose}
           fullScreen={mobileMode}
           scroll={"paper"}
           maxWidth={"md"}
           fullWidth
           closeAfterTransition={false}
+          slots={{
+            transition: Transition,
+          }}
           slotProps={{
             paper: {
               elevation: 0,

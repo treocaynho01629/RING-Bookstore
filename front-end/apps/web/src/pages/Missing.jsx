@@ -20,9 +20,7 @@ const RandomShape = styled.span`
   height: 150dvh;
   width: 50%;
   opacity: 0.7;
-  background: hsl(
-    from ${({ theme }) => theme.vars.palette.primary.main} h s l / 0.4
-  );
+  background: hsl(from ${({ theme }) => theme.vars.palette.primary.main} h s l / 0.4);
   z-index: -1;
   transform: translate(60%, 0%) rotate(25deg);
 
@@ -33,10 +31,7 @@ const RandomShape = styled.span`
     left: 0;
     height: 100dvh;
     width: 100%;
-    background: hsl(
-      from ${({ theme }) => theme.vars.palette.primary.main} calc(h + 30) s l /
-        0.3
-    );
+    background: hsl(from ${({ theme }) => theme.vars.palette.primary.main} calc(h + 30) s l / 0.3);
     transform: translate(-80%, -60%) rotate(85deg);
   }
 
@@ -47,10 +42,7 @@ const RandomShape = styled.span`
     left: 0;
     height: 100%;
     width: 200%;
-    background: hsl(
-      from ${({ theme }) => theme.vars.palette.primary.main} calc(h - 30) s l /
-        0.2
-    );
+    background: hsl(from ${({ theme }) => theme.vars.palette.primary.main} calc(h - 30) s l / 0.2);
     transform: rotate(-130deg) translate(-35%, -60%);
     z-index: -5;
   }
@@ -130,6 +122,7 @@ const Missing = () => {
       <Content>
         <h2>Ôi khônggggg!</h2>
         <ErrorContainer>
+          // TODO: Fix missing icon
           <ErrorCode>{/* 4<StyledEmptyIcon />4 */}</ErrorCode>
         </ErrorContainer>
         <h3>Không thể tìm thấy trang bạn yêu cầu</h3>

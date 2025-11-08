@@ -2,10 +2,7 @@ import styled from "@emotion/styled";
 import { useState, useEffect, lazy, Suspense, useRef } from "react";
 import { Link, useNavigate } from "react-router";
 import { useGetCategoriesQuery } from "../features/categories/categoriesApiSlice";
-import {
-  useGetBooksQuery,
-  useGetRandomBooksQuery,
-} from "../features/books/booksApiSlice";
+import { useGetBooksQuery, useGetRandomBooksQuery } from "../features/books/booksApiSlice";
 import { CustomTab, CustomTabs } from "../components/custom/CustomTabs";
 import { useGetPublishersQuery } from "../features/publishers/publishersApiSlice";
 import { orderTabs } from "../utils/suggest";
@@ -28,14 +25,9 @@ import TableChart from "@mui/icons-material/TableChart";
 import ThumbUpAlt from "@mui/icons-material/ThumbUpAlt";
 import TrendingUp from "@mui/icons-material/TrendingUp";
 import LazyLoadComponent from "../components/layout/LazyLoadComponent";
-import { LocationDisabledRounded } from "@mui/icons-material";
 
-const ProductsSlider = lazy(
-  () => import("../components/product/ProductsSlider")
-);
-const BigProductsSlider = lazy(
-  () => import("../components/product/BigProductsSlider")
-);
+const ProductsSlider = lazy(() => import("../components/product/ProductsSlider"));
+const BigProductsSlider = lazy(() => import("../components/product/BigProductsSlider"));
 const Products = lazy(() => import("../components/product/Products"));
 const Publishers = lazy(() => import("../components/other/Publishers"));
 const Categories = lazy(() => import("../components/other/Categories"));
@@ -143,8 +135,7 @@ const ContainerTitle = styled.span`
   font-weight: 450;
   display: flex;
   align-items: center;
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.main || theme.vars.palette.text.primary};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.main || theme.vars.palette.text.primary};
 
   svg {
     color: inherit;
@@ -200,21 +191,13 @@ const SaleContainer = styled.div`
     border: 1px solid ${({ theme }) => theme.vars.palette.success.light};
     background-image: repeating-linear-gradient(
       45deg,
-      ${({ theme }) =>
-          `color-mix(in srgb, ${theme.vars.palette.primary.main}, transparent 80%)`}
-        0,
-      ${({ theme }) =>
-          `color-mix(in srgb, ${theme.vars.palette.primary.main}, transparent 80%)`}
-        10px,
+      ${({ theme }) => `color-mix(in srgb, ${theme.vars.palette.primary.main}, transparent 80%)`} 0,
+      ${({ theme }) => `color-mix(in srgb, ${theme.vars.palette.primary.main}, transparent 80%)`} 10px,
       transparent 0,
       transparent 50%
     );
     background-size: 4em 4em;
-    background-color: color-mix(
-      in srgb,
-      ${({ theme }) => theme.vars.palette.success.light},
-      transparent 90%
-    );
+    background-color: color-mix(in srgb, ${({ theme }) => theme.vars.palette.success.light}, transparent 90%);
     border-left: none;
     border-right: none;
   }
@@ -237,19 +220,17 @@ const cateToTabs = (cate) => {
 const Loadable = ({ children, height = 300 }) => {
   const placeholder = <Placeholder sx={{ height }} />;
   return (
-    <LazyLoadComponent
-      threshold={0.2}
-      placeholder={placeholder}
-      sx={{ height }}
-    >
+    <LazyLoadComponent threshold={0.2} placeholder={placeholder} sx={{ height }}>
       {children}
     </LazyLoadComponent>
   );
 };
 
 const SaleList = () => {
-  const { data, isLoading, isFetching, isSuccess, isError, refetch } =
-    useGetBooksQuery({ sortBy: "discount", sortDir: "desc" });
+  const { data, isLoading, isFetching, isSuccess, isError, refetch } = useGetBooksQuery({
+    sortBy: "discount",
+    sortDir: "desc",
+  });
 
   return (
     <>
@@ -270,9 +251,7 @@ const SaleList = () => {
           </Link>
         )}
       </TitleContainer>
-      <ProductsSlider
-        {...{ isLoading, isFetching, data, isSuccess, isError }}
-      />
+      <ProductsSlider {...{ isLoading, isFetching, data, isSuccess, isError }} />
     </>
   );
 };
@@ -282,11 +261,10 @@ const ProductsList = ({ tabs, value, title }) => {
   const [tabValue, setTabValue] = useState(0); //Tab
 
   //Products
-  const filters = tabs
-    ? { ...tabs[tabValue]?.filters, sortDir: "desc" }
-    : value || {};
-  const { data, isLoading, isFetching, isSuccess, isError, refetch } =
-    useGetBooksQuery(tabs || value ? filters : {}, { skip: !tabs && !value });
+  const filters = tabs ? { ...tabs[tabValue]?.filters, sortDir: "desc" } : value || {};
+  const { data, isLoading, isFetching, isSuccess, isError, refetch } = useGetBooksQuery(tabs || value ? filters : {}, {
+    skip: !tabs && !value,
+  });
 
   const handleChangeValue = (e, newValue) => {
     if (newValue !== null) {
@@ -298,17 +276,7 @@ const ProductsList = ({ tabs, value, title }) => {
     }
   };
   const getParams = () => {
-    const {
-      sortBy,
-      keyword,
-      cateId,
-      rating,
-      amount,
-      pubIds,
-      type,
-      shopId,
-      sellerId,
-    } = filters || {};
+    const { sortBy, keyword, cateId, rating, amount, pubIds, type, shopId, sellerId } = filters || {};
 
     const params = new URLSearchParams();
     if (sortBy) params.append("sort", sortBy);
@@ -345,11 +313,7 @@ const ProductsList = ({ tabs, value, title }) => {
       )}
       {tabs && (
         <ToggleGroupContainer className={title ? "" : "border"}>
-          <CustomTabs
-            value={tabValue}
-            onChange={handleChangeValue}
-            scrollButtons="auto"
-          >
+          <CustomTabs value={tabValue} onChange={handleChangeValue} scrollButtons="auto">
             {(!tabs?.length ? [...Array(1)] : tabs)?.map((tab, index) => (
               <CustomTab
                 key={`${title}-tabs-${tab?.label}-${index}`}
@@ -361,23 +325,17 @@ const ProductsList = ({ tabs, value, title }) => {
         </ToggleGroupContainer>
       )}
       <SliderContainer>
-        <ProductsSlider
-          key={tabValue}
-          {...{ isLoading, isFetching, data, isSuccess, isError }}
-        />
+        <ProductsSlider key={tabValue} {...{ isLoading, isFetching, data, isSuccess, isError }} />
       </SliderContainer>
     </>
   );
 };
 
 const RandomList = () => {
-  const { data, isLoading, isFetching, isSuccess, isError, refetch } =
-    useGetRandomBooksQuery({ amount: 10 });
+  const { data, isLoading, isFetching, isSuccess, isError, refetch } = useGetRandomBooksQuery({ amount: 10 });
   return (
     <>
-      <ProductsSlider
-        {...{ isLoading, isFetching, data, isSuccess, isError }}
-      />
+      <ProductsSlider {...{ isLoading, isFetching, data, isSuccess, isError }} />
       <ButtonContainer>
         {isError ? (
           <Button
@@ -413,17 +371,16 @@ const TopList = ({ categories }) => {
   const [tabValue, setTabValue] = useState(categories?.ids[0] ?? null); // Tab
 
   // Products
-  const { data, isLoading, isFetching, isSuccess, isError, refetch } =
-    useGetBooksQuery(
-      {
-        cateId: tabValue,
-        size: listSize,
-        withDesc: true,
-        sortBy: "totalOrders",
-        sortDir: "desc",
-      },
-      { skip: !categories }
-    );
+  const { data, isLoading, isFetching, isSuccess, isError, refetch } = useGetBooksQuery(
+    {
+      cateId: tabValue,
+      size: listSize,
+      withDesc: true,
+      sortBy: "totalOrders",
+      sortDir: "desc",
+    },
+    { skip: !categories }
+  );
 
   useEffect(() => {
     setTabValue(categories?.ids[0] ?? null);
@@ -448,13 +405,7 @@ const TopList = ({ categories }) => {
       ids?.map((id, index) => {
         const cate = entities[id];
 
-        return (
-          <CustomTab
-            key={`top-tab-${id}-${index}`}
-            label={cate?.name ?? "Đang cập nhật"}
-            value={id ?? ""}
-          />
-        );
+        return <CustomTab key={`top-tab-${id}-${index}`} label={cate?.name ?? "Đang cập nhật"} value={id ?? ""} />;
       })
     ) : (
       <CustomTab label={"Đang cập nhật"} value={""} />
@@ -484,18 +435,12 @@ const TopList = ({ categories }) => {
       </TitleContainer>
       {categories && (
         <ToggleGroupContainer>
-          <CustomTabs
-            value={tabValue}
-            onChange={handleChangeValue}
-            scrollButtons="auto"
-          >
+          <CustomTabs value={tabValue} onChange={handleChangeValue} scrollButtons="auto">
             {tabs}
           </CustomTabs>
         </ToggleGroupContainer>
       )}
-      <ProductsTop
-        {...{ isLoading, isFetching, data, isSuccess, isError, size: listSize }}
-      />
+      <ProductsTop {...{ isLoading, isFetching, data, isSuccess, isError, size: listSize }} />
     </>
   );
 };
@@ -518,11 +463,7 @@ const Home = () => {
     isLoading: loadCates,
     isSuccess: doneCates,
   } = useGetCategoriesQuery({ include: "children" });
-  const {
-    data: publishers,
-    isLoading: loadPubs,
-    isSuccess: donePubs,
-  } = useGetPublishersQuery();
+  const { data: publishers, isLoading: loadPubs, isSuccess: donePubs } = useGetPublishersQuery();
   const { data, isLoading, isSuccess, isError } = useGetBooksQuery({
     page: pagination?.number,
     size: pagination?.size,
@@ -538,9 +479,7 @@ const Home = () => {
 
       ids.forEach((id) => {
         const cate = entities[id];
-        cate?.children?.length
-          ? catesWithChildren.push(cate)
-          : cates.push(cate);
+        cate?.children?.length ? catesWithChildren.push(cate) : cates.push(cate);
       });
 
       setCatesWithChilds(catesWithChildren);
@@ -568,8 +507,7 @@ const Home = () => {
       navigate("/store");
     } else {
       const nextPage = data?.ids?.length / defaultMore;
-      if (nextPage >= 1)
-        setPagination({ ...pagination, number: nextPage, size: defaultMore });
+      if (nextPage >= 1) setPagination({ ...pagination, number: nextPage, size: defaultMore });
     }
   };
 
@@ -718,9 +656,7 @@ const Home = () => {
                     tabs,
                     title: (
                       <ContainerTitle>
-                        <Bookmarks
-                          color={index % 2 == 0 ? "primary" : "info"}
-                        />
+                        <Bookmarks color={index % 2 == 0 ? "primary" : "info"} />
                         &nbsp;{title}
                       </ContainerTitle>
                     ),

@@ -1,26 +1,17 @@
 import styled from "@emotion/styled";
 import Dialog from "@mui/material/Dialog";
 import Skeleton from "@mui/material/Skeleton";
-import { lazy, Suspense } from "react";
-import {
-  StyledDialogTitle,
-  TabContentContainer,
-} from "../components/custom/ProfileComponents";
+import { lazy, Suspense, forwardRef, useState } from "react";
+import { StyledDialogTitle, TabContentContainer } from "../components/custom/ProfileComponents";
 import { useNavigate, useOutletContext, useParams } from "react-router";
-import {
-  useRefreshMutation,
-  useSignOutMutation,
-} from "@ring/redux/authApiSlice";
+import { useRefreshMutation, useSignOutMutation } from "@ring/redux/authApiSlice";
 import useTitle from "@ring/shared/useTitle";
 import Placeholder from "@ring/ui/Placeholder";
+import Slide from "@mui/material/Slide";
 
 const ProfileDetail = lazy(() => import("../components/profile/ProfileDetail"));
-const AddressComponent = lazy(
-  () => import("../components/address/AddressComponent")
-);
-const ResetPassComponent = lazy(
-  () => import("../components/profile/ResetPassComponent")
-);
+const AddressComponent = lazy(() => import("../components/address/AddressComponent"));
+const ResetPassComponent = lazy(() => import("../components/profile/ResetPassComponent"));
 
 //#region styled
 const PlaceholderContainer = styled.div`
@@ -42,22 +33,19 @@ const tempLoad = (
   </>
 );
 
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="left" ref={ref} {...props} />;
+});
+
 const Profile = () => {
   const { tab } = useParams();
-  const {
-    profile,
-    loading,
-    isSuccess,
-    tabletMode,
-    mobileMode,
-    pending,
-    setPending,
-  } = useOutletContext();
-  const navigate = useNavigate();
+  const { profile, loading, isSuccess, tabletMode, mobileMode, pending, setPending } = useOutletContext();
   const [refresh, { isLoading: refreshing }] = useRefreshMutation();
   const [logout] = useSignOutMutation();
+  const [open, setOpen] = useState(true);
+  const navigate = useNavigate();
 
-  //Set title
+  // Set title
   useTitle("Hồ sơ");
 
   const verifyRefreshToken = async () => {
@@ -67,7 +55,7 @@ const Profile = () => {
       await refresh().unwrap();
     } catch (error) {
       let errorMsg;
-      //Log user out if fail to refresh
+      // Log user out if fail to refresh
       if (error?.status === 500) {
         errorMsg = "Đã xảy ra lỗi xác thực, vui lòng đăng nhập lại!";
       } else if (error?.status === 400 || error?.status === 403) {
@@ -77,9 +65,19 @@ const Profile = () => {
     }
   };
 
-  let content;
+  const handleClose = (e) => {
+    e.preventDefault();
+    setOpen(false);
+    navigate(-1);
+  };
 
-  switch (tab ? tab : tabletMode ? "" : "info") {
+  let content;
+  const currTab = tab ? tab : tabletMode ? "" : "info";
+
+  // TODO: Fix tab list disappear
+  console.log(currTab);
+
+  switch (currTab) {
     case "info":
       content = (
         <ProfileDetail
@@ -91,6 +89,7 @@ const Profile = () => {
             isSuccess,
             tabletMode,
             verifyRefreshToken,
+            handleClose,
           }}
         />
       );
@@ -99,11 +98,7 @@ const Profile = () => {
       content = <AddressComponent {...{ pending, setPending, mobileMode }} />;
       break;
     case "password":
-      content = (
-        <ResetPassComponent
-          {...{ pending, setPending, verifyRefreshToken, refreshing }}
-        />
-      );
+      content = <ResetPassComponent {...{ pending, setPending, verifyRefreshToken, refreshing }} />;
       break;
   }
 
@@ -111,13 +106,16 @@ const Profile = () => {
     <>
       {tabletMode ? (
         <Dialog
-          open={tab ? true : tabletMode ? false : true}
-          onClose={() => navigate(-1)}
+          open={currTab}
+          onClose={handleClose}
           fullScreen={mobileMode}
           scroll={"paper"}
           maxWidth={"md"}
           fullWidth
           closeAfterTransition={false}
+          slots={{
+            transition: Transition,
+          }}
           slotProps={{
             paper: {
               elevation: 0,

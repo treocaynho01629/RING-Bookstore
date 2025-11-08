@@ -45,15 +45,13 @@ interface CouponsState extends EntityState<CouponResponse, number> {
 
 export const couponsAdapter = createEntityAdapter<CouponResponse>();
 export const couponsSelector = couponsAdapter.getSelectors();
-export const couponsInitialState: CouponsState = couponsAdapter.getInitialState(
-  {
-    empty: false,
-    page: 0,
-    size: 0,
-    totalElements: 0,
-    totalPages: 0,
-  }
-);
+export const couponsInitialState: CouponsState = couponsAdapter.getInitialState({
+  empty: false,
+  page: 0,
+  size: 0,
+  totalElements: 0,
+  totalPages: 0,
+});
 const apiWithEnum = apiSlice.enhanceEndpoints({ addTagTypes: ["Coupon"] });
 
 export const couponsApiSlice = apiWithEnum.injectEndpoints({
@@ -67,6 +65,7 @@ export const couponsApiSlice = apiWithEnum.injectEndpoints({
           userId,
           byShop,
           showExpired,
+          showUsed,
           codes,
           code,
           cValue,
@@ -79,16 +78,13 @@ export const couponsApiSlice = apiWithEnum.injectEndpoints({
 
         // Params
         const params = new URLSearchParams();
-        if (types && types?.length > 0)
-          params.append("types", types?.join(","));
-        if (criterias && criterias?.length > 0)
-          params.append("criterias", criterias?.join(","));
+        if (types && types?.length > 0) params.append("types", types?.join(","));
+        if (criterias && criterias?.length > 0) params.append("criterias", criterias?.join(","));
         if (shopId) params.append("shopId", shopId.toString());
         if (userId) params.append("userId", userId.toString());
         if (byShop != null) params.append("byShop", byShop.toString());
         if (showExpired) params.append("showExpired", showExpired.toString());
-        if (codes && codes?.length > 0)
-          params.append("codes", codes?.join(","));
+        if (codes && codes?.length > 0) params.append("codes", codes?.join(","));
         if (code) params.append("code", code);
         if (page) params.append("pageNo", page.toString());
         if (size) params.append("pSize", size.toString());
@@ -96,6 +92,7 @@ export const couponsApiSlice = apiWithEnum.injectEndpoints({
         if (sortDir) params.append("sortDir", sortDir);
         if (cValue) params.append("cValue", cValue.toString());
         if (cQuantity) params.append("cQuantity", cQuantity.toString());
+        if (showUsed) params.append("showUsed", showUsed.toString());
 
         return {
           url: `/api/coupons?${params.toString()}`,
@@ -105,8 +102,7 @@ export const couponsApiSlice = apiWithEnum.injectEndpoints({
         };
       },
       transformResponse: (response: CouponsResponse) => {
-        const { content, empty, page, size, totalElements, totalPages } =
-          response;
+        const { content, empty, page, size, totalElements, totalPages } = response;
         return couponsAdapter.setAll(
           {
             ...couponsInitialState,
@@ -148,10 +144,7 @@ export const couponsApiSlice = apiWithEnum.injectEndpoints({
       merge: (currentCache, newItems, { arg: currentArg }) => {
         currentCache.page = newItems.page;
         if (!currentArg?.loadMore) couponsAdapter.removeAll(currentCache);
-        couponsAdapter.upsertMany(
-          currentCache,
-          couponsSelector.selectAll(newItems)
-        );
+        couponsAdapter.upsertMany(currentCache, couponsSelector.selectAll(newItems));
       },
       forceRefetch: ({ currentArg, previousArg }) => {
         return !!(
@@ -162,10 +155,7 @@ export const couponsApiSlice = apiWithEnum.injectEndpoints({
       },
       providesTags: (result) =>
         result
-          ? [
-              ...result.ids.map((id) => ({ type: "Coupon" as const, id })),
-              { type: "Coupon", id: "LIST" },
-            ]
+          ? [...result.ids.map((id) => ({ type: "Coupon" as const, id })), { type: "Coupon", id: "LIST" }]
           : [{ type: "Coupon", id: "LIST" }],
     }),
   }),

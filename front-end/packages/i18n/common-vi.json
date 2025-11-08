@@ -33,7 +33,7 @@
   "logout.end": "Kết thúc phiên đăng nhập?",
   "notification": "Thông báo",
   "search": "Tìm kiếm",
-  "store": "cửa hàng",
+  "store": "Cửa hàng",
   "home": "Trang chủ",
   "profile": "Thông tin tài khoản",
   "items": "sản phẩm",
@@ -48,6 +48,11 @@
   "total": "Tổng",
   "remove": "Xoá",
   "partner": "Đối tác",
+  "back": "Quay lại",
+  "unselect": "Bỏ chọn",
+  "remove.saved": "Gỡ",
+  "save": "Lưu",
+  "scroll": "Về đầu trang",
   "coupon": {
     "shipping": {
       "label": "Giảm phí ship",
@@ -106,6 +111,7 @@
     "success": "{{action}} thành công"
   },
   "error": {
-    "server.not.response": "Server không phản hồi"
+    "server.not.response": "Server không phản hồi",
+    "general": "Đã xảy ra lỗi"
   }
 }

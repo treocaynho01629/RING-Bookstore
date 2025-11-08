@@ -1,12 +1,4 @@
-import {
-  Fragment,
-  Suspense,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  lazy,
-} from "react";
+import { Fragment, Suspense, useCallback, useEffect, useRef, useState, lazy } from "react";
 import { useGetOrdersByUserQuery } from "../../features/orders/ordersApiSlice";
 import {
   MainContainer,
@@ -17,7 +9,7 @@ import {
   LoadContainer,
   PlaceholderContainer,
 } from "../custom/ProfileComponents";
-import { Link, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { booksApiSlice } from "../../features/books/booksApiSlice";
 import { CustomTab, CustomTabs } from "../custom/CustomTabs";
 import { debounce } from "lodash-es";
@@ -33,14 +25,12 @@ import Search from "@mui/icons-material/Search";
 import useCart from "../../hooks/useCart";
 import OrderItem from "./OrderItem";
 
-const CancelAndRefundDetailForm = lazy(
-  () => import("./CancelAndRefundDetailForm")
-);
+const CancelAndRefundDetailForm = lazy(() => import("./CancelAndRefundDetailForm"));
 
 const OrderStatus = getOrderStatus();
 const defaultSize = 5;
 
-const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
+const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }) => {
   const { addProduct } = useCart();
   const scrollRef = useRef(null);
   const mobileScrollRef = useRef(null);
@@ -60,16 +50,14 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
   });
 
   //Fetch orders
-  const { data, isLoading, isFetching, isSuccess, isError, error } =
-    useGetOrdersByUserQuery({
-      status: filters.status,
-      keyword: filters.keyword,
-      page: pagination.number,
-      size: pagination.size,
-      loadMore: pagination.isMore,
-    });
-  const [getBought, { isLoading: fetching }] =
-    booksApiSlice.useLazyGetBooksByIdsQuery();
+  const { data, isLoading, isFetching, isSuccess, isError, error } = useGetOrdersByUserQuery({
+    status: filters.status,
+    keyword: filters.keyword,
+    page: pagination.number,
+    size: pagination.size,
+    loadMore: pagination.isMore,
+  });
+  const [getBought, { isLoading: fetching }] = booksApiSlice.useLazyGetBooksByIdsQuery();
 
   useEffect(() => {
     setFilters((prev) => ({
@@ -105,9 +93,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
   //Change tab
   const handleChangeStatus = (e, newValue) => {
     setFilters((prev) => ({ ...prev, status: newValue, keyword: "" }));
-    newValue === ""
-      ? searchParams.delete("status")
-      : searchParams.set("status", newValue);
+    newValue === "" ? searchParams.delete("status") : searchParams.set("status", newValue);
     searchParams.delete("k");
     setSearchParams(searchParams);
     handleResetPage();
@@ -164,7 +150,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
     setOpen(true);
   };
 
-  const handleClose = () => {
+  const handleCloseForm = () => {
     setContextOrder(false);
     setOpen(false);
   };
@@ -172,32 +158,22 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
   // Show more
   const handleShowMore = () => {
     const currentPage = data?.page;
-    if (
-      isFetching ||
-      typeof currentPage?.number !== "number" ||
-      currentPage?.number < pagination?.number
-    )
-      return;
+    if (isFetching || typeof currentPage?.number !== "number" || currentPage?.number < pagination?.number) return;
     const nextPage = currentPage?.number + 1;
-    if (nextPage < currentPage?.totalPages)
-      setPagination((prev) => ({ ...prev, number: nextPage }));
+    if (nextPage < currentPage?.totalPages) setPagination((prev) => ({ ...prev, number: nextPage }));
   };
 
   const handleWindowScroll = (e) => {
-    const trigger =
-      document.body.scrollHeight - 700 < window.scrollY + window.innerHeight;
+    const trigger = document.body.scrollHeight - 700 < window.scrollY + window.innerHeight;
     if (trigger) handleShowMore();
   };
 
   const handleScroll = (e) => {
-    const trigger =
-      e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
+    const trigger = e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
     if (trigger) handleShowMore();
   };
 
-  const windowScrollListener = useCallback(debounce(handleWindowScroll, 500), [
-    data,
-  ]);
+  const windowScrollListener = useCallback(debounce(handleWindowScroll, 500), [data]);
   const scrollListener = useCallback(debounce(handleScroll, 500), [data]);
 
   useEffect(() => {
@@ -257,31 +233,22 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
   return (
     <>
       <StyledDialogTitle ref={scrollRef}>
-        <Link to={-1}>
+        <a onClick={handleClose}>
           <KeyboardArrowLeft />
-        </Link>
+        </a>
         <Receipt />
         &nbsp;Đơn hàng của bạn
       </StyledDialogTitle>
       <ToggleGroupContainer>
-        <CustomTabs
-          value={filters.status}
-          onChange={handleChangeStatus}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
+        <CustomTabs value={filters.status} onChange={handleChangeStatus} variant="scrollable" scrollButtons="auto">
           <CustomTab label="Tất cả" value="" />
           {Object.values(OrderStatus).map((tab, index) => (
-            <CustomTab
-              key={`tab-${index}`}
-              label={tab.label}
-              value={tab.value}
-            />
+            <CustomTab key={`tab-${index}`} label={tab.label} value={tab.value} />
           ))}
         </CustomTabs>
       </ToggleGroupContainer>
       <DialogContent
-        sx={{ py: 0, px: { xs: 0, sm: 2, md: 0 } }}
+        sx={{ py: 0, px: { xs: 0, sm: 2, md: 0 }, height: { xs: "100dvh", md: "auto" } }}
         onScroll={tabletMode ? scrollListener : undefined}
       >
         <form ref={mobileScrollRef} onSubmit={handleChangeKeyword}>
@@ -309,17 +276,16 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
               <CircularProgress size={30} color="primary" />
             </LoadContainer>
           )}
-          {data?.ids?.length > 0 &&
-            data?.ids?.length == data?.totalElements && (
-              <Message color="warning">Không còn đơn hàng nào!</Message>
-            )}
+          {data?.ids?.length > 0 && data?.ids?.length == data?.totalElements && (
+            <Message color="warning">Không còn đơn hàng nào!</Message>
+          )}
         </MainContainer>
       </DialogContent>
       <Dialog
         maxWidth={"sm"}
         fullWidth
         open={open}
-        onClose={handleClose}
+        onClose={handleCloseForm}
         fullScreen={mobileMode}
         closeAfterTransition={false}
         aria-labelledby="cancel-dialog"
@@ -331,7 +297,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
                 pending,
                 setPending,
                 id: contextOrder?.id,
-                handleClose,
+                handleClose: handleCloseForm,
               }}
             />
           </Suspense>

@@ -28,6 +28,7 @@ import LocationOn from "@mui/icons-material/LocationOn";
 import Close from "@mui/icons-material/Close";
 import AddressItem from "./AddressItem";
 import useAddress from "../../hooks/useAddress";
+import SimpleBar from "simplebar-react";
 
 const AddressForm = lazy(() => import("./AddressForm"));
 
@@ -37,6 +38,25 @@ const MessageContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+`;
+
+const StyledSimpleBar = styled(SimpleBar)`
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  padding: inherit;
+
+  .simplebar-track {
+    &.simplebar-vertical {
+      .simplebar-scrollbar {
+        &:before {
+          background-color: ${({ theme }) => theme.vars.palette.divider};
+        }
+      }
+    }
+  }
 `;
 
 const PlaceholderContainer = styled.div`
@@ -513,30 +533,26 @@ const AddressSelectDialog = ({
   } else if (isSuccess) {
     const { ids, entities } = data;
 
-    addressesContent = (
-      <>
-        {ids?.length
-          ? ids?.map((id, index) => {
-              const savedAddress = entities[id];
-              if (savedAddress.isDefault && selectedValue == -1) setSelectedValue(id);
+    addressesContent = ids?.length
+      ? ids?.map((id, index) => {
+          const savedAddress = entities[id];
+          if (savedAddress.isDefault && selectedValue == -1) setSelectedValue(id);
 
-              return (
-                <Fragment key={`saved-${id}-${index}`}>
-                  <AddressItem
-                    onCheck={(e) => setSelectedValue(e.target.value)}
-                    {...{
-                      addressInfo: savedAddress,
-                      handleOpen,
-                      handleClick,
-                      selectedValue,
-                    }}
-                  />
-                </Fragment>
-              );
-            })
-          : null}
-      </>
-    );
+          return (
+            <Fragment key={`saved-${id}-${index}`}>
+              <AddressItem
+                onCheck={(e) => setSelectedValue(e.target.value)}
+                {...{
+                  addressInfo: savedAddress,
+                  handleOpen,
+                  handleClick,
+                  selectedValue,
+                }}
+              />
+            </Fragment>
+          );
+        })
+      : null;
   } else if (isError) {
     addressesContent = (
       <MessageContainer>
@@ -585,28 +601,30 @@ const AddressSelectDialog = ({
             <LocationOn />
             &nbsp;Địa chỉ của bạn
           </DialogTitle>
-          <DialogContent sx={{ height: "100dvh" }}>
-            {addressesContent}
-            {storedContent}
-            <Button
-              variant="outlined"
-              size="large"
-              color="primary"
-              fullWidth
-              onClick={() => handleOpen()}
-              aria-label="Add address button"
-            >
-              <AddHome />
-              &nbsp;Thêm địa chỉ
-            </Button>
-            {!isLoading && !isError && !data?.ids?.length && !storeAddresses?.length && (
-              <MessageContainer>
-                <Message>
-                  <StyledEmptyIcon />
-                  Chưa có địa chỉ nào
-                </Message>
-              </MessageContainer>
-            )}
+          <DialogContent sx={{ height: "100dvh", position: "relative" }} dividers={true}>
+            <StyledSimpleBar>
+              {addressesContent}
+              {storedContent}
+              <Button
+                variant="outlined"
+                size="large"
+                color="primary"
+                fullWidth
+                onClick={() => handleOpen()}
+                aria-label="Add address button"
+              >
+                <AddHome />
+                &nbsp;Thêm địa chỉ
+              </Button>
+              {!isLoading && !isError && !data?.ids?.length && !storeAddresses?.length && (
+                <MessageContainer>
+                  <Message>
+                    <StyledEmptyIcon />
+                    Chưa có địa chỉ nào
+                  </Message>
+                </MessageContainer>
+              )}
+            </StyledSimpleBar>
           </DialogContent>
           <DialogActions>
             <Button variant="outlined" color="error" size="large" onClick={handleCloseDialog} startIcon={<Close />}>

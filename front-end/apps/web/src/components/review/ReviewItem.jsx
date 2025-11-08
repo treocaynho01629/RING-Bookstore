@@ -9,7 +9,7 @@ import CalendarMonth from "@mui/icons-material/CalendarMonth";
 import Star from "@mui/icons-material/Star";
 import StarBorder from "@mui/icons-material/StarBorder";
 import ReportGmailerrorred from "@mui/icons-material/ReportGmailerrorred";
-import BorderColorOutlined from "@mui/icons-material/BorderColorOutlined";
+import EditOutlined from "@mui/icons-material/EditOutlined";
 
 //#region styled
 const ReviewContainer = styled.div`
@@ -33,14 +33,12 @@ const Profile = styled.div`
 `;
 
 const RateContent = styled.div`
-  margin: ${({ theme }) => theme.spacing(1)} 0
-    ${({ theme }) => theme.spacing(2)};
+  margin: ${({ theme }) => theme.spacing(1)} 0 ${({ theme }) => theme.spacing(2)};
   font-size: 15px;
   overflow: hidden;
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
-    margin: ${({ theme }) => theme.spacing(0.5)} 0
-      ${({ theme }) => theme.spacing(2)};
+    margin: ${({ theme }) => theme.spacing(0.5)} 0 ${({ theme }) => theme.spacing(2)};
   }
 `;
 
@@ -122,9 +120,7 @@ const ReviewItem = ({ review, username, isPreview, handleClick }) => {
 
   return (
     <ReviewContainer>
-      <Profile
-        className={username && username === review?.username ? "active" : ""}
-      >
+      <Profile className={username && username === review?.username ? "active" : ""}>
         <InfoContainer>
           {review ? (
             <>
@@ -142,9 +138,7 @@ const ReviewItem = ({ review, username, isPreview, handleClick }) => {
                   name="product-rating"
                   value={review?.rating ?? 0}
                   readOnly
-                  getLabelText={(value) =>
-                    `${value} Star${value !== 1 ? "s" : ""}`
-                  }
+                  getLabelText={(value) => `${value} Star${value !== 1 ? "s" : ""}`}
                   sx={{ fontSize: 16 }}
                   icon={<Star sx={{ fontSize: 16 }} />}
                   empty={<StarBorder sx={{ fontSize: 16 }} />}
@@ -162,11 +156,7 @@ const ReviewItem = ({ review, username, isPreview, handleClick }) => {
                 }}
               />
               <div>
-                <Skeleton
-                  variant="text"
-                  sx={{ fontSize: "14px" }}
-                  width={150}
-                />
+                <Skeleton variant="text" sx={{ fontSize: "14px" }} width={150} />
                 <Skeleton variant="text" sx={{ fontSize: "14px" }} width={80} />
               </div>
             </>
@@ -197,7 +187,7 @@ const ReviewItem = ({ review, username, isPreview, handleClick }) => {
               </RatingInfo>
               {(username && username === review?.username) || isPreview ? (
                 <ActionButton className="mobile" onClick={handleClick}>
-                  <BorderColorOutlined />
+                  <EditOutlined />
                 </ActionButton>
               ) : (
                 <ActionButton className="mobile">
@@ -251,7 +241,7 @@ const ReviewItem = ({ review, username, isPreview, handleClick }) => {
       {review ? (
         (username && username === review?.username) || isPreview ? (
           <ActionButton onClick={handleClick}>
-            <BorderColorOutlined />
+            <EditOutlined />
             &nbsp;Chỉnh sửa
           </ActionButton>
         ) : (

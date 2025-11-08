@@ -143,6 +143,7 @@ const ProfileDetail = ({
   isSuccess,
   tabletMode,
   verifyRefreshToken,
+  handleClose,
 }) => {
   //Initial value
   const { username } = useAuth();
@@ -150,9 +151,7 @@ const ProfileDetail = ({
   const [errMsg, setErrMsg] = useState("");
   const [err, setErr] = useState([]);
   const [name, setName] = useState(profile?.name || "");
-  const [dob, setDob] = useState(
-    profile?.dob ? dayjs(profile?.dob) : dayjs("1970-01-01")
-  );
+  const [dob, setDob] = useState(profile?.dob ? dayjs(profile?.dob) : dayjs("1970-01-01"));
   const [gender, setGender] = useState(profile?.gender || "");
   const [phone, setPhone] = useState(profile?.phone || "");
   const [validPhone, setValidPhone] = useState(false);
@@ -160,15 +159,12 @@ const ProfileDetail = ({
   const [editDob, setEditDob] = useState(false);
   const [pic, setPic] = useState(profile?.image || null);
   const [file, setFile] = useState(null);
-  const [ConfirmationDialog, confirm] = useConfirm(
-    "Gỡ ảnh đại diện?",
-    "Gỡ bỏ anh đại diện hiện tại?"
-  );
+  const [ConfirmationDialog, confirm] = useConfirm("Gỡ ảnh đại diện?", "Gỡ bỏ anh đại diện hiện tại?");
 
-  //Update profile hook
+  // Update profile hook
   const [updateProfile, { isLoading: updating }] = useUpdateProfileMutation();
 
-  //Set data
+  // Set data
   useEffect(() => {
     if (!loading && isSuccess && profile) {
       setName(profile?.name) || "";
@@ -232,7 +228,7 @@ const ProfileDetail = ({
     e.preventDefault();
     if (updating || pending) return;
 
-    //Validation
+    // Validation
     const valid = PHONE_REGEX.test(phone);
     if (!valid && phone) {
       return;
@@ -241,7 +237,7 @@ const ProfileDetail = ({
     setPending(true);
     const { enqueueSnackbar } = await import("notistack");
 
-    //Set data
+    // Set data
     const formData = new FormData();
     const json = JSON.stringify({
       name: name || null,
@@ -284,13 +280,13 @@ const ProfileDetail = ({
   return (
     <>
       <StyledDialogTitle>
-        <Link to={-1}>
+        <a onClick={handleClose}>
           <KeyboardArrowLeft />
-        </Link>
+        </a>
         <Person />
         &nbsp;Hồ sơ của bạn
       </StyledDialogTitle>
-      <DialogContent sx={{ p: { xs: 1, sm: 2, md: 0 }, mt: { xs: 1, md: 0 } }}>
+      <DialogContent sx={{ p: { xs: 1, sm: 2, md: 0 }, mt: { xs: 1, md: 0 }, height: { xs: "100dvh", md: "auto" } }}>
         <Instruction display={errMsg ? "block" : "none"} aria-live="assertive">
           {errMsg}
         </Instruction>
@@ -304,15 +300,8 @@ const ProfileDetail = ({
                       overlap="circular"
                       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                       badgeContent={
-                        <BadgeButton
-                          className={!profile?.image && !pic ? "edit" : ""}
-                          onClick={handleClickBadge}
-                        >
-                          {!profile?.image && !pic ? (
-                            <EditOutlined />
-                          ) : (
-                            <Clear />
-                          )}
+                        <BadgeButton className={!profile?.image && !pic ? "edit" : ""} onClick={handleClickBadge}>
+                          {!profile?.image && !pic ? <EditOutlined /> : <Clear />}
                         </BadgeButton>
                       }
                     >
@@ -339,11 +328,7 @@ const ProfileDetail = ({
               <InfoStack>
                 <InfoStackContainer>
                   {loading ? (
-                    <Skeleton
-                      variant="text"
-                      sx={{ fontSize: "16px" }}
-                      width={120}
-                    />
+                    <Skeleton variant="text" sx={{ fontSize: "16px" }} width={120} />
                   ) : (
                     <InfoText>{username}</InfoText>
                   )}
@@ -360,11 +345,7 @@ const ProfileDetail = ({
                           className={`${!profile?.image && !pic ? "edit" : ""} ${loading ? "disabled" : ""}`}
                           onClick={handleClickBadge}
                         >
-                          {!profile?.image && !pic ? (
-                            <EditOutlined />
-                          ) : (
-                            <Clear />
-                          )}
+                          {!profile?.image && !pic ? <EditOutlined /> : <Clear />}
                         </BadgeButton>
                       }
                     >
@@ -390,18 +371,9 @@ const ProfileDetail = ({
               <InfoStack>
                 <InfoStackContainer>
                   {loading ? (
-                    <Skeleton
-                      variant="text"
-                      sx={{ fontSize: "16px" }}
-                      width={110}
-                    />
+                    <Skeleton variant="text" sx={{ fontSize: "16px" }} width={110} />
                   ) : (
-                    <InfoText>
-                      {profile?.email.replace(
-                        /(\w{3})[\w.-]+@([\w.]+\w)/,
-                        "$1***@$2"
-                      )}
-                    </InfoText>
+                    <InfoText>{profile?.email.replace(/(\w{3})[\w.-]+@([\w.]+\w)/, "$1***@$2")}</InfoText>
                   )}
                 </InfoStackContainer>
               </InfoStack>
@@ -443,11 +415,7 @@ const ProfileDetail = ({
                       onValueChange={(values) => setPhone(values.value)}
                       value={phone}
                       error={(phone && !validPhone) || err?.data?.errors?.phone}
-                      label={
-                        phone && !validPhone
-                          ? "Sai định dạng số điện thoại!"
-                          : err?.data?.errors?.phone
-                      }
+                      label={phone && !validPhone ? "Sai định dạng số điện thoại!" : err?.data?.errors?.phone}
                       size="small"
                       fullWidth
                       format="(+84) ### ### ###"
@@ -457,22 +425,11 @@ const ProfileDetail = ({
                   ) : (
                     <>
                       {loading ? (
-                        <Skeleton
-                          variant="text"
-                          sx={{ fontSize: "16px" }}
-                          width="25%"
-                        />
+                        <Skeleton variant="text" sx={{ fontSize: "16px" }} width="25%" />
                       ) : (
-                        <InfoText>
-                          {phone
-                            ? phone.replace(/\d(?=\d{2})/g, "*")
-                            : "Chưa có"}
-                        </InfoText>
+                        <InfoText>{phone ? phone.replace(/\d(?=\d{2})/g, "*") : "Chưa có"}</InfoText>
                       )}
-                      <InfoText
-                        className={`edit ${loading ? "disabled" : ""}`}
-                        onClick={() => setEditPhone(true)}
-                      >
+                      <InfoText className={`edit ${loading ? "disabled" : ""}`} onClick={() => setEditPhone(true)}>
                         Thay đổi
                       </InfoText>
                     </>
@@ -491,18 +448,11 @@ const ProfileDetail = ({
                       fallback={
                         <>
                           {loading ? (
-                            <Skeleton
-                              variant="text"
-                              sx={{ fontSize: "16px" }}
-                              width="30%"
-                            />
+                            <Skeleton variant="text" sx={{ fontSize: "16px" }} width="30%" />
                           ) : (
                             <InfoText>{dob.format("DD/MM/YYYY")}</InfoText>
                           )}
-                          <InfoText
-                            className={`edit ${loading ? "disabled" : ""}`}
-                            onClick={() => setEditDob(true)}
-                          >
+                          <InfoText className={`edit ${loading ? "disabled" : ""}`} onClick={() => setEditDob(true)}>
                             Thay đổi
                           </InfoText>
                         </>
@@ -527,18 +477,11 @@ const ProfileDetail = ({
                   ) : (
                     <>
                       {loading ? (
-                        <Skeleton
-                          variant="text"
-                          sx={{ fontSize: "16px" }}
-                          width="30%"
-                        />
+                        <Skeleton variant="text" sx={{ fontSize: "16px" }} width="30%" />
                       ) : (
                         <InfoText>{dob.format("DD/MM/YYYY")}</InfoText>
                       )}
-                      <InfoText
-                        className={`edit ${loading ? "disabled" : ""}`}
-                        onClick={() => setEditDob(true)}
-                      >
+                      <InfoText className={`edit ${loading ? "disabled" : ""}`} onClick={() => setEditDob(true)}>
                         Thay đổi
                       </InfoText>
                     </>
@@ -554,11 +497,7 @@ const ProfileDetail = ({
                 <InfoStackContainer>
                   {tabletMode ? (
                     loading ? (
-                      <Skeleton
-                        variant="rectangular"
-                        height={40}
-                        width="100%"
-                      />
+                      <Skeleton variant="rectangular" height={40} width="100%" />
                     ) : (
                       <TextField
                         required
@@ -569,10 +508,7 @@ const ProfileDetail = ({
                         fullWidth
                       >
                         {Object.values(GenderType).map((gender, index) => (
-                          <MenuItem
-                            key={`menu-${gender?.value}-${index}`}
-                            value={gender?.value}
-                          >
+                          <MenuItem key={`menu-${gender?.value}-${index}`} value={gender?.value}>
                             {gender?.label}
                           </MenuItem>
                         ))}
@@ -580,29 +516,12 @@ const ProfileDetail = ({
                     )
                   ) : loading ? (
                     <>
-                      <Skeleton
-                        variant="text"
-                        width={75}
-                        sx={{ fontSize: 14, mr: 2 }}
-                      />
-                      <Skeleton
-                        variant="text"
-                        width={75}
-                        sx={{ fontSize: 14, mr: 2 }}
-                      />
-                      <Skeleton
-                        variant="text"
-                        width={75}
-                        sx={{ fontSize: 14 }}
-                      />
+                      <Skeleton variant="text" width={75} sx={{ fontSize: 14, mr: 2 }} />
+                      <Skeleton variant="text" width={75} sx={{ fontSize: 14, mr: 2 }} />
+                      <Skeleton variant="text" width={75} sx={{ fontSize: 14 }} />
                     </>
                   ) : (
-                    <RadioGroup
-                      spacing={1}
-                      row
-                      value={gender}
-                      onChange={(e) => setGender(e.target.value)}
-                    >
+                    <RadioGroup spacing={1} row value={gender} onChange={(e) => setGender(e.target.value)}>
                       {Object.values(GenderType).map((gender, index) => (
                         <FormControlLabel
                           key={`radio-${gender?.value}-${index}`}

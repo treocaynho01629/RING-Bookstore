@@ -36,7 +36,7 @@
   "ring": "RING!",
   "home": "Home",
   "search": "Search",
-  "store": "store",
+  "store": "Store",
   "saved": "Saved",
   "items": "items",
   "loading": "Loading...",
@@ -48,6 +48,15 @@
   "remove": "Remove",
   "unknown": "Unknown",
   "partner": "Partner",
+  "back": "Back",
+  "apply": "Apply",
+  "close": "Close",
+  "select": "Select",
+  "show.more": "Show more",
+  "unselect": "Unselect",
+  "remove.saved": "Remove",
+  "save": "Save",
+  "scroll": "Scroll back to top",
   "coupon": {
     "shipping": {
       "label": "Shipping discount",
@@ -106,6 +115,7 @@
     "success": "{{action}} successfully"
   },
   "error": {
-    "server.not.response": "Server did not respond"
+    "server.not.response": "Server did not respond",
+    "general": "An error occurred"
   }
 }

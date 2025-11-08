@@ -37,10 +37,7 @@ const StyledButton = styled.span`
   align-items: center;
   justify-content: center;
   padding: 0 5px;
-  color: ${({ theme, disabled }) =>
-    disabled
-      ? theme.vars.palette.text.disabled
-      : theme.vars.palette.text.secondary};
+  color: ${({ theme, disabled }) => (disabled ? theme.vars.palette.text.disabled : theme.vars.palette.text.secondary)};
   pointer-events: ${({ disabled }) => (disabled ? "none" : "all")};
 
   &:hover {
@@ -56,16 +53,11 @@ const MIN_VALUE = 1;
 const MAX_VALUE = 199;
 
 export default function AmountInput(props) {
-  const { handleDecrease, handleIncrease, disabled, min, max, ...otherProps } =
-    props;
+  const { handleDecrease, handleIncrease, disabled, min, max, ...otherProps } = props;
 
   return (
     <InputContainer>
-      <StyledButton
-        aria-label="decrease amount"
-        onClick={handleDecrease}
-        disabled={disabled}
-      >
+      <StyledButton aria-label="Decrease amount" onClick={handleDecrease} disabled={disabled}>
         <Remove fontSize="small" />
       </StyledButton>
       <CustomInput
@@ -81,18 +73,14 @@ export default function AmountInput(props) {
             style: { fontSize: 13, textAlign: "center", padding: 0 },
           },
           htmlInput: {
-            min: min ?? MIN_VALUE1,
+            min: min ?? MIN_VALUE,
             max: max ?? MAX_VALUE,
             type: "number",
           },
         }}
-        inputProps={{ "aria-label": "amount input" }}
+        inputProps={{ "aria-label": "Amount input" }}
       />
-      <StyledButton
-        aria-label="increase amount"
-        onClick={handleIncrease}
-        $disabled={disabled}
-      >
+      <StyledButton aria-label="Increase amount" onClick={handleIncrease} $disabled={disabled}>
         <Add fontSize="small" />
       </StyledButton>
     </InputContainer>

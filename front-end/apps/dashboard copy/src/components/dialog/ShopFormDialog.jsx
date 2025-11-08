@@ -25,10 +25,7 @@ import { Title } from "../custom/Components";
 import { PatternFormat } from "react-number-format";
 import { Instruction } from "@ring/ui";
 import ImageSelect from "../custom/ImageSelect";
-import {
-  useCreateShopMutation,
-  useUpdateShopMutation,
-} from "../../features/shops/shopsApiSlice";
+import { useCreateShopMutation, useUpdateShopMutation } from "../../features/shops/shopsApiSlice";
 
 const AddressType = getAddressType();
 
@@ -66,9 +63,7 @@ const ShopFormDialog = ({ open, handleClose, shop, pending, setPending }) => {
   const [description, setDescription] = useState("");
 
   //Address
-  const [validPhone, setValidPhone] = useState(
-    PHONE_REGEX.test(shop?.address?.phone) || true
-  );
+  const [validPhone, setValidPhone] = useState(PHONE_REGEX.test(shop?.address?.phone) || true);
   const [currAddress, setCurrAddress] = useState(splitAddress(shop?.address));
   const [err, setErr] = useState([]);
   const [errMsg, setErrMsg] = useState("");
@@ -274,9 +269,7 @@ const ShopFormDialog = ({ open, handleClose, shop, pending, setPending }) => {
         label="Phường/Xã"
         required
         value={currAddress?.ward || ""}
-        onChange={(e) =>
-          setCurrAddress({ ...currAddress, ward: e.target.value })
-        }
+        onChange={(e) => setCurrAddress({ ...currAddress, ward: e.target.value })}
         select
         error={(errMsg != "" || shop?.address) && !currAddress?.ward}
         defaultValue=""
@@ -324,17 +317,13 @@ const ShopFormDialog = ({ open, handleClose, shop, pending, setPending }) => {
       </DialogTitle>
       <DialogContent sx={{ pt: 0, px: { xs: 1, sm: 3 } }}>
         <form onSubmit={handleSubmit}>
-          <Instruction display={errMsg ? "block" : "none"}>
-            {errMsg}
-          </Instruction>
+          <Instruction display={errMsg ? "block" : "none"}>{errMsg}</Instruction>
           <Grid container size="grow" spacing={1}>
             <Grid size={12}>
               <Title>Thông tin cửa hàng</Title>
             </Grid>
             <Grid size={12} display="flex" justifyContent="center" py={2}>
-              <ImageSelect
-                {...{ image: pic, handleRemoveImage, file, setFile }}
-              />
+              <ImageSelect {...{ image: pic, handleRemoveImage, file, setFile }} />
             </Grid>
             <Grid size={12}>
               <TextField
@@ -380,14 +369,9 @@ const ShopFormDialog = ({ open, handleClose, shop, pending, setPending }) => {
                 type="text"
                 id="fullName"
                 required
-                onChange={(e) =>
-                  setCurrAddress({ ...currAddress, name: e.target.value })
-                }
+                onChange={(e) => setCurrAddress({ ...currAddress, name: e.target.value })}
                 value={currAddress?.name}
-                error={
-                  ((errMsg != "" || shop?.address) && !currAddress?.name) ||
-                  err?.data?.errors?.name
-                }
+                error={((errMsg != "" || shop?.address) && !currAddress?.name) || err?.data?.errors?.name}
                 helperText={err?.data?.errors?.name}
                 fullWidth
                 slotProps={{
@@ -402,9 +386,7 @@ const ShopFormDialog = ({ open, handleClose, shop, pending, setPending }) => {
                 label="Số điện thoại"
                 id="phone"
                 required
-                onValueChange={(values) =>
-                  setCurrAddress({ ...currAddress, phone: values.value })
-                }
+                onValueChange={(values) => setCurrAddress({ ...currAddress, phone: values.value })}
                 value={currAddress?.phone}
                 error={
                   ((errMsg != "" || shop?.address) && !currAddress?.phone) ||
@@ -412,9 +394,7 @@ const ShopFormDialog = ({ open, handleClose, shop, pending, setPending }) => {
                   err?.data?.errors?.phone
                 }
                 helperText={
-                  currAddress.phone && !validPhone
-                    ? "Sai định dạng số điện thoại!"
-                    : err?.data?.errors?.phone
+                  currAddress.phone && !validPhone ? "Sai định dạng số điện thoại!" : err?.data?.errors?.phone
                 }
                 fullWidth
                 slotProps={{
@@ -452,9 +432,7 @@ const ShopFormDialog = ({ open, handleClose, shop, pending, setPending }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 label="Loại địa chỉ"
-                onChange={(e) =>
-                  setCurrAddress({ ...currAddress, type: e.target.value })
-                }
+                onChange={(e) => setCurrAddress({ ...currAddress, type: e.target.value })}
                 select
                 value={currAddress?.type || ""}
                 error={err?.data?.errors?.type}
@@ -518,14 +496,9 @@ const ShopFormDialog = ({ open, handleClose, shop, pending, setPending }) => {
                 type="text"
                 autoComplete="on"
                 required
-                onChange={(e) =>
-                  setCurrAddress({ ...currAddress, address: e.target.value })
-                }
+                onChange={(e) => setCurrAddress({ ...currAddress, address: e.target.value })}
                 value={currAddress?.address}
-                error={
-                  ((errMsg != "" || shop?.address) && !currAddress?.address) ||
-                  err?.data?.errors?.address
-                }
+                error={((errMsg != "" || shop?.address) && !currAddress?.address) || err?.data?.errors?.address}
                 helperText={err?.data?.errors?.address}
                 fullWidth
                 multiline
@@ -541,24 +514,10 @@ const ShopFormDialog = ({ open, handleClose, shop, pending, setPending }) => {
         </form>
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="outlined"
-          color="error"
-          size="large"
-          sx={{ marginY: "10px" }}
-          onClick={handleClose}
-          startIcon={<CloseIcon />}
-        >
+        <Button variant="outlined" color="error" size="large" onClick={handleClose} startIcon={<CloseIcon />}>
           Huỷ
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          sx={{ marginY: "10px" }}
-          onClick={handleSubmit}
-          startIcon={<Check />}
-        >
+        <Button variant="contained" color="primary" size="large" onClick={handleSubmit} startIcon={<Check />}>
           Áp dụng
         </Button>
       </DialogActions>

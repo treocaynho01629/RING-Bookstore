@@ -1,10 +1,7 @@
 import styled from "@emotion/styled";
 import { Link, useLocation } from "react-router";
-import {
-  useCreateReviewMutation,
-  useUpdateReviewMutation,
-} from "../../features/reviews/reviewsApiSlice";
-import { useEffect, useState } from "react";
+import { useCreateReviewMutation, useUpdateReviewMutation } from "../../features/reviews/reviewsApiSlice";
+import { forwardRef, useEffect, useState } from "react";
 import { rateLabels } from "../../utils/filters";
 import Rating from "@mui/material/Rating";
 import Button from "@mui/material/Button";
@@ -18,6 +15,7 @@ import Close from "@mui/icons-material/Close";
 import Edit from "@mui/icons-material/Edit";
 import Star from "@mui/icons-material/Star";
 import StarBorder from "@mui/icons-material/StarBorder";
+import Slide from "@mui/material/Slide";
 
 //#region styled
 const RatingSelect = styled.div`
@@ -60,6 +58,10 @@ const SuggestText = styled.b`
   }
 `;
 //#endregion
+
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="left" ref={ref} {...props} />;
+});
 
 const ReviewForm = ({
   username,
@@ -185,6 +187,9 @@ const ReviewForm = ({
       onClose={handleClose}
       fullScreen={mobileMode}
       closeAfterTransition={false}
+      slots={{
+        transition: Transition,
+      }}
     >
       <DialogTitle sx={{ display: "flex", alignItems: "center" }}>
         <Edit />
@@ -207,17 +212,13 @@ const ReviewForm = ({
                     onChangeActive={(e, newHover) => {
                       setHover(newHover);
                     }}
-                    getLabelText={(value) =>
-                      `${value} Star${value !== 1 ? "s" : ""}`
-                    }
+                    getLabelText={(value) => `${value} Star${value !== 1 ? "s" : ""}`}
                     sx={{ fontSize: { xs: 28, md: 36 } }}
                     icon={<Star sx={{ fontSize: "inherit" }} />}
                     emptyIcon={<StarBorder sx={{ fontSize: "inherit" }} />}
                   />
                   {rating !== null && (
-                    <SuggestText className="label">
-                      {rateLabels[hover !== -1 ? hover : rating]}
-                    </SuggestText>
+                    <SuggestText className="label">{rateLabels[hover !== -1 ? hover : rating]}</SuggestText>
                   )}
                 </RateSelect>
               </RatingSelect>
@@ -248,31 +249,17 @@ const ReviewForm = ({
             </form>
           </div>
         ) : (
-          <SuggestText>
-            Bạn chưa đăng nhập, hãy Đăng nhập để đánh giá
-          </SuggestText>
+          <SuggestText>Bạn chưa đăng nhập, hãy Đăng nhập để đánh giá</SuggestText>
         )}
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="outlined"
-          color="error"
-          size="large"
-          sx={{ marginY: "10px" }}
-          onClick={handleClose}
-          startIcon={<Close />}
-        >
+        <Button variant="outlined" color="error" size="large" onClick={handleClose} startIcon={<Close />}>
           Huỷ
         </Button>
         {username ? (
           err?.data?.code === 208 ? (
             <Link to={"/profile"} title="Xem đánh giá">
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                sx={{ marginY: "10px" }}
-              >
+              <Button variant="contained" color="primary" size="large" sx={{ marginY: "10px" }}>
                 Xem đánh giá
               </Button>
             </Link>
@@ -281,7 +268,6 @@ const ReviewForm = ({
               variant="contained"
               color="primary"
               size="large"
-              sx={{ marginY: "10px" }}
               onClick={() => {
                 handleClose();
                 scrollTo(0, 0);
@@ -290,24 +276,13 @@ const ReviewForm = ({
               Mua ngay
             </Button>
           ) : (
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              sx={{ marginY: "10px" }}
-              onClick={handleSubmitReview}
-            >
+            <Button variant="contained" color="primary" size="large" onClick={handleSubmitReview}>
               {review?.content ? "Sửa đánh giá" : "Gửi đánh giá"}
             </Button>
           )
         ) : (
           <Link to={"/auth/login"} state={{ from: location }} title="Đăng nhập">
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              sx={{ marginY: "10px" }}
-            >
+            <Button variant="contained" color="primary" size="large" sx={{ marginY: "10px" }}>
               Đăng nhập ngay
             </Button>
           </Link>

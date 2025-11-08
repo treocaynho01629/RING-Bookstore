@@ -1,24 +1,23 @@
 import useTitle from "@ring/shared/useTitle";
 import { idFormatter } from "@ring/shared/utils/convert";
-import {
-  Navigate,
-  useNavigate,
-  useOutletContext,
-  useParams,
-} from "react-router";
+import { Navigate, useNavigate, useOutletContext, useParams } from "react-router";
 import { TabContentContainer } from "../components/custom/ProfileComponents";
 import { useGetOrderDetailQuery } from "../features/orders/ordersApiSlice";
+import { forwardRef, useState } from "react";
 import Dialog from "@mui/material/Dialog";
-import { useState } from "react";
 import OrderDetailComponent from "../components/order/OrderDetailComponent";
+import Slide from "@mui/material/Slide";
+
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="left" ref={ref} {...props} />;
+});
 
 const OrderDetail = () => {
   const { id } = useParams(); //Order id
   const { tabletMode, mobileMode } = useOutletContext();
   const navigate = useNavigate();
   const [pending, setPending] = useState(false);
-  const { data, isLoading, isSuccess, isError, error } =
-    useGetOrderDetailQuery(id);
+  const { data, isLoading, isSuccess, isError, error } = useGetOrderDetailQuery(id);
 
   // Set title
   useTitle(`Chi tiết đơn hàng ${idFormatter(id)}`);
@@ -84,6 +83,9 @@ const OrderDetail = () => {
           maxWidth={"md"}
           fullWidth
           closeAfterTransition={false}
+          slots={{
+            transition: Transition,
+          }}
           slotProps={{
             paper: {
               elevation: 0,

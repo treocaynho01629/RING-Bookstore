@@ -1,25 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, Checkbox, ListItemText, useMediaQuery } from "@mui/material";
-import {
-  TextField,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
-  Grid,
-} from "@mui/material";
-import {
-  Check,
-  Close as CloseIcon,
-  Person as PersonIcon,
-} from "@mui/icons-material";
+import { TextField, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Grid } from "@mui/material";
+import { Check, Close as CloseIcon, Person as PersonIcon } from "@mui/icons-material";
 import { Instruction, DatePicker, PasswordInput } from "@ring/ui";
 import { PatternFormat } from "react-number-format";
-import {
-  useCreateUserMutation,
-  useUpdateUserMutation,
-} from "../../features/users/usersApiSlice";
+import { useCreateUserMutation, useUpdateUserMutation } from "../../features/users/usersApiSlice";
 import { getGenderType, getUserRole } from "@ring/shared";
 import { useAppStore } from "@ring/redux";
 import { EMAIL_REGEX, PHONE_REGEX } from "@ring/shared/utils/regex";
@@ -41,9 +26,7 @@ const UserFormDialog = ({ open, handleClose, user, pending, setPending }) => {
   const [email, setEmail] = useState(user?.email || "");
   const [name, setName] = useState(user?.name || "");
   const [phone, setPhone] = useState(user?.phone || "");
-  const [dob, setDob] = useState(
-    user?.dob ? dayjs(user?.dob) : dayjs("1970-01-01")
-  );
+  const [dob, setDob] = useState(user?.dob ? dayjs(user?.dob) : dayjs("1970-01-01"));
   const [roles, setRoles] = useState([Object.keys(UserRole)[0]]);
   const [gender, setGender] = useState(Object.keys(GenderType)[0]);
   const [err, setErr] = useState([]);
@@ -229,14 +212,10 @@ const UserFormDialog = ({ open, handleClose, user, pending, setPending }) => {
       </DialogTitle>
       <DialogContent sx={{ pt: 0, px: { xs: 1, sm: 3 } }}>
         <form onSubmit={handleSubmit}>
-          <Instruction display={errMsg ? "block" : "none"}>
-            {errMsg}
-          </Instruction>
+          <Instruction display={errMsg ? "block" : "none"}>{errMsg}</Instruction>
           <Grid container size="grow" spacing={1}>
             <Grid size={12} display="flex" justifyContent="center" py={2}>
-              <ImageSelect
-                {...{ image: pic, handleRemoveImage, file, setFile }}
-              />
+              <ImageSelect {...{ image: pic, handleRemoveImage, file, setFile }} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
@@ -261,14 +240,8 @@ const UserFormDialog = ({ open, handleClose, user, pending, setPending }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 aria-invalid={validEmail ? "false" : "true"}
-                error={
-                  (email && !validEmail) || err?.data?.errors?.email != null
-                }
-                helperText={
-                  email && !validEmail
-                    ? "Sai định dạng email."
-                    : err?.data?.errors?.email
-                }
+                error={(email && !validEmail) || err?.data?.errors?.email != null}
+                helperText={email && !validEmail ? "Sai định dạng email." : err?.data?.errors?.email}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -303,11 +276,7 @@ const UserFormDialog = ({ open, handleClose, user, pending, setPending }) => {
                 onValueChange={(values) => setPhone(values.value)}
                 value={phone}
                 error={(phone && !validPhone) || err?.data?.errors?.phone}
-                helperText={
-                  phone && !validPhone
-                    ? "Sai định dạng số điện thoại!"
-                    : err?.data?.errors?.phone
-                }
+                helperText={phone && !validPhone ? "Sai định dạng số điện thoại!" : err?.data?.errors?.phone}
                 fullWidth
                 format="(+84) ### ### ###"
                 allowEmptyFormatting
@@ -359,9 +328,7 @@ const UserFormDialog = ({ open, handleClose, user, pending, setPending }) => {
                     value: roles,
                     onChange: (e) => handleChangeRoles(e),
                     renderValue: (selected) => {
-                      const filteredLabel = selected?.map(
-                        (value) => UserRole[value].label
-                      );
+                      const filteredLabel = selected?.map((value) => UserRole[value].label);
                       return filteredLabel.join(", ");
                     },
                     MenuProps: {
@@ -377,15 +344,8 @@ const UserFormDialog = ({ open, handleClose, user, pending, setPending }) => {
                 }}
               >
                 {Object.values(UserRole).map((role, index) => (
-                  <MenuItem
-                    key={`role-${role.value}-${index}`}
-                    value={role.value}
-                  >
-                    <Checkbox
-                      sx={{ py: 0.5, pr: 1, pl: 0 }}
-                      disableRipple
-                      checked={roles?.includes(role.value)}
-                    />
+                  <MenuItem key={`role-${role.value}-${index}`} value={role.value}>
+                    <Checkbox sx={{ py: 0.5, pr: 1, pl: 0 }} disableRipple checked={roles?.includes(role.value)} />
                     <ListItemText primary={role.label} />
                   </MenuItem>
                 ))}
@@ -395,24 +355,10 @@ const UserFormDialog = ({ open, handleClose, user, pending, setPending }) => {
         </form>
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="outlined"
-          color="error"
-          size="large"
-          sx={{ marginY: "10px" }}
-          onClick={handleClose}
-          startIcon={<CloseIcon />}
-        >
+        <Button variant="outlined" color="error" size="large" onClick={handleClose} startIcon={<CloseIcon />}>
           Huỷ
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          sx={{ marginY: "10px" }}
-          onClick={handleSubmit}
-          startIcon={<Check />}
-        >
+        <Button variant="contained" color="primary" size="large" onClick={handleSubmit} startIcon={<Check />}>
           Áp dụng
         </Button>
       </DialogActions>

@@ -6,25 +6,25 @@ export const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    //Add product to cart
+    // Add product to cart
     addToCart: (state, action) => {
       const item = state.products.find((item) => item.id === action.payload.id);
       if (item) {
-        //If already in cart >> increase quantity
+        // If already in cart >> increase quantity
         const newQuantity = item.quantity + action.payload.quantity;
         newQuantity > (item.amount ?? 199)
           ? (item.quantity = item.amount ?? 199)
           : (item.quantity += action.payload.quantity);
       } else {
-        //Put to cart if not already
+        // Put to cart if not already
         state.products.push(action.payload);
       }
     },
-    //Replace product in cart
+    // Replace product in cart
     replaceInCart: (state, action) => {
       const item = state.products.find((item) => item.id === action.payload.id);
       if (item) {
-        //If already in cart >> replace
+        // If already in cart >> replace
         item.slug = action.payload.slug;
         item.title = action.payload.title;
         item.amount = action.payload.amount;
@@ -33,74 +33,64 @@ export const cartSlice = createSlice({
         item.shopId = action.payload.shopId;
         item.shopName = action.payload.shopName;
       } else {
-        //Put to cart if not already
+        // Put to cart if not already
         state.products.push(action.payload);
       }
     },
-    //Decrease quantity
+    // Decrease quantity
     decreaseQuantity: (state, action) => {
       const item = state.products.find((item) => item.id === action.payload);
       if (item) {
-        if (item.quantity == 1) {
+        if (+item.quantity == 1) {
           //Remove if < 0
-          state.products = state.products.filter(
-            (item) => item.id !== action.payload
-          );
+          state.products = state.products.filter((item) => item.id !== action.payload);
         } else {
-          item.quantity--;
+          item.quantity = +item.quantity - 1;
         }
       }
     },
-    //Increase quantity
+    // Increase quantity
     increaseQuantity: (state, action) => {
       const item = state.products.find((item) => item.id === action.payload);
-      const newQuantity = item.quantity + 1;
+      const newQuantity = +item.quantity + 1;
       if (item) {
         newQuantity > (item.amount ?? 199)
           ? (item.quantity = item.amount ?? 199)
-          : item.quantity++;
+          : (item.quantity = +item.quantity + 1);
       }
     },
-    //Input quantity
+    // Input quantity
     changeQuantity: (state, action) => {
       const item = state.products.find((item) => item.id === action.payload.id);
       const quantity = action.payload.quantity;
       if (item) {
-        if (isNaN(quantity)) {
-          //Reset to 1 if not valid input
-          item.quantity = 1;
+        if (quantity == "" || isNaN(Number(quantity))) {
+          // Reset to empty string if not valid input
+          item.quantity = "";
         } else if (quantity < 1) {
-          //Remove if < 1
-          state.products = state.products.filter(
-            (item) => item.id !== action.payload.id
-          );
+          // Reset to 1 if < 1
+          item.quantity = 1;
         } else if (quantity > (item.amount ?? 199)) {
-          //Cap quantity to max stock amount
+          // Cap quantity to max stock amount
           item.quantity = item.amount ?? 199;
         } else {
           item.quantity = quantity;
         }
       }
     },
-    //Remove product from cart
+    // Remove product from cart
     removeItem: (state, action) => {
-      state.products = state.products.filter(
-        (item) => item.id !== action.payload
-      );
+      state.products = state.products.filter((item) => item.id !== action.payload);
     },
-    //Remove products from cart
+    // Remove products from cart
     removeItems: (state, action) => {
-      state.products = state.products.filter(
-        (item) => !action.payload.includes(item.id)
-      );
+      state.products = state.products.filter((item) => !action.payload.includes(item.id));
     },
-    //Remove shop product
+    // Remove shop product
     removeShopItem: (state, action) => {
-      state.products = state.products.filter(
-        (item) => item.shopId !== action.payload
-      );
+      state.products = state.products.filter((item) => item.shopId !== action.payload);
     },
-    //Clear cart
+    // Clear cart
     resetCart: (state) => {
       state.products = [];
     },

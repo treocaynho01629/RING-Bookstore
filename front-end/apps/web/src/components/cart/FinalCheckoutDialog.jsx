@@ -151,14 +151,9 @@ const FinalCheckoutDialog = ({
             />
           </CheckoutPrice>
           {!calculating && displayInfo.totalDiscount > 0 && (
-            <SavePrice>
-              Tiết kiệm {currencyFormat.format(displayInfo.totalDiscount)}
-            </SavePrice>
+            <SavePrice>Tiết kiệm {currencyFormat.format(displayInfo.totalDiscount)}</SavePrice>
           )}
-          <SubText>
-            (Giá này đã bao gồm thuế GTGT, phí đóng gói, phí vận chuyển và các
-            chi phí phát sinh khác)
-          </SubText>
+          <SubText>(Giá này đã bao gồm thuế GTGT, phí đóng gói, phí vận chuyển và các chi phí phát sinh khác)</SubText>
         </PriceContainer>
       </CheckoutRow>
     </>
@@ -201,10 +196,7 @@ const FinalCheckoutDialog = ({
                     />
                   </CheckoutPrice>
                   {!calculating && displayInfo.totalDiscount > 0 && (
-                    <SavePrice>
-                      Tiết kiệm{" "}
-                      {currencyFormat.format(displayInfo.totalDiscount)}
-                    </SavePrice>
+                    <SavePrice>Tiết kiệm {currencyFormat.format(displayInfo.totalDiscount)}</SavePrice>
                   )}
                 </PriceContainer>
               </AltCheckoutBox>
@@ -246,20 +238,18 @@ const FinalCheckoutDialog = ({
                     : `Chọn mã giảm giá ${coupon != null ? "khác" : ""}`}
                 </span>
                 <MiniCouponContainer>
-                  <Suspense fallback={null}>
-                    {coupon && <CouponDisplay coupon={coupon} />}
-                  </Suspense>
+                  <Suspense fallback={null}>{coupon && <CouponDisplay coupon={coupon} />}</Suspense>
                   <KeyboardArrowRight fontSize="small" />
                 </MiniCouponContainer>
               </CouponButton>
             </CheckoutStack>
             <CheckoutStack>
-              <CheckoutPriceContainer>
-                <PriceContainer>
+              <CheckoutPriceContainer onClick={() => toggleDrawer(true)}>
+                <PriceContainer className="row">
                   <CheckoutText>Tổng thanh toán:</CheckoutText>
                 </PriceContainer>
-                <PriceContainer>
-                  <CheckoutPrice onClick={() => toggleDrawer(true)}>
+                <PriceContainer className="row">
+                  <CheckoutPrice>
                     <NumberFlow
                       value={displayInfo.total}
                       format={{ style: "currency", currency: "VND" }}
@@ -271,10 +261,7 @@ const FinalCheckoutDialog = ({
                   </CheckoutPrice>
                   &emsp;
                   {!calculating && displayInfo.totalDiscount > 0 && (
-                    <SavePrice>
-                      Tiết kiệm{" "}
-                      {currencyFormat.format(displayInfo.totalDiscount)}
-                    </SavePrice>
+                    <SavePrice>Tiết kiệm {currencyFormat.format(displayInfo.totalDiscount)}</SavePrice>
                   )}
                 </PriceContainer>
               </CheckoutPriceContainer>
@@ -319,19 +306,11 @@ const FinalCheckoutDialog = ({
                 <CheckoutRow>
                   <AddressContainer>
                     <AddressContent>
-                      <UserInfo>
-                        {addressInfo?.companyName ?? addressInfo?.name}&nbsp;
-                      </UserInfo>
-                      {addressInfo?.phone && (
-                        <UserInfo>{`(+84) ${addressInfo.phone}`}</UserInfo>
-                      )}
+                      <UserInfo>{addressInfo?.companyName ?? addressInfo?.name}&nbsp;</UserInfo>
+                      {addressInfo?.phone && <UserInfo>{`(+84) ${addressInfo.phone}`}</UserInfo>}
                     </AddressContent>
                     <Address>
-                      {address && (
-                        <AddressTag className={address.color}>
-                          {address.label}
-                        </AddressTag>
-                      )}
+                      {address && <AddressTag className={address.color}>{address.label}</AddressTag>}
                       {fullAddress.length > 2 ? fullAddress : "Không xác định"}
                     </Address>
                   </AddressContainer>
@@ -344,9 +323,7 @@ const FinalCheckoutDialog = ({
                   KHUYẾN MÃI
                   {coupon && <span>Đã áp dụng</span>}
                 </CheckoutTitle>
-                <CheckoutRow>
-                  {coupon && <CouponDisplay coupon={coupon} />}
-                </CheckoutRow>
+                <CheckoutRow>{coupon && <CouponDisplay coupon={coupon} />}</CheckoutRow>
                 <CouponButton onClick={() => handleOpenDialog()}>
                   <span>
                     <LocalActivityOutlined color="error" />
@@ -391,7 +368,7 @@ const FinalCheckoutDialog = ({
         )}
       </CheckoutContainer>
       <Suspense fallback={null}>
-        {open != undefined && (
+        {tabletMode && (
           <SwipeableDrawer
             anchor="bottom"
             open={open}
@@ -400,7 +377,7 @@ const FinalCheckoutDialog = ({
             disableSwipeToOpen={true}
             disabled={calculating}
           >
-            <CheckoutBox>
+            <CheckoutBox className="drawer">
               {activeStep > 0 && addressInfo && (
                 <>
                   <CheckoutTitle>
@@ -419,22 +396,12 @@ const FinalCheckoutDialog = ({
                   <CheckoutRow>
                     <AddressContainer>
                       <AddressContent>
-                        <UserInfo>
-                          {addressInfo?.companyName ?? addressInfo?.name}&nbsp;
-                        </UserInfo>
-                        {addressInfo?.phone && (
-                          <UserInfo>{`(+84) ${addressInfo.phone}`}</UserInfo>
-                        )}
+                        <UserInfo>{addressInfo?.companyName ?? addressInfo?.name}&nbsp;</UserInfo>
+                        {addressInfo?.phone && <UserInfo>{`(+84) ${addressInfo.phone}`}</UserInfo>}
                       </AddressContent>
                       <Address>
-                        {address && (
-                          <AddressTag className={address.color}>
-                            {address.label}
-                          </AddressTag>
-                        )}
-                        {fullAddress.length > 2
-                          ? fullAddress
-                          : "Không xác định"}
+                        {address && <AddressTag className={address.color}>{address.label}</AddressTag>}
+                        {fullAddress.length > 2 ? fullAddress : "Không xác định"}
                       </Address>
                     </AddressContainer>
                   </CheckoutRow>

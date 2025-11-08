@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { currencyFormat } from "@ring/shared/utils/convert";
 import { getShippingType } from "@ring/shared/enums/shipping";
 import { iconList } from "@ring/shared/utils/icon";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, forwardRef } from "react";
 import Button from "@mui/material/Button";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
@@ -15,6 +15,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import AllInbox from "@mui/icons-material/AllInbox";
 import Check from "@mui/icons-material/Check";
 import Close from "@mui/icons-material/Close";
+import Slide from "@mui/material/Slide";
 
 //#region styled
 const FormContent = styled.div`
@@ -65,8 +66,7 @@ const PriceTag = styled.span`
   align-items: center;
   justify-content: flex-end;
   font-weight: 450;
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.dark || theme.vars.palette.text.primary};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.dark || theme.vars.palette.text.primary};
 `;
 
 const ItemTitle = styled.div`
@@ -86,15 +86,11 @@ const Estimate = styled.span`
 //#endregion
 
 const ShippingType = getShippingType();
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="left" ref={ref} {...props} />;
+});
 
-const ShippingSelectDialog = ({
-  open,
-  handleClose,
-  selectedShipping,
-  shippingFee,
-  shippingDiscount,
-  onSubmit,
-}) => {
+const ShippingSelectDialog = ({ open, handleClose, selectedShipping, shippingFee, shippingDiscount, onSubmit }) => {
   const fullScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const [value, setValue] = useState(selectedShipping);
 
@@ -119,6 +115,9 @@ const ShippingSelectDialog = ({
       onClose={handleClose}
       fullScreen={fullScreen}
       closeAfterTransition={false}
+      slots={{
+        transition: Transition,
+      }}
     >
       <DialogTitle sx={{ display: "flex", alignItems: "center" }}>
         <AllInbox />
@@ -145,17 +144,11 @@ const ShippingSelectDialog = ({
                       <PriceTag>
                         {item?.value == selectedShipping ? (
                           <>
-                            {shippingDiscount > 0 && (
-                              <Discount>{shippingDiscount}</Discount>
-                            )}
-                            {currencyFormat.format(
-                              shippingFee - (shippingDiscount || 0)
-                            )}
+                            {shippingDiscount > 0 && <Discount>{shippingDiscount}</Discount>}
+                            {currencyFormat.format(shippingFee - (shippingDiscount || 0))}
                           </>
                         ) : (
-                          currencyFormat.format(
-                            baseShippingFee * item?.multiplier
-                          )
+                          currencyFormat.format(baseShippingFee * item?.multiplier)
                         )}
                       </PriceTag>
                     </ItemContent>
@@ -168,24 +161,10 @@ const ShippingSelectDialog = ({
         </RadioGroup>
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="outlined"
-          color="error"
-          size="large"
-          sx={{ marginY: "10px" }}
-          onClick={handleClose}
-          startIcon={<Close />}
-        >
+        <Button variant="outlined" color="error" size="large" onClick={handleClose} startIcon={<Close />}>
           Huỷ
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          sx={{ marginY: "10px" }}
-          onClick={() => onSubmit(value)}
-          startIcon={<Check />}
-        >
+        <Button variant="contained" color="primary" size="large" onClick={() => onSubmit(value)} startIcon={<Check />}>
           Chọn
         </Button>
       </DialogActions>

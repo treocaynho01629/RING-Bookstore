@@ -13,7 +13,6 @@ import useCoupon from "../../hooks/useCoupon";
 
 //#region styled
 const Wrapper = styled.div`
-  padding: 5px;
   overflow: hidden;
   position: relative;
   width: 100%;
@@ -72,6 +71,10 @@ const CouponAction = styled.div`
   display: flex;
   justify-content: space-around;
   align-items: center;
+
+  &.selected {
+    border-color: ${({ theme }) => theme.vars.palette.error.main};
+  }
 
   &.saved {
     border-color: ${({ theme }) => theme.vars.palette.warning.main};
@@ -158,24 +161,16 @@ const ExpText = styled.span`
   color: ${({ theme, color }) => theme.vars.palette[color]?.main || theme.vars.palette.text.primary};
   white-space: nowrap;
 
-  &::before {
-    content: "Còn:";
-  }
-
   &.date {
     color: ${({ theme }) => theme.vars.palette.info.light};
     font-weight: normal;
-
-    &::before {
-      content: "HSD:";
-    }
   }
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
     font-size: 12px;
 
-    &::before {
-      content: "";
+    span {
+      display: none;
     }
   }
 `;
@@ -238,6 +233,27 @@ const CouponCode = styled.span`
   }
 `;
 
+const CouponTag = styled.span`
+  position: absolute;
+  z-index: 1;
+  right: 20px;
+  bottom: 20px;
+  width: 120px;
+  height: 56px;
+  font-weight: bold;
+  text-transform: uppercase;
+  display: none;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  background-color: ${({ theme }) => theme.vars.palette.background.default};
+  color: ${({ theme }) => theme.vars.palette.text.disabled};
+  border: 1px solid ${({ theme }) => theme.vars.palette.divider};
+  border-radius: 6px;
+  transform: rotate(-10deg);
+  pointer-events: none;
+`;
+
 const CouponContainer = styled.div`
   position: relative;
   border-radius: 5px;
@@ -263,26 +279,21 @@ const CouponContainer = styled.div`
     }
   }
 
-  &.disabled {
-    filter: grayscale(1);
+  &.used {
+    ${CouponIcon} {
+      filter: grayscale(0.75);
+    }
 
-    &::after {
-      content: "CHƯA THOẢ ĐIỀU KIỆN";
-      position: absolute;
-      right: 20px;
-      bottom: 20px;
-      width: 120px;
-      height: 56px;
-      font-weight: bold;
-      text-align: center;
+    ${CouponTag} {
       display: flex;
-      align-items: center;
-      background-color: ${({ theme }) => theme.vars.palette.background.default};
-      color: ${({ theme }) => theme.vars.palette.text.disabled};
-      border: 1px solid ${({ theme }) => theme.vars.palette.divider};
-      border-radius: 6px;
-      transform: rotate(-10deg);
-      pointer-events: none;
+    }
+  }
+
+  &.disabled {
+    filter: grayscale(0.5);
+
+    ${CouponTag} {
+      display: flex;
     }
 
     ${CouponAction} {
@@ -294,114 +305,103 @@ const CouponContainer = styled.div`
         pointer-events: all;
       }
     }
-
-    &.used {
-      &::after {
-        content: "ĐÃ QUA SỬ DỤNG";
-      }
-    }
   }
 
-  ${({ theme }) => theme.breakpoints.up("md_lg")} {
-    &.display {
-      padding: 5px 2px;
+  &.display {
+    padding: 5px 2px;
 
-      ${CouponEdge} {
-        width: 20px;
-        height: 20px;
-        top: calc(50% - 10px);
-      }
+    ${CouponEdge} {
+      width: 20px;
+      height: 20px;
+      top: calc(50% - 10px);
+    }
 
-      ${CouponContent} {
-        padding: 0 5px;
-      }
+    ${CouponContent} {
+      padding: 0 5px;
+    }
 
-      ${CouponAction} {
-        position: absolute;
-        padding: 0;
-        right: 2%;
-        bottom: 3%;
-        height: 30%;
-        margin-right: 4px;
-      }
+    ${CouponAction} {
+      position: absolute;
+      padding: 0;
+      right: 2%;
+      bottom: 3%;
+      height: 30%;
+      margin-right: 4px;
+    }
 
-      ${CouponMain} {
-        height: 75px;
-        padding-left: ${({ theme }) => theme.spacing(0.5)};
+    ${CouponMain} {
+      height: 75px;
+      padding-left: ${({ theme }) => theme.spacing(0.5)};
 
-        h2 {
-          font-size: 14px;
-          text-transform: none;
+      h2 {
+        font-size: 14px;
+        text-transform: none;
 
-          @supports (-webkit-line-clamp: 2) {
-            -webkit-line-clamp: 2;
-          }
-        }
-
-        p {
-          margin: 0;
-          font-size: 13px;
-          width: 80%;
-        }
-
-        span {
-          font-size: 12px;
+        @supports (-webkit-line-clamp: 2) {
+          -webkit-line-clamp: 2;
         }
       }
 
-      ${ExpText} {
+      p {
+        margin: 0;
+        font-size: 13px;
+        width: 80%;
+      }
+
+      span {
         font-size: 12px;
-        margin-right: ${({ theme }) => theme.spacing(0.5)};
-
-        &::before {
-          content: "";
-        }
       }
+    }
 
-      ${CouponIcon} {
-        height: 75px;
-        margin: 5px;
-      }
+    ${ExpText} {
+      font-size: 12px;
+      margin-right: ${({ theme }) => theme.spacing(0.5)};
 
-      ${CouponCode} {
+      span {
         display: none;
       }
+    }
 
-      &.disabled {
-        &::after {
-          right: 10px;
-          bottom: 10px;
-          width: 70px;
-          height: 40px;
-          font-size: 11px;
-        }
-      }
+    ${CouponIcon} {
+      height: 75px;
+      margin: 5px;
+    }
+
+    ${CouponCode} {
+      display: none;
+    }
+
+    ${CouponTag} {
+      right: auto;
+      left: 95px;
+      bottom: 5px;
+      width: 70px;
+      height: 40px;
+      font-size: 11px;
+      transform: rotate(5deg);
     }
   }
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
     padding: 5px 2px;
 
-    &.disabled {
-      &::after {
-        right: 10px;
-        bottom: 10px;
-        width: 70px;
-        height: 40px;
-        font-size: 11px;
-      }
+    ${CouponTag} {
+      right: 10px;
+      bottom: 10px;
+      width: 70px;
+      height: 40px;
+      font-size: 11px;
     }
   }
 `;
 //#endregion
 
-const CouponItem = ({ coupon, selectMode, onClickApply, className, scrollPosition }) => {
+const CouponItem = ({ coupon, selectMode, onClickApply, className, scrollPosition, ...props }) => {
   const { t } = useTranslation();
   const { addCoupon, removeCoupon } = useCoupon();
   const date = new Date(coupon?.expDate);
   const warnDate = new Date();
   warnDate.setDate(warnDate.getDate() + 2);
-  console.log(coupon);
 
   /**
    * Handle click apply coupon
@@ -435,13 +435,17 @@ const CouponItem = ({ coupon, selectMode, onClickApply, className, scrollPositio
   ) : null;
 
   return (
-    <Wrapper className={className}>
+    <Wrapper className={className} {...props}>
       {coupon ? (
         <CouponContainer
-          className={`${selectMode && coupon?.isSelected ? "active " : " "}${
-            selectMode && coupon?.isUsed ? "disabled used" : coupon?.isDisabled ? "disabled" : className
-          }`}
+          className={`${selectMode && coupon?.isSelected ? "active " : " "}
+            ${selectMode && (coupon?.isDisabled || coupon?.isUsed) ? "disabled " : " "}
+            ${coupon?.isUsed ? "used " : " "}
+            ${className}`}
         >
+          <CouponTag>
+            {coupon?.isUsed ? t("coupon.used", { ns: "client" }) : t("coupon.not.usable", { ns: "client" })}
+          </CouponTag>
           <CouponEdge elevation={className == "display" ? 0 : 24} className="left" />
           <CouponEdge elevation={className == "display" ? 0 : 24} className="right" />
           <CouponContent>
@@ -466,21 +470,24 @@ const CouponItem = ({ coupon, selectMode, onClickApply, className, scrollPositio
               </div>
               <Expire>
                 <ExpText color={date <= warnDate ? "error" : ""} className="date">
+                  <span>{t("coupon.expired.date", { ns: "client" })}</span>
                   &nbsp;{dateFormatter(date)}
                 </ExpText>
-                {coupon?.usage < 100 && <ExpText color="error">&nbsp;{coupon?.usage} lượt</ExpText>}
+                {coupon?.usage < 100 && (
+                  <ExpText color="error">{t("coupon.expired.usage", { ns: "client", count: coupon?.usage })}</ExpText>
+                )}
               </Expire>
             </CouponMain>
           </CouponContent>
-          <CouponAction className={coupon?.isSaved ? "saved" : ""}>
+          <CouponAction className={coupon?.isSelected ? "selected" : coupon?.isSaved ? "saved" : ""}>
             <CouponCode>{coupon?.code}</CouponCode>
             {selectMode ? (
               <Button disableRipple color={coupon?.isSelected ? "error" : "primary"} onClick={handleClick}>
-                {coupon?.isSelected ? "Bỏ chọn" : "Áp dụng"}
+                {coupon?.isSelected ? t("unselect") : t("apply")}
               </Button>
             ) : (
               <Button disableRipple color={coupon?.isSaved ? "warning" : "primary"} onClick={handleSave}>
-                {coupon?.isSaved ? "Gỡ" : "Lưu"}
+                {coupon?.isSaved ? t("remove.saved") : t("save")}
               </Button>
             )}
           </CouponAction>

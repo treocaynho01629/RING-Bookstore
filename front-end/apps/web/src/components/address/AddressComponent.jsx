@@ -6,22 +6,8 @@ import {
   useGetMyAddressesQuery,
   useUpdateAddressMutation,
 } from "../../features/addresses/addressesApiSlice";
-import {
-  CircularProgress,
-  Dialog,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  DialogContent,
-} from "@mui/material";
-import {
-  AddHome,
-  Delete,
-  Home,
-  KeyboardArrowLeft,
-  LocationOn,
-} from "@mui/icons-material";
+import { CircularProgress, Dialog, ListItemIcon, ListItemText, Menu, MenuItem, DialogContent } from "@mui/material";
+import { AddHome, Delete, Home, KeyboardArrowLeft, LocationOn } from "@mui/icons-material";
 import { StyledDialogTitle } from "../custom/ProfileComponents";
 import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
 import { Link } from "react-router";
@@ -79,32 +65,24 @@ const StyledAddButton = styled.span`
 //#endregion
 
 const AddressComponent = ({ pending, setPending, mobileMode }) => {
-  const {
-    addresses: storeAddresses,
-    addNewAddress,
-    removeAddress,
-  } = useAddress();
+  const { addresses: storeAddresses, addNewAddress, removeAddress } = useAddress();
   const [open, setOpen] = useState(undefined);
   const [err, setErr] = useState("");
   const [errMsg, setErrMsg] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [contextAddress, setContextAddress] = useState(null);
   const openContext = Boolean(anchorEl);
-  const [ConfirmationDialog, confirm] = useConfirm(
-    "Xoá địa chỉ?",
-    "Xoá địa chỉ khỏi sổ địa chỉ?"
-  );
+  const [ConfirmationDialog, confirm] = useConfirm("Xoá địa chỉ?", "Xoá địa chỉ khỏi sổ địa chỉ?");
 
-  //Fetch addresses
-  const { data, isLoading, isSuccess, isError, error } =
-    useGetMyAddressesQuery();
+  // Fetch addresses
+  const { data, isLoading, isSuccess, isError, error } = useGetMyAddressesQuery();
 
-  //Update address
+  // Update address
   const [createAddress, { isLoading: creating }] = useCreateAddressMutation();
   const [updateAddress, { isLoading: updating }] = useUpdateAddressMutation();
   const [deleteAddress, { isLoading: deleting }] = useDeleteAddressMutation();
 
-  //Dialog
+  // Dialog
   const handleOpen = (addressInfo) => {
     setContextAddress(addressInfo);
     setOpen(true);
@@ -117,7 +95,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
     setOpen(false);
   };
 
-  //Context
+  // Context
   const handleClick = (event, address) => {
     setAnchorEl(event.currentTarget);
     setContextAddress(address);
@@ -172,18 +150,14 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
     }
   };
 
-  const handleCreateAddress = async (
-    address,
-    isDefault = false,
-    isTemp = false
-  ) => {
+  const handleCreateAddress = async (address, isDefault = false, isTemp = false) => {
     if (pending || creating || updating || deleting) return;
     setPending(true);
     const { enqueueSnackbar } = await import("notistack");
 
     try {
       if (isTemp) {
-        const { isDefault, ...newAddress } = address; //Remove isDefault
+        const { isDefault, ...newAddress } = address; // Remove isDefault
         addNewAddress(newAddress);
         handleClose();
         setErrMsg("");
@@ -191,7 +165,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
         setPending(false);
         enqueueSnackbar("Thêm địa chỉ thành công!", { variant: "success" });
       } else {
-        //Saved address
+        // Saved address
         createAddress({
           name: address.name == "" ? null : address.name,
           companyName: address.companyName == "" ? null : address.companyName,
@@ -218,9 +192,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
             } else if (err?.status === 400) {
               setErrMsg("Sai định dạng thông tin!");
             } else if (err?.status === 409) {
-              setErrMsg(
-                "Vượt quá số lượng cho phép (5), vui lòng xoá bớt hoặc tạm lưu vào bộ nhớ!"
-              );
+              setErrMsg("Vượt quá số lượng cho phép (5), vui lòng xoá bớt hoặc tạm lưu vào bộ nhớ!");
             } else {
               setErrMsg("Thêm địa chỉ thất bại");
             }
@@ -229,7 +201,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
           });
       }
     } catch (err) {
-      //Redux error
+      // Redux error
       console.error(err);
       setErr(err);
       handleClose();
@@ -248,8 +220,8 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
       let isStored = address?.isDefault == null;
 
       if (isStored) {
-        //If stored address
-        const { isDefault, ...newAddress } = address; //Remove isDefault
+        // If stored address
+        const { isDefault, ...newAddress } = address; // Remove isDefault
         addNewAddress({ ...newAddress, id: address?.id });
         handleClose();
         handleCloseContext();
@@ -258,7 +230,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
         setPending(false);
         enqueueSnackbar("Cập nhật địa chỉ thành công!", { variant: "success" });
       } else {
-        //Saved address
+        // Saved address
         updateAddress({
           id: address.id,
           updatedAddress: {
@@ -297,7 +269,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
           });
       }
     } catch (err) {
-      //Redux error
+      // Redux error
       console.error(err);
       setErr(err);
       handleClose();
@@ -316,17 +288,17 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
       let isStored = address?.isDefault == null;
 
       if (!isStored && isTemp) {
-        //Convert saved to stored
-        const { isDefault, ...newAddress } = address; //Remove isDefault
-        handleRemoveAddress(address); //Remove saved address
-        addNewAddress(newAddress); //Add to store
+        // Convert saved to stored
+        const { isDefault, ...newAddress } = address; // Remove isDefault
+        handleRemoveAddress(address); // Remove saved address
+        addNewAddress(newAddress); // Add to store
         handleClose();
         setErrMsg("");
         setErr([]);
         setPending(false);
         enqueueSnackbar("Cập nhật địa chỉ thành công!", { variant: "success" });
       } else if (isStored && !isTemp) {
-        //Convert stored to saved
+        // Convert stored to saved
         createAddress({
           name: address.name,
           companyName: address.companyName,
@@ -337,9 +309,9 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
         })
           .unwrap()
           .then((data) => {
-            handleRemoveAddress(address); //Remove stored address
+            handleRemoveAddress(address); // Remove stored address
 
-            //Reset state
+            // Reset state
             handleClose();
             handleCloseContext();
             setErrMsg("");
@@ -357,9 +329,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
             } else if (err?.status === 400) {
               setErrMsg("Sai định dạng thông tin!");
             } else if (err?.status === 409) {
-              setErrMsg(
-                "Vượt quá số lượng cho phép (5), vui lòng xoá bớt hoặc tạm lưu vào bộ nhớ!"
-              );
+              setErrMsg("Vượt quá số lượng cho phép (5), vui lòng xoá bớt hoặc tạm lưu vào bộ nhớ!");
             } else {
               setErrMsg("Cập nhật địa chỉ thất bại");
             }
@@ -368,7 +338,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
           });
       }
     } catch (err) {
-      //Redux error
+      // Redux error
       console.error(err);
       setErr(err);
       handleClose();
@@ -387,7 +357,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
       let isStored = address?.isDefault == null;
 
       if (isStored) {
-        //If stored address
+        // If stored address
         createAddress({
           name: address.name,
           companyName: address.companyName,
@@ -399,9 +369,9 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
         })
           .unwrap()
           .then((data) => {
-            handleRemoveAddress(address); //Remove stored address
+            handleRemoveAddress(address); // Remove stored address
 
-            //Reset state
+            // Reset state
             handleClose();
             handleCloseContext();
             setErrMsg("");
@@ -419,9 +389,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
             } else if (err?.status === 400) {
               setErrMsg("Sai định dạng thông tin!");
             } else if (err?.status === 409) {
-              setErrMsg(
-                "Vượt quá số lượng cho phép (5), vui lòng xoá bớt hoặc tạm lưu vào bộ nhớ!"
-              );
+              setErrMsg("Vượt quá số lượng cho phép (5), vui lòng xoá bớt hoặc tạm lưu vào bộ nhớ!");
             } else {
               setErrMsg("Thêm địa chỉ thất bại");
             }
@@ -429,7 +397,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
             enqueueSnackbar("Thêm địa chỉ thất bại!", { variant: "error" });
           });
       } else {
-        handleUpdateAddress(address, true); //Update default address
+        handleUpdateAddress(address, true); // Update default address
       }
     } catch (err) {
       console.error(err);
@@ -442,19 +410,13 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
 
   const handleClickRemove = async (address) => {
     const confirmation = await confirm();
-    if (confirmation) {
-      handleRemoveAddress(address);
-    } else {
-      console.log("Cancel");
-    }
+    if (confirmation) handleRemoveAddress(address);
   };
 
   let addressesContent;
   let storedContent = storeAddresses?.map((address, index) => (
     <Fragment key={`stored-${address?.id}-${index}`}>
-      <AddressItem
-        {...{ addressInfo: address, handleOpen, handleClick, isTemp: true }}
-      />
+      <AddressItem {...{ addressInfo: address, handleOpen, handleClick, isTemp: true }} />
     </Fragment>
   ));
 
@@ -475,9 +437,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
 
               return (
                 <Fragment key={`saved-${id}-${index}`}>
-                  <AddressItem
-                    {...{ addressInfo: savedAddress, handleOpen, handleClick }}
-                  />
+                  <AddressItem {...{ addressInfo: savedAddress, handleOpen, handleClick }} />
                 </Fragment>
               );
             })
@@ -512,17 +472,14 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
         <ContentContainer>
           {addressesContent}
           {storedContent}
-          {!isLoading &&
-            !isError &&
-            !data?.ids?.length &&
-            !storeAddresses?.length && (
-              <MessageContainer>
-                <Message>
-                  <StyledEmptyIcon />
-                  Chưa có địa chỉ nào
-                </Message>
-              </MessageContainer>
-            )}
+          {!isLoading && !isError && !data?.ids?.length && !storeAddresses?.length && (
+            <MessageContainer>
+              <Message>
+                <StyledEmptyIcon />
+                Chưa có địa chỉ nào
+              </Message>
+            </MessageContainer>
+          )}
         </ContentContainer>
       </DialogContent>
       <Dialog
@@ -566,19 +523,13 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
           list: { "aria-labelledby": "basic-button" },
         }}
       >
-        <MenuItem
-          disabled={isSelectedDefault}
-          onClick={() => handleClickRemove(contextAddress)}
-        >
+        <MenuItem disabled={isSelectedDefault} onClick={() => handleClickRemove(contextAddress)}>
           <ListItemIcon>
             <Delete sx={{ color: "error.main" }} fontSize="small" />
           </ListItemIcon>
           <ListItemText sx={{ color: "error.main" }}>Xoá địa chỉ</ListItemText>
         </MenuItem>
-        <MenuItem
-          disabled={isSelectedDefault}
-          onClick={() => handleSetDefault(contextAddress)}
-        >
+        <MenuItem disabled={isSelectedDefault} onClick={() => handleSetDefault(contextAddress)}>
           <ListItemIcon>
             <Home fontSize="small" />
           </ListItemIcon>
