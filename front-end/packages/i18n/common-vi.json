@@ -28,9 +28,7 @@
   "signup.title": "Đăng ký tài khoản mới",
   "signup.suggestions": "Chưa có tài khoản?",
   "help": "Trợ giúp",
-  "logout": "Đăng xuất",
   "login.suggestions": "Đã có tài khoản?",
-  "logout.end": "Kết thúc phiên đăng nhập?",
   "notification": "Thông báo",
   "search": "Tìm kiếm",
   "store": "Cửa hàng",
@@ -53,6 +51,13 @@
   "remove.saved": "Gỡ",
   "save": "Lưu",
   "scroll": "Về đầu trang",
+  "logout": "Đăng xuất",
+  "logout.end": "Kết thúc phiên đăng nhập?",
+  "signout": {
+    "confirmation": "Đăng xuất?",
+    "message": "Đăng xuất khỏi tài khoản của bạn?",
+    "success": "Đã đăng xuất"
+  },
   "coupon": {
     "shipping": {
       "label": "Giảm phí ship",

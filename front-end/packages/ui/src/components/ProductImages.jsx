@@ -71,9 +71,11 @@ const CustomArrowButton = styled.div`
   opacity: 0.8;
   z-index: 1;
 
-  &:hover {
-    opacity: 1;
-    transform: scale(1.1);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
   }
 
   &.left {
@@ -134,9 +136,11 @@ const SmallImageSlide = styled.div`
     opacity: 1;
   }
 
-  &:hover {
-    border: 1px solid ${({ theme }) => theme.vars.palette.primary.light};
-    opacity: 1;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border: 1px solid ${({ theme }) => theme.vars.palette.primary.light};
+      opacity: 1;
+    }
   }
 `;
 

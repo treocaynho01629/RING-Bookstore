@@ -20,9 +20,11 @@ const Container = styled.div`
   border: 0.5px solid ${({ theme }) => theme.vars.palette.background.paper};
   margin: ${({ theme }) => theme.spacing(0.1)} 0;
 
-  &:hover {
-    border-color: ${({ theme }) => theme.vars.palette.action.focus};
-    box-shadow: ${({ theme }) => theme.shadows[1]};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: ${({ theme }) => theme.vars.palette.action.focus};
+      box-shadow: ${({ theme }) => theme.shadows[1]};
+    }
   }
 
   ${({ theme }) => theme.breakpoints.down("md")} {
@@ -139,20 +141,14 @@ const ProductPreview = ({ book, scrollPosition }) => {
             <Title>{book.title}</Title>
             <Price>
               {currencyFormat.format(book.price)}
-              {book.discount > 0 && (
-                <Percentage>-{book.discount * 100}%</Percentage>
-              )}
+              {book.discount > 0 && <Percentage>-{book.discount * 100}%</Percentage>}
             </Price>
           </Info>
         </Link>
       ) : (
         <>
           <SkeletonContainer>
-            <Skeleton
-              variant="rectangular"
-              height={"100%"}
-              sx={{ aspectRatio: "1/1" }}
-            />
+            <Skeleton variant="rectangular" height={"100%"} sx={{ aspectRatio: "1/1" }} />
           </SkeletonContainer>
           <Info>
             <Skeleton variant="text" sx={{ fontSize: "16px" }} width="100%" />

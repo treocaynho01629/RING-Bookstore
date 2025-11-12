@@ -44,10 +44,12 @@ const PubContainer = styled.div`
   overflow: hidden;
   background-color: ${({ theme }) => theme.vars.palette.background.paper};
 
-  &:hover {
-    .button-container {
-      opacity: 1;
-      visibility: visible;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      .button-container {
+        opacity: 1;
+        visibility: visible;
+      }
     }
   }
 `;
@@ -97,9 +99,11 @@ const ButtonContainer = styled.div`
   visibility: hidden;
   z-index: 2;
 
-  &:hover {
-    opacity: 1;
-    visibility: visible;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 
   ${({ theme }) => theme.breakpoints.down("md")} {
@@ -109,12 +113,7 @@ const ButtonContainer = styled.div`
 //#endregion
 
 const Publishers = () => {
-  const {
-    data: publishers,
-    isLoading,
-    isSuccess,
-    isError,
-  } = useGetPublishersQuery();
+  const { data: publishers, isLoading, isSuccess, isError } = useGetPublishersQuery();
   const slideRef = useRef();
 
   //Scroll
@@ -143,9 +142,7 @@ const Publishers = () => {
                 <StyledLazyImage
                   src={pub?.image}
                   alt={`Publisher: ${pub?.name}`}
-                  placeholder={
-                    <StyledSkeleton variant="rectangular" animation={false} />
-                  }
+                  placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
                 />
               </Link>
             </ItemContainer>
@@ -161,16 +158,10 @@ const Publishers = () => {
       </Wrapper>
       <ButtonContainer className="button-container">
         <div>
-          <IconButton
-            aria-label="Scroll publishers to left"
-            onClick={() => scrollSlide(-500)}
-          >
+          <IconButton aria-label="Scroll publishers to left" onClick={() => scrollSlide(-500)}>
             <KeyboardArrowLeft fontSize="small" />
           </IconButton>
-          <IconButton
-            aria-label="Scroll publishers to right"
-            onClick={() => scrollSlide(500)}
-          >
+          <IconButton aria-label="Scroll publishers to right" onClick={() => scrollSlide(500)}>
             <KeyboardArrowRight fontSize="small" />
           </IconButton>
         </div>

@@ -132,10 +132,12 @@ const EditButton = styled.span`
     margin-right: 0;
   }
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.primary.main};
-    background-color: ${({ theme }) => theme.vars.palette.grey[200]};
-    transition: 0.25s ease;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme }) => theme.vars.palette.primary.main};
+      background-color: ${({ theme }) => theme.vars.palette.grey[200]};
+      transition: 0.25s ease;
+    }
   }
 
   ${({ theme }) => theme.breakpoints.down("md")} {
@@ -164,9 +166,11 @@ const StyledListItemButton = styled(ListItemButton)`
     color: ${({ theme }) => theme.vars.palette.text.secondary};
   }
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.primary.main};
-    background-color: ${({ theme }) => theme.vars.palette.background.default};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme }) => theme.vars.palette.primary.main};
+      background-color: ${({ theme }) => theme.vars.palette.background.default};
+    }
   }
 
   &.Mui-selected {
@@ -174,8 +178,10 @@ const StyledListItemButton = styled(ListItemButton)`
     background-color: transparent;
     text-decoration: underline;
 
-    &:hover {
-      background-color: ${({ theme }) => theme.vars.palette.action.hover};
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        background-color: ${({ theme }) => theme.vars.palette.action.hover};
+      }
     }
   }
 

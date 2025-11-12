@@ -20,8 +20,7 @@ const StyledLazyImage = styled(LazyLoadImage)`
   object-fit: contain;
   transition: filter 0.25s ease;
   z-index: -1;
-  background-color: ${({ theme }) =>
-    theme.vars.palette.action.disabledBackground};
+  background-color: ${({ theme }) => theme.vars.palette.action.disabledBackground};
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
     margin-bottom: 0;
@@ -59,11 +58,13 @@ const Wrapper = styled.div`
   overflow: hidden;
   transition: all 0.25s ease;
 
-  &:hover {
-    border-color: ${({ theme }) => theme.vars.palette.action.focus};
-    box-shadow: ${({ theme }) => theme.shadows[1]};
-    ${ImageContainer} {
-      filter: saturate(120%);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: ${({ theme }) => theme.vars.palette.action.focus};
+      box-shadow: ${({ theme }) => theme.shadows[1]};
+      ${ImageContainer} {
+        filter: saturate(120%);
+      }
     }
   }
 
@@ -192,9 +193,12 @@ const AddToCart = styled.p`
     color: ${({ theme }) => theme.vars.palette.text.disabled};
   }
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.primary.main};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme }) => theme.vars.palette.primary.main};
+    }
   }
+
   &:after {
     content: " THÊM VÀO GIỎ";
   }
@@ -236,10 +240,8 @@ const ProductTag = styled.span`
   top: ${({ theme }) => theme.spacing(1)};
   left: ${({ theme }) => theme.spacing(1)};
   padding: ${({ theme }) => `${theme.spacing(0.25)} ${theme.spacing(1)}`};
-  background-color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.light || theme.vars.palette.info.light};
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.dark || theme.vars.palette.info.dark};
+  background-color: ${({ theme, color }) => theme.vars.palette[color]?.light || theme.vars.palette.info.light};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.dark || theme.vars.palette.info.dark};
   font-size: 12px;
   font-weight: 500px;
   z-index: 1;
@@ -258,10 +260,7 @@ const Product = ({ book, scrollPosition }) => {
     <Wrapper>
       <Container>
         {book ? (
-          <Link
-            to={`/product/${book.slug}`}
-            style={{ width: "100%", height: "100%" }}
-          >
+          <Link to={`/product/${book.slug}`} style={{ width: "100%", height: "100%" }}>
             <ItemContainer>
               {book?.amount < 30 && (
                 <ProductTag color={book?.amount <= 0 ? "error" : "warning"}>
@@ -273,9 +272,7 @@ const Product = ({ book, scrollPosition }) => {
                   src={book?.image?.srcSet[ImageSize?.SMALL?.value]}
                   alt={`${book?.title} Thumbnail`}
                   scrollPosition={scrollPosition}
-                  placeholder={
-                    <StyledSkeleton variant="rectangular" animation={false} />
-                  }
+                  placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
                 />
               </ImageContainer>
               <Info>
@@ -283,17 +280,11 @@ const Product = ({ book, scrollPosition }) => {
                   <ProductInfo>
                     <Title>{book.title}</Title>
                     <PriceContainer>
-                      <Price>
-                        {currencyFormat.format(
-                          book.price * (1 - book.discount)
-                        )}
-                      </Price>
+                      <Price>{currencyFormat.format(book.price * (1 - book.discount))}</Price>
                       <DiscountContainer>
                         {book.discount > 0 ? (
                           <>
-                            <Discount>
-                              {currencyFormat.format(book.price)}
-                            </Discount>
+                            <Discount>{currencyFormat.format(book.price)}</Discount>
                             <Percentage>-{book.discount * 100}%</Percentage>
                           </>
                         ) : (
@@ -306,17 +297,13 @@ const Product = ({ book, scrollPosition }) => {
                     <StyledRating
                       name="product-rating"
                       value={book?.rating ?? 0}
-                      getLabelText={(value) =>
-                        `${value} Star${value !== 1 ? "s" : ""}`
-                      }
+                      getLabelText={(value) => `${value} Star${value !== 1 ? "s" : ""}`}
                       precision={0.5}
                       icon={<StarIcon style={{ fontSize: 14 }} />}
                       emptyIcon={<StarBorder style={{ fontSize: 14 }} />}
                       readOnly
                     />
-                    <TextMore className="secondary">
-                      Đã bán {numFormat.format(book?.totalOrders)}
-                    </TextMore>
+                    <TextMore className="secondary">Đã bán {numFormat.format(book?.totalOrders)}</TextMore>
                   </MoreInfo>
                 </MainInfo>
               </Info>
@@ -336,10 +323,7 @@ const Product = ({ book, scrollPosition }) => {
                   </Title>
                   <PriceContainer>
                     <Price>
-                      <Skeleton
-                        variant="text"
-                        sx={{ width: { xs: "90%", sm: "40%" } }}
-                      />
+                      <Skeleton variant="text" sx={{ width: { xs: "90%", sm: "40%" } }} />
                     </Price>
                     <DiscountContainer>
                       <Skeleton variant="text" width="60%" />
@@ -356,10 +340,7 @@ const Product = ({ book, scrollPosition }) => {
       </Container>
       <Info className="extra">
         <Divider />
-        <AddToCart
-          onClick={() => handleAddToCart(book)}
-          className={book ? "" : "disabled"}
-        >
+        <AddToCart onClick={() => handleAddToCart(book)} className={book ? "" : "disabled"}>
           <ShoppingCartIcon style={{ fontSize: 14 }} />
           &nbsp;
         </AddToCart>

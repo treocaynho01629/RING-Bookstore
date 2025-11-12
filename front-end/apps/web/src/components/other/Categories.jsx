@@ -54,12 +54,14 @@ const ItemContainer = styled.div`
   cursor: pointer;
   transition: all 0.25s ease;
 
-  &:hover {
-    transform: translateY(-1px);
-    border-color: ${({ theme }) => theme.vars.palette.action.focus};
-    box-shadow: ${({ theme }) => theme.shadows[1]};
-    ${StyledLazyImage} {
-      filter: saturate(120%);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-1px);
+      border-color: ${({ theme }) => theme.vars.palette.action.focus};
+      box-shadow: ${({ theme }) => theme.shadows[1]};
+      ${StyledLazyImage} {
+        filter: saturate(120%);
+      }
     }
   }
 
@@ -84,10 +86,12 @@ const CateContainer = styled.div`
   overflow: hidden;
   background-color: ${({ theme }) => theme.vars.palette.background.paper};
 
-  &:hover {
-    .button-container {
-      opacity: 1;
-      visibility: visible;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      .button-container {
+        opacity: 1;
+        visibility: visible;
+      }
     }
   }
 `;
@@ -150,9 +154,11 @@ const ButtonContainer = styled.div`
   visibility: hidden;
   z-index: 2;
 
-  &:hover {
-    opacity: 1;
-    visibility: visible;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 
   ${({ theme }) => theme.breakpoints.down("md")} {
@@ -162,12 +168,7 @@ const ButtonContainer = styled.div`
 //#endregion
 
 const Categories = () => {
-  const {
-    data: categories,
-    isLoading,
-    isSuccess,
-    isError,
-  } = useGetPreviewCategoriesQuery();
+  const { data: categories, isLoading, isSuccess, isError } = useGetPreviewCategoriesQuery();
   const slideRef = useRef();
 
   //Scroll
@@ -198,17 +199,12 @@ const Categories = () => {
 
           return (
             <ItemWrapper key={`cate-${cateId}-${index}`}>
-              <Link
-                to={`/store/${cate?.slug}?cate=${cateId}`}
-                title={cate?.name}
-              >
+              <Link to={`/store/${cate?.slug}?cate=${cateId}`} title={cate?.name}>
                 <ItemContainer>
                   <StyledLazyImage
                     src={cate?.image}
                     alt={`Category item: ${cate?.name}`}
-                    placeholder={
-                      <StyledSkeleton variant="rectangular" animation={false} />
-                    }
+                    placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
                   />
                   <ItemName>{cate?.name}</ItemName>
                 </ItemContainer>
@@ -226,16 +222,10 @@ const Categories = () => {
       </Wrapper>
       <ButtonContainer className="button-container">
         <div>
-          <IconButton
-            aria-label="Scroll categories to left"
-            onClick={() => scrollSlide(-500)}
-          >
+          <IconButton aria-label="Scroll categories to left" onClick={() => scrollSlide(-500)}>
             <KeyboardArrowLeft fontSize="small" />
           </IconButton>
-          <IconButton
-            aria-label="Scroll categories to right"
-            onClick={() => scrollSlide(500)}
-          >
+          <IconButton aria-label="Scroll categories to right" onClick={() => scrollSlide(500)}>
             <KeyboardArrowRight fontSize="small" />
           </IconButton>
         </div>

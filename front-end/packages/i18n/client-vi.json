@@ -50,14 +50,47 @@
     "add": "Nhập mã giảm giá",
     "not.found": "Hiện không có khuyến mãi"
   },
+  "footer": {
+    "address": "Địa chỉ: Toà nhà 162, Khu phố 2, Phường 9, TP. Hồ Chí Minh, Việt Nam",
+    "support": {
+      "title": "Hỗ trợ",
+      "refund": "Chính sách đổi - trả - hoàn tiền",
+      "shipping": "Phương thức vận chuyển",
+      "payment": "Phương thức thanh toán",
+      "faq": "Câu hỏi thường gặp",
+      "order": "Hướng dẫn đặt hàng"
+    },
+    "information": {
+      "title": "Thông tin",
+      "about": "Giới thiệu về RING!",
+      "recruitment": "Tuyển dụng nhân sự",
+      "complaint": "Chính sách khiếu nại",
+      "terms": "Điều khoản sử dụng"
+    },
+    "services": {
+      "title": "Dịch vụ", 
+      "privacy": "Chính sách bảo mật",
+      "warehouse": "Hệ thống hàng"
+    },
+    "payments": {
+      "title": "Thanh toán",
+      "payment": "Phương thức thanh toán",
+      "cash": "Thanh toán khi nhận hàng",
+      "payOS": "Thanh toán qua cổng PayOS"
+    },
+    "copyright": "{{year}} - Bản quyền thuộc về RING! - Bookstore."
+  },
+  "search": {
+    "toggle": "Hộ thoại tìm kiếm",
+    "store": "trong cửa hàng",
+    "for": "Tìm kiếm {{value}}:",
+    "history": "Lịch sử tìm kiếm",
+    "remove": "Xóa '{{value}}' khỏi lịch sử tìm kiếm",
+    "clear": "Xóa lịch sử tìm kiếm",
+    "close": "Đóng hộp thoại tìm kiếm",
+    "suggest": "Gợi ý"
+  },
   "shop.explore": "Duyệt cửa hàng",
-  "search.store": "trong cửa hàng",
-  "search.for": "Tìm kiếm {{value}}:",
-  "search.history": "Lịch sử tìm kiếm",
-  "search.remove": "Xóa '{{value}}' khỏi lịch sử tìm kiếm",
-  "search.clear": "Xóa lịch sử tìm kiếm",
-  "search.close": "Đóng hộp thoại tìm kiếm",
-  "search.suggest": "Gợi ý",
   "required.login": "Vui lòng đăng nhập để {{action}}",
   "required.select": "Vui lòng chọn sản phẩm trong giỏ"
 }

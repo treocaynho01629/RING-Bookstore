@@ -91,6 +91,7 @@ export const StyledTableHead = styled(TableHead)`
   &:before {
     content: "";
     position: absolute;
+    pointer-events: none;
     left: -10px;
     top: -16px;
     width: calc(100% + 20px);
@@ -102,6 +103,7 @@ export const StyledTableHead = styled(TableHead)`
   &:after {
     content: "";
     position: absolute;
+    pointer-events: none;
     left: 0;
     top: 0;
     width: calc(100% + 0.5px);

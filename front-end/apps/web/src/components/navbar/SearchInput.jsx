@@ -196,9 +196,11 @@ const StyledIconButton = styled(IconButton)`
     font-size: 20px;
   }
 
-  &:hover {
-    background-color: transparent;
-    color: ${({ theme }) => theme.vars.palette.error.main};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: transparent;
+      color: ${({ theme }) => theme.vars.palette.error.main};
+    }
   }
 `;
 

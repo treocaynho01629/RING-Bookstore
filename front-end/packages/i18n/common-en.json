@@ -29,8 +29,6 @@
   "signup.suggestions": "Don't have an account?",
   "login.suggestions": "Already have an account?",
   "help": "Help",
-  "logout": "Log out",
-  "logout.end": "Log out of this session?",
   "notification": "Notification",
   "profile": "Profile",
   "ring": "RING!",
@@ -57,6 +55,13 @@
   "remove.saved": "Remove",
   "save": "Save",
   "scroll": "Scroll back to top",
+  "logout": "Log out",
+  "logout.end": "Log out of this session?",
+  "signout": {
+    "confirmation": "Sign out?",
+    "message": "You will be signed out of your account.",
+    "success": "Signed out successfully"
+  },
   "coupon": {
     "shipping": {
       "label": "Shipping discount",

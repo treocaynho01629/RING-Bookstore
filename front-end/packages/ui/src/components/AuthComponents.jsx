@@ -30,13 +30,13 @@ export const AuthText = styled.p`
 
 export const AuthHighlight = styled.span`
   text-decoration: underline;
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.main || theme.vars.palette.primary.main};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.main || theme.vars.palette.primary.main};
   cursor: pointer;
 
-  &:hover {
-    color: ${({ theme, color }) =>
-      theme.vars.palette[color]?.dark || theme.vars.palette.primary.dark};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme, color }) => theme.vars.palette[color]?.dark || theme.vars.palette.primary.dark};
+    }
   }
 `;
 

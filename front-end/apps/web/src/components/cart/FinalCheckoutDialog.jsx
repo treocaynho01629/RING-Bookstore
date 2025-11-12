@@ -90,8 +90,10 @@ const EditButton = styled.div`
     margin-right: ${({ theme }) => theme.spacing(0.5)};
   }
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.info.light};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme }) => theme.vars.palette.info.light};
+    }
   }
 `;
 

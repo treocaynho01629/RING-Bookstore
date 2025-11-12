@@ -23,9 +23,11 @@ const Container = styled.div`
   background-color: ${({ theme }) => theme.vars.palette.background.paper};
   margin: 0 ${({ theme }) => theme.spacing(0.1)};
 
-  &:hover {
-    border-color: ${({ theme }) => theme.vars.palette.action.focus};
-    box-shadow: ${({ theme }) => theme.shadows[1]};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: ${({ theme }) => theme.vars.palette.action.focus};
+      box-shadow: ${({ theme }) => theme.shadows[1]};
+    }
   }
 `;
 
@@ -122,17 +124,13 @@ const ProductSimple = ({ book, scrollPosition }) => {
               alt={`${book?.title} Thumbnail`}
               width={"100%"}
               scrollPosition={scrollPosition}
-              placeholder={
-                <StyledSkeleton variant="rectangular" animation={false} />
-              }
+              placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
             />
           </ImgContainer>
           <Info>
             <Price>
               {currencyFormat.format(book.price)}
-              {book.discount > 0 && (
-                <Percentage>-{book.discount * 100}%</Percentage>
-              )}
+              {book.discount > 0 && <Percentage>-{book.discount * 100}%</Percentage>}
             </Price>
             <Title>{book.title}</Title>
           </Info>

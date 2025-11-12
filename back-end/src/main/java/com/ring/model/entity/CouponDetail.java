@@ -41,7 +41,7 @@ public class CouponDetail {
     private CouponCriteria criteria;
 
     @Column(nullable = false)
-    private Double attribute; //Min money/quantity
+    private Double attribute; // Min money/quantity
 
     @Column
     private Double maxDiscount;

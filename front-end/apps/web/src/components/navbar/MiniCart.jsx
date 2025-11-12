@@ -157,7 +157,15 @@ const MiniCart = ({ anchorEl, handleClose, products }) => {
                   style={{ objectFit: "contain" }}
                   src={product?.image?.srcSet[ImageSize?.TINY?.value]}
                   alt={`Cart item: ${product?.title}`}
-                  placeholder={<Skeleton width={50} height={50} animation={false} variant="rectangular" />}
+                  placeholder={
+                    <Skeleton
+                      width={50}
+                      height={50}
+                      animation={false}
+                      sx={{ minWidth: "50px" }}
+                      variant="rectangular"
+                    />
+                  }
                 />
                 <ItemInfo>
                   <ProductTitle>{product?.title}</ProductTitle>

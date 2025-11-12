@@ -105,11 +105,7 @@ const Thumb = styled.div`
   &.thumbnail {
     &:before {
       content: "<Thumbnail>";
-      background-image: linear-gradient(
-        0deg,
-        ${({ theme }) => theme.vars.palette.success.main},
-        transparent 100%
-      );
+      background-image: linear-gradient(0deg, ${({ theme }) => theme.vars.palette.success.main}, transparent 100%);
     }
   }
 
@@ -146,8 +142,10 @@ const StyledIconButton = styled(IconButton)`
   color: white;
   background-color: #0000008b;
 
-  &:hover {
-    background-color: #000000bc;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: #000000bc;
+    }
   }
 
   &.left {
@@ -178,24 +176,8 @@ const ButtonContainer = styled.div`
 `;
 //#endregion
 
-const CustomDropZone = ({
-  thumbnailId,
-  setThumbnailId,
-  remove,
-  setRemove,
-  images,
-  files,
-  setFiles,
-  isMissing,
-}) => {
-  const {
-    getRootProps,
-    getInputProps,
-    isFocused,
-    isDragAccept,
-    isDragReject,
-    fileRejections,
-  } = useDropzone({
+const CustomDropZone = ({ thumbnailId, setThumbnailId, remove, setRemove, images, files, setFiles, isMissing }) => {
+  const { getRootProps, getInputProps, isFocused, isDragAccept, isDragReject, fileRejections } = useDropzone({
     maxFiles: 10,
     maxSize: 2000000,
     accept: {
@@ -252,10 +234,7 @@ const CustomDropZone = ({
     } else if (removeIndex === remove.length - 1) {
       newRemove = newRemove.concat(remove.slice(0, -1));
     } else if (removeIndex > 0) {
-      newRemove = newRemove.concat(
-        remove.slice(0, removeIndex),
-        remove.slice(removeIndex + 1)
-      );
+      newRemove = newRemove.concat(remove.slice(0, removeIndex), remove.slice(removeIndex + 1));
     }
 
     setRemove(newRemove);
@@ -277,10 +256,7 @@ const CustomDropZone = ({
     } else if (removeIndex === remove.length - 1) {
       newRemove = newRemove.concat(remove.slice(0, -1));
     } else if (removeIndex > 0) {
-      newRemove = newRemove.concat(
-        remove.slice(0, removeIndex),
-        remove.slice(removeIndex + 1)
-      );
+      newRemove = newRemove.concat(remove.slice(0, removeIndex), remove.slice(removeIndex + 1));
     }
 
     setRemove(newRemove);
@@ -301,10 +277,7 @@ const CustomDropZone = ({
 
     if (thumbnail)
       previews.push(
-        <Tooltip
-          key={`thumbnail-${thumbnail.id}`}
-          title={"Thumbnail: " + thumbnail.name}
-        >
+        <Tooltip key={`thumbnail-${thumbnail.id}`} title={"Thumbnail: " + thumbnail.name}>
           <Thumb className="thumbnail">
             <ThumbInner>
               <ThumbImage src={thumbnail.url} />
@@ -317,21 +290,13 @@ const CustomDropZone = ({
   if (files?.length) {
     files.forEach((file, index) => {
       previews.push(
-        <Tooltip
-          key={`file-${file.name}-${index}`}
-          title={"Tải ảnh: " + file.name}
-        >
-          <Thumb
-            className={`${!thumbnailId && index == 0 ? "thumbnail" : ""} file`}
-          >
+        <Tooltip key={`file-${file.name}-${index}`} title={"Tải ảnh: " + file.name}>
+          <Thumb className={`${!thumbnailId && index == 0 ? "thumbnail" : ""} file`}>
             <StyledIconButton onClick={() => handleRemoveFile(index)}>
               <Close />
             </StyledIconButton>
             {(thumbnailId || index > 0) && (
-              <StyledIconButton
-                className="left"
-                onClick={() => handleChangeThumbnail(index)}
-              >
+              <StyledIconButton className="left" onClick={() => handleChangeThumbnail(index)}>
                 <PermMedia />
               </StyledIconButton>
             )}
@@ -355,18 +320,12 @@ const CustomDropZone = ({
         const isRemoved = remove.indexOf(image.id);
 
         previews.push(
-          <Tooltip
-            key={`preview-${image.id}-${index}`}
-            title={isRemoved ? "Gỡ ảnh: " : "" + image.name}
-          >
+          <Tooltip key={`preview-${image.id}-${index}`} title={isRemoved ? "Gỡ ảnh: " : "" + image.name}>
             <Thumb className={isRemoved != -1 ? "remove" : ""}>
               <StyledIconButton onClick={() => handleRemoveImage(image.id)}>
                 <Delete />
               </StyledIconButton>
-              <StyledIconButton
-                className="left"
-                onClick={() => handleSetThumbnail(image.id)}
-              >
+              <StyledIconButton className="left" onClick={() => handleSetThumbnail(image.id)}>
                 <PermMedia />
               </StyledIconButton>
               <ThumbInner>
@@ -381,9 +340,7 @@ const CustomDropZone = ({
 
   return (
     <section>
-      <DropZoneContainer
-        {...getRootProps({ isFocused, isDragAccept, isDragReject, isMissing })}
-      >
+      <DropZoneContainer {...getRootProps({ isFocused, isDragAccept, isDragReject, isMissing })}>
         <input {...getInputProps()} style={{ display: "none" }} />
         <DropZoneContent>
           <PermMedia fontSize="large" />

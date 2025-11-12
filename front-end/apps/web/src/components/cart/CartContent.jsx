@@ -106,12 +106,15 @@ function EnhancedTableHead({ onSelectAllClick, numSelected, rowCount, handleDele
             slotProps={{
               input: {
                 "aria-label": t("select.all"),
+                "id": "select-all-checkbox",
               },
             }}
           />
         </StyledTableCell>
         <StyledTableCell align="left">
-          {t("select.all")} ({rowCount} {t("items")})
+          <label htmlFor="select-all-checkbox" style={{ cursor: "pointer" }}>
+            {t("select.all")} ({rowCount} {t("items")})
+          </label>
         </StyledTableCell>
         <StyledTableCell
           align="left"

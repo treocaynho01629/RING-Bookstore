@@ -59,11 +59,13 @@ const ActionButton = styled.span`
     font-size: 20px;
   }
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.warning.main};
-
-    svg {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
       color: ${({ theme }) => theme.vars.palette.warning.main};
+
+      svg {
+        color: ${({ theme }) => theme.vars.palette.warning.main};
+      }
     }
   }
 

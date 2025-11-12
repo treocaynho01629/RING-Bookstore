@@ -18,8 +18,10 @@ export const ItemTitle = styled.p`
     -webkit-box-orient: vertical;
   }
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.info.main};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme }) => theme.vars.palette.info.main};
+    }
   }
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
@@ -200,8 +202,7 @@ export const PriceText = styled.span`
   font-size: 16px;
   font-weight: 450;
   white-space: nowrap;
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.main || theme.vars.palette.text.primary};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.main || theme.vars.palette.text.primary};
 
   &.secondary {
     font-weight: 400;
@@ -298,8 +299,7 @@ export const StatusContent = styled.div`
   background-color: ${({ theme, color }) =>
     `color-mix(in srgb, ${theme.vars.palette[color]?.light || theme.vars.palette.primary.light}, 
       transparent 70%)`};
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.main ?? theme.vars.palette.primary.main};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.main ?? theme.vars.palette.primary.main};
   border: 0.5px solid;
   border-color: currentColor;
   padding: ${({ theme }) => `${theme.spacing(1)} ${theme.spacing(2)}`};

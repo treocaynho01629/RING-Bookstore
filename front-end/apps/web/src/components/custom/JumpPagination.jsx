@@ -1,46 +1,42 @@
 import { useState, useEffect } from "react";
-import styled from "@emotion/styled";
-import Check from "@mui/icons-material/Check";
-import Close from "@mui/icons-material/Close";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import TextField from "@mui/material/TextField";
+import AmountInput from "./AmountInput";
 
-const StyledInput = styled(TextField)`
-  width: 60px;
-
-  input[type="number"]::-webkit-outer-spin-button,
-  input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-    opacity: 1;
-  }
-
-  input[type="number"] {
-    -moz-appearance: textfield;
-  }
-`;
-
-const JumpPagination = ({ pagination, onPageChange, open, handleClose }) => {
+const JumpPagination = ({ pagination, totalPages, onPageChange, open, handleClose }) => {
   const [page, setPage] = useState(pagination?.number + 1);
 
-  useEffect(() => {
-    setPage(pagination?.number + 1);
-  }, [pagination]);
+  const handleIncrease = () => {
+    if (page >= totalPages) return;
+    setPage((prev) => prev + 1);
+  };
 
-  const handleChange = (value) => {
-    let newValue = value;
-    if (newValue > pagination?.totalPages) newValue = pagination?.totalPages;
+  const handleDecrease = () => {
+    if (page <= 1) return;
+    setPage((prev) => prev - 1);
+  };
+
+  const handleChange = (e) => {
+    let newValue = e.target.value;
+    if (isNaN(newValue)) newValue = "";
+
+    if (newValue != "") {
+      if (newValue < 1) newValue = 1;
+      if (newValue > totalPages) newValue = totalPages;
+    }
+
     setPage(newValue);
   };
 
   const handleBlur = () => {
-    if (page < 1) setPage(1);
-    if (page > pagination?.totalPages) setPage(pagination?.totalPages);
+    let newValue = page;
+    if (newValue < 1) newValue = 1;
+    if (newValue > totalPages) newValue = totalPages;
+    setPage(newValue);
   };
 
   const handleConfirm = () => {
@@ -49,62 +45,26 @@ const JumpPagination = ({ pagination, onPageChange, open, handleClose }) => {
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      closeAfterTransition={false}
-      aria-labelledby="pagination-dialog"
-    >
+    <Dialog open={open} onClose={handleClose} closeAfterTransition={false} aria-labelledby="pagination-dialog">
       <DialogTitle id="pagination-dialog-title">Đi đến trang?</DialogTitle>
-      <DialogContent>
-        <Box display="flex" justifyContent="center" minWidth={220}>
-          <StyledInput
-            required
-            id="page"
-            variant="outlined"
-            type="number"
+      <DialogContent dividers>
+        <Box display="flex" justifyContent="center" minWidth={250}>
+          <AmountInput
             value={page}
-            onChange={(e) => handleChange(e.target.value)}
+            onChange={handleChange}
+            handleDecrease={handleDecrease}
+            handleIncrease={handleIncrease}
             onBlur={handleBlur}
-            slotProps={{
-              input: {
-                min: 1,
-                max: pagination?.totalPages,
-                type: "number",
-                style: { textAlign: "center" },
-              },
-              htmlInput: {
-                min: 1,
-                max: pagination?.totalPages,
-                type: "number",
-                style: { textAlign: "center" },
-              },
-            }}
+            min={1}
+            max={totalPages}
           />
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="outlined"
-          color="error"
-          size="large"
-          fullWidth
-          sx={{ mb: 1 }}
-          onClick={handleClose}
-          startIcon={<Close />}
-        >
+        <Button color="error" onClick={handleClose}>
           Huỷ
         </Button>
-        <Button
-          variant="contained"
-          size="large"
-          fullWidth
-          sx={{ mb: 1 }}
-          onClick={handleConfirm}
-          startIcon={<Check />}
-        >
-          Đồng ý
-        </Button>
+        <Button onClick={handleConfirm}>Đồng ý</Button>
       </DialogActions>
     </Dialog>
   );

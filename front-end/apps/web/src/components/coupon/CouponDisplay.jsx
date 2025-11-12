@@ -9,7 +9,6 @@ import { useTranslation } from "react-i18next";
 const CouponContainer = styled.div`
   position: relative;
   border-radius: 5px;
-  height: 100%;
   width: 100%;
   background-color: ${({ theme }) => theme.vars.palette.background.paper};
   border: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
@@ -68,11 +67,8 @@ const CouponContainer = styled.div`
 const CouponIcon = styled.div`
   height: 50px;
   aspect-ratio: 1/1;
-  background-color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.light || theme.vars.palette.primary.light};
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.contrastText ||
-    theme.vars.palette.primary.contrastText};
+  background-color: ${({ theme, color }) => theme.vars.palette[color]?.light || theme.vars.palette.primary.light};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.contrastText || theme.vars.palette.primary.contrastText};
   border-right: 5px dotted ${({ theme }) => theme.vars.palette.background.paper};
   display: flex;
   align-items: center;
@@ -107,8 +103,7 @@ const CouponIcon = styled.div`
     border-right: none;
     border-radius: 6px;
     border: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
-    color: ${({ theme, color }) =>
-      theme.vars.palette[color]?.dark || theme.vars.palette.primary.dark};
+    color: ${({ theme, color }) => theme.vars.palette[color]?.dark || theme.vars.palette.primary.dark};
 
     svg {
       font-size: 15px;
@@ -157,20 +152,14 @@ const CouponDisplay = ({ coupon }) => {
 
   return (
     <CouponContainer>
-      <CouponIcon
-        color={meta?.color}
-        className={coupon?.isUsable ? "" : "disabled"}
-      >
+      <CouponIcon color={meta?.color} className={coupon?.isUsable ? "" : "disabled"}>
         <Suspense fallback={null}>
           <Icon />
         </Suspense>
       </CouponIcon>
       <CouponDesc>
         {t(coupon?.discount == 1 ? meta?.summaryFull : meta?.summary, {
-          discount:
-            coupon?.discount == 1
-              ? currencyFormat.format(coupon?.maxDiscount)
-              : coupon?.discount * 100 + "%",
+          discount: coupon?.discount == 1 ? currencyFormat.format(coupon?.maxDiscount) : coupon?.discount * 100 + "%",
           max: currencyFormat.format(coupon?.maxDiscount),
         })}
       </CouponDesc>

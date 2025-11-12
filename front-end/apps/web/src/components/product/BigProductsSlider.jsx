@@ -111,10 +111,12 @@ const CustomArrowButton = styled.div`
   opacity: 0.8;
   z-index: 1;
 
-  &:hover {
-    opacity: 1;
-    transform: scale(1.1);
-    background-color: ${({ theme }) => theme.vars.palette.background.default};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      opacity: 1;
+      transform: scale(1.1);
+      background-color: ${({ theme }) => theme.vars.palette.background.default};
+    }
   }
 
   &.left {
@@ -160,10 +162,7 @@ const responsive = {
 };
 
 const CustomArrow = ({ onClick, className, direction }) => (
-  <CustomArrowButton
-    className={`${className ?? ""} ${direction}`}
-    onClick={onClick}
-  >
+  <CustomArrowButton className={`${className ?? ""} ${direction}`} onClick={onClick}>
     {direction == "left" ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
   </CustomArrowButton>
 );
@@ -177,11 +176,7 @@ function Item({ book, index }) {
 
   return (
     <SlideItemContainer>
-      <Grid
-        container
-        size="grow"
-        sx={{ alignItems: "center", position: "relative" }}
-      >
+      <Grid container size="grow" sx={{ alignItems: "center", position: "relative" }}>
         <Grid size={{ xs: 12, md: 5 }} mb={{ xs: "100px", md: 0 }}>
           {book ? (
             <Link to={`/product/${book.slug}`}>
@@ -189,10 +184,7 @@ function Item({ book, index }) {
                 <StyledLazyImage
                   src={book.image.url}
                   srcSet={Object.values(ImageSize)
-                    .map(
-                      (size) =>
-                        `${book.image?.srcSet[size?.value]} ${size?.width}w`
-                    )
+                    .map((size) => `${book.image?.srcSet[size?.value]} ${size?.width}w`)
                     .join(", ")}
                   alt={`${book.title} Big product item`}
                   sizes={"(min-width: 450px) 450px, 100vw"}
@@ -212,11 +204,7 @@ function Item({ book, index }) {
             </Link>
           ) : (
             <ImgContainer>
-              <Skeleton
-                variant="rectangular"
-                height={400}
-                sx={{ width: { xs: "80%", md: "100%" } }}
-              />
+              <Skeleton variant="rectangular" height={400} sx={{ width: { xs: "80%", md: "100%" } }} />
             </ImgContainer>
           )}
         </Grid>
@@ -228,34 +216,17 @@ function Item({ book, index }) {
                   <Title>{book.title}</Title>
                   <Description>{book.description}</Description>
                 </Link>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  onClick={() => handleAddToCart(book)}
-                >
+                <Button variant="contained" color="primary" size="large" onClick={() => handleAddToCart(book)}>
                   Mua ngay
                 </Button>
               </InfoContainer>
             ) : (
               <InfoContainer>
-                <Skeleton
-                  variant="text"
-                  sx={{ fontSize: "30px", marginBottom: 1 }}
-                />
+                <Skeleton variant="text" sx={{ fontSize: "30px", marginBottom: 1 }} />
                 <Skeleton variant="text" sx={{ fontSize: "18px" }} />
                 <Skeleton variant="text" sx={{ fontSize: "18px" }} />
-                <Skeleton
-                  variant="text"
-                  sx={{ fontSize: "18px", marginBottom: 1 }}
-                  width={"50%"}
-                />
-                <Button
-                  disabled
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                >
+                <Skeleton variant="text" sx={{ fontSize: "18px", marginBottom: 1 }} width={"50%"} />
+                <Button disabled variant="contained" color="primary" size="large">
                   Mua ngay
                 </Button>
               </InfoContainer>

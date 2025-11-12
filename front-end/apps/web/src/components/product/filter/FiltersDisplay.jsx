@@ -32,11 +32,8 @@ const FilterChip = styled.span`
   padding: 6px 10px;
   margin: ${({ theme }) => theme.spacing(0.5)} 0;
   margin-right: ${({ theme }) => theme.spacing(1)};
-  border: 1px solid
-    ${({ theme, color }) =>
-      theme.vars.palette[color]?.main || theme.vars.palette.warning.main};
-  color: ${({ theme, color }) =>
-    theme.vars.palette[color]?.light || theme.vars.palette.warning.light};
+  border: 1px solid ${({ theme, color }) => theme.vars.palette[color]?.main || theme.vars.palette.warning.main};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.light || theme.vars.palette.warning.light};
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -44,12 +41,13 @@ const FilterChip = styled.span`
   transition: all 0.2s ease;
   cursor: pointer;
 
-  &:hover {
-    border-color: ${({ theme, color }) =>
-      theme.vars.palette[color]?.light || theme.vars.palette.warning.light};
-    background-color: ${({ theme, color }) =>
-      `color-mix(in srgb, ${theme.vars.palette[color]?.light || theme.vars.palette.warning.light}, 
-      transparent 90%)`};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: ${({ theme, color }) => theme.vars.palette[color]?.light || theme.vars.palette.warning.light};
+      background-color: ${({ theme, color }) =>
+        `color-mix(in srgb, ${theme.vars.palette[color]?.light || theme.vars.palette.warning.light}, 
+        transparent 90%)`};
+    }
   }
 
   svg {
@@ -62,8 +60,10 @@ const ClearButton = styled.div`
   transition: all 0.2s ease;
   height: 24px;
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.error.main};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme }) => theme.vars.palette.error.main};
+    }
   }
 `;
 
@@ -163,8 +163,7 @@ const FiltersDisplay = memo(
         if (!isEqual(filters.value, defaultFilters.value)) {
           content.push(
             <FilterChip key={"chip-value"} onClick={scrollToValue}>
-              Giá:{" "}
-              {`${currencyFormat.format(filters.value[0])} - ${currencyFormat.format(filters.value[1])}`}
+              Giá: {`${currencyFormat.format(filters.value[0])} - ${currencyFormat.format(filters.value[1])}`}
               <Close onClick={handleRemoveValue} />
             </FilterChip>
           );
@@ -172,8 +171,7 @@ const FiltersDisplay = memo(
         if (filters.rating != defaultFilters.rating) {
           content.push(
             <FilterChip key={"chip-rate"} onClick={scrollToRating}>
-              Đánh giá:{" "}
-              {`${filters.rating < 5 ? "Từ" : ""} ${filters.rating} sao`}
+              Đánh giá: {`${filters.rating < 5 ? "Từ" : ""} ${filters.rating} sao`}
               <Close onClick={handleRemoveRating} />
             </FilterChip>
           );

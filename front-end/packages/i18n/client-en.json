@@ -34,7 +34,7 @@
     "product.discount": "Product discount",
     "coupon.discount": "Coupon discount"
   },
-  "shop.explore": "Explore shop",
+  "shop.explore": "Explore",
   "order": {
     "label": "Order",
     "description": "View your orders"
@@ -52,13 +52,46 @@
     "add": "Enter coupon code",
     "not.found": "No coupons found"
   },
-  "search.store": "in store",
-  "search.for": "Search {{value}}:",
-  "search.history": "Search history",
-  "search.clear": "Clear search history",
-  "search.remove": "Remove '{{value}}' from history",
-  "search.close": "Close search dialog",
-  "search.suggest": "Suggestions",
+  "footer": {
+    "address": "Address: 162, Ward 2, District 9, Ho Chi Minh City, Vietnam",
+    "support": {
+      "title": "Support",
+      "refund": "Change - return - refund policy",
+      "shipping": "Shipping method",
+      "payment": "Payment method",
+      "faq": "RING! - FAQ",
+      "order": "Order guide"
+    },
+    "information": {
+      "title": "Information",
+      "about": "About RING!",
+      "recruitment": "Recruitment staff",
+      "complaint": "Complaint policy",
+      "terms": "Terms of use"
+    },
+    "services": {
+      "title": "Services", 
+      "privacy": "Privacy policy",
+      "warehouse": "Warehouse system"
+    },
+    "payments": {
+      "title": "Payments",
+      "payment": "Payment method",
+      "cash": "Cash on delivery",
+      "payOS": "Online payment via PayOS"
+    },
+    "copyright": "© {{year}} RING! - Bookstore. All rights reserved."
+  },
+  "search": {
+    "toggle": "Search toggle",
+    "store": "in store",
+    "for": "Search {{value}}:",
+    "history": "Search history",
+    "remove": "Remove '{{value}}' from history",
+    "clear": "Clear search history",
+    "close": "Close search dialog",
+    "suggest": "Suggestions"
+  },
   "required.login": "Please login to {{action}}",
   "required.select": "Please select any items in cart"
 }

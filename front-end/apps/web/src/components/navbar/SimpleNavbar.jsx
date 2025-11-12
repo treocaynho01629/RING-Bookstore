@@ -48,8 +48,10 @@ const SimpleButton = styled.span`
     margin-left: 5px;
   }
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.text.primary};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme }) => theme.vars.palette.text.primary};
+    }
   }
 
   ${({ theme }) => theme.breakpoints.down("md")} {

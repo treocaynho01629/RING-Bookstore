@@ -1,12 +1,4 @@
-import {
-  lazy,
-  memo,
-  Suspense,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { lazy, memo, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate, useParams, useSearchParams } from "react-router";
 import { useGetCategoryQuery } from "../features/categories/categoriesApiSlice";
 import { useGetBooksQuery } from "../features/books/booksApiSlice";
@@ -24,18 +16,10 @@ import FilteredProducts from "../components/product/filter/FilteredProducts";
 import FilterSortList from "../components/product/filter/FilterSortList";
 import CustomBreadcrumbs from "../components/custom/CustomBreadcrumbs";
 
-const FilterList = lazy(
-  () => import("../components/product/filter/FilterList")
-);
-const FilterDrawer = lazy(
-  () => import("../components/product/filter/FilterDrawer")
-);
-const FiltersDisplay = lazy(
-  () => import("../components/product/filter/FiltersDisplay")
-);
-const JumpPagination = lazy(
-  () => import("../components/custom/JumpPagination")
-);
+const FilterList = lazy(() => import("../components/product/filter/FilterList"));
+const FilterDrawer = lazy(() => import("../components/product/filter/FilterDrawer"));
+const FiltersDisplay = lazy(() => import("../components/product/filter/FiltersDisplay"));
+const JumpPagination = lazy(() => import("../components/custom/JumpPagination"));
 
 const DEFAULT_FILTERS = {
   keyword: "",
@@ -57,11 +41,7 @@ const createCrumbs = (cate) => {
   if (cate) {
     return [
       createCrumbs(cate?.parent),
-      <NavLink
-        to={`/store/${cate?.slug}?cate=${cate?.id}`}
-        end
-        key={`crumb-${cate?.id}`}
-      >
+      <NavLink to={`/store/${cate?.slug}?cate=${cate?.id}`} end key={`crumb-${cate?.id}`}>
         {cate?.name}
       </NavLink>,
     ];
@@ -99,16 +79,12 @@ const FiltersPage = () => {
       slug: cSlug ?? DEFAULT_FILTERS.cate.slug,
     },
     pubIds: searchParams.get("pubs")?.split(",") ?? DEFAULT_FILTERS.pubIds,
-    value: searchParams.get("value")
-      ? searchParams.get("value").split(",").map(Number)
-      : DEFAULT_FILTERS.value,
+    value: searchParams.get("value") ? searchParams.get("value").split(",").map(Number) : DEFAULT_FILTERS.value,
     types: searchParams.get("types")?.split(",") ?? DEFAULT_FILTERS.types,
     rating: searchParams.get("rating") ?? DEFAULT_FILTERS.rating,
   });
   const [pagination, setPagination] = useState({
-    number: searchParams.get("pNo")
-      ? searchParams.get("pNo") - 1
-      : DEFAULT_PAGINATION.number,
+    number: searchParams.get("pNo") ? searchParams.get("pNo") - 1 : DEFAULT_PAGINATION.number,
     size: searchParams.get("pSize") ?? DEFAULT_PAGINATION.size,
     sortBy: searchParams.get("sort") ?? DEFAULT_PAGINATION.sortBy,
     sortDir: searchParams.get("dir") ?? DEFAULT_PAGINATION.sortDir,
@@ -116,21 +92,20 @@ const FiltersPage = () => {
   });
 
   //Fetch data
-  const { data, isLoading, isFetching, isUninitialized, isError, error } =
-    useGetBooksQuery({
-      //Books
-      page: pagination.number,
-      size: pagination.size,
-      sortBy: pagination.sortBy,
-      sortDir: pagination.sortDir,
-      amount: pagination.amount,
-      keyword: filters.keyword,
-      cateId: filters.cate.id,
-      rating: filters.rating,
-      types: filters.types,
-      pubIds: filters.pubIds,
-      value: filters.value,
-    });
+  const { data, isLoading, isFetching, isUninitialized, isError, error } = useGetBooksQuery({
+    //Books
+    page: pagination.number,
+    size: pagination.size,
+    sortBy: pagination.sortBy,
+    sortDir: pagination.sortDir,
+    amount: pagination.amount,
+    keyword: filters.keyword,
+    cateId: filters.cate.id,
+    rating: filters.rating,
+    types: filters.types,
+    pubIds: filters.pubIds,
+    value: filters.value,
+  });
   const { data: currCate, isLoading: loadCate } = useGetCategoryQuery(
     { slug: filters.cate.slug, include: "parent" },
     { skip: !filters.cate.id || !filters.cate.slug }
@@ -145,17 +120,13 @@ const FiltersPage = () => {
         slug: cSlug ?? DEFAULT_FILTERS.cate.slug,
       },
       pubIds: searchParams.get("pubs")?.split(",") ?? DEFAULT_FILTERS.pubIds,
-      value: searchParams.get("value")
-        ? searchParams.get("value").split(",").map(Number)
-        : DEFAULT_FILTERS.value,
+      value: searchParams.get("value") ? searchParams.get("value").split(",").map(Number) : DEFAULT_FILTERS.value,
       types: searchParams.get("types")?.split(",") ?? DEFAULT_FILTERS.types,
       rating: searchParams.get("rating") ?? DEFAULT_FILTERS.rating,
     }));
     setPagination((prev) => ({
       ...prev,
-      number: searchParams.get("pNo")
-        ? searchParams.get("pNo") - 1
-        : DEFAULT_PAGINATION.number,
+      number: searchParams.get("pNo") ? searchParams.get("pNo") - 1 : DEFAULT_PAGINATION.number,
       size: searchParams.get("pSize") ?? DEFAULT_PAGINATION.size,
       sortBy: searchParams.get("sort") ?? DEFAULT_PAGINATION.sortBy,
       sortDir: searchParams.get("dir") ?? DEFAULT_PAGINATION.sortDir,
@@ -185,23 +156,18 @@ const FiltersPage = () => {
       ...prev,
       keyword: newValue,
     }));
-    newValue == DEFAULT_FILTERS.keyword
-      ? searchParams.delete("q")
-      : searchParams.set("q", newValue);
+    newValue == DEFAULT_FILTERS.keyword ? searchParams.delete("q") : searchParams.set("q", newValue);
     setSearchParams(searchParams);
     handleResetPage();
   };
   const handleChangeCate = (newValue) => {
-    newValue =
-      filters?.cate.id == newValue?.id ? { id: "", slug: "" } : newValue;
+    newValue = filters?.cate.id == newValue?.id ? { id: "", slug: "" } : newValue;
     setFilters((prev) => ({
       ...prev,
       cate: newValue,
       pubs: DEFAULT_FILTERS.pubIds,
     }));
-    newValue?.id == DEFAULT_FILTERS.cate.id
-      ? searchParams.delete("cate")
-      : searchParams.set("cate", newValue?.id);
+    newValue?.id == DEFAULT_FILTERS.cate.id ? searchParams.delete("cate") : searchParams.set("cate", newValue?.id);
     searchParams.delete("pubs");
     const newPath = `/store${newValue?.slug ? `/${newValue.slug}` : ""}`;
     navigate({ pathname: newPath, search: searchParams.toString() });
@@ -209,33 +175,25 @@ const FiltersPage = () => {
   };
   const handleChangePubs = debounce((newValue) => {
     setFilters((prev) => ({ ...prev, pubIds: newValue }));
-    isEqual(newValue, DEFAULT_FILTERS.pubIds)
-      ? searchParams.delete("pubs")
-      : searchParams.set("pubs", newValue);
+    isEqual(newValue, DEFAULT_FILTERS.pubIds) ? searchParams.delete("pubs") : searchParams.set("pubs", newValue);
     setSearchParams(searchParams);
     handleResetPage();
   }, 500);
   const handleChangeInputRange = (newValue) => {
     setFilters((prev) => ({ ...prev, value: newValue }));
-    isEqual(newValue, DEFAULT_FILTERS.value)
-      ? searchParams.delete("value")
-      : searchParams.set("value", newValue);
+    isEqual(newValue, DEFAULT_FILTERS.value) ? searchParams.delete("value") : searchParams.set("value", newValue);
     setSearchParams(searchParams);
     handleResetPage();
   };
   const handleChangeRange = debounce((newValue) => {
     setFilters((prev) => ({ ...prev, value: newValue }));
-    isEqual(newValue, DEFAULT_FILTERS.value)
-      ? searchParams.delete("value")
-      : searchParams.set("value", newValue);
+    isEqual(newValue, DEFAULT_FILTERS.value) ? searchParams.delete("value") : searchParams.set("value", newValue);
     setSearchParams(searchParams);
     handleResetPage();
   }, 1000);
   const handleChangeTypes = debounce((newValue) => {
     setFilters((prev) => ({ ...prev, types: newValue }));
-    isEqual(newValue, DEFAULT_FILTERS.types)
-      ? searchParams.delete("types")
-      : searchParams.set("types", newValue);
+    isEqual(newValue, DEFAULT_FILTERS.types) ? searchParams.delete("types") : searchParams.set("types", newValue);
     setSearchParams(searchParams);
     handleResetPage();
   }, 500);
@@ -244,9 +202,7 @@ const FiltersPage = () => {
       ...prev,
       rating: prev.rating == newValue ? "" : newValue,
     }));
-    newValue == DEFAULT_FILTERS.rating
-      ? searchParams.delete("rating")
-      : searchParams.set("rating", newValue);
+    newValue == DEFAULT_FILTERS.rating ? searchParams.delete("rating") : searchParams.set("rating", newValue);
     setSearchParams(searchParams);
     handleResetPage();
   };
@@ -277,41 +233,31 @@ const FiltersPage = () => {
   // Pagination change
   const handleChangePage = (page) => {
     setPagination((prev) => ({ ...prev, number: page - 1 }));
-    page - 1 == DEFAULT_PAGINATION.number
-      ? searchParams.delete("pNo")
-      : searchParams.set("pNo", page);
+    page - 1 == DEFAULT_PAGINATION.number ? searchParams.delete("pNo") : searchParams.set("pNo", page);
     setSearchParams(searchParams);
     scrollToTop();
   };
   const handleChangeOrder = (newValue) => {
     setPagination((prev) => ({ ...prev, sortBy: newValue }));
-    newValue == DEFAULT_PAGINATION.sortBy
-      ? searchParams.delete("sort")
-      : searchParams.set("sort", newValue);
+    newValue == DEFAULT_PAGINATION.sortBy ? searchParams.delete("sort") : searchParams.set("sort", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
   const handleChangeDir = (newValue) => {
     setPagination((prev) => ({ ...prev, sortDir: newValue }));
-    newValue == DEFAULT_PAGINATION.sortDir
-      ? searchParams.delete("dir")
-      : searchParams.set("dir", newValue);
+    newValue == DEFAULT_PAGINATION.sortDir ? searchParams.delete("dir") : searchParams.set("dir", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
   const handleChangeSize = (newValue) => {
     setPagination((prev) => ({ ...prev, size: newValue }));
-    newValue == DEFAULT_PAGINATION.size
-      ? searchParams.delete("pSize")
-      : searchParams.set("pSize", newValue);
+    newValue == DEFAULT_PAGINATION.size ? searchParams.delete("pSize") : searchParams.set("pSize", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
   const handleChangeAmount = (newValue) => {
     setPagination((prev) => ({ ...prev, amount: newValue }));
-    newValue == DEFAULT_PAGINATION.amount
-      ? searchParams.delete("amount")
-      : searchParams.set("amount", newValue);
+    newValue == DEFAULT_PAGINATION.amount ? searchParams.delete("amount") : searchParams.set("amount", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
@@ -380,14 +326,7 @@ const FiltersPage = () => {
           <Skeleton variant="text" sx={{ fontSize: "16px" }} width={200} />
         )}
       </CustomBreadcrumbs>
-      <Grid
-        container
-        spacing={2}
-        size="grow"
-        position="relative"
-        display="flex"
-        justifyContent="center"
-      >
+      <Grid container spacing={2} size="grow" position="relative" display="flex" justifyContent="center">
         {tabletMode ? (
           <Suspense fallback={null}>
             <FilterDrawer
@@ -431,9 +370,7 @@ const FiltersPage = () => {
           sx={(theme) => ({ scrollMargin: theme.mixins.toolbar.minHeight })}
           position="relative"
         >
-          <CustomDivider sx={{ display: { xs: "none", md: "flex" } }}>
-            DANH MỤC SẢN PHẨM
-          </CustomDivider>
+          <CustomDivider sx={{ display: { xs: "none", md: "flex" } }}>DANH MỤC SẢN PHẨM</CustomDivider>
           {filters.keyword && (
             <NavLink to={`/shop?q=${filters.keyword}`}>
               <StoreSuggest>
@@ -495,6 +432,7 @@ const FiltersPage = () => {
               <JumpPagination
                 {...{
                   pagination,
+                  totalPages: data?.totalPages ?? 0,
                   onPageChange: handleChangePage,
                   open: openPagination,
                   handleClose: handleClosePagination,

@@ -1,31 +1,13 @@
 import styled from "@emotion/styled";
-import {
-  useState,
-  Suspense,
-  lazy,
-  useEffect,
-  useCallback,
-  useRef,
-  memo,
-} from "react";
-import {
-  NavLink,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "react-router";
+import { useState, Suspense, lazy, useEffect, useCallback, useRef, memo } from "react";
+import { NavLink, useLocation, useNavigate, useSearchParams } from "react-router";
 import {
   useFollowShopMutation,
   useGetDisplayShopsQuery,
   useUnfollowShopMutation,
 } from "../features/shops/shopsApiSlice";
 import useTitle from "@ring/shared/useTitle";
-import {
-  filterShopsBy,
-  filterShopsValue,
-  pageSizes,
-  sortShopsBy,
-} from "../utils/filters";
+import { filterShopsBy, filterShopsValue, pageSizes, sortShopsBy } from "../utils/filters";
 import { Wrapper } from "../components/custom/SortComponents";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -40,9 +22,7 @@ import Shop from "../components/shop/Shop";
 import ShopSortList from "../components/shop/ShopSortList";
 import useAuth from "../hooks/useAuth";
 
-const JumpPagination = lazy(
-  () => import("../components/custom/JumpPagination")
-);
+const JumpPagination = lazy(() => import("../components/custom/JumpPagination"));
 
 //#region styled
 const Container = styled.div`
@@ -64,8 +44,10 @@ const ClearButton = styled.div`
   transition: all 0.2s ease;
   height: 24px;
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.error.main};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme }) => theme.vars.palette.error.main};
+    }
   }
 `;
 
@@ -106,9 +88,7 @@ const Shops = () => {
   const [openPagination, setOpenPagination] = useState(undefined); //Pagination
   const [keyword, setKeyword] = useState(searchParams.get("q") ?? "");
   const [pagination, setPagination] = useState({
-    number: searchParams.get("pNo")
-      ? searchParams.get("pNo") - 1
-      : DEFAULT_PAGINATION.number,
+    number: searchParams.get("pNo") ? searchParams.get("pNo") - 1 : DEFAULT_PAGINATION.number,
     size: searchParams.get("pSize") ?? DEFAULT_PAGINATION.size,
     sortBy: searchParams.get("sort") ?? DEFAULT_PAGINATION.sortBy,
     sortDir: searchParams.get("dir") ?? DEFAULT_PAGINATION.sortDir,
@@ -120,15 +100,7 @@ const Shops = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const {
-    data,
-    isLoading,
-    isFetching,
-    isUninitialized,
-    isSuccess,
-    isError,
-    error,
-  } = useGetDisplayShopsQuery({
+  const { data, isLoading, isFetching, isUninitialized, isSuccess, isError, error } = useGetDisplayShopsQuery({
     page: pagination.number,
     size: pagination.size,
     sortBy: pagination.sortBy,
@@ -141,9 +113,7 @@ const Shops = () => {
     setKeyword(searchParams.get("q") ?? "");
     setPagination((prev) => ({
       ...prev,
-      number: searchParams.get("pNo")
-        ? searchParams.get("pNo") - 1
-        : DEFAULT_PAGINATION.number,
+      number: searchParams.get("pNo") ? searchParams.get("pNo") - 1 : DEFAULT_PAGINATION.number,
       size: searchParams.get("pSize") ?? DEFAULT_PAGINATION.size,
       sortBy: searchParams.get("sort") ?? DEFAULT_PAGINATION.sortBy,
       sortDir: searchParams.get("dir") ?? DEFAULT_PAGINATION.sortDir,
@@ -167,41 +137,31 @@ const Shops = () => {
   }, []);
   const handleChangePage = (page) => {
     setPagination((prev) => ({ ...prev, number: page - 1 }));
-    page - 1 == DEFAULT_PAGINATION.number
-      ? searchParams.delete("pNo")
-      : searchParams.set("pNo", page);
+    page - 1 == DEFAULT_PAGINATION.number ? searchParams.delete("pNo") : searchParams.set("pNo", page);
     setSearchParams(searchParams);
     scrollToTop();
   };
   const handleChangeOrder = (newValue) => {
     setPagination((prev) => ({ ...prev, sortBy: newValue }));
-    newValue == DEFAULT_PAGINATION.sortBy
-      ? searchParams.delete("sort")
-      : searchParams.set("sort", newValue);
+    newValue == DEFAULT_PAGINATION.sortBy ? searchParams.delete("sort") : searchParams.set("sort", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
   const handleChangeDir = (newValue) => {
     setPagination((prev) => ({ ...prev, sortDir: newValue }));
-    newValue == DEFAULT_PAGINATION.sortDir
-      ? searchParams.delete("dir")
-      : searchParams.set("dir", newValue);
+    newValue == DEFAULT_PAGINATION.sortDir ? searchParams.delete("dir") : searchParams.set("dir", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
   const handleChangeSize = (newValue) => {
     setPagination((prev) => ({ ...prev, size: newValue }));
-    newValue == DEFAULT_PAGINATION.size
-      ? searchParams.delete("pSize")
-      : searchParams.set("pSize", newValue);
+    newValue == DEFAULT_PAGINATION.size ? searchParams.delete("pSize") : searchParams.set("pSize", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
   const handleChangeFollowed = (newValue) => {
     setPagination((prev) => ({ ...prev, followed: newValue }));
-    newValue == DEFAULT_PAGINATION.followed
-      ? searchParams.delete("followed")
-      : searchParams.set("followed", newValue);
+    newValue == DEFAULT_PAGINATION.followed ? searchParams.delete("followed") : searchParams.set("followed", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
@@ -270,15 +230,11 @@ const Shops = () => {
         );
       })
     ) : (
-      <Box sx={{ marginTop: 2, width: "100%", textAlign: "center" }}>
-        Không tìm thấy cửa hàng nào!
-      </Box>
+      <Box sx={{ marginTop: 2, width: "100%", textAlign: "center" }}>Không tìm thấy cửa hàng nào!</Box>
     );
   } else if (isError) {
     shopsContent = (
-      <Box sx={{ marginTop: 2, width: "100%", textAlign: "center" }}>
-        {error?.error ?? "Đã xảy ra lỗi!"}
-      </Box>
+      <Box sx={{ marginTop: 2, width: "100%", textAlign: "center" }}>{error?.error ?? "Đã xảy ra lỗi!"}</Box>
     );
   }
 
@@ -295,9 +251,7 @@ const Shops = () => {
         )}
       </CustomBreadcrumbs>
       <Container ref={scrollRef}>
-        <CustomDivider sx={{ display: { xs: "none", md: "flex" } }}>
-          DANH SÁCH CỬA HÀNG
-        </CustomDivider>
+        <CustomDivider sx={{ display: { xs: "none", md: "flex" } }}>DANH SÁCH CỬA HÀNG</CustomDivider>
         {!tabletMode && keyword && (
           <Keyword>
             <span>
@@ -336,6 +290,7 @@ const Shops = () => {
             <JumpPagination
               {...{
                 pagination,
+                totalPages: data?.totalPages ?? 0,
                 onPageChange: handleChangePage,
                 open: openPagination,
                 handleClose: handleClosePagination,

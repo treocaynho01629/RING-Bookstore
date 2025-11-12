@@ -12,12 +12,13 @@ import Divider from "@mui/material/Divider";
 import Paper from "@mui/material/Paper";
 import NightlightOutlined from "@mui/icons-material/NightlightOutlined";
 import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
-import DeliveryDiningOutlined from "@mui/icons-material/DeliveryDiningOutlined";
-import LockOutlined from "@mui/icons-material/LockOutlined";
+import LocalShippingOutlined from "@mui/icons-material/LocalShippingOutlined";
+import Logout from "@mui/icons-material/Logout";
 import ContrastOutlined from "@mui/icons-material/ContrastOutlined";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import LockOutlined from "@mui/icons-material/LockOutlined";
 
-const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, signOut, mode, setMode }) => {
+const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, handleSignOut, mode, setMode, username }) => {
   const { t, i18n } = useTranslation();
   const [openSetting, setOpenSetting] = useState(null);
   const open = Boolean(anchorEl);
@@ -41,22 +42,42 @@ const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, signOut, mo
   };
 
   const mainPopover = [
-    <Link to={"/profile/detail"} key="profile-detail" title={t("profile")}>
-      <MenuItem>
-        <Avatar sx={{ width: 30, height: 30, ml: -0.5, mr: 1 }} src={image ?? null} />
-        {t("profile")}
-      </MenuItem>
-    </Link>,
-    <Link to={"/profile/order"} key="profile-order" title={t("order.label", { ns: "client" })}>
-      <MenuItem>
-        <ListItemIcon>
-          <DeliveryDiningOutlined fontSize="small" />
-        </ListItemIcon>
-        {t("order.label", { ns: "client" })}
-      </MenuItem>
-    </Link>,
+    username ? (
+      <Link to={"/profile/detail"} key="profile-detail" title={t("profile")}>
+        <MenuItem>
+          <Avatar sx={{ width: 30, height: 30, ml: -0.5, mr: 1.5 }} src={image ?? null} />
+          {t("profile")}
+        </MenuItem>
+      </Link>
+    ) : (
+      <Link to={"/auth/register"} key="auth-register" title={t("signup")}>
+        <MenuItem>
+          <Avatar sx={{ width: 30, height: 30, ml: -0.5, mr: 1.5 }} />
+          {t("signup")}
+        </MenuItem>
+      </Link>
+    ),
+    username ? (
+      <Link to={"/profile/order"} key="profile-order" title={t("order.label", { ns: "client" })}>
+        <MenuItem>
+          <ListItemIcon>
+            <LocalShippingOutlined fontSize="small" />
+          </ListItemIcon>
+          {t("order.label", { ns: "client" })}
+        </MenuItem>
+      </Link>
+    ) : (
+      <Link to={"/auth/login"} key="auth-login" title={t("login")}>
+        <MenuItem>
+          <ListItemIcon>
+            <LockOutlined fontSize="small" />
+          </ListItemIcon>
+          {t("login")}
+        </MenuItem>
+      </Link>
+    ),
     <Divider key="divider" />,
-    <MenuItem aria-label="Change theme" key="theme" onClick={(e) => setOpenSetting("theme")}>
+    <MenuItem aria-label={t("theme.description")} key="theme" onClick={(e) => setOpenSetting("theme")}>
       <ListItemIcon>
         {mode === "dark" ? (
           <NightlightOutlined fontSize="small" />
@@ -76,12 +97,14 @@ const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, signOut, mo
       </ListItemIcon>
       {t("language.label")}: {upperCase(i18n.language)}
     </MenuItem>,
-    <MenuItem key="logout" onClick={() => signOut()}>
-      <ListItemIcon>
-        <LockOutlined fontSize="small" />
-      </ListItemIcon>
-      {t("logout")}
-    </MenuItem>,
+    username && (
+      <MenuItem key="logout" onClick={handleSignOut}>
+        <ListItemIcon>
+          <Logout fontSize="small" />
+        </ListItemIcon>
+        {t("logout")}
+      </MenuItem>
+    ),
   ];
 
   const languagePopover = [

@@ -71,14 +71,16 @@ const ImageContainer = styled.div`
   border-color: ${(props) => getColor(props)};
   cursor: pointer;
 
-  &:hover {
-    ${ImagePlaceholder} {
-      opacity: 1;
-      background-color: ${({ theme }) => theme.vars.palette.action.hover};
-    }
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      ${ImagePlaceholder} {
+        opacity: 1;
+        background-color: ${({ theme }) => theme.vars.palette.action.hover};
+      }
 
-    ${Image} {
-      opacity: 0.5;
+      ${Image} {
+        opacity: 0.5;
+      }
     }
   }
 `;
@@ -111,32 +113,33 @@ const BadgeButton = styled.span`
     margin-right: 0;
   }
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.error.main};
-    transition: 0.2s ease;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme }) => theme.vars.palette.error.main};
+      transition: 0.2s ease;
+    }
   }
 `;
 //#endregion
 
 const ImageSelect = ({ image, handleRemoveImage, file, setFile }) => {
-  const { getRootProps, getInputProps, isFocused, isDragAccept, isDragReject } =
-    useDropzone({
-      maxFiles: 1,
-      maxSize: 2000000,
-      multiple: false,
-      accept: {
-        "image/*": [],
-      },
-      onDrop: (acceptedFiles) => {
-        setFile(
-          acceptedFiles.map((file) =>
-            Object.assign(file, {
-              preview: URL.createObjectURL(file),
-            })
-          )
-        );
-      },
-    });
+  const { getRootProps, getInputProps, isFocused, isDragAccept, isDragReject } = useDropzone({
+    maxFiles: 1,
+    maxSize: 2000000,
+    multiple: false,
+    accept: {
+      "image/*": [],
+    },
+    onDrop: (acceptedFiles) => {
+      setFile(
+        acceptedFiles.map((file) =>
+          Object.assign(file, {
+            preview: URL.createObjectURL(file),
+          })
+        )
+      );
+    },
+  });
 
   useEffect(() => {
     // Make sure to revoke the data uris to avoid memory leaks, will run on unmount
@@ -160,9 +163,7 @@ const ImageSelect = ({ image, handleRemoveImage, file, setFile }) => {
 
   return (
     <section className="container">
-      <ImageContainer
-        {...getRootProps({ isFocused, isDragAccept, isDragReject })}
-      >
+      <ImageContainer {...getRootProps({ isFocused, isDragAccept, isDragReject })}>
         <input {...getInputProps()} />
         <CustomBadge
           overlap="circular"

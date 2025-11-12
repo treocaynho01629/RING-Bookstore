@@ -32,6 +32,7 @@ import Grid from "@mui/material/Grid";
 import useCart from "../../hooks/useCart";
 import styled from "@emotion/styled";
 import SearchInput from "./SearchInput";
+import useConfirm from "@ring/shared/useConfirm";
 
 const NavDrawer = lazy(() => import("./NavDrawer"));
 const MiniCart = lazy(() => import("./MiniCart"));
@@ -123,9 +124,11 @@ const Social = styled.p`
     font-size: 18px;
   }
 
-  &:hover {
-    background-color: #${({ color }) => color};
-    color: white;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: #${({ color }) => color};
+      color: white;
+    }
   }
 `;
 
@@ -158,9 +161,11 @@ const NavItem = styled.div`
 const StyledIconButton = styled(IconButton)`
   border-radius: 0;
 
-  &:hover {
-    background-color: transparent;
-    color: ${({ theme }) => theme.vars.palette.primary.main};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: transparent;
+      color: ${({ theme }) => theme.vars.palette.primary.main};
+    }
   }
 
   &.nav {
@@ -254,13 +259,13 @@ const SearchComponent = ({ tabletMode, show, toggle, setToggle, isSearch, isShop
     <Box display="flex" alignItems="center" flex={1} flexDirection={{ xs: "row-reverse", md: "row" }}>
       {tabletMode && isSearch ? (
         <Link to={"/"} title={t("home")}>
-          <StyledIconButton aria-label="home">
+          <StyledIconButton aria-label={t("home")}>
             <HomeOutlined />
           </StyledIconButton>
         </Link>
       ) : (
         <Link to={"/store"} title={t("shop.explore", { ns: "client" })}>
-          <StyledIconButton aria-label="explore">
+          <StyledIconButton aria-label={t("shop.explore", { ns: "client" })}>
             <Storefront />
           </StyledIconButton>
         </Link>
@@ -276,8 +281,8 @@ const SearchComponent = ({ tabletMode, show, toggle, setToggle, isSearch, isShop
           }}
         />
         {tabletMode && isSearch ? (
-          <Link to={"/cart"} title={t("login", { ns: "client" })}>
-            <StyledIconButton aria-label="cart">
+          <Link to={"/cart"} title={t("cart.label", { ns: "client" })}>
+            <StyledIconButton aria-label={t("cart.label", { ns: "client" })} sx={{ mr: { xs: 0.3, md: 0 } }}>
               <Badge
                 color="primary"
                 badgeContent={products?.length}
@@ -291,7 +296,11 @@ const SearchComponent = ({ tabletMode, show, toggle, setToggle, isSearch, isShop
             </StyledIconButton>
           </Link>
         ) : (
-          <StyledIconButton aria-label="search toggle" onClick={toggleSearch} sx={{ mr: { xs: 0.3, md: 0 } }}>
+          <StyledIconButton
+            aria-label={t("search.toggle", { ns: "client" })}
+            onClick={toggleSearch}
+            sx={{ mr: { xs: 0.3, md: 0 } }}
+          >
             {show ? <SearchOff /> : <Search />}
           </StyledIconButton>
         )}
@@ -300,7 +309,7 @@ const SearchComponent = ({ tabletMode, show, toggle, setToggle, isSearch, isShop
   );
 };
 
-const PopoverComponents = ({ mode, setMode, cartProducts, username, image, signOut, location }) => {
+const PopoverComponents = ({ mode, setMode, cartProducts, username, image, handleSignOut, location }) => {
   const { t } = useTranslation();
 
   // Anchor for popoever & open state
@@ -401,43 +410,44 @@ const PopoverComponents = ({ mode, setMode, cartProducts, username, image, signO
               </Suspense>
             )}
           </Box>
-          {username ? (
-            <Box
-              aria-owns={anchorEl ? "mouse-over-popover-profile" : undefined}
-              aria-haspopup="true"
-              onMouseEnter={handleProfilePopover}
-              onMouseLeave={handleProfileClose}
-            >
+          <Box
+            aria-owns={anchorEl ? "mouse-over-popover-profile" : undefined}
+            aria-haspopup="true"
+            onMouseEnter={handleProfilePopover}
+            onMouseLeave={handleProfileClose}
+          >
+            {username ? (
               <Link to={"/profile/detail"} title={t("profile")}>
                 <StyledIconButton className="nav" aria-label={t("profile")}>
                   <Avatar sx={{ width: 24, height: 24, fontSize: "16px" }} src={image ?? null} />
                   <IconText className="username">{username}</IconText>
                 </StyledIconButton>
               </Link>
-              {anchorEl !== undefined && (
-                <Suspense fallback={null}>
-                  <ProfilePopover
-                    {...{
-                      anchorEl,
-                      setAnchorEl,
-                      handleClose: handleProfileClose,
-                      signOut,
-                      mode,
-                      setMode,
-                      image,
-                    }}
-                  />
-                </Suspense>
-              )}
-            </Box>
-          ) : (
-            <Link to={"/auth/login"} state={{ from: location }} title={t("login")}>
-              <StyledIconButton className="nav" aria-label={t("login")}>
-                <LockOutlined />
-                <IconText className="username">{t("login")}</IconText>
-              </StyledIconButton>
-            </Link>
-          )}
+            ) : (
+              <Link to={"/auth/login"} state={{ from: location }} title={t("login")}>
+                <StyledIconButton className="nav" aria-label={t("login")}>
+                  <LockOutlined />
+                  <IconText className="username">{t("login")}</IconText>
+                </StyledIconButton>
+              </Link>
+            )}
+            {anchorEl !== undefined && (
+              <Suspense fallback={null}>
+                <ProfilePopover
+                  {...{
+                    anchorEl,
+                    setAnchorEl,
+                    handleClose: handleProfileClose,
+                    handleSignOut,
+                    mode,
+                    setMode,
+                    image,
+                    username,
+                  }}
+                />
+              </Suspense>
+            )}
+          </Box>
         </Stack>
       </NavItem>
     </Grid>
@@ -452,6 +462,7 @@ const Navbar = () => {
   const showMenu = useMatch("/");
   const isTransparent = matchRoutes([{ path: "/" }, { path: "/product/*" }], location);
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md"));
+  const [ConfirmationDialog, confirm] = useConfirm(t("signout.confirmation"), t("signout.message"));
 
   // Search
   const isStore = useMatch("/store");
@@ -466,6 +477,14 @@ const Navbar = () => {
   // Other
   const { username, image } = useAuth();
   const signOut = useLogout();
+
+  /**
+   * Sign out
+   */
+  const handleSignOut = async () => {
+    const confirmation = await confirm();
+    if (confirmation) signOut();
+  };
 
   /**
    * Set the drawer open state.
@@ -538,12 +557,14 @@ const Navbar = () => {
 
   useEffect(() => {
     window.removeEventListener("scroll", windowScrollListener);
-    if (tabletMode && isTransparent) window.addEventListener("scroll", windowScrollListener);
-    handleResetStyles();
+    if (tabletMode && isTransparent) {
+      window.addEventListener("scroll", windowScrollListener);
+    } else {
+      handleResetStyles();
+    }
 
     return () => {
       window.removeEventListener("scroll", windowScrollListener);
-      handleResetStyles();
     };
   }, [tabletMode, isTransparent]);
 
@@ -625,7 +646,7 @@ const Navbar = () => {
                         image,
                         location,
                         products: cartProducts,
-                        signOut,
+                        handleSignOut,
                         mode,
                         setMode,
                         handleOpen: () => handleToggleDrawer(true),
@@ -660,7 +681,7 @@ const Navbar = () => {
                   cartProducts,
                   username,
                   image,
-                  signOut,
+                  handleSignOut,
                   location,
                 }}
               />
@@ -668,6 +689,7 @@ const Navbar = () => {
           </Grid>
         </Wrapper>
       </StyledAppBar>
+      <ConfirmationDialog />
     </>
   );
 };

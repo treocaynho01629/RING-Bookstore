@@ -1,11 +1,5 @@
 import styled from "@emotion/styled";
-import {
-  Pagination,
-  PaginationItem,
-  MenuItem,
-  TextField,
-  paginationItemClasses,
-} from "@mui/material";
+import { Pagination, PaginationItem, MenuItem, TextField, paginationItemClasses } from "@mui/material";
 import { pageSizes } from "../../utils/filters";
 
 //#region styled
@@ -60,9 +54,11 @@ const StyledPagination = styled(Pagination)`
 const StyledPageItem = styled(PaginationItem)`
   background-color: ${({ theme }) => theme.vars.palette.action.focus};
 
-  &:hover {
-    background-color: ${({ theme }) => theme.vars.palette.primary.light};
-    color: ${({ theme }) => theme.vars.palette.primary.contrastText};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: ${({ theme }) => theme.vars.palette.primary.light};
+      color: ${({ theme }) => theme.vars.palette.primary.contrastText};
+    }
   }
 
   &.Mui-disabled {
@@ -78,14 +74,7 @@ const StyledPageItem = styled(PaginationItem)`
 `;
 //#endregion
 
-const AppPagination = ({
-  page,
-  count,
-  size,
-  onPageChange,
-  onSizeChange,
-  sizes,
-}) => {
+const AppPagination = ({ page, count, size, onPageChange, onSizeChange, sizes }) => {
   //Initial value
   const currPage = page + 1;
   const totalPages = count;

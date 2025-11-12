@@ -57,8 +57,10 @@ const ItemTitle = styled.p`
     color: ${({ theme }) => theme.vars.palette.error.light};
   }
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.info.main};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme }) => theme.vars.palette.info.main};
+    }
   }
 
   ${({ theme }) => theme.breakpoints.down("sm")} {

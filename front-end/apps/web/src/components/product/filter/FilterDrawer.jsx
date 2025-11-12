@@ -83,8 +83,10 @@ const StyledButton = styled.span`
   cursor: pointer;
   transition: width 0.2s ease;
 
-  &:hover {
-    background-color: ${({ theme }) => theme.vars.palette.action.hover};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: ${({ theme }) => theme.vars.palette.action.hover};
+    }
   }
 
   &.filled {

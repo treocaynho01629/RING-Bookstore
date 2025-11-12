@@ -51,7 +51,7 @@ public class ImageServiceImpl implements ImageService {
         try {
             if (file.isEmpty()) {
 
-                var errorMsg = messageService.getMessage("exception.image.not.found" );
+                var errorMsg = messageService.getMessage("exception.image.not.found");
                 throw new HttpResponseException(HttpStatus.BAD_REQUEST,
                         AppConstants.INVALID_ARGUMENT,
                         errorMsg);
@@ -59,7 +59,7 @@ public class ImageServiceImpl implements ImageService {
             Image image = imageRepo.findById(id)
                     .orElseThrow(() -> {
                         var errorMsg = messageService.getMessage("exception.not.found",
-                                new Object[]{ new DefaultMessageSourceResolvable("label.image") });
+                                new Object[] { new DefaultMessageSourceResolvable("label.image") });
                         return new ResourceNotFoundException(errorMsg);
                     });
 
@@ -130,10 +130,11 @@ public class ImageServiceImpl implements ImageService {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         String formatName = Strings.isNullOrEmpty(file.getContentType())
-                ? "" : file.getContentType().split("/")[1];
+                ? ""
+                : file.getContentType().split("/")[1];
         if (formatName.isBlank()) {
             var errorMsg = messageService.getMessage("exception.empty",
-                    new Object[]{ new DefaultMessageSourceResolvable("label.image.name") });
+                    new Object[] { new DefaultMessageSourceResolvable("label.image.name") });
             throw new HttpResponseException(HttpStatus.BAD_REQUEST,
                     AppConstants.INVALID_ARGUMENT,
                     errorMsg);
@@ -155,7 +156,7 @@ public class ImageServiceImpl implements ImageService {
         if (!FileUploadUtil.isAllowedExtension(fileName, FileUploadUtil.IMAGE_PATTERN)) {
 
             var errorMsg = messageService.getMessage("exception.invalid",
-                    new Object[]{ new DefaultMessageSourceResolvable("label.image") });
+                    new Object[] { new DefaultMessageSourceResolvable("label.image") });
             throw new HttpResponseException(HttpStatus.BAD_REQUEST,
                     AppConstants.INVALID_ARGUMENT,
                     errorMsg);
@@ -165,7 +166,7 @@ public class ImageServiceImpl implements ImageService {
     /**
      * Upload image asynchronously.
      * 
-     * @param file The multipart file.
+     * @param file       The multipart file.
      * @param folderName The folder name.
      * @return The image.
      */
@@ -188,10 +189,10 @@ public class ImageServiceImpl implements ImageService {
         CompletableFuture<Void> allUploads = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
         return allUploads.thenApply(v -> futures.stream()
-                        .map(CompletableFuture::join) // Join each future to get the result
-                        .filter(Objects::nonNull) // Filter out any failed uploads
-                        .collect(Collectors.toList()))
-                        .join();
+                .map(CompletableFuture::join) // Join each future to get the result
+                .filter(Objects::nonNull) // Filter out any failed uploads
+                .collect(Collectors.toList()))
+                .join();
     }
 
     public boolean deleteImage(Long id) {

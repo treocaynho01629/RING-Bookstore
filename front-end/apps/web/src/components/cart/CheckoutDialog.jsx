@@ -25,9 +25,10 @@ import useOffset from "../../hooks/useOffset";
 import ShoppingCartCheckout from "@mui/icons-material/ShoppingCartCheckout";
 import LocalActivityOutlined from "@mui/icons-material/LocalActivityOutlined";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import Collapse from "@mui/material/Collapse";
+import CouponDisplay from "../coupon/CouponDisplay";
 
 const SwipeableDrawer = lazy(() => import("@mui/material/SwipeableDrawer"));
-const CouponDisplay = lazy(() => import("../coupon/CouponDisplay"));
 
 const CheckoutDialog = ({
   coupon,
@@ -228,7 +229,9 @@ const CheckoutDialog = ({
                 {coupon && numSelected > 0 && <span>{t("cart.coupon.applied", { ns: "client" })}</span>}
               </CheckoutTitle>
               <CheckoutRow>
-                <Suspense fallback={null}>{coupon && numSelected > 0 && <CouponDisplay coupon={coupon} />}</Suspense>
+                <Collapse sx={{ width: "100%" }} in={coupon && numSelected} timeout={250} unmountOnExit>
+                  <CouponDisplay coupon={coupon} />
+                </Collapse>
               </CheckoutRow>
               <CouponButton onClick={() => handleOpenDialog()}>
                 <span>

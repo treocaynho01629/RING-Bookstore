@@ -143,11 +143,13 @@ export const StoreSuggest = styled.div`
   background-color: ${({ theme }) => theme.vars.palette.background.paper};
   transition: all 0.2s ease;
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.success.main};
-    background-color: ${({ theme }) =>
-      `color-mix(in srgb, ${theme.vars.palette.success.light}, 
-      transparent 90%)`};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme }) => theme.vars.palette.success.main};
+      background-color: ${({ theme }) =>
+        `color-mix(in srgb, ${theme.vars.palette.success.light}, 
+        transparent 90%)`};
+    }
   }
 
   span {

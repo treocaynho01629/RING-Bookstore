@@ -118,15 +118,19 @@ const BadgeButton = styled.span`
   }
 
   &.edit {
-    &:hover {
-      color: ${({ theme }) => theme.vars.palette.primary.main};
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        color: ${({ theme }) => theme.vars.palette.primary.main};
+      }
     }
   }
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.error.main};
-    background-color: ${({ theme }) => theme.vars.palette.grey[200]};
-    transition: 0.25s ease;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme }) => theme.vars.palette.error.main};
+      background-color: ${({ theme }) => theme.vars.palette.grey[200]};
+      transition: 0.25s ease;
+    }
   }
 `;
 //#endregion

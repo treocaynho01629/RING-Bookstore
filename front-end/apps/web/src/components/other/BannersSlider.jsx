@@ -14,15 +14,15 @@ import Carousel from "react-multi-carousel";
 
 //#region styled
 const CustomDotButton = styled("span")(({ theme }) => ({
-  width: 8,
-  height: 8,
-  margin: "0 4px 15px",
-  borderRadius: "50%",
-  border: ".5px solid",
-  cursor: "pointer",
-  transition: "width .1s ease",
-  borderColor: theme.vars.palette.action.focus,
-  backgroundColor: theme.vars.palette.grey[400],
+  "width": 8,
+  "height": 8,
+  "margin": "0 4px 15px",
+  "borderRadius": "50%",
+  "border": ".5px solid",
+  "cursor": "pointer",
+  "transition": "width .1s ease",
+  "borderColor": theme.vars.palette.action.focus,
+  "backgroundColor": theme.vars.palette.grey[400],
   ...theme.applyStyles("dark", {
     backgroundColor: theme.vars.palette.grey[700],
   }),
@@ -57,10 +57,12 @@ const CustomArrowButton = styled.div`
   opacity: 0.8;
   z-index: 1;
 
-  &:hover {
-    opacity: 1;
-    transform: scale(1.1);
-    background-color: ${({ theme }) => theme.vars.palette.background.default};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      opacity: 1;
+      transform: scale(1.1);
+      background-color: ${({ theme }) => theme.vars.palette.background.default};
+    }
   }
 
   &.left {
@@ -98,8 +100,7 @@ const BackdropImage = styled(LazyLoadImage)`
   width: 130%;
   height: 130%;
   object-fit: fill;
-  background-color: ${({ theme }) =>
-    theme.vars.palette.action.disabledBackground};
+  background-color: ${({ theme }) => theme.vars.palette.action.disabledBackground};
 `;
 
 const BackdropPlaceholder = styled(Skeleton)`
@@ -128,8 +129,7 @@ const StyledLazyImage = styled(LazyLoadImage)`
   width: 100%;
   height: 100%;
   object-fit: fill;
-  background-color: ${({ theme }) =>
-    theme.vars.palette.action.disabledBackground};
+  background-color: ${({ theme }) => theme.vars.palette.action.disabledBackground};
 
   ${({ theme }) => theme.breakpoints.down("md")} {
     width: 90%;
@@ -199,18 +199,13 @@ const responsive = {
 };
 
 const CustomArrow = ({ onClick, className, direction }) => (
-  <CustomArrowButton
-    className={`${className ?? ""} ${direction}`}
-    onClick={onClick}
-  >
+  <CustomArrowButton className={`${className ?? ""} ${direction}`} onClick={onClick}>
     {direction == "left" ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
   </CustomArrowButton>
 );
 
 const CustomDot = ({ onClick, active }) => {
-  return (
-    <CustomDotButton className={active ? "active" : ""} onClick={onClick} />
-  );
+  return <CustomDotButton className={active ? "active" : ""} onClick={onClick} />;
 };
 
 function Item({ banner, index }) {
@@ -223,26 +218,19 @@ function Item({ banner, index }) {
               aria-hidden
               src={banner?.image?.srcSet[ImageSize?.TINY?.value]}
               visibleByDefault={index == 0}
-              placeholder={
-                <BackdropPlaceholder variant="rectangular" animation={false} />
-              }
+              placeholder={<BackdropPlaceholder variant="rectangular" animation={false} />}
             />
           </BackdropContainer>
           <StyledLink to={banner?.url}>
             <StyledLazyImage
               src={banner?.image.url}
               srcSet={Object.values(ImageSize)
-                .map(
-                  (size) =>
-                    `${banner?.image?.srcSet[size?.value]} ${size?.width}w`
-                )
+                .map((size) => `${banner?.image?.srcSet[size?.value]} ${size?.width}w`)
                 .concat(`${banner?.image.url} 600w`)
                 .join(", ")}
               alt={banner?.name}
               visibleByDefault={index == 0}
-              placeholder={
-                <StyledSkeleton variant="rectangular" animation={false} />
-              }
+              placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
             />
           </StyledLink>
         </>
@@ -267,9 +255,7 @@ function ExtraItem({ banner }) {
             src={banner?.image?.srcSet[ImageSize?.MEDIUM?.value]}
             alt={banner?.name}
             visibleByDefault={true}
-            placeholder={
-              <StyledSkeleton variant="rectangular" animation={false} />
-            }
+            placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
           />
         </StyledLink>
       </ExtraContainer>
@@ -287,8 +273,7 @@ const ExtraBanners = ({ extraBanners, slideIndex, totalBanners }) => {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    let newIndex =
-      totalBanners <= 1 ? 0 : slideIndex >= totalBanners - 1 ? -1 : slideIndex;
+    let newIndex = totalBanners <= 1 ? 0 : slideIndex >= totalBanners - 1 ? -1 : slideIndex;
     scrollRef.current.style.setProperty("--scroll-offset", newIndex);
   }, [slideIndex]);
 
@@ -311,11 +296,7 @@ const BannersSlider = () => {
 
   if (isLoading || isError) {
     bannersContent = <Item />;
-    extraBanners = [
-      <ExtraItem key={"temp-1"} />,
-      <ExtraItem key={"temp-2"} />,
-      <ExtraItem key={"temp-3"} />,
-    ];
+    extraBanners = [<ExtraItem key={"temp-1"} />, <ExtraItem key={"temp-2"} />, <ExtraItem key={"temp-3"} />];
   } else if (isSuccess) {
     const { ids, entities } = data;
 
@@ -324,13 +305,7 @@ const BannersSlider = () => {
 
       ids?.map((id, index) => {
         const banner = entities[id];
-        bannersContent.push(
-          <Item
-            key={`banner-${banner?.id}-${index}`}
-            banner={banner}
-            index={index}
-          />
-        );
+        bannersContent.push(<Item key={`banner-${banner?.id}-${index}`} banner={banner} index={index} />);
         extraBanners.push(
           <Fragment key={`extra-${banner?.id}-${index}`}>
             <ExtraItem banner={banner} />
@@ -347,22 +322,12 @@ const BannersSlider = () => {
       );
     } else {
       bannersContent = <Item />;
-      extraBanners = [
-        <ExtraItem key={"temp-1"} />,
-        <ExtraItem key={"temp-2"} />,
-        <ExtraItem key={"temp-3"} />,
-      ];
+      extraBanners = [<ExtraItem key={"temp-1"} />, <ExtraItem key={"temp-2"} />, <ExtraItem key={"temp-3"} />];
     }
   }
 
   return (
-    <Grid
-      container
-      spacing={1}
-      size={12}
-      mb={{ xs: 2.5, md: -1 }}
-      mt={{ xs: 0, md: 2 }}
-    >
+    <Grid container spacing={1} size={12} mb={{ xs: 2.5, md: -1 }} mt={{ xs: 0, md: 2 }}>
       <Grid size={{ xs: 12, md: "grow" }}>
         <Carousel
           responsive={responsive}
@@ -374,13 +339,7 @@ const BannersSlider = () => {
           removeArrowOnDeviceType={["mobile"]}
           customDot={<CustomDot />}
           beforeChange={(nextSlide) => {
-            setSlideIndex(
-              nextSlide > 5
-                ? nextSlide - 6
-                : nextSlide < 2
-                  ? nextSlide + 2
-                  : nextSlide - 2
-            );
+            setSlideIndex(nextSlide > 5 ? nextSlide - 6 : nextSlide < 2 ? nextSlide + 2 : nextSlide - 2);
           }}
           pauseOnHover
           keyBoardControl
@@ -391,11 +350,7 @@ const BannersSlider = () => {
         </Carousel>
       </Grid>
       {!tabletMode && (
-        <Grid
-          size={4}
-          display={{ xs: "none", md: "block" }}
-          sx={{ position: "relative" }}
-        >
+        <Grid size={4} display={{ xs: "none", md: "block" }} sx={{ position: "relative" }}>
           <ExtraBanners
             {...{
               extraBanners,

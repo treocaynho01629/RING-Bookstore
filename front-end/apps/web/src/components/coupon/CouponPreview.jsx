@@ -331,7 +331,7 @@ const CouponPreview = ({ shopId, scrollPosition }) => {
           <KeyboardArrowRight fontSize="small" />
         </MobileExtendButton>
       </CouponContainer>
-      <Suspense fallback={<></>}>
+      <Suspense fallback={null}>
         {openDialog !== undefined && <CouponDialog {...{ open: openDialog, handleClose: handleCloseDialog, shopId }} />}
       </Suspense>
     </CouponWrapper>

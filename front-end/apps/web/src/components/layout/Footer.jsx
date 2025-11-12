@@ -1,18 +1,17 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Facebook from "@mui/icons-material/Facebook";
 import YouTube from "@mui/icons-material/YouTube";
 import LinkedIn from "@mui/icons-material/LinkedIn";
 import Twitter from "@mui/icons-material/Twitter";
-import QrCode from "@mui/icons-material/QrCode";
-import LocalAtm from "@mui/icons-material/LocalAtm";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Collapse from "@mui/material/Collapse";
 import Grid from "@mui/material/Grid";
 
 //#region styled
-const Wrapper = styled.div`
+const Wrapper = styled.footer`
   background-color: ${({ theme }) => theme.vars.palette.divider};
   border-top: 2px solid ${({ theme }) => theme.vars.palette.primary.main};
   margin-top: 15dvh;
@@ -107,9 +106,11 @@ const SocialIcon = styled.div`
     font-size: 20px;
   }
 
-  &:hover {
-    transform: scale(1.1);
-    border-radius: 45%;
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: scale(1.1);
+      border-radius: 45%;
+    }
   }
 `;
 
@@ -134,6 +135,8 @@ const Title = styled.h4`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  text-transform: uppercase;
+  cursor: pointer;
 
   svg {
     display: none;
@@ -176,8 +179,10 @@ const ListItem = styled.li`
   cursor: pointer;
   transition: all 0.25s ease;
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.primary.dark};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme }) => theme.vars.palette.primary.dark};
+    }
   }
 `;
 
@@ -199,10 +204,12 @@ const Payment = styled.div`
   margin-bottom: 3px;
   border: 0.5px solid ${({ theme }) => theme.vars.palette.action.focus};
 
-  &:hover {
-    background-color: ${({ theme }) => theme.vars.palette.primary.light};
-    color: ${({ theme }) => theme.vars.palette.primary.contrastText};
-    transform: translateX(5px);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: ${({ theme }) => theme.vars.palette.primary.light};
+      color: ${({ theme }) => theme.vars.palette.primary.contrastText};
+      transform: translateX(5px);
+    }
   }
 `;
 
@@ -246,53 +253,72 @@ const Name = styled.b`
 `;
 //#endregion
 
-const support = (
-  <>
-    <ListItem>Chính sách đổi - trả - hoàn tiền</ListItem>
-    <ListItem>Phương thức vận chuyển</ListItem>
-    <ListItem>Phương thức thanh toán</ListItem>
-    <ListItem>Câu hỏi thường gặp</ListItem>
-    <ListItem>Hướng dẫn đặt hàng</ListItem>
-  </>
-);
+const supportItems = [
+  {
+    title: "footer.support.refund",
+  },
+  {
+    title: "footer.support.shipping",
+  },
+  {
+    title: "footer.support.payment",
+  },
+  {
+    title: "footer.support.faq",
+  },
+  {
+    title: "footer.support.order",
+  },
+];
 
-const information = (
-  <>
-    <ListItem>Giới thiệu</ListItem>
-    <ListItem>Tuyển dụng</ListItem>
-    <ListItem>Chính sách khiếu nại</ListItem>
-    <ListItem>Điều khoản sử dụng</ListItem>
-  </>
-);
+const informationItems = [
+  {
+    title: "footer.information.about",
+  },
+  {
+    title: "footer.information.recruitment",
+  },
+];
 
-const services = (
-  <>
-    <ListItem>Chính sách bảo mật</ListItem>
-    <ListItem>Hệ thống hàng</ListItem>
-  </>
-);
+const servicesItems = [
+  {
+    title: "footer.services.privacy",
+  },
+  {
+    title: "footer.services.warehouse",
+  },
+];
 
-const payments = (
-  <>
-    <ListItem>Phương thức thanh toán</ListItem>
-    <PaymentList>
-      <Payment>
-        <QrCode />
-        Online Payment
-      </Payment>
-      <Payment>
-        <LocalAtm />
-        Tiền mặt
-      </Payment>
-    </PaymentList>
-  </>
-);
+const paymentsItems = [
+  {
+    title: "footer.payments.payment",
+  },
+  {
+    title: "footer.payments.cash",
+  },
+  {
+    title: "footer.payments.payOS",
+  },
+];
 
 const Footer = () => {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
+
+  /**
+   * Toggle the open state of the tab
+   * @param {string} tab - The tab to open
+   */
   const handleClick = (tab) => {
     setOpen((prev) => ({ ...prev, [tab]: !prev[tab] }));
   };
+
+  const support = supportItems.map((item) => <ListItem key={item.title}>{t(item.title, { ns: "client" })}</ListItem>);
+  const information = informationItems.map((item) => (
+    <ListItem key={item.title}>{t(item.title, { ns: "client" })}</ListItem>
+  ));
+  const services = servicesItems.map((item) => <ListItem key={item.title}>{t(item.title, { ns: "client" })}</ListItem>);
+  const payments = paymentsItems.map((item) => <ListItem key={item.title}>{t(item.title, { ns: "client" })}</ListItem>);
 
   return (
     <Wrapper>
@@ -301,9 +327,7 @@ const Footer = () => {
           <Grid size={{ xs: 12, lg: "auto" }}>
             <AddressContainer>
               <Logo src="/full-logo.svg" alt="RING! logo" />
-              <Description>
-                Khu phố 6, Phường Linh Trung, TP. Thủ Đức - TP. Hồ Chí Minh
-              </Description>
+              <Description>{t("footer.address", { ns: "client" })}</Description>
               <Social>
                 <SocialIcon color="3B5999">
                   <Facebook />
@@ -320,15 +344,10 @@ const Footer = () => {
               </Social>
             </AddressContainer>
           </Grid>
-          <Grid
-            container
-            spacing={0.5}
-            size={{ xs: 12, lg: "grow" }}
-            mb={{ xs: 3, sm: 6 }}
-          >
+          <Grid container spacing={0.5} size={{ xs: 12, lg: "grow" }} mb={{ xs: 3, sm: 6 }}>
             <Grid size={{ xs: 12, sm: 3 }}>
               <Title onClick={() => handleClick("support")}>
-                HỖ TRỢ {open["support"] ? <ExpandLess /> : <ExpandMore />}
+                {t("footer.support.title", { ns: "client" })} {open["support"] ? <ExpandLess /> : <ExpandMore />}
               </Title>
               <List>{support}</List>
               <Collapse in={open["support"]} timeout="auto" unmountOnExit>
@@ -337,7 +356,7 @@ const Footer = () => {
             </Grid>
             <Grid size={{ xs: 12, sm: 3 }}>
               <Title onClick={() => handleClick("information")}>
-                THÔNG TIN{" "}
+                {t("footer.information.title", { ns: "client" })}{" "}
                 {open["information"] ? <ExpandLess /> : <ExpandMore />}
               </Title>
               <List>{information}</List>
@@ -347,7 +366,7 @@ const Footer = () => {
             </Grid>
             <Grid size={{ xs: 12, sm: 3 }}>
               <Title onClick={() => handleClick("services")}>
-                DỊCH VỤ {open["services"] ? <ExpandLess /> : <ExpandMore />}
+                {t("footer.services.title", { ns: "client" })} {open["services"] ? <ExpandLess /> : <ExpandMore />}
               </Title>
               <List>{services}</List>
               <Collapse in={open["services"]} timeout="auto" unmountOnExit>
@@ -356,7 +375,7 @@ const Footer = () => {
             </Grid>
             <Grid size={{ xs: 12, sm: 3 }}>
               <Title onClick={() => handleClick("payments")}>
-                THANH TOÁN {open["payments"] ? <ExpandLess /> : <ExpandMore />}
+                {t("footer.payments.title", { ns: "client" })} {open["payments"] ? <ExpandLess /> : <ExpandMore />}
               </Title>
               <List>{payments}</List>
               <Collapse in={open["payments"]} timeout="auto" unmountOnExit>
@@ -367,9 +386,7 @@ const Footer = () => {
         </Grid>
       </Container>
       <BotFooter>
-        <BotText>
-          Giấy chứng nhận Đăng ý kính doanh do TP.HCM cấp ngày 01/01/2022.
-        </BotText>
+        <BotText>{t("footer.copyright", { year: new Date().getFullYear(), ns: "client" })}</BotText>
         <Name>DoraZ</Name>
       </BotFooter>
     </Wrapper>

@@ -40,8 +40,10 @@ const StyledButton = styled.span`
   color: ${({ theme, disabled }) => (disabled ? theme.vars.palette.text.disabled : theme.vars.palette.text.secondary)};
   pointer-events: ${({ disabled }) => (disabled ? "none" : "all")};
 
-  &:hover {
-    color: ${({ theme }) => theme.vars.palette.text.primary};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      color: ${({ theme }) => theme.vars.palette.text.primary};
+    }
   }
 
   ${({ theme }) => theme.breakpoints.down("sm")} {

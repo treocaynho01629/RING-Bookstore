@@ -59,10 +59,12 @@ const CustomArrowButton = styled.div`
   opacity: 0.8;
   z-index: 1;
 
-  &:hover {
-    opacity: 1;
-    transform: scale(1.1);
-    background-color: ${({ theme }) => theme.vars.palette.background.default};
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      opacity: 1;
+      transform: scale(1.1);
+      background-color: ${({ theme }) => theme.vars.palette.background.default};
+    }
   }
 
   &.left {
@@ -102,10 +104,7 @@ const responsive = {
 };
 
 const CustomArrow = ({ onClick, className, direction }) => (
-  <CustomArrowButton
-    className={`${className ?? ""} ${direction}`}
-    onClick={onClick}
-  >
+  <CustomArrowButton className={`${className ?? ""} ${direction}`} onClick={onClick}>
     {direction == "left" ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
   </CustomArrowButton>
 );
@@ -158,11 +157,7 @@ const ProductsSlider = ({
 
   return (
     <Container>
-      {loading && (
-        <Progress
-          color={`${isError || isUninitialized ? "error" : "primary"}`}
-        />
-      )}
+      {loading && <Progress color={`${isError || isUninitialized ? "error" : "primary"}`} />}
       <Carousel
         responsive={responsive}
         customLeftArrow={<CustomArrow direction="left" />}

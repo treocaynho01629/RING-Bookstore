@@ -21,8 +21,10 @@ const ItemContainer = styled.div`
     background-color: ${({ color }) => color};
   }
 
-  &:hover {
-    transform: translateY(-1px);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-1px);
+    }
   }
 
   ${({ theme }) => theme.breakpoints.down("md_lg")} {
@@ -89,12 +91,7 @@ const Suggest = () => {
         bgcolor={"background.paper"}
       >
         {suggest?.map((tab, index) => (
-          <Grid
-            key={`suggest-${index}`}
-            size={{ xs: 2.4, md: 1.2 }}
-            display="flex"
-            justifyContent="center"
-          >
+          <Grid key={`suggest-${index}`} size={{ xs: 2.4, md: 1.2 }} display="flex" justifyContent="center">
             <ItemWrapper key={`suggest-tab-${index}`}>
               <Link to={tab.url} title={tab.label}>
                 <ItemContainer color={tab.color}>

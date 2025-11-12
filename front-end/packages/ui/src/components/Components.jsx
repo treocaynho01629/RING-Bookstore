@@ -18,6 +18,11 @@ export const Instruction = styled.p`
 export const LogoImage = styled.img`
   height: 40px;
   padding: 4px;
+
+  &.contrast {
+    filter: drop-shadow(0px -2000px 0 ${({ theme }) => theme.vars.palette.text.primary});
+    transform: translateY(2000px);
+  }
 `;
 
 export const LogoTitle = styled.span`
