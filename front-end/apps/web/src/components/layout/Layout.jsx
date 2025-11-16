@@ -1,11 +1,13 @@
 import { Outlet } from "react-router";
 import LoadingProgress from "./LoadingProgress";
-// import LanguageSync from "./LanguageSync";
+import TitleLayout from "./TitleLayout";
+// import LanguageSync from "./LanguageSync"; // TODO: Do something with this
 
 const Layout = () => {
   return (
     <main className="App">
       {/* <LanguageSync /> */}
+      <TitleLayout />
       <LoadingProgress />
       <Outlet />
     </main>

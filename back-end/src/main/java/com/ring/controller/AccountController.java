@@ -50,9 +50,11 @@ public class AccountController {
      * @param pageNo   page number.
      * @param sortBy   sorting field.
      * @param sortDir  sorting direction.
-     * @param keyword  a search keyword to filter accounts (default is an empty string).
+     * @param keyword  a search keyword to filter accounts (default is an empty
+     *                 string).
      * @param role     the role to filter accounts (optional).
-     * @return a {@link ResponseEntity} containing a list of accounts wrapped in a {@link Page} object.
+     * @return a {@link ResponseEntity} containing a list of accounts wrapped in a
+     *         {@link Page} object.
      */
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','GUEST') and hasAuthority('read:user')")

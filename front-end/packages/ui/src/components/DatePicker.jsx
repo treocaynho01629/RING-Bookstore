@@ -17,7 +17,7 @@ const StyledDatePicker = styled(MuiDatePicker)(({ theme }) => ({
     borderBottomColor: theme.vars.palette.action.focus,
   },
   "& .MuiOutlinedInput-root": {
-    borderRadius: 0,
+    "borderRadius": 0,
     "& fieldset": {
       borderRadius: 0,
       borderColor: theme.vars.palette.action.focus,
@@ -50,15 +50,13 @@ const StyledDatePicker = styled(MuiDatePicker)(({ theme }) => ({
 }));
 
 const DatePicker = (props) => {
-  const { margin } = props;
+  const { margin, locale } = props;
 
   return (
     <LocalizationProvider
-      localeText={
-        viVN.components.MuiLocalizationProvider.defaultProps.localeText
-      }
+      localeText={locale === "vi" ? viVN.components.MuiLocalizationProvider.defaultProps.localeText : null}
       dateAdapter={AdapterDayjs}
-      adapterLocale="vi"
+      adapterLocale={locale ?? "vi"}
     >
       <FormControl margin={margin ? margin : "none"} fullWidth>
         <StyledDatePicker {...props} />

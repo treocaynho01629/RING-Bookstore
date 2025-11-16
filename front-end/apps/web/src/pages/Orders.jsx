@@ -16,7 +16,7 @@ const Orders = () => {
   const [open, setOpen] = useState(true);
 
   // Set title
-  useTitle("Đơn hàng");
+  //useTitle("Đơn hàng");
 
   const handleClose = (e) => {
     e.preventDefault();

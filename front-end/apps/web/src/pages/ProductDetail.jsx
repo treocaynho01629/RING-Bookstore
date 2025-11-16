@@ -1,10 +1,7 @@
 import { useState, useRef, lazy, Suspense, useEffect } from "react";
 import { Box, Skeleton, Stack, useMediaQuery } from "@mui/material";
 import { useParams, Navigate, NavLink, useSearchParams } from "react-router";
-import {
-  useGetBookDetailQuery,
-  useGetRandomBooksQuery,
-} from "../features/books/booksApiSlice";
+import { useGetBookDetailQuery, useGetRandomBooksQuery } from "../features/books/booksApiSlice";
 import useTitle from "@ring/shared/useTitle";
 import { useGetShopInfoQuery } from "../features/shops/shopsApiSlice";
 import Placeholder from "@ring/ui/Placeholder";
@@ -15,26 +12,16 @@ import ProductSimple from "../components/product/ProductSimple";
 import LazyLoadComponent from "../components/layout/LazyLoadComponent";
 
 const PendingModal = lazy(() => import("@ring/ui"));
-const ProductsSlider = lazy(
-  () => import("../components/product/ProductsSlider")
-);
+const ProductsSlider = lazy(() => import("../components/product/ProductsSlider"));
 const ShopDisplay = lazy(() => import("../components/shop/ShopDisplay"));
-const ProductDetailContainer = lazy(
-  () => import("../components/product/detail/ProductDetailContainer")
-);
-const ReviewComponent = lazy(
-  () => import("../components/review/ReviewComponent")
-);
+const ProductDetailContainer = lazy(() => import("../components/product/detail/ProductDetailContainer"));
+const ReviewComponent = lazy(() => import("../components/review/ReviewComponent"));
 
 const createCrumbs = (cate) => {
   if (cate) {
     return [
       createCrumbs(cate?.parent),
-      <NavLink
-        to={`/store/${cate?.slug}?cate=${cate?.id}`}
-        end
-        key={`crumb-${cate?.id}`}
-      >
+      <NavLink to={`/store/${cate?.slug}?cate=${cate?.id}`} end key={`crumb-${cate?.id}`}>
         {cate?.name}
       </NavLink>,
     ];
@@ -42,11 +29,8 @@ const createCrumbs = (cate) => {
 };
 
 const RandomList = () => {
-  const { data, isLoading, isFetching, isSuccess, isError } =
-    useGetRandomBooksQuery({ amount: 10 });
-  return (
-    <ProductsSlider {...{ isLoading, isFetching, data, isSuccess, isError }} />
-  );
+  const { data, isLoading, isFetching, isSuccess, isError } = useGetRandomBooksQuery({ amount: 10 });
+  return <ProductsSlider {...{ isLoading, isFetching, data, isSuccess, isError }} />;
 };
 
 const ShopComponent = ({ id, name }) => {
@@ -60,11 +44,7 @@ const ShopComponent = ({ id, name }) => {
   const placeholder = <Placeholder sx={placeholderProps} />;
 
   return (
-    <LazyLoadComponent
-      threshold={0.2}
-      sx={placeholderProps}
-      placeholder={placeholder}
-    >
+    <LazyLoadComponent threshold={0.2} sx={placeholderProps} placeholder={placeholder}>
       <ShopDisplay shop={data} name={name} />
     </LazyLoadComponent>
   );
@@ -73,21 +53,21 @@ const ShopComponent = ({ id, name }) => {
 const ProductDetail = () => {
   const { slug, id } = useParams(); // Book id/slug
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isReview, setIsReview] = useState(
-    searchParams.get("review") ?? undefined
-  ); //Is open review tab
+  const [isReview, setIsReview] = useState(searchParams.get("review") ?? undefined); //Is open review tab
   const [pending, setPending] = useState(false); // For reviewing & changing address
   const reviewRef = useRef(null); // Ref for scroll
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md"));
 
   // Fetch data
-  const { data, isLoading, isFetching, isSuccess, isError, error } =
-    useGetBookDetailQuery(slug ? { slug } : id ? { id } : null, {
+  const { data, isLoading, isFetching, isSuccess, isError, error } = useGetBookDetailQuery(
+    slug ? { slug } : id ? { id } : null,
+    {
       skip: !slug && !id,
-    });
+    }
+  );
 
   // Set title
-  useTitle(`${data?.title ?? "RING - Bookstore!"}`);
+  //useTitle(`${data?.title ?? "RING - Bookstore!"}`);
 
   useEffect(() => {
     if (isReview) scrollIntoTab();
@@ -114,11 +94,7 @@ const ProductDetail = () => {
   if (isLoading || isFetching) {
     product = <ProductContent />;
   } else if (isSuccess) {
-    product = (
-      <ProductContent
-        {...{ book: data, handleToggleReview, pending, setPending }}
-      />
-    );
+    product = <ProductContent {...{ book: data, handleToggleReview, pending, setPending }} />;
   } else if (isError && error?.status === 404) {
     product = <Navigate to={"/missing"} replace />;
   } else {
@@ -133,22 +109,14 @@ const ProductDetail = () => {
         </Suspense>
       )}
       <Box display="relative">
-        <CustomBreadcrumbs
-          separator="›"
-          maxItems={4}
-          aria-label="breadcrumb"
-          className="solid"
-        >
+        <CustomBreadcrumbs separator="›" maxItems={4} aria-label="breadcrumb" className="solid">
           {data ? (
             [
               <NavLink to={"/store"} key={"store"}>
                 Danh mục sản phẩm
               </NavLink>,
               createCrumbs(data?.category),
-              <NavLink
-                to={`/store?pubs=${data?.publisher?.id}`}
-                key={"publisher"}
-              >
+              <NavLink to={`/store?pubs=${data?.publisher?.id}`} key={"publisher"}>
                 {data?.publisher?.name}
               </NavLink>,
               <NavLink to="#" key={"book-title"}>
@@ -160,11 +128,7 @@ const ProductDetail = () => {
           )}
         </CustomBreadcrumbs>
         {product}
-        <Stack
-          my={1}
-          spacing={1}
-          direction={{ xs: "column-reverse", md: "column" }}
-        >
+        <Stack my={1} spacing={1} direction={{ xs: "column-reverse", md: "column" }}>
           <Stack spacing={1}>
             <ShopComponent id={data?.shopId} name={data?.shopName} />
             <LazyLoadComponent

@@ -66,7 +66,7 @@ const CheckoutDialog = ({
       <PriceDisplay displayInfo={displayInfo} loggedIn={loggedIn} />
       <CheckoutRow>
         {!numSelected ? (
-          <CheckoutText color="error">{t("required.select", { ns: "client" })}</CheckoutText>
+          <CheckoutText color="error">{t("required.select")}</CheckoutText>
         ) : (
           <PriceContainer>
             <CheckoutPrice>
@@ -85,7 +85,7 @@ const CheckoutDialog = ({
                 {t("cart.saved", { ns: "client", discount: currencyFormat.format(displayInfo.totalDiscount) })}
               </SavePrice>
             )}
-            <SubText>{t("cart.vat.included", { ns: "client" })}</SubText>
+            <SubText>{t("cart.vat.included")}</SubText>
           </PriceContainer>
         )}
       </CheckoutRow>
@@ -96,8 +96,8 @@ const CheckoutDialog = ({
     coupon && discount && numSelected > 0
       ? t("cart.coupon.saved", { ns: "client", discount: currencyFormat.format(discount) })
       : !coupon
-        ? t("cart.coupon.add", { ns: "client" })
-        : t("cart.coupon.change", { ns: "client" });
+        ? t("cart.coupon.add")
+        : t("cart.coupon.change");
 
   return (
     <>
@@ -120,7 +120,7 @@ const CheckoutDialog = ({
             <CheckoutStack>
               <AltCheckoutBox onClick={() => toggleDrawer(true)}>
                 {!numSelected ? (
-                  <CheckoutText color="error">{t("required.select", { ns: "client" })}</CheckoutText>
+                  <CheckoutText color="error">{t("required.select")}</CheckoutText>
                 ) : (
                   <PriceContainer>
                     <CheckoutPrice>
@@ -157,7 +157,7 @@ const CheckoutDialog = ({
                   })
                 }
               >
-                {loggedIn ? `${t("cart.checkout", { ns: "client" })} (${numSelected})` : t("login")}
+                {loggedIn ? `${t("cart.checkout")} (${numSelected})` : t("login")}
               </CheckoutButton>
             </CheckoutStack>
           </div>
@@ -180,7 +180,7 @@ const CheckoutDialog = ({
               <CheckoutPriceContainer onClick={() => toggleDrawer(true)}>
                 <PriceContainer className="row">
                   <CheckoutText>{t("cart.total", { ns: "client", quantity: numSelected })}&emsp;</CheckoutText>
-                  {numSelected > 0 && <SubText>{t("cart.vat.included", { ns: "client" })}</SubText>}
+                  {numSelected > 0 && <SubText>{t("cart.vat.included")}</SubText>}
                 </PriceContainer>
                 <PriceContainer className="row">
                   <CheckoutPrice>
@@ -217,7 +217,7 @@ const CheckoutDialog = ({
                 }
                 startIcon={<ShoppingCartCheckout />}
               >
-                {loggedIn ? t("cart.checkout", { ns: "client" }) : t("login")}
+                {loggedIn ? t("cart.checkout") : t("login")}
               </CheckoutButton>
             </CheckoutStack>
           </CheckoutBox>
@@ -225,8 +225,8 @@ const CheckoutDialog = ({
           <>
             <CheckoutBox>
               <CheckoutTitle>
-                {t("cart.discount", { ns: "client" })}
-                {coupon && numSelected > 0 && <span>{t("cart.coupon.applied", { ns: "client" })}</span>}
+                {t("cart.discount")}
+                {coupon && numSelected > 0 && <span>{t("cart.coupon.applied")}</span>}
               </CheckoutTitle>
               <CheckoutRow>
                 <Collapse sx={{ width: "100%" }} in={coupon && numSelected} timeout={250} unmountOnExit>
@@ -243,7 +243,7 @@ const CheckoutDialog = ({
               </CouponButton>
             </CheckoutBox>
             <CheckoutBox className="sticky">
-              <CheckoutTitle>{t("cart.checkout", { ns: "client" })}</CheckoutTitle>
+              <CheckoutTitle>{t("cart.checkout")}</CheckoutTitle>
               {checkoutDetail}
               <CheckoutButton
                 variant="contained"
@@ -259,8 +259,8 @@ const CheckoutDialog = ({
                 startIcon={<ShoppingCartCheckout />}
               >
                 {loggedIn
-                  ? `${t("cart.checkout", { ns: "client" })} (${numSelected})`
-                  : capitalize(t("required.login", { ns: "client", action: t("cart.checkout", { ns: "client" }) }))}
+                  ? `${t("cart.checkout")} (${numSelected})`
+                  : capitalize(t("required.login", { ns: "client", action: t("cart.checkout") }))}
               </CheckoutButton>
             </CheckoutBox>
           </>
@@ -276,7 +276,7 @@ const CheckoutDialog = ({
             disableSwipeToOpen={true}
           >
             <CheckoutBox className="drawer">
-              <CheckoutTitle>{t("cart.checkout", { ns: "client" })}</CheckoutTitle>
+              <CheckoutTitle>{t("cart.checkout")}</CheckoutTitle>
               {checkoutDetail}
             </CheckoutBox>
           </SwipeableDrawer>

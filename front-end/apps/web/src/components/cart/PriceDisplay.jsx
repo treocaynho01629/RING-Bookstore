@@ -10,18 +10,18 @@ const PriceDisplay = ({ displayInfo, loggedIn }) => {
   return (
     <DetailContainer>
       <CheckoutRow>
-        <CheckoutText>{t("cart.subtotal", { ns: "client" })}:</CheckoutText>
+        <CheckoutText>{t("cart.subtotal")}:</CheckoutText>
         <CheckoutText>{currencyFormat.format(displayInfo.subTotal)}</CheckoutText>
       </CheckoutRow>
       <CheckoutRow>
-        <CheckoutText>{t("cart.shipping.fee", { ns: "client" })}:</CheckoutText>
+        <CheckoutText>{t("cart.shipping.fee")}:</CheckoutText>
         <CheckoutText>{currencyFormat.format(displayInfo.shipping)}</CheckoutText>
       </CheckoutRow>
       <TransitionGroup>
         {displayInfo.shippingDiscount > 0 && (
           <Collapse key={"shipping-discount"}>
             <CheckoutRow>
-              <CheckoutText>{t("cart.shipping.discount", { ns: "client" })}:</CheckoutText>
+              <CheckoutText>{t("cart.shipping.discount")}:</CheckoutText>
               <CheckoutText>-{currencyFormat.format(displayInfo.shippingDiscount)}</CheckoutText>
             </CheckoutRow>
           </Collapse>
@@ -29,7 +29,7 @@ const PriceDisplay = ({ displayInfo, loggedIn }) => {
         {displayInfo.deal > 0 && (
           <Collapse key={"product-discount"}>
             <CheckoutRow>
-              <CheckoutText>{t("cart.product.discount", { ns: "client" })}:</CheckoutText>
+              <CheckoutText>{t("cart.product.discount")}:</CheckoutText>
               <CheckoutText>-{currencyFormat.format(displayInfo.deal)}</CheckoutText>
             </CheckoutRow>
           </Collapse>
@@ -37,7 +37,7 @@ const PriceDisplay = ({ displayInfo, loggedIn }) => {
         {displayInfo.couponDiscount > 0 && (
           <Collapse key={"coupon-discount"}>
             <CheckoutRow>
-              <CheckoutText>{t("cart.coupon.discount", { ns: "client" })}:</CheckoutText>
+              <CheckoutText>{t("cart.coupon.discount")}:</CheckoutText>
               <CheckoutText>-{currencyFormat.format(displayInfo.couponDiscount)}</CheckoutText>
             </CheckoutRow>
           </Collapse>
@@ -49,7 +49,7 @@ const PriceDisplay = ({ displayInfo, loggedIn }) => {
               <CheckoutText color="warning">
                 &nbsp;
                 <br />
-                {t("required.login", { ns: "client", action: t("cart.coupon.apply", { ns: "client" }) })}
+                {t("required.login", { ns: "client", action: t("cart.coupon.apply") })}
               </CheckoutText>
             </CheckoutRow>
           </Collapse>

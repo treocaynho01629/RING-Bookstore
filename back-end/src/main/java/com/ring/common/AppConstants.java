@@ -11,10 +11,10 @@ public class AppConstants {
     public static final String HEADER_RECAPTCHA_SOURCE = "source";
     public static final String HEADER_X_REFRESH_TOKEN = "X-Refresh-Token";
     public static final String DELIMITER = ",";
-    
+
     // Static resources
     public static final String LOGO_PATH = "static/logo.png";
-    
+
     // Keywords
     public static final String NAME = "name";
     public static final String ENUMS = "enums";
@@ -92,6 +92,7 @@ public class AppConstants {
     // Validation
     public static final int MAX_ADDRESSES_SIZE = 5;
     public static final LocalDate DEFAULT_DATE = LocalDate.of(1970, 1, 1);
+    public static final long MAX_FILE_SIZE = 1048576; // 1 MB
 
     // Exceptions
     public static final String NOT_FOUND = "Resource not found";
@@ -121,6 +122,5 @@ public class AppConstants {
     public static final String FILE_SIZE_EXCEED_MAXIMUM_LIMIT = "File size exceed maximum limit";
     public static final String AUTHORIZATION_FAILED = "Authorization failed";
     public static final String DUPLICATE_KEY = "Duplicate key";
-    
-}
 
+}

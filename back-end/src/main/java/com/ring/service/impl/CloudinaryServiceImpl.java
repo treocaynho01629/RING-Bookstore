@@ -2,6 +2,8 @@ package com.ring.service.impl;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.api.ApiResponse;
+import com.ring.common.CloudinaryTransformations;
+import com.ring.common.FileUploadUtil;
 import com.ring.dto.response.CloudinaryResponse;
 import com.ring.exception.ImageUploadException;
 import com.ring.service.CloudinaryService;
@@ -26,6 +28,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     public static final String PUBLIC_ID = "public_id"; // The image public ID
     public static final String INVALIDATE = "invalidate"; // Should invalidate the image cache or not
     public static final String FOLDER = "folder"; // The folder to store the image in
+    public static final String TRANSFORMATION = "transformation"; // The transformation to apply to the image
 
     public CloudinaryResponse replace(byte[] data, String publicId) {
 
@@ -52,6 +55,21 @@ public class CloudinaryServiceImpl implements CloudinaryService {
             HashMap<Object, Object> options = new HashMap<>();
             options.put(PUBLIC_ID, name);
             options.put(FOLDER, folderName);
+
+            // Apply transformation based on the folder name
+            switch (folderName) {
+                case FileUploadUtil.USER_FOLDER:
+                case FileUploadUtil.SHOP_FOLDER:
+                    options.put(TRANSFORMATION, CloudinaryTransformations.PROFILE_TRANSFORMATION);
+                    break;
+                case FileUploadUtil.PRODUCT_FOLDER:
+                    options.put(TRANSFORMATION, CloudinaryTransformations.PRODUCT_TRANSFORMATION);
+                    break;
+                case FileUploadUtil.ASSET_FOLDER:
+                    options.put(TRANSFORMATION, CloudinaryTransformations.ASSETS_TRANSFORMATION);
+                    break;
+            }
+
             var uploaded = cloudinary.uploader().upload(data, options);
             String publicId = (String) uploaded.get(PUBLIC_ID);
             return CloudinaryResponse.builder()

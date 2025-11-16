@@ -3,6 +3,8 @@ import { Instruction } from "@ring/ui/Components";
 import { PHONE_REGEX } from "@ring/shared/utils/regex";
 import { getAddressType } from "@ring/shared/enums/address";
 import { location } from "@ring/shared/utils/location";
+import { useTranslation } from "react-i18next";
+import { AddressType } from "@ring/shared/models/addressType";
 import { PatternFormat } from "react-number-format";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
@@ -23,8 +25,11 @@ import Apartment from "@mui/icons-material/Apartment";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
 
-const AddressType = getAddressType();
-
+/**
+ * Split the address into city, ward, and address
+ * @param {Object} addressInfo - The address information
+ * @returns {Object} - The split address
+ */
 const splitAddress = (addressInfo) => {
   let city = "";
   let ward = "";
@@ -64,6 +69,7 @@ const AddressForm = ({
   handleClickRemove,
   handleUpdateAddress,
 }) => {
+  const { t } = useTranslation();
   const [validPhone, setValidPhone] = useState(PHONE_REGEX.test(addressInfo?.phone) || true);
   const [currAddress, setCurrAddress] = useState(splitAddress(addressInfo));
   const [setting, setSetting] = useState(() => [addressInfo && addressInfo?.isDefault == null ? "temp" : null]);
@@ -158,7 +164,7 @@ const AddressForm = ({
   if (!selectedCity) {
     selectWards = (
       <TextField
-        label="Phường/Xã"
+        label={t("address.ward", { ns: "authenticated" })}
         select
         error={(errMsg != "" || addressInfo) && !currAddress?.ward}
         defaultValue=""
@@ -179,14 +185,14 @@ const AddressForm = ({
         }}
       >
         <MenuItem disabled value="">
-          <em>--Phường/Xã--</em>
+          <em>--{t("address.ward", { ns: "authenticated" })}--</em>
         </MenuItem>
       </TextField>
     );
   } else {
     selectWards = (
       <TextField
-        label="Phường/Xã"
+        label={t("address.ward", { ns: "authenticated" })}
         required
         value={currAddress?.ward || ""}
         onChange={(e) => setCurrAddress({ ...currAddress, ward: e.target.value })}
@@ -210,7 +216,7 @@ const AddressForm = ({
         }}
       >
         <MenuItem disabled value="">
-          <em>--Phường/Xã--</em>
+          <em>--{t("address.ward", { ns: "authenticated" })}--</em>
         </MenuItem>
         {selectedCity[0]?.wards?.map((ward) => (
           <MenuItem key={ward} value={ward}>
@@ -227,17 +233,17 @@ const AddressForm = ({
     <>
       <DialogTitle sx={{ display: "flex", alignItems: "center" }}>
         <LocationOnIcon />
-        &nbsp;Địa chỉ người nhận
+        &nbsp;{t("address.form.title", { ns: "authenticated" })}
       </DialogTitle>
       <DialogContent>
         <form style={{ paddingTop: 10 }} onSubmit={handleSubmit}>
-          <Instruction display={errMsg ? "block" : "none"} aria-live="assertive">
+          <Instruction aria-live="assertive" style={{ marginTop: -10 }}>
             {errMsg}
           </Instruction>
           <Grid container size="grow" spacing={1}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
-                label={err?.data?.errors?.name ?? "Họ và tên"}
+                label={err?.data?.errors?.name ?? t("address.name", { ns: "authenticated" })}
                 type="text"
                 id="fullName"
                 required
@@ -257,8 +263,11 @@ const AddressForm = ({
               <PatternFormat
                 label={
                   currAddress.phone && !validPhone
-                    ? "Sai định dạng số điện thoại!"
-                    : (err?.data?.errors?.phone ?? "Số điện thoại")
+                    ? t("validation.constraint.invalid", {
+                        field: t("address.phone", { ns: "authenticated" }),
+                        ns: "validation",
+                      })
+                    : (err?.data?.errors?.phone ?? t("address.phone", { ns: "authenticated" }))
                 }
                 id="phone"
                 required
@@ -283,7 +292,7 @@ const AddressForm = ({
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
-                label={err?.data?.errors?.companyName ?? "Tên công ty"}
+                label={err?.data?.errors?.companyName ?? t("address.company", { ns: "authenticated" })}
                 type="text"
                 id="company"
                 onChange={(e) =>
@@ -305,7 +314,7 @@ const AddressForm = ({
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
-                label={err?.data?.errors?.type ?? "Loại địa chỉ"}
+                label={err?.data?.errors?.type ?? t("address.type", { ns: "authenticated" })}
                 onChange={(e) => setCurrAddress({ ...currAddress, type: e.target.value })}
                 select
                 value={currAddress?.type || ""}
@@ -314,18 +323,22 @@ const AddressForm = ({
                 size="small"
               >
                 <MenuItem value={null}>
-                  <em>--Không--</em>
+                  <em>--{t("none")}--</em>
                 </MenuItem>
-                {Object.values(AddressType).map((option, index) => (
-                  <MenuItem key={index} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
+                {Object.values(AddressType).map((type, index) => {
+                  const itemMeta = getAddressType(type);
+
+                  return (
+                    <MenuItem key={index} value={type}>
+                      {t(itemMeta?.label)}
+                    </MenuItem>
+                  );
+                })}
               </TextField>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
-                label={err?.data?.errors?.city ?? "Tỉnh/Thành phố"}
+                label={err?.data?.errors?.city ?? t("address.city", { ns: "authenticated" })}
                 required
                 value={currAddress?.city || ""}
                 onChange={(e) =>
@@ -355,7 +368,7 @@ const AddressForm = ({
                 }}
               >
                 <MenuItem disabled value="">
-                  <em>--Tỉnh/Thành phố--</em>
+                  <em>--{t("address.city", { ns: "authenticated" })}--</em>
                 </MenuItem>
                 {location.map((city) => (
                   <MenuItem key={city.name} value={city.name}>
@@ -367,7 +380,7 @@ const AddressForm = ({
             <Grid size={{ xs: 12, sm: 6 }}>{selectWards}</Grid>
             <Grid size={12}>
               <TextField
-                label={err?.data?.errors?.address ?? "Địa chỉ nhận hàng"}
+                label={err?.data?.errors?.address ?? t("address.detail", { ns: "authenticated" })}
                 type="text"
                 autoComplete="on"
                 required
@@ -380,9 +393,6 @@ const AddressForm = ({
                 minRows={4}
                 slotProps={{
                   inputComponent: TextareaAutosize,
-                  inputComponent: {
-                    "aria-label": "Address textarea",
-                  },
                   inputProps: {
                     minRows: 4,
                     style: { resize: "auto" },
@@ -401,9 +411,8 @@ const AddressForm = ({
                   color="error"
                   size="large"
                   onClick={() => handleClickRemove(addressInfo)}
-                  aria-label="Delete button"
                 >
-                  Xoá&nbsp;
+                  {t("delete")}&nbsp;
                   <Delete />
                 </Button>
               )}
@@ -413,23 +422,21 @@ const AddressForm = ({
                 onChange={handleSettingChange}
                 size="small"
                 sx={{ ml: "auto" }}
-                aria-label="Additional settings"
+                aria-label={t("address.settings")}
               >
                 <ToggleButton
                   sx={{ px: 2, textTransform: "none", fontSize: 15 }}
                   value="default"
                   disabled={setting.includes("temp") || addressInfo?.isDefault || isSelected}
-                  aria-label="Default address"
                 >
-                  Mặc định
+                  {t("address.default", { ns: "authenticated" })}
                 </ToggleButton>
                 <ToggleButton
                   sx={{ px: 2, textTransform: "none", fontSize: 15 }}
                   value="temp"
                   disabled={setting.includes("default")}
-                  aria-label="Temporary address"
                 >
-                  Tạm thời
+                  {t("address.temp", { ns: "authenticated" })}
                 </ToggleButton>
               </ToggleButtonGroup>
             </Grid>
@@ -437,25 +444,11 @@ const AddressForm = ({
         </form>
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="outlined"
-          color="error"
-          size="large"
-          onClick={handleClose}
-          startIcon={<CloseIcon />}
-          aria-label="Cancel button"
-        >
-          Huỷ
+        <Button variant="outlined" color="error" size="large" onClick={handleClose} startIcon={<CloseIcon />}>
+          {t("cancel")}
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          onClick={handleSubmit}
-          startIcon={<Check />}
-          aria-label="Apply button"
-        >
-          Áp dụng
+        <Button variant="contained" color="primary" size="large" onClick={handleSubmit} startIcon={<Check />}>
+          {t("apply")}
         </Button>
       </DialogActions>
     </>

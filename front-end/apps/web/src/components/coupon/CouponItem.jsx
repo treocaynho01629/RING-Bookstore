@@ -443,9 +443,7 @@ const CouponItem = ({ coupon, selectMode, onClickApply, className, scrollPositio
             ${coupon?.isUsed ? "used " : " "}
             ${className}`}
         >
-          <CouponTag>
-            {coupon?.isUsed ? t("coupon.used", { ns: "client" }) : t("coupon.not.usable", { ns: "client" })}
-          </CouponTag>
+          <CouponTag>{coupon?.isUsed ? t("coupon.used") : t("coupon.not.usable")}</CouponTag>
           <CouponEdge elevation={className == "display" ? 0 : 24} className="left" />
           <CouponEdge elevation={className == "display" ? 0 : 24} className="right" />
           <CouponContent>
@@ -470,7 +468,7 @@ const CouponItem = ({ coupon, selectMode, onClickApply, className, scrollPositio
               </div>
               <Expire>
                 <ExpText color={date <= warnDate ? "error" : ""} className="date">
-                  <span>{t("coupon.expired.date", { ns: "client" })}</span>
+                  <span>{t("coupon.expired.date")}</span>
                   &nbsp;{dateFormatter(date)}
                 </ExpText>
                 {coupon?.usage < 100 && (
@@ -487,7 +485,7 @@ const CouponItem = ({ coupon, selectMode, onClickApply, className, scrollPositio
               </Button>
             ) : (
               <Button disableRipple color={coupon?.isSaved ? "warning" : "primary"} onClick={handleSave}>
-                {coupon?.isSaved ? t("remove.saved") : t("save")}
+                {coupon?.isSaved ? t("remove") : t("save")}
               </Button>
             )}
           </CouponAction>

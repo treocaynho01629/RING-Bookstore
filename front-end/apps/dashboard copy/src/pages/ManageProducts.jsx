@@ -3,11 +3,7 @@ import { Box, Button, Grid } from "@mui/material";
 import { Add, AutoStories, LocalFireDepartment } from "@mui/icons-material";
 import { NavLink } from "react-router";
 import { HeaderContainer } from "../components/custom/Components";
-import {
-  booksApiSlice,
-  useGetBookAnalyticsQuery,
-  useGetBooksQuery,
-} from "../features/books/booksApiSlice";
+import { booksApiSlice, useGetBookAnalyticsQuery, useGetBooksQuery } from "../features/books/booksApiSlice";
 import useTitle from "@ring/shared/useTitle";
 import useAuth from "@ring/auth/useAuth";
 import TableProducts from "../components/table/TableProducts";
@@ -15,16 +11,12 @@ import InfoCard from "../components/custom/InfoCard";
 import CustomBreadcrumbs from "../components/custom/CustomBreadcrumbs";
 import ProductsShowcase from "../components/product/ProductsShowcase";
 
-const ProductFormDialog = lazy(
-  () => import("../components/dialog/ProductFormDialog")
-);
+const ProductFormDialog = lazy(() => import("../components/dialog/ProductFormDialog"));
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
 
 const ManageProducts = () => {
   const { id, shop, roles } = useAuth();
-  const isAdmin = roles?.find((role) =>
-    ["ROLE_ADMIN", "ROLE_GUEST"].includes(role)
-  );
+  const isAdmin = roles?.find((role) => ["ROLE_ADMIN", "ROLE_GUEST"].includes(role));
   const [contextProduct, setContextProduct] = useState(null);
   const [open, setOpen] = useState(undefined);
   const [pending, setPending] = useState(false);
@@ -51,7 +43,7 @@ const ManageProducts = () => {
   const [getBook, { isLoading }] = booksApiSlice.useLazyGetBookQuery();
 
   //Set title
-  useTitle("Sản phẩm");
+  //useTitle("Sản phẩm");
 
   const handleOpen = () => {
     setContextProduct(null);
@@ -76,10 +68,7 @@ const ManageProducts = () => {
     <>
       {(isLoading || pending) && (
         <Suspense fallBack={null}>
-          <PendingModal
-            open={isLoading || pending}
-            message="Đang gửi yêu cầu..."
-          />
+          <PendingModal open={isLoading || pending} message="Đang gửi yêu cầu..." />
         </Suspense>
       )}
       <HeaderContainer>
@@ -94,11 +83,7 @@ const ManageProducts = () => {
         </Button>
       </HeaderContainer>
       <Box mb={3}>
-        <InfoCard
-          icon={<AutoStories color="primary" />}
-          info={bookAnalytics}
-          color="primary"
-        />
+        <InfoCard icon={<AutoStories color="primary" />} info={bookAnalytics} color="primary" />
       </Box>
       <Grid container spacing={3} sx={{ marginBottom: "20px" }}>
         {loadBest ? null : (
@@ -121,9 +106,7 @@ const ManageProducts = () => {
           </Grid>
         )}
       </Grid>
-      <TableProducts
-        {...{ shop, isAdmin, userId: id, handleOpenEdit, pending, setPending }}
-      />
+      <TableProducts {...{ shop, isAdmin, userId: id, handleOpenEdit, pending, setPending }} />
       <Suspense fallback={null}>
         {open !== undefined && (
           <ProductFormDialog

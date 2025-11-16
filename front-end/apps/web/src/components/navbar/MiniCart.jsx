@@ -141,12 +141,12 @@ const MiniCart = ({ anchorEl, handleClose, products }) => {
         }}
       />
       <MiniCartContainer>
-        <CartTitle>{t("cart.title", { ns: "client" })}</CartTitle>
+        <CartTitle>{t("cart.title")}</CartTitle>
         <ItemsContainer className={products?.length == 0 ? "empty" : ""}>
           {products?.length == 0 ? (
             <>
               <RemoveShoppingCartIcon sx={{ fontSize: "50px" }} />
-              <b>{t("cart.empty", { ns: "client" })}</b>
+              <b>{t("cart.empty")}</b>
             </>
           ) : (
             products?.slice(0, 5).map((product, index) => (
@@ -184,9 +184,9 @@ const MiniCart = ({ anchorEl, handleClose, products }) => {
                 `${t("cart.more", { ns: "client", quantity: products?.length - 5 })}`
               )}
             </span>
-            <Link to={"/cart"} title={t("cart.view", { ns: "client" })}>
+            <Link to={"/cart"} title={t("cart.view")}>
               <Button variant="outlined" color="info" size="medium">
-                {t("cart.view", { ns: "client" })}
+                {t("cart.view")}
               </Button>
             </Link>
           </ActionContainer>

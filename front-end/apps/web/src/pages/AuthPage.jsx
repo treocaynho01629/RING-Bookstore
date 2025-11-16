@@ -135,7 +135,7 @@ function AuthPage() {
   const { reCaptchaLoaded, generateReCaptchaToken } = useReCaptcha(recaptchaSiteKey);
 
   // Set title
-  useTitle(t("welcome"));
+  //useTitle(t("welcome"));
 
   return (
     <Wrapper>
@@ -148,20 +148,7 @@ function AuthPage() {
       <Container>
         <TransitionGroup component={null}>
           <Suspense fallback={null}>
-            {tab == "login" ? (
-              <Grow key={"login"} in={tab == "login"}>
-                <ContentContainer>
-                  <LoginTab
-                    {...{
-                      pending,
-                      setPending,
-                      reCaptchaLoaded,
-                      generateReCaptchaToken,
-                    }}
-                  />
-                </ContentContainer>
-              </Grow>
-            ) : tab == "register" ? (
+            {tab == "register" ? (
               <Grow key={"register"} in={tab == "register"}>
                 <ContentContainer>
                   <RegisterTab
@@ -174,7 +161,20 @@ function AuthPage() {
                   />
                 </ContentContainer>
               </Grow>
-            ) : null}
+            ) : (
+              <Grow key={"login"} in={tab == "login"}>
+                <ContentContainer>
+                  <LoginTab
+                    {...{
+                      pending,
+                      setPending,
+                      reCaptchaLoaded,
+                      generateReCaptchaToken,
+                    }}
+                  />
+                </ContentContainer>
+              </Grow>
+            )}
           </Suspense>
         </TransitionGroup>
       </Container>

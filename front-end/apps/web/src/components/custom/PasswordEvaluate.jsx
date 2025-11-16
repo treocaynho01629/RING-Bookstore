@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { Rating, Box } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 //#region styled
 const Indicator = styled.span`
@@ -32,45 +33,46 @@ const EvaluateHelperText = styled.span`
 const customEvaluate = {
   0: {
     color: "error",
-    label: "Độ dài không hợp lệ",
+    label: "validation.constraints.password.evaluate.length",
   },
   1: {
     color: "error",
-    label: "Mật khẩu cần kí tự thường và chữ số hoặc kí tự đặc biệt",
+    label: "validation.constraints.password.evaluate.chars",
   },
   2: {
     color: "warning",
-    label: "Mật khẩu thông dụng",
+    label: "validation.constraints.password.evaluate.common",
   },
   3: {
     color: "success",
-    label: "Mật khẩu hợp lệ",
+    label: "validation.constraints.password.evaluate.strong",
   },
 };
 
 const PasswordEvaluate = ({ password, onValid }) => {
   const [strength, setStrength] = useState(0);
+  const { t } = useTranslation();
 
-  //Password
+  // Password
   useEffect(() => {
     setStrength(evaluatePasswordStrength(password));
   }, [password]);
 
-  //Pass strength evaluate
+  // Pass strength evaluate
   const evaluatePasswordStrength = (password) => {
     let score = 0;
     if (!password) return score;
 
-    //Length
+    // Length
     if (password.length > 24 || password.length < 8) return (score = 0);
     if (password.length > 8) score += 0.25;
-    //Lowercase
+    // Lowercase
     if (/[a-z]/.test(password)) score += 0.5;
-    //Uppercase
+    // Uppercase
     if (/[A-Z]/.test(password)) score += 1;
-    //Numbers
+    // Numbers
     if (/\d/.test(password)) score += 0.5;
-    //Special characters
+    // Special characters
     if (/[^A-Za-z0-9]/.test(password)) score += 1;
 
     score = Math.ceil(score > 3 ? 3 : score);
@@ -85,14 +87,14 @@ const PasswordEvaluate = ({ password, onValid }) => {
         value={strength}
         max={3}
         sx={{ color: `${customEvaluate[strength].color}.main` }}
-        getLabelText={(value) => customEvaluate[value].label}
+        getLabelText={(value) => t(customEvaluate[value].label, { ns: "validation" })}
         icon={<Indicator />}
         emptyIcon={<Indicator className="empty" />}
         readOnly
       />
-      <EvaluateLabel>{customEvaluate[strength].label}</EvaluateLabel>
+      <EvaluateLabel>{t(customEvaluate[strength].label, { ns: "validation" })}</EvaluateLabel>
       <EvaluateHelperText>
-        Độ dài mật khẩu từ 8-24 kí tự bao gồm cả chữ cái thường và chữ số.
+        {t("validation.constraints.password.evaluate.helper", { min: 8, max: 24, ns: "validation" })}
       </EvaluateHelperText>
     </Box>
   );

@@ -20,7 +20,7 @@ const CheckoutDetail = () => {
   const { data, isLoading, isSuccess, isError, error } = useGetReceiptDetailQuery(id);
 
   //Set title
-  useTitle(`Chi tiết thanh toán ${idFormatter(id)}`);
+  //useTitle(`Chi tiết thanh toán ${idFormatter(id)}`);
 
   let content = (
     <CheckoutDetailComponent

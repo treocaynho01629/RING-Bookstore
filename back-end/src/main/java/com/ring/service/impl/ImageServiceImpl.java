@@ -49,7 +49,7 @@ public class ImageServiceImpl implements ImageService {
         this.isFileAllowed(file);
 
         try {
-            if (file.isEmpty()) {
+            if (file.isEmpty() || file == null || file.getSize() == 0) {
 
                 var errorMsg = messageService.getMessage("exception.image.not.found");
                 throw new HttpResponseException(HttpStatus.BAD_REQUEST,
@@ -88,8 +88,11 @@ public class ImageServiceImpl implements ImageService {
         String fileName = FileUploadUtil.getFileName(file);
 
         try {
-            if (file.isEmpty()) {
-                throw new HttpResponseException(HttpStatus.BAD_REQUEST, "File not found!");
+            if (file.isEmpty() || file == null || file.getSize() == 0) {
+                var errorMsg = messageService.getMessage("exception.image.not.found");
+                throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                        AppConstants.INVALID_ARGUMENT,
+                        errorMsg);
             }
 
             byte[] bytes = writeImage(file);
@@ -159,6 +162,14 @@ public class ImageServiceImpl implements ImageService {
                     new Object[] { new DefaultMessageSourceResolvable("label.image") });
             throw new HttpResponseException(HttpStatus.BAD_REQUEST,
                     AppConstants.INVALID_ARGUMENT,
+                    errorMsg);
+        }
+
+        if (file.getSize() > AppConstants.MAX_FILE_SIZE) {
+            var errorMsg = messageService.getMessage("exception.image.size",
+                    new Object[] { AppConstants.MAX_FILE_SIZE / 1024 / 1024 });
+            throw new HttpResponseException(HttpStatus.PAYLOAD_TOO_LARGE,
+                    AppConstants.FILE_SIZE_EXCEED_MAXIMUM_LIMIT,
                     errorMsg);
         }
     }

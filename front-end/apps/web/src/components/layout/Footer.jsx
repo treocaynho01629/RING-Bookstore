@@ -313,12 +313,10 @@ const Footer = () => {
     setOpen((prev) => ({ ...prev, [tab]: !prev[tab] }));
   };
 
-  const support = supportItems.map((item) => <ListItem key={item.title}>{t(item.title, { ns: "client" })}</ListItem>);
-  const information = informationItems.map((item) => (
-    <ListItem key={item.title}>{t(item.title, { ns: "client" })}</ListItem>
-  ));
-  const services = servicesItems.map((item) => <ListItem key={item.title}>{t(item.title, { ns: "client" })}</ListItem>);
-  const payments = paymentsItems.map((item) => <ListItem key={item.title}>{t(item.title, { ns: "client" })}</ListItem>);
+  const support = supportItems.map((item) => <ListItem key={item.title}>{t(item.title)}</ListItem>);
+  const information = informationItems.map((item) => <ListItem key={item.title}>{t(item.title)}</ListItem>);
+  const services = servicesItems.map((item) => <ListItem key={item.title}>{t(item.title)}</ListItem>);
+  const payments = paymentsItems.map((item) => <ListItem key={item.title}>{t(item.title)}</ListItem>);
 
   return (
     <Wrapper>
@@ -327,7 +325,7 @@ const Footer = () => {
           <Grid size={{ xs: 12, lg: "auto" }}>
             <AddressContainer>
               <Logo src="/full-logo.svg" alt="RING! logo" />
-              <Description>{t("footer.address", { ns: "client" })}</Description>
+              <Description>{t("footer.address")}</Description>
               <Social>
                 <SocialIcon color="3B5999">
                   <Facebook />
@@ -347,7 +345,7 @@ const Footer = () => {
           <Grid container spacing={0.5} size={{ xs: 12, lg: "grow" }} mb={{ xs: 3, sm: 6 }}>
             <Grid size={{ xs: 12, sm: 3 }}>
               <Title onClick={() => handleClick("support")}>
-                {t("footer.support.title", { ns: "client" })} {open["support"] ? <ExpandLess /> : <ExpandMore />}
+                {t("footer.support.title")} {open["support"] ? <ExpandLess /> : <ExpandMore />}
               </Title>
               <List>{support}</List>
               <Collapse in={open["support"]} timeout="auto" unmountOnExit>
@@ -356,8 +354,7 @@ const Footer = () => {
             </Grid>
             <Grid size={{ xs: 12, sm: 3 }}>
               <Title onClick={() => handleClick("information")}>
-                {t("footer.information.title", { ns: "client" })}{" "}
-                {open["information"] ? <ExpandLess /> : <ExpandMore />}
+                {t("footer.information.title")} {open["information"] ? <ExpandLess /> : <ExpandMore />}
               </Title>
               <List>{information}</List>
               <Collapse in={open["information"]} timeout="auto" unmountOnExit>
@@ -366,7 +363,7 @@ const Footer = () => {
             </Grid>
             <Grid size={{ xs: 12, sm: 3 }}>
               <Title onClick={() => handleClick("services")}>
-                {t("footer.services.title", { ns: "client" })} {open["services"] ? <ExpandLess /> : <ExpandMore />}
+                {t("footer.services.title")} {open["services"] ? <ExpandLess /> : <ExpandMore />}
               </Title>
               <List>{services}</List>
               <Collapse in={open["services"]} timeout="auto" unmountOnExit>
@@ -375,7 +372,7 @@ const Footer = () => {
             </Grid>
             <Grid size={{ xs: 12, sm: 3 }}>
               <Title onClick={() => handleClick("payments")}>
-                {t("footer.payments.title", { ns: "client" })} {open["payments"] ? <ExpandLess /> : <ExpandMore />}
+                {t("footer.payments.title")} {open["payments"] ? <ExpandLess /> : <ExpandMore />}
               </Title>
               <List>{payments}</List>
               <Collapse in={open["payments"]} timeout="auto" unmountOnExit>

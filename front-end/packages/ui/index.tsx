@@ -8,6 +8,7 @@ export * from "./src/lib/theme";
 // Components
 export * from "./src/components/Components";
 export * from "./src/components/AuthComponents";
+export { default as LightboxImage } from "./src/components/LightboxImage";
 export { default as LightboxImages } from "./src/components/LightboxImages";
 export { default as ProductImages } from "./src/components/ProductImages";
 export { default as DatePicker } from "./src/components/DatePicker";

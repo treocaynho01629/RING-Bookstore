@@ -10,14 +10,23 @@
     "label": "Ngôn ngữ",
     "description": "Chọn ngôn ngữ của bạn"
   },
+  "gender": {
+    "label": "Giới tính",
+    "male": "Nam",
+    "female": "Nữ"
+  },
   "welcome": "Chào mừng",
   "hello": "Xin chào",
   "login": "Đăng nhập",
   "login.title": "Đăng nhập tài khoản",
-  "email": "email",
+  "email": "Email",
   "email.placeholder": "Địa chỉ email",
   "username": "Tên đăng nhập",
   "password": "Mật khẩu",
+  "fullname": "Họ và tên",
+  "fullname.placeholder": "Nhập họ và tên",
+  "phone": "Số điện thoại",
+  "dob": "Ngày sinh",
   "password.confirm": "Nhập lại mật khẩu",
   "recaptcha": "Được bảo vệ bởi reCAPTCHA và Google thông qua",
   "terms": "Điều khoản dịch vụ",
@@ -33,7 +42,6 @@
   "search": "Tìm kiếm",
   "store": "Cửa hàng",
   "home": "Trang chủ",
-  "profile": "Thông tin tài khoản",
   "items": "sản phẩm",
   "ring": "RING!",
   "saved": "Đã lưu",
@@ -44,15 +52,31 @@
   "price": "Đơn giá",
   "quantity": "Số lượng",
   "total": "Tổng",
-  "remove": "Xoá",
+  "delete": "Xoá",
   "partner": "Đối tác",
   "back": "Quay lại",
+  "apply": "Áp dụng",
+  "confirm": "Xác nhận",
+  "close": "Đóng",
+  "cancel": "Huỷ",
+  "none": "Không",
+  "not.yet": "Chưa có",
+  "edit": "Thay đổi",
+  "select": "Chọn",
+  "image": "Ảnh",
+  "show.more": "Xem thêm",
   "unselect": "Bỏ chọn",
-  "remove.saved": "Gỡ",
+  "remove": "Gỡ",
   "save": "Lưu",
   "scroll": "Về đầu trang",
   "logout": "Đăng xuất",
   "logout.end": "Kết thúc phiên đăng nhập?",
+  "role": {
+    "admin": "Quản trị viên",
+    "user": "Người dùng",
+    "seller": "Người bán",
+    "guest": "Khách"
+  },
   "signout": {
     "confirmation": "Đăng xuất?",
     "message": "Đăng xuất khỏi tài khoản của bạn?",
@@ -84,6 +108,32 @@
       "all": "Cho tất cả đơn hàng"
     }
   },
+  "review": {
+    "label": "Đánh giá"
+  },
+  "order": {
+    "label": "Đơn hàng",
+    "status": {
+      "pending": "Đang xử lý",
+      "shipping": "Đang vận chuyển",
+      "completed": "Đã giao",
+      "refunded": "Đổi trả"
+    }
+  },
+  "profile": {
+    "navigation": "Thông tin tài khoản",
+    "dropdown": "Tài khoản của tôi",
+    "label": "Hồ sơ",
+    "title": "Hồ sơ của bạn",
+    "media": "Chỉnh sửa ảnh đại diện",
+    "save": "Lưu thông tin",
+    "media.add": "Thêm ảnh đại diện",
+    "media.reset": "Đặt lại ảnh đại diện",
+    "media.edit": "Cập nhật ảnh đại diện",
+    "media.remove": "Gỡ ảnh đại diện",
+    "media.remove.message": "Gỡ bỏ ảnh đại diện hiện tại?",
+    "update": "Cập nhật hồ sơ"
+  },
   "payment": {
     "cash": {
       "label": "Thanh toán bằng tiền mặt",
@@ -112,8 +162,16 @@
       }
     }
   },
+  "password.change": {
+    "label": "Đổi mật khẩu",
+    "title": "Thay đổi mật khẩu",
+    "old": "Nhập mật khẩu hiện tại",
+    "new": "Nhập mật khẩu mới",
+    "confirm": "Nhập lại mật khẩu mới"
+  },
   "message": {
-    "success": "{{action}} thành công"
+    "success": "{{action}} thành công!",
+    "error": "{{action}} thất bại!"
   },
   "error": {
     "server.not.response": "Server không phản hồi",

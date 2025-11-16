@@ -5,6 +5,8 @@ import { MobileExtendButton } from "@ring/ui/Components";
 import { numFormat } from "@ring/shared/utils/convert";
 import { getOrderStatus } from "@ring/shared/enums/order";
 import { getUserRole } from "@ring/shared/enums/user";
+import { UserRole } from "@ring/shared/models/userRole";
+import { useTranslation } from "react-i18next";
 import useAuth from "../../hooks/useAuth";
 import List from "@mui/material/List";
 import Collapse from "@mui/material/Collapse";
@@ -28,11 +30,15 @@ import ReceiptLongOutlined from "@mui/icons-material/ReceiptLongOutlined";
 import LocalActivityOutlined from "@mui/icons-material/LocalActivityOutlined";
 import LocalActivity from "@mui/icons-material/LocalActivity";
 import Today from "@mui/icons-material/Today";
+import ContactSupportOutlined from "@mui/icons-material/ContactSupportOutlined";
+import LocationOn from "@mui/icons-material/LocationOn";
+import LockOutlined from "@mui/icons-material/LockOutlined";
 
 //#region styled
 const ListContainer = styled.div`
   position: relative;
   width: 100%;
+  min-height: 90dvh;
 
   ${({ theme }) => theme.breakpoints.down("md")} {
     padding: 10px 12px;
@@ -248,32 +254,31 @@ const NavItem = styled(NavLink)`
     padding: 5px;
     border-radius: 5px;
     font-size: 2.6rem;
-    color: ${({ theme }) => theme.vars.palette.primary.dark};
-    background-color: color-mix(in srgb, ${({ theme }) => theme.vars.palette.primary.light}, transparent 70%);
+    color: ${({ theme }) => theme.vars.palette.primary.light};
+    background-color: ${({ theme }) => theme.vars.palette.action.hover};
   }
 `;
 //#endregion
 
-const UserRole = getUserRole();
 const OrderStatus = getOrderStatus();
 const items = [
   {
-    label: "Đang xử lý",
+    label: "order.status.pending",
     icon: <PendingOutlined />,
     url: `/profile/order?status=${OrderStatus.PENDING.value}`,
   },
   {
-    label: "Đang vận chuyển",
+    label: "order.status.shipping",
     icon: <LocalShippingOutlined />,
     url: `/profile/order?status=${OrderStatus.SHIPPING.value}`,
   },
   {
-    label: "Đã giao",
+    label: "order.status.completed",
     icon: <DomainVerification />,
     url: `/profile/order?status=${OrderStatus.COMPLETED.value}`,
   },
   {
-    label: "Đổi trả",
+    label: "order.status.refunded",
     icon: <Replay />,
     url: `/profile/order?status=${OrderStatus.REFUNDED.value}`,
   },
@@ -281,9 +286,10 @@ const items = [
 
 const ProfileTabsList = ({ profile, loading, tabletMode }) => {
   const { username, image, roles } = useAuth();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(true);
   const roleIndexes = roles?.map((r) => Object.keys(UserRole).indexOf(r));
-  const currRole = UserRole[Object.keys(UserRole)[Math.max(...roleIndexes)]];
+  const currRole = getUserRole(UserRole[Object.keys(UserRole)[Math.max(...roleIndexes)]]);
 
   const toggleOpen = (e) => {
     e.preventDefault();
@@ -315,10 +321,10 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
                       <Skeleton variant="text" sx={{ fontSize: "inherit", width: 95 }} />
                     </Name>
                   ) : (
-                    <Name>{profile?.name || "Sửa hồ sơ"}</Name>
+                    <Name>{profile?.name || t("profile.edit")}</Name>
                   )}
                 </Username>
-                <Role color={currRole?.color}>{currRole?.label}</Role>
+                <Role color={currRole?.color}>{t(currRole?.label)}</Role>
               </UserContainer>
             </InfoContainer>
           </MainProfile>
@@ -341,15 +347,15 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
               <>
                 <Additional>
                   <PersonAddAlt1 color="warning" />
-                  Theo dõi:<b>{numFormat.format(profile?.totalFollows || 0)}</b>
+                  {t("profile.following")}:<b>{numFormat.format(profile?.totalFollows || 0)}</b>
                 </Additional>
                 <Additional>
                   <LocalActivity color="warning" />
-                  Đánh giá:<b>{numFormat.format(profile?.totalReviews || 0)}</b>
+                  {t("review.label")}:<b>{numFormat.format(profile?.totalReviews || 0)}</b>
                 </Additional>
                 <Additional>
                   <Today color="warning" />
-                  Tham gia:
+                  {t("profile.joined")}:
                   <b>
                     {new Date(profile?.joinedDate).toLocaleDateString("en-GB", {
                       year: "numeric",
@@ -371,40 +377,34 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
                 <StyledListItemButton selected={isActive} onClick={toggleOpen} tabIndex={-1}>
                   <ItemText>
                     <PersonIcon />
-                    &nbsp;Tài khoản của tôi
+                    &nbsp;{t("profile.dropdown")}
                   </ItemText>
                   {open ? <ExpandLess /> : <ExpandMore />}
                 </StyledListItemButton>
               )}
             </NavLink>
             <Collapse in={open} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding>
-                <NavLink to={"/profile/detail/info"} end>
-                  {({ isActive }) => (
-                    <StyledListItemButton selected={isActive} className="secondary">
-                      <ItemText>Hồ sơ</ItemText>
-                    </StyledListItemButton>
-                  )}
-                </NavLink>
-              </List>
-              <List component="div" disablePadding>
-                <NavLink to={"/profile/detail/address"} end>
-                  {({ isActive }) => (
-                    <StyledListItemButton selected={isActive} className="secondary">
-                      <ItemText>Sổ địa chỉ</ItemText>
-                    </StyledListItemButton>
-                  )}
-                </NavLink>
-              </List>
-              <List component="div" disablePadding>
-                <NavLink to={"/profile/detail/password"} end>
-                  {({ isActive }) => (
-                    <StyledListItemButton selected={isActive} className="secondary">
-                      <ItemText>Đổi mật khẩu</ItemText>
-                    </StyledListItemButton>
-                  )}
-                </NavLink>
-              </List>
+              <NavLink to={"/profile/detail/info"} end>
+                {({ isActive }) => (
+                  <StyledListItemButton selected={isActive} className="secondary">
+                    <ItemText>{t("profile.label")}</ItemText>
+                  </StyledListItemButton>
+                )}
+              </NavLink>
+              <NavLink to={"/profile/detail/address"} end>
+                {({ isActive }) => (
+                  <StyledListItemButton selected={isActive} className="secondary">
+                    <ItemText>{t("address.saved", { ns: "authenticated" })}</ItemText>
+                  </StyledListItemButton>
+                )}
+              </NavLink>
+              <NavLink to={"/profile/detail/password"} end>
+                {({ isActive }) => (
+                  <StyledListItemButton selected={isActive} className="secondary">
+                    <ItemText>{t("password.change.label")}</ItemText>
+                  </StyledListItemButton>
+                )}
+              </NavLink>
             </Collapse>
           </>
         )}
@@ -413,7 +413,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
             <StyledListItemButton selected={isActive} tabIndex={-1}>
               <ItemText>
                 <ReceiptLongOutlined />
-                &nbsp;Đơn hàng
+                &nbsp;{t("order.label")}
                 <MobileExtendButton className="transparent">
                   <KeyboardArrowRight fontSize="small" />
                 </MobileExtendButton>
@@ -426,7 +426,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
             {items.map((item, index) => (
               <NavItem key={`tab-${index}`} to={item?.url}>
                 {item?.icon}
-                <p>{item?.label}</p>
+                <p>{t(item?.label)}</p>
               </NavItem>
             ))}
           </NavWrapper>
@@ -437,7 +437,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
             <StyledListItemButton selected={isActive} tabIndex={-1}>
               <ItemText>
                 <RateReviewOutlined />
-                &nbsp;Đánh giá
+                &nbsp;{t("review.label")}
                 <MobileExtendButton className="transparent">
                   <KeyboardArrowRight fontSize="small" />
                 </MobileExtendButton>
@@ -451,13 +451,57 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
             <StyledListItemButton selected={isActive} tabIndex={-1}>
               <ItemText>
                 <LocalActivityOutlined />
-                &nbsp;Mã giảm giá
+                &nbsp;{t("coupon.label")}
                 <MobileExtendButton className="transparent">
                   <KeyboardArrowRight fontSize="small" />
                 </MobileExtendButton>
               </ItemText>
             </StyledListItemButton>
           )}
+        </NavLink>
+        {tabletMode && (
+          <>
+            <Divider />
+            <NavLink to={"/profile/detail/address"} end>
+              {({ isActive }) => (
+                <StyledListItemButton selected={isActive} tabIndex={-1}>
+                  <ItemText>
+                    <LocationOn />
+                    &nbsp;{t("address.saved", { ns: "authenticated" })}
+                    <MobileExtendButton className="transparent">
+                      <KeyboardArrowRight fontSize="small" />
+                    </MobileExtendButton>
+                  </ItemText>
+                </StyledListItemButton>
+              )}
+            </NavLink>
+            <Divider />
+            <NavLink to={"/profile/detail/password"} end>
+              {({ isActive }) => (
+                <StyledListItemButton selected={isActive} tabIndex={-1}>
+                  <ItemText>
+                    <LockOutlined />
+                    &nbsp;{t("password.change.label")}
+                    <MobileExtendButton className="transparent">
+                      <KeyboardArrowRight fontSize="small" />
+                    </MobileExtendButton>
+                  </ItemText>
+                </StyledListItemButton>
+              )}
+            </NavLink>
+          </>
+        )}
+        <Divider />
+        <NavLink to={"https://github.com/treocaynho01629/RING-Bookstore/issues"}>
+          <StyledListItemButton tabIndex={-1}>
+            <ItemText>
+              <ContactSupportOutlined />
+              &nbsp;{t("help.center")}
+              <MobileExtendButton className="transparent">
+                <KeyboardArrowRight fontSize="small" />
+              </MobileExtendButton>
+            </ItemText>
+          </StyledListItemButton>
         </NavLink>
       </List>
     </ListContainer>

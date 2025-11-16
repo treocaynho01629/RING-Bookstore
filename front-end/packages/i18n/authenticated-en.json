@@ -1,0 +1,28 @@
+{
+  "address": {
+    "saved": "Address book",
+    "title": "Your addresses",
+    "empty": "No addresses found",
+    "form.title": "Recipient address",
+    "add": "New address",
+    "edit": "Edit address",
+    "delete": "Delete address",
+    "delete.title": "Delete address?",
+    "delete.description": "Delete this address from your address book?",
+    "temp": "Temporary",
+    "default": "Default",
+    "default.empty": "No default address found",
+    "default.set": "Set as default",
+    "suggestion": "Create a temporary address?",
+    "name": "Name",
+    "phone": "Phone",
+    "company": "Company",
+    "type": "Address type",
+    "city": "City",
+    "ward": "Ward",
+    "detail": "Address detail",
+    "settings": "Additional settings",
+    "type.home": "Home",
+    "type.office": "Office"
+  }
+}

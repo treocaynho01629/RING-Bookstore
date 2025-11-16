@@ -125,7 +125,7 @@ const ShopDetail = () => {
   }, [searchParams]);
 
   // Set title
-  useTitle(`${data?.name ?? "RING - Bookstore!"}`);
+  //useTitle(`${data?.name ?? "RING - Bookstore!"}`);
 
   // Handle change
   const scrollToTop = useCallback(() => {

@@ -9,7 +9,7 @@ const ManageReviews = () => {
   const [pending, setPending] = useState(false);
 
   //Set title
-  useTitle("Đánh giá");
+  //useTitle("Đánh giá");
 
   return (
     <>

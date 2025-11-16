@@ -12,6 +12,7 @@ import { StyledDialogTitle } from "../custom/ProfileComponents";
 import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
 import { Link } from "react-router";
 import { Message } from "@ring/ui/Components";
+import { useTranslation } from "react-i18next";
 import useConfirm from "@ring/shared/useConfirm";
 import AddressItem from "./AddressItem";
 import useAddress from "../../hooks/useAddress";
@@ -41,6 +42,10 @@ const PlaceholderContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+
+  ${({ theme }) => theme.breakpoints.down("md")} {
+    min-height: 100dvh;
+  }
 `;
 
 const StyledEmptyIcon = styled(EmptyIcon)`
@@ -66,13 +71,17 @@ const StyledAddButton = styled.span`
 
 const AddressComponent = ({ pending, setPending, mobileMode }) => {
   const { addresses: storeAddresses, addNewAddress, removeAddress } = useAddress();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(undefined);
   const [err, setErr] = useState("");
   const [errMsg, setErrMsg] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [contextAddress, setContextAddress] = useState(null);
   const openContext = Boolean(anchorEl);
-  const [ConfirmationDialog, confirm] = useConfirm("Xoá địa chỉ?", "Xoá địa chỉ khỏi sổ địa chỉ?");
+  const [ConfirmationDialog, confirm] = useConfirm(
+    t("address.delete.title", { ns: "authenticated" }),
+    t("address.delete.description", { ns: "authenticated" })
+  );
 
   // Fetch addresses
   const { data, isLoading, isSuccess, isError, error } = useGetMyAddressesQuery();
@@ -82,12 +91,18 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
   const [updateAddress, { isLoading: updating }] = useUpdateAddressMutation();
   const [deleteAddress, { isLoading: deleting }] = useDeleteAddressMutation();
 
-  // Dialog
+  /**
+   * Open address form
+   * @param {Object} addressInfo
+   */
   const handleOpen = (addressInfo) => {
     setContextAddress(addressInfo);
     setOpen(true);
   };
 
+  /**
+   * Close address form
+   */
   const handleClose = () => {
     setContextAddress(null);
     setErrMsg("");
@@ -95,17 +110,28 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
     setOpen(false);
   };
 
-  // Context
+  /**
+   * Open context menu
+   * @param {Event} event
+   * @param {Object} address
+   */
   const handleClick = (event, address) => {
     setAnchorEl(event.currentTarget);
     setContextAddress(address);
   };
 
+  /**
+   * Close context menu
+   */
   const handleCloseContext = () => {
     setAnchorEl(null);
     setContextAddress(null);
   };
 
+  /**
+   * Remove address from user profile
+   * @param {Object} address
+   */
   const handleRemoveAddress = (address) => {
     if (pending || creating || updating || deleting) return;
     setPending(true);
@@ -132,11 +158,9 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
             console.error(err);
             setErr(err);
             if (!err?.status) {
-              setErrMsg("Server không phản hồi");
-            } else if (err?.status === 400) {
-              setErrMsg("Sai định dạng thông tin!");
+              setErrMsg(t("error.server.not.response"));
             } else {
-              setErrMsg("Xoá địa chỉ thất bại");
+              setErrMsg(err?.data?.message);
             }
             setPending(false);
           });
@@ -150,10 +174,61 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
     }
   };
 
+  /**
+   * Save address to user profile
+   * @param {Object} address
+   * @param {boolean} removeStored
+   */
+  const createAddressHandler = async (address, removeStored = false) => {
+    const { enqueueSnackbar } = await import("notistack");
+    createAddress({
+      name: address.name == "" ? null : address.name,
+      companyName: address.companyName == "" ? null : address.companyName,
+      phone: address.phone,
+      city: address.city,
+      address: address.address,
+      type: address.type,
+      isDefault: address.isDefault,
+    })
+      .unwrap()
+      .then((data) => {
+        // Remove stored address if needed
+        if (removeStored) handleRemoveAddress(address);
+
+        // Reset state
+        handleClose();
+        handleCloseContext();
+        setErrMsg("");
+        setErr([]);
+        setPending(false);
+        enqueueSnackbar(t("message.success", { action: removeStored ? t("update.address") : t("add.address") }), {
+          variant: "success",
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        setErr(err);
+        if (!err?.status) {
+          setErrMsg(t("error.server.not.response"));
+        } else {
+          setErrMsg(err?.data?.message);
+        }
+        setPending(false);
+        enqueueSnackbar(t("message.error", { action: removeStored ? t("update.address") : t("add.address") }), {
+          variant: "error",
+        });
+      });
+  };
+
+  /**
+   * Create address
+   * @param {Object} address
+   * @param {boolean} isDefault
+   * @param {boolean} isTemp
+   */
   const handleCreateAddress = async (address, isDefault = false, isTemp = false) => {
     if (pending || creating || updating || deleting) return;
     setPending(true);
-    const { enqueueSnackbar } = await import("notistack");
 
     try {
       if (isTemp) {
@@ -163,10 +238,9 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
         setErrMsg("");
         setErr([]);
         setPending(false);
-        enqueueSnackbar("Thêm địa chỉ thành công!", { variant: "success" });
+        enqueueSnackbar(t("message.success", { action: t("add.address") }), { variant: "success" });
       } else {
-        // Saved address
-        createAddress({
+        const newAddress = {
           name: address.name == "" ? null : address.name,
           companyName: address.companyName == "" ? null : address.companyName,
           phone: address.phone,
@@ -174,31 +248,8 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
           address: address.address,
           type: address.type,
           isDefault,
-        })
-          .unwrap()
-          .then((data) => {
-            handleClose();
-            handleCloseContext();
-            setErrMsg("");
-            setErr([]);
-            setPending(false);
-            enqueueSnackbar("Thêm địa chỉ thành công!", { variant: "success" });
-          })
-          .catch((err) => {
-            console.error(err);
-            setErr(err);
-            if (!err?.status) {
-              setErrMsg("Server không phản hồi");
-            } else if (err?.status === 400) {
-              setErrMsg("Sai định dạng thông tin!");
-            } else if (err?.status === 409) {
-              setErrMsg("Vượt quá số lượng cho phép (5), vui lòng xoá bớt hoặc tạm lưu vào bộ nhớ!");
-            } else {
-              setErrMsg("Thêm địa chỉ thất bại");
-            }
-            setPending(false);
-            enqueueSnackbar("Thêm địa chỉ thất bại!", { variant: "error" });
-          });
+        };
+        createAddressHandler(newAddress);
       }
     } catch (err) {
       // Redux error
@@ -207,10 +258,15 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
       handleClose();
       handleCloseContext();
       setPending(false);
-      enqueueSnackbar("Thêm địa chỉ thất bại!", { variant: "error" });
+      enqueueSnackbar(t("message.error", { action: t("add.address") }), { variant: "error" });
     }
   };
 
+  /**
+   * Update address
+   * @param {Object} address
+   * @param {boolean} isDefault
+   */
   const handleUpdateAddress = async (address, isDefault = false) => {
     if (pending || creating || updating || deleting) return;
     setPending(true);
@@ -228,7 +284,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
         setErrMsg("");
         setErr([]);
         setPending(false);
-        enqueueSnackbar("Cập nhật địa chỉ thành công!", { variant: "success" });
+        enqueueSnackbar(t("message.success", { action: t("update.address") }), { variant: "success" });
       } else {
         // Saved address
         updateAddress({
@@ -250,7 +306,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
             setErrMsg("");
             setErr([]);
             setPending(false);
-            enqueueSnackbar("Cập nhật địa chỉ thành công!", {
+            enqueueSnackbar(t("message.success", { action: t("update.address") }), {
               variant: "success",
             });
           })
@@ -258,14 +314,12 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
             console.error(err);
             setErr(err);
             if (!err?.status) {
-              setErrMsg("Server không phản hồi");
-            } else if (err?.status === 400) {
-              setErrMsg("Sai định dạng thông tin!");
+              setErrMsg(t("error.server.not.response"));
             } else {
-              setErrMsg("Cập nhật thất bại");
+              setErrMsg(err?.data?.message);
             }
             setPending(false);
-            enqueueSnackbar("Cập nhật địa chỉ thất bại!", { variant: "error" });
+            enqueueSnackbar(t("message.error", { action: t("update.address") }), { variant: "error" });
           });
       }
     } catch (err) {
@@ -275,14 +329,18 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
       handleClose();
       handleCloseContext();
       setPending(false);
-      enqueueSnackbar("Cập nhật địa chỉ thất bại!", { variant: "error" });
+      enqueueSnackbar(t("message.error", { action: t("update.address") }), { variant: "error" });
     }
   };
 
+  /**
+   * Convert address
+   * @param {Object} address
+   * @param {boolean} isTemp
+   */
   const handleConvertAddress = async (address, isTemp) => {
     if (pending || creating || updating || deleting) return;
     setPending(true);
-    const { enqueueSnackbar } = await import("notistack");
 
     try {
       let isStored = address?.isDefault == null;
@@ -296,46 +354,19 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
         setErrMsg("");
         setErr([]);
         setPending(false);
-        enqueueSnackbar("Cập nhật địa chỉ thành công!", { variant: "success" });
+        enqueueSnackbar(t("message.success", { action: t("update.address") }), { variant: "success" });
       } else if (isStored && !isTemp) {
         // Convert stored to saved
-        createAddress({
+        const newAddress = {
           name: address.name,
           companyName: address.companyName,
           phone: address.phone,
           city: address.city,
           address: address.address,
           type: address.type,
-        })
-          .unwrap()
-          .then((data) => {
-            handleRemoveAddress(address); // Remove stored address
-
-            // Reset state
-            handleClose();
-            handleCloseContext();
-            setErrMsg("");
-            setErr([]);
-            setPending(false);
-            enqueueSnackbar("Cập nhật địa chỉ thành công!", {
-              variant: "success",
-            });
-          })
-          .catch((err) => {
-            console.error(err);
-            setErr(err);
-            if (!err?.status) {
-              setErrMsg("Server không phản hồi");
-            } else if (err?.status === 400) {
-              setErrMsg("Sai định dạng thông tin!");
-            } else if (err?.status === 409) {
-              setErrMsg("Vượt quá số lượng cho phép (5), vui lòng xoá bớt hoặc tạm lưu vào bộ nhớ!");
-            } else {
-              setErrMsg("Cập nhật địa chỉ thất bại");
-            }
-            setPending(false);
-            enqueueSnackbar("Cập nhật địa chỉ thất bại!", { variant: "error" });
-          });
+          isDefault: false,
+        };
+        createAddressHandler(newAddress, true);
       }
     } catch (err) {
       // Redux error
@@ -344,21 +375,24 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
       handleClose();
       handleCloseContext();
       setPending(false);
-      enqueueSnackbar("Thêm địa chỉ thất bại!", { variant: "error" });
+      enqueueSnackbar(t("message.error", { action: t("update.address") }), { variant: "error" });
     }
   };
 
+  /**
+   * Set default address
+   * @param {Object} address
+   */
   const handleSetDefault = async (address) => {
     if (pending || creating || updating || deleting) return;
     setPending(true);
-    const { enqueueSnackbar } = await import("notistack");
 
     try {
       let isStored = address?.isDefault == null;
 
       if (isStored) {
         // If stored address
-        createAddress({
+        const newAddress = {
           name: address.name,
           companyName: address.companyName,
           phone: address.phone,
@@ -366,36 +400,8 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
           address: address.address,
           type: address.type,
           isDefault: true,
-        })
-          .unwrap()
-          .then((data) => {
-            handleRemoveAddress(address); // Remove stored address
-
-            // Reset state
-            handleClose();
-            handleCloseContext();
-            setErrMsg("");
-            setErr([]);
-            setPending(false);
-            enqueueSnackbar("Cập nhật địa chỉ thành công!", {
-              variant: "success",
-            });
-          })
-          .catch((err) => {
-            console.error(err);
-            setErr(err);
-            if (!err?.status) {
-              setErrMsg("Server không phản hồi");
-            } else if (err?.status === 400) {
-              setErrMsg("Sai định dạng thông tin!");
-            } else if (err?.status === 409) {
-              setErrMsg("Vượt quá số lượng cho phép (5), vui lòng xoá bớt hoặc tạm lưu vào bộ nhớ!");
-            } else {
-              setErrMsg("Thêm địa chỉ thất bại");
-            }
-            setPending(false);
-            enqueueSnackbar("Thêm địa chỉ thất bại!", { variant: "error" });
-          });
+        };
+        createAddressHandler(newAddress, true);
       } else {
         handleUpdateAddress(address, true); // Update default address
       }
@@ -408,11 +414,16 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
     }
   };
 
+  /**
+   * Remove address
+   * @param {Object} address
+   */
   const handleClickRemove = async (address) => {
     const confirmation = await confirm();
     if (confirmation) handleRemoveAddress(address);
   };
 
+  // Render addresses content
   let addressesContent;
   let storedContent = storeAddresses?.map((address, index) => (
     <Fragment key={`stored-${address?.id}-${index}`}>
@@ -420,6 +431,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
     </Fragment>
   ));
 
+  // Render loading content
   if (isLoading) {
     addressesContent = (
       <PlaceholderContainer>
@@ -447,7 +459,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
   } else if (isError) {
     addressesContent = (
       <MessageContainer>
-        <Message color="error">{error?.error || "Đã xảy ra lỗi"}</Message>
+        <Message color="error">{error?.error || t("error.general")}</Message>
       </MessageContainer>
     );
   }
@@ -462,13 +474,13 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
             <KeyboardArrowLeft />
           </Link>
           <LocationOn />
-          &nbsp;Địa chỉ của bạn
+          &nbsp;{t("address.title", { ns: "authenticated" })}
         </TitleContainer>
         <StyledAddButton onClick={() => handleOpen(null)}>
-          Thêm địa chỉ <AddHome />
+          {t("address.add", { ns: "authenticated" })} <AddHome />
         </StyledAddButton>
       </StyledDialogTitle>
-      <DialogContent sx={{ p: { xs: 1, sm: 2, md: 0 }, mt: { xs: 1, md: 0 } }}>
+      <DialogContent sx={{ p: { xs: 1, sm: 2, md: 0 }, mt: { xs: 1, md: 0 }, height: { xs: "100dvh", md: "auto" } }}>
         <ContentContainer>
           {addressesContent}
           {storedContent}
@@ -476,7 +488,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
             <MessageContainer>
               <Message>
                 <StyledEmptyIcon />
-                Chưa có địa chỉ nào
+                {t("address.empty", { ns: "authenticated" })}
               </Message>
             </MessageContainer>
           )}
@@ -527,13 +539,13 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
           <ListItemIcon>
             <Delete sx={{ color: "error.main" }} fontSize="small" />
           </ListItemIcon>
-          <ListItemText sx={{ color: "error.main" }}>Xoá địa chỉ</ListItemText>
+          <ListItemText sx={{ color: "error.main" }}>{t("address.delete", { ns: "authenticated" })}</ListItemText>
         </MenuItem>
         <MenuItem disabled={isSelectedDefault} onClick={() => handleSetDefault(contextAddress)}>
           <ListItemIcon>
             <Home fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Đặt làm mặc định</ListItemText>
+          <ListItemText>{t("address.default.set", { ns: "authenticated" })}</ListItemText>
         </MenuItem>
       </Menu>
       <ConfirmationDialog />

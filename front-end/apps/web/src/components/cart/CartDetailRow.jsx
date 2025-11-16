@@ -351,9 +351,7 @@ function ItemRow({
           handleIncrease={onIncreaseQuantity}
         />
         <AmountLeft>
-          {product.amount > 0
-            ? t("cart.items.left", { quantity: product.amount, ns: "client" })
-            : t("cart.items.out", { ns: "client" })}
+          {product.amount > 0 ? t("cart.items.left", { quantity: product.amount, ns: "client" }) : t("cart.items.out")}
         </AmountLeft>
       </StyledTableCell>
       <StyledTableCell align="right" sx={{ display: { xs: "none", md: "table-cell" }, width: "130px" }}>
@@ -406,12 +404,12 @@ const CartDetailRow = ({
                 ns: "client",
               })
             : t("cart.coupon.criteria", { criteria: coupon?.summary, ns: "client" }) // Coupon is not usable
-          : t("cart.coupon.change", { ns: "client" }) // Group not selected
+          : t("cart.coupon.change") // Group not selected
         : // Discount not applied
           coupon?.isUsed
-          ? t("cart.coupon.change", { ns: "client" }) // Coupon is used
+          ? t("cart.coupon.change") // Coupon is used
           : t("cart.coupon.criteria", { criteria: coupon?.summary, ns: "client" }) // Coupon is not usable
-      : t("cart.coupon.add", { ns: "client" }); // No coupon
+      : t("cart.coupon.add"); // No coupon
   };
 
   return (

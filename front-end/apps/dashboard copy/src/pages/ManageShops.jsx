@@ -1,27 +1,16 @@
 import { useState, Suspense, lazy } from "react";
 import { Box, Button, Grid } from "@mui/material";
-import {
-  Add,
-  AutoStories,
-  LocalFireDepartment,
-  Storefront,
-} from "@mui/icons-material";
+import { Add, AutoStories, LocalFireDepartment, Storefront } from "@mui/icons-material";
 import { NavLink } from "react-router";
 import { HeaderContainer } from "../components/custom/Components";
-import {
-  shopsApiSlice,
-  useGetShopAnalyticsQuery,
-  useGetShopsQuery,
-} from "../features/shops/shopsApiSlice";
+import { shopsApiSlice, useGetShopAnalyticsQuery, useGetShopsQuery } from "../features/shops/shopsApiSlice";
 import useTitle from "@ring/shared/useTitle";
 import useAuth from "@ring/auth/useAuth";
 import InfoCard from "../components/custom/InfoCard";
 import CustomBreadcrumbs from "../components/custom/CustomBreadcrumbs";
 import TableShops from "../components/table/TableShops";
 
-const ShopFormDialog = lazy(
-  () => import("../components/dialog/ShopFormDialog")
-);
+const ShopFormDialog = lazy(() => import("../components/dialog/ShopFormDialog"));
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
 
 const ManageShops = () => {
@@ -32,7 +21,7 @@ const ManageShops = () => {
   const [getShop, { isLoading }] = shopsApiSlice.useLazyGetShopQuery();
 
   //Set title
-  useTitle("Cửa hàng");
+  //useTitle("Cửa hàng");
 
   const handleOpen = () => {
     setContextShop(null);
@@ -57,10 +46,7 @@ const ManageShops = () => {
     <>
       {(isLoading || pending) && (
         <Suspense fallBack={null}>
-          <PendingModal
-            open={isLoading || pending}
-            message="Đang gửi yêu cầu..."
-          />
+          <PendingModal open={isLoading || pending} message="Đang gửi yêu cầu..." />
         </Suspense>
       )}
       <HeaderContainer>
@@ -75,11 +61,7 @@ const ManageShops = () => {
         </Button>
       </HeaderContainer>
       <Box mb={3}>
-        <InfoCard
-          icon={<Storefront color="info" />}
-          info={shopAnalytics}
-          color="info"
-        />
+        <InfoCard icon={<Storefront color="info" />} info={shopAnalytics} color="info" />
       </Box>
       <Grid container spacing={3} sx={{ marginBottom: "20px" }}>
         dsads

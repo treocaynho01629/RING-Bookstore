@@ -30,11 +30,11 @@ public class PublisherMapper implements Function<Publisher, PublisherDTO> {
 
         Image image = publisher.getImage();
         String imageUrl = cloudinary.url()
-                        .transformation(CloudinaryTransformations.PRODUCT_TRANSFORMATION)
-                        .secure(true)
-                        .generate(image.getPublicId());
+                .transformation(CloudinaryTransformations.PRODUCT_THUMBNAIL_TRANSFORMATION)
+                .secure(true)
+                .generate(image.getPublicId());
 
-        return new PublisherDTO(publisher.getId(), 
+        return new PublisherDTO(publisher.getId(),
                 publisher.getName(),
                 imageUrl);
     }

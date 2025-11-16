@@ -1,19 +1,10 @@
 "use client";
 
-import {
-  AutoStories,
-  Group,
-  AttachMoney,
-  Storefront,
-  LocalFireDepartment,
-} from "@mui/icons-material";
+import { AutoStories, Group, AttachMoney, Storefront, LocalFireDepartment } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import useTitle from "@ring/shared/useTitle";
 // import useAuth from "@ring/auth/useAuth";
-import {
-  useGetBookAnalyticsQuery,
-  useGetBooksQuery,
-} from "../features/books/booksApiSlice";
+import { useGetBookAnalyticsQuery, useGetBooksQuery } from "../features/books/booksApiSlice";
 import { useGetUserAnalyticsQuery } from "../features/users/usersApiSlice";
 import { useGetSalesAnalyticsQuery } from "../features/orders/ordersApiSlice";
 import { useGetShopAnalyticsQuery } from "../features/shops/shopsApiSlice";
@@ -63,14 +54,12 @@ const Dashboard = () => {
   // const { data: shopAnalytics } = useGetShopAnalyticsQuery();
 
   //Set title
-  useTitle("Dashboard");
+  //useTitle("Dashboard");
 
   return (
     <>
       <Grid container size="grow" spacing={2} pt={2}>
-        <Grid size={{ xs: 12, sm: 7 }}>
-          {/* <WelcomeCard username={username} /> */}
-        </Grid>
+        <Grid size={{ xs: 12, sm: 7 }}>{/* <WelcomeCard username={username} /> */}</Grid>
         <Grid size={{ xs: 12, sm: 4 }}>
           <p>STUFF</p>
         </Grid>

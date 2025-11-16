@@ -6,9 +6,17 @@
       "size.range": "{{field}} phải từ {{min}} đến {{max}} kí tự!",
       "size.max": "{{field}} không được vượt quá {{max}} kí tự!",
       "size.min": "{{field}} phải lớn hơn {{min}} kí tự!",
+      "image.size": "Kích thước ảnh không được vượt quá {{max}} MB!",
       "date.past": "{{field}} phải trước ngày hôm nay!",
       "range": "{{field}} phải từ {{min}} đến {{max}}!",
-      "password.match": "Mật khẩu không trùng khớp!"
+      "password.match": "Mật khẩu không trùng khớp!",
+      "password.evaluate": {
+        "helper": "Độ dài mật khẩu từ {{min}}-{{max}} kí tự bao gồm cả chữ cái thường và chữ số.",
+        "length": "Độ dài không hợp lệ",
+        "chars": "Mật khẩu cần kí tự thường và chữ số hoặc kí tự đặc biệt",
+        "common": "Mật khẩu thông dụng",
+        "strong": "Mật khẩu hợp lệ"
+      } 
     }
   }
 }

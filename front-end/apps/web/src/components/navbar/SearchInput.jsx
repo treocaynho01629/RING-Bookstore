@@ -403,9 +403,7 @@ const AutocompleteComponent = ({
               </StyledIconButton>
             )}
             <StyledSearchInput
-              placeholder={capitalize(
-                `${t("search")} ${isShop ? (id ? t("search.store", { ns: "client" }) : t("store")) : ""}...`
-              )}
+              placeholder={capitalize(`${t("search")} ${isShop ? (id ? t("search.store") : t("store")) : ""}...`)}
               size="small"
               autoFocus
               slotProps={{
@@ -426,13 +424,13 @@ const AutocompleteComponent = ({
                     <GroupItem key={`group-${group.key}-${group.index}`}>
                       {group?.group == "HISTORY" ? (
                         <GroupHeader>
-                          {t("search.history", { ns: "client" })}
-                          <StyledIconButton onClick={clearKeywords} aria-label={t("search.clear", { ns: "client" })}>
+                          {t("search.history")}
+                          <StyledIconButton onClick={clearKeywords} aria-label={t("search.clear")}>
                             <Delete />
                           </StyledIconButton>
                         </GroupHeader>
                       ) : group?.group == "SUGGEST" ? (
-                        <GroupHeader>{t("search.suggest", { ns: "client" })}</GroupHeader>
+                        <GroupHeader>{t("search.suggest")}</GroupHeader>
                       ) : null}
                       <GroupListBox>
                         {group.options.map((option, index) => {
@@ -498,9 +496,7 @@ const AutocompleteComponent = ({
         <>
           <SearchInputContainer>
             <StyledSearchInput
-              placeholder={capitalize(
-                `${t("search")} ${isShop ? (id ? t("search.store", { ns: "client" }) : t("store")) : ""}...`
-              )}
+              placeholder={capitalize(`${t("search")} ${isShop ? (id ? t("search.store") : t("store")) : ""}...`)}
               size="small"
               slotProps={{
                 input: {
@@ -625,9 +621,7 @@ const SearchInput = ({ mobileMode, tabletMode, show, isFocus, isShop }) => {
       {tabletMode ? (
         <AutocompleteContainer className={show ? "" : "hidden"}>
           <StyledSearchInput
-            placeholder={capitalize(
-              `${t("search")} ${isShop ? (id ? t("search.store", { ns: "client" }) : t("store")) : ""}...`
-            )}
+            placeholder={capitalize(`${t("search")} ${isShop ? (id ? t("search.store") : t("store")) : ""}...`)}
             size="small"
             value={displayRef.current}
             onClick={handleOpenDialog}

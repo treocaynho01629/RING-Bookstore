@@ -21,7 +21,7 @@ const useCart = () => {
   // Cart
   const addProduct = async (item, quantity) => {
     const { enqueueSnackbar } = await import("notistack");
-    enqueueSnackbar(t("cart.add.success", { ns: "client" }), { variant: "success" });
+    enqueueSnackbar(t("cart.add.success"), { variant: "success" });
     dispatch(
       addToCart({
         id: item.id,

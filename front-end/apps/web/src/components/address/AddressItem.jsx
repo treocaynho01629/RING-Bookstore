@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { PHONE_REGEX } from "@ring/shared/utils/regex";
+import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -104,9 +105,9 @@ const UserAddress = styled.span`
 `;
 
 const StyledRadio = styled(Radio)(({ theme }) => ({
-  borderRadius: 0,
-  backgroundColor: theme.vars.palette.action.disabled,
-  transition: "all .25s ease",
+  "borderRadius": 0,
+  "backgroundColor": theme.vars.palette.action.disabled,
+  "transition": "all .25s ease",
 
   "&:hover": {
     backgroundColor: theme.vars.palette.primary.light,
@@ -132,14 +133,8 @@ const StyledRadio = styled(Radio)(({ theme }) => ({
 }));
 //#endregion
 
-const AddressItem = ({
-  onCheck,
-  addressInfo,
-  handleOpen,
-  handleClick,
-  selectedValue,
-  isTemp,
-}) => {
+const AddressItem = ({ onCheck, addressInfo, handleOpen, handleClick, selectedValue, isTemp }) => {
+  const { t } = useTranslation();
   const isValid = () => {
     if (!addressInfo) return false;
 
@@ -149,14 +144,7 @@ const AddressItem = ({
     let currCity = "";
     if (addressSplit.length > 1) currCity = addressSplit[0];
 
-    const result = !(
-      !name ||
-      !phone ||
-      !address ||
-      !currCity ||
-      !ward ||
-      !PHONE_REGEX.test(phone)
-    );
+    const result = !(!name || !phone || !address || !currCity || !ward || !PHONE_REGEX.test(phone));
     return result;
   };
   const isNotValid = !isValid();
@@ -178,19 +166,19 @@ const AddressItem = ({
       >
         {addressInfo?.isDefault && (
           <AddressTag className={`${isNotValid ? "error" : ""}`}>
-            Mặc định
+            {t("address.default", { ns: "authenticated" })}
           </AddressTag>
         )}
         {isTemp && (
           <AddressTag className={`${isNotValid ? "error" : "temp"}`}>
-            Tạm lưu
+            {t("address.temp", { ns: "authenticated" })}
           </AddressTag>
         )}
         <Box display="flex" flexDirection={"column"}>
           {!addressInfo ? (
             <>
-              <UserInfo>Chưa có địa chỉ mặc định</UserInfo>
-              <UserAddress>Tạo địa chỉ tạm thời?</UserAddress>
+              <UserInfo>{t("address.default.empty", { ns: "authenticated" })}</UserInfo>
+              <UserAddress>{t("address.suggestion", { ns: "authenticated" })}</UserAddress>
             </>
           ) : (
             <>
@@ -198,9 +186,7 @@ const AddressItem = ({
                 {addressInfo?.companyName || addressInfo?.name}&nbsp;
                 {addressInfo?.phone && `(+84) ${addressInfo?.phone}`}
               </UserInfo>
-              <UserAddress>
-                {[addressInfo?.city, addressInfo?.address].join(", ")}
-              </UserAddress>
+              <UserAddress>{[addressInfo?.city, addressInfo?.address].join(", ")}</UserAddress>
             </>
           )}
         </Box>
@@ -215,7 +201,7 @@ const AddressItem = ({
           color={isNotValid ? "error" : isTemp ? "info" : "primary"}
           onClick={() => handleOpen(addressInfo)}
         >
-          Thay đổi
+          {t("edit")}
         </Button>
         <IconButton
           sx={{ display: { xs: "flex", sm: "none" }, pr: 0 }}

@@ -364,7 +364,7 @@ const CouponDialog = ({
 
     shippingCoupons = (
       <>
-        {content?.length > 0 && <DetailTitle>{t("coupon.shipping", { ns: "client" })}</DetailTitle>}
+        {content?.length > 0 && <DetailTitle>{t("coupon.shipping")}</DetailTitle>}
         {content}
       </>
     );
@@ -431,7 +431,7 @@ const CouponDialog = ({
 
     coupons = (
       <>
-        {content?.length > 0 && <DetailTitle>{t("coupon.discount", { ns: "client" })}</DetailTitle>}
+        {content?.length > 0 && <DetailTitle>{t("coupon.discount")}</DetailTitle>}
         {content}
       </>
     );
@@ -472,18 +472,18 @@ const CouponDialog = ({
 
     savedCoupons = (
       <>
-        {content?.length > 0 && <DetailTitle>{t("coupon.saved", { ns: "client" })}</DetailTitle>}
+        {content?.length > 0 && <DetailTitle>{t("coupon.saved")}</DetailTitle>}
         {content}
       </>
     );
   }
 
   let errorMessage = errorCode
-    ? t("coupon.invalid", { ns: "client" })
+    ? t("coupon.invalid")
     : !loggedIn
-      ? capitalize("required.login", { ns: "client", action: t("cart.coupon.apply", { ns: "client" }) })
+      ? capitalize("required.login", { ns: "client", action: t("cart.coupon.apply") })
       : !numSelected
-        ? t("required.select", { ns: "client" })
+        ? t("required.select")
         : "";
 
   const savedEmpty = isSaved && saved?.ids?.length == 0 && !fetchingSaved;
@@ -505,7 +505,7 @@ const CouponDialog = ({
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
         <TitleContainer>
           <Loyalty />
-          &nbsp;{t("coupon.title", { ns: "client" })}
+          &nbsp;{t("coupon.title")}
         </TitleContainer>
         {selectMode && (
           <Button
@@ -522,7 +522,7 @@ const CouponDialog = ({
         <CouponContainer>
           <InputContainer onSubmit={handleChangeInput}>
             <TextField
-              placeholder={t("coupon.add", { ns: "client" })}
+              placeholder={t("coupon.add")}
               type="text"
               id="coupon"
               inputRef={inputRef}
@@ -607,9 +607,7 @@ const CouponDialog = ({
               </>
             )}
             {savedEmpty ||
-              (couponsEmpty && (
-                <Message>{errorFlag ? t("error.general") : t("coupon.not.found", { ns: "client" })}</Message>
-              ))}
+              (couponsEmpty && <Message>{errorFlag ? t("error.general") : t("coupon.not.found")}</Message>)}
           </CouponsContainer>
         </StyledSimpleBar>
       </DialogContent>

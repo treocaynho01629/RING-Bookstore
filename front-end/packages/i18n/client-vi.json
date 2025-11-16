@@ -34,10 +34,8 @@
     "product.discount": "Giảm giá sản phẩm",
     "coupon.discount": "Giảm giá từ coupon"
   },
-  "order": {
-    "label": "Đơn giao"
-  },
   "coupon": {
+    "label": "Mã giảm giá",
     "title": "Thông tin ưu đãi",
     "discount": "Mã giảm giá",
     "shipping": "Mã vận chuyển",
@@ -90,7 +88,14 @@
     "close": "Đóng hộp thoại tìm kiếm",
     "suggest": "Gợi ý"
   },
+  "profile": {
+    "following": "Theo dõi",
+    "joined": "Tham gia",
+    "orders": "Đơn giao",
+    "edit": "Sửa hồ sơ"
+  },
   "shop.explore": "Duyệt cửa hàng",
   "required.login": "Vui lòng đăng nhập để {{action}}",
-  "required.select": "Vui lòng chọn sản phẩm trong giỏ"
+  "required.select": "Vui lòng chọn sản phẩm trong giỏ",
+  "help.center": "Trung tâm hỗ trợ"
 }

@@ -45,8 +45,7 @@ function ResetPage() {
 
   // Recaptcha
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY;
-  const { reCaptchaLoaded, generateReCaptchaToken } =
-    useReCaptcha(recaptchaSiteKey);
+  const { reCaptchaLoaded, generateReCaptchaToken } = useReCaptcha(recaptchaSiteKey);
 
   return (
     <Wrapper>

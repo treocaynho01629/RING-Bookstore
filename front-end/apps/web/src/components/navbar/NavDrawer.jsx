@@ -221,7 +221,7 @@ const NavDrawer = ({
                   <ListItemIcon>
                     <Avatar sx={{ width: 45, height: 45, mr: 2 }} src={image ?? null} />
                   </ListItemIcon>
-                  <ListItemText primary={username} secondary={t("profile")} />
+                  <ListItemText primary={username} secondary={t("profile.navigation")} />
                 </StyledItemButton>
               </ListItem>
             </NavLink>
@@ -280,7 +280,7 @@ const NavDrawer = ({
                   <ListItemIcon>
                     <Storefront />
                   </ListItemIcon>
-                  <ListItemText primary={t("shop.explore", { ns: "client" })} />
+                  <ListItemText primary={t("shop.explore")} />
                 </StyledItemButton>
               </ListItem>
             )}
@@ -294,7 +294,7 @@ const NavDrawer = ({
                       <ShoppingCartOutlined />
                     </Badge>
                   </ListItemIcon>
-                  <ListItemText primary={t("cart.label", { ns: "client" })} />
+                  <ListItemText primary={t("cart.label")} />
                 </StyledItemButton>
               </ListItem>
             )}
@@ -317,7 +317,7 @@ const NavDrawer = ({
                     <ListItemIcon>
                       <LocalShippingOutlined />
                     </ListItemIcon>
-                    <ListItemText primary={t("order.label", { ns: "client" })} />
+                    <ListItemText primary={t("profile.orders")} />
                   </StyledItemButton>
                 </ListItem>
               )}

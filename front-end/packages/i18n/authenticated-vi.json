@@ -1,0 +1,28 @@
+{
+  "address": {
+    "saved": "Sổ địa chỉ",
+    "title": "Địa chỉ của bạn",
+    "empty": "Chưa có địa chỉ nào",
+    "form.title": "Địa chỉ người nhận",
+    "add": "Thêm địa chỉ",
+    "edit": "Sửa địa chỉ",
+    "delete": "Xóa địa chỉ",
+    "delete.title": "Xóa địa chỉ?",
+    "delete.description": "Xoá địa chỉ khỏi sổ địa chỉ của bạn?",
+    "temp": "Tạm thời",
+    "default": "Mặc định",
+    "default.empty": "Chưa có địa chỉ mặc định",
+    "default.set": "Đặt làm địa chỉ mặc định",
+    "suggestion": "Tạo địa chỉ tạm thời?",
+    "name": "Họ và tên",
+    "phone": "Số điện thoại",
+    "company": "Tên công ty",
+    "type": "Loại địa chỉ",
+    "city": "Tỉnh/Thành phố",
+    "ward": "Phường/Xã",
+    "detail": "Địa chỉ nhận hàng",
+    "settings": "Cài đặt khác",
+    "type.home": "Nhà riêng",
+    "type.office": "Văn phòng"
+  }
+}

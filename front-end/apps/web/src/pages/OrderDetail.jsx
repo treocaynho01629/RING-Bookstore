@@ -20,7 +20,7 @@ const OrderDetail = () => {
   const { data, isLoading, isSuccess, isError, error } = useGetOrderDetailQuery(id);
 
   // Set title
-  useTitle(`Chi tiết đơn hàng ${idFormatter(id)}`);
+  //useTitle(`Chi tiết đơn hàng ${idFormatter(id)}`);
 
   let content = (
     <OrderDetailComponent

@@ -10,15 +10,23 @@
     "label": "Language",
     "description": "Select your language"
   },
+  "gender": {
+    "label": "Gender",
+    "male": "Male",
+    "female": "Female"
+  },
   "welcome": "Welcome",
   "hello": "Hello",
   "login": "Login",
   "login.title": "Login to your account",
-  "email": "email",
+  "email": "Email",
   "email.placeholder": "Email address",
   "username": "Username",
   "password": "Password",
-  "password.confirm": "Confirm password",
+  "fullname": "Full name",
+  "fullname.placeholder": "Enter full name",
+  "phone": "Phone",
+  "dob": "Date of birth",
   "recaptcha": "Protected by reCAPTCHA and Google through",
   "terms": "Terms of service",
   "policy": "Privacy policy",
@@ -30,33 +38,44 @@
   "login.suggestions": "Already have an account?",
   "help": "Help",
   "notification": "Notification",
-  "profile": "Profile",
   "ring": "RING!",
   "home": "Home",
   "search": "Search",
   "store": "Store",
   "saved": "Saved",
   "items": "items",
+  "image": "Image",
   "loading": "Loading...",
   "pending": "Pending request...",
   "select.all": "Select all",
   "price": "Price",
   "quantity": "Quantity",
   "total": "Total",
-  "remove": "Remove",
+  "delete": "Delete",
   "unknown": "Unknown",
   "partner": "Partner",
   "back": "Back",
   "apply": "Apply",
+  "confirm": "Confirm",
   "close": "Close",
+  "cancel": "Cancel",
+  "none": "None",
+  "not.yet": "None",
+  "edit": "Edit",
   "select": "Select",
   "show.more": "Show more",
   "unselect": "Unselect",
-  "remove.saved": "Remove",
+  "remove": "Remove",
   "save": "Save",
   "scroll": "Scroll back to top",
   "logout": "Log out",
   "logout.end": "Log out of this session?",
+  "role": {
+    "admin": "Admin",
+    "user": "User",
+    "seller": "Seller",
+    "guest": "Guest"
+  },
   "signout": {
     "confirmation": "Sign out?",
     "message": "You will be signed out of your account.",
@@ -88,6 +107,32 @@
       "all": "For all orders"
     }
   },
+  "profile": {
+    "navigation": "Profile",
+    "dropdown": "My account",
+    "label": "Profile",
+    "title": "Your profile",
+    "media": "Edit media",
+    "save": "Save changes",
+    "media.add": "Add profile picture",
+    "media.reset": "Reset profile picture",
+    "media.edit": "Edit profile picture",
+    "media.remove": "Remove profile picture",
+    "media.remove.message": "Remove the current profile picture?",
+    "update": "Update profile"
+  },
+  "order": {
+    "label": "Orders",
+    "status": {
+      "pending": "Pending",
+      "shipping": "Shipping",
+      "completed": "Completed",
+      "refunded": "Refunded"
+    }
+  },
+  "review": {
+    "label": "Reviews"
+  },
   "payment": {
     "cash": {
       "label": "Cash on delivery",
@@ -116,8 +161,16 @@
       }
     }
   },
+  "password.change": {
+    "label": "Change password",
+    "title": "Change account password",
+    "old": "Enter current password",
+    "new": "Enter new password",
+    "confirm": "Confirm new password"
+  },
   "message": {
-    "success": "{{action}} successfully"
+    "success": "{{action}} successfully!",
+    "error": "{{action}} failed!"
   },
   "error": {
     "server.not.response": "Server did not respond",

@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import Dialog from "@mui/material/Dialog";
 import Skeleton from "@mui/material/Skeleton";
-import { lazy, Suspense, forwardRef, useState } from "react";
+import { lazy, Suspense, forwardRef, useState, useEffect } from "react";
 import { StyledDialogTitle, TabContentContainer } from "../components/custom/ProfileComponents";
 import { useNavigate, useOutletContext, useParams } from "react-router";
 import { useRefreshMutation, useSignOutMutation } from "@ring/redux/authApiSlice";
@@ -19,19 +19,29 @@ const PlaceholderContainer = styled.div`
   align-items: center;
   justify-content: center;
   height: 40dvh;
+
+  &.tall {
+    height: 70dvh;
+  }
+
+  ${({ theme }) => theme.breakpoints.down("md")} {
+    height: 100dvh;
+  }
 `;
 //#endregion
 
-const tempLoad = (
-  <>
-    <StyledDialogTitle>
-      <Skeleton variant="text" sx={{ fontSize: "19px" }} width="50%" />
-    </StyledDialogTitle>
-    <PlaceholderContainer>
-      <Placeholder />
-    </PlaceholderContainer>
-  </>
-);
+const PlaceholderContent = ({ tab }) => {
+  return (
+    <>
+      <StyledDialogTitle>
+        <Skeleton variant="text" sx={{ fontSize: "19px" }} width="50%" />
+      </StyledDialogTitle>
+      <PlaceholderContainer className={tab === "address" ? "tall" : ""}>
+        <Placeholder />
+      </PlaceholderContainer>
+    </>
+  );
+};
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
@@ -42,11 +52,17 @@ const Profile = () => {
   const { profile, loading, isSuccess, tabletMode, mobileMode, pending, setPending } = useOutletContext();
   const [refresh, { isLoading: refreshing }] = useRefreshMutation();
   const [logout] = useSignOutMutation();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [currTab, setCurrTab] = useState("info");
   const navigate = useNavigate();
 
   // Set title
-  useTitle("Hồ sơ");
+  //useTitle("Hồ sơ");
+
+  useEffect(() => {
+    setOpen(!!tab);
+    if (tab) setCurrTab(tab);
+  }, [tab]);
 
   const verifyRefreshToken = async () => {
     if (refreshing) return;
@@ -72,10 +88,6 @@ const Profile = () => {
   };
 
   let content;
-  const currTab = tab ? tab : tabletMode ? "" : "info";
-
-  // TODO: Fix tab list disappear
-  console.log(currTab);
 
   switch (currTab) {
     case "info":
@@ -87,6 +99,7 @@ const Profile = () => {
             profile,
             loading,
             isSuccess,
+            mobileMode,
             tabletMode,
             verifyRefreshToken,
             handleClose,
@@ -100,36 +113,42 @@ const Profile = () => {
     case "password":
       content = <ResetPassComponent {...{ pending, setPending, verifyRefreshToken, refreshing }} />;
       break;
+    default: {
+      content = !tabletMode ? (
+        <ProfileDetail
+          {...{ pending, setPending, profile, loading, isSuccess, tabletMode, verifyRefreshToken, handleClose }}
+        />
+      ) : (
+        <PlaceholderContent tab={currTab} />
+      );
+      break;
+    }
   }
 
-  return (
-    <>
-      {tabletMode ? (
-        <Dialog
-          open={currTab}
-          onClose={handleClose}
-          fullScreen={mobileMode}
-          scroll={"paper"}
-          maxWidth={"md"}
-          fullWidth
-          closeAfterTransition={false}
-          slots={{
-            transition: Transition,
-          }}
-          slotProps={{
-            paper: {
-              elevation: 0,
-            },
-          }}
-        >
-          <Suspense fallback={tempLoad}>{content}</Suspense>
-        </Dialog>
-      ) : (
-        <TabContentContainer>
-          <Suspense fallback={tempLoad}>{content}</Suspense>
-        </TabContentContainer>
-      )}
-    </>
+  return tabletMode ? (
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      fullScreen={mobileMode}
+      scroll={"paper"}
+      maxWidth={"md"}
+      fullWidth
+      closeAfterTransition={false}
+      slots={{
+        transition: Transition,
+      }}
+      slotProps={{
+        paper: {
+          elevation: 0,
+        },
+      }}
+    >
+      <Suspense fallback={<PlaceholderContent tab={currTab} />}>{content}</Suspense>
+    </Dialog>
+  ) : (
+    <TabContentContainer>
+      <Suspense fallback={<PlaceholderContent tab={currTab} />}>{content}</Suspense>
+    </TabContentContainer>
   );
 };
 

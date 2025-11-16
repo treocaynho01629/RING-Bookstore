@@ -12,8 +12,9 @@ i18n
   .init({
     fallbackLng: defaultLocale,
     supportedLngs: locales,
-    defaultNS: "common",
-    ns: ["common", "validation", "client"],
+    defaultNS: "client",
+    fallbackNS: "common",
+    ns: ["common", "validation", "client", "authenticated"],
     interpolation: {
       escapeValue: false,
     },
@@ -33,7 +34,7 @@ i18n
     },
     react: {
       useSuspense: true,
-    },
+    }
   });
 
 export default i18n;

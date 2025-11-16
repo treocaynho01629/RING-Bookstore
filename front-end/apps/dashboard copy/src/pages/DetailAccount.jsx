@@ -1,22 +1,9 @@
 import { useState } from "react";
-import {
-  Avatar,
-  Box,
-  IconButton,
-  Typography,
-  Skeleton,
-  Chip,
-  Stack,
-  Grid,
-} from "@mui/material";
+import { Avatar, Box, IconButton, Typography, Skeleton, Chip, Stack, Grid } from "@mui/material";
 import { NavLink, useParams } from "react-router";
 import { Launch, Edit as EditIcon } from "@mui/icons-material";
 import { useGetUserQuery } from "../features/users/usersApiSlice";
-import {
-  ButtonContainer,
-  HeaderContainer,
-  InfoTable,
-} from "../components/custom/Components";
+import { ButtonContainer, HeaderContainer, InfoTable } from "../components/custom/Components";
 import { numFormat, getGenderType, getUserRole, useTitle } from "@ring/shared";
 import { useAppStore } from "@ring/redux";
 import CustomBreadcrumbs from "../components/custom/CustomBreadcrumbs";
@@ -38,7 +25,7 @@ const DetailAccount = () => {
   };
 
   //Set title
-  useTitle(data?.username ?? "Thành viên");
+  //useTitle(data?.username ?? "Thành viên");
 
   const roleItem = UserRole[data?.roles];
 
@@ -65,12 +52,7 @@ const DetailAccount = () => {
           </IconButton>
         </ButtonContainer>
       </HeaderContainer>
-      <Grid
-        container
-        size="grow"
-        spacing={{ xs: 0, md: 1, lg: 2 }}
-        position="relative"
-      >
+      <Grid container size="grow" spacing={{ xs: 0, md: 1, lg: 2 }} position="relative">
         <Grid
           size={{ xs: 12, md: 5 }}
           display="flex"
@@ -94,11 +76,7 @@ const DetailAccount = () => {
         </Grid>
         <Grid size={{ xs: 12, md: 7 }}>
           <Stack spacing={1} px={{ xs: 1, md: 0 }}>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignContent="center"
-            >
+            <Box display="flex" justifyContent="space-between" alignContent="center">
               <Chip
                 variant="outlined"
                 color={roleItem?.color}

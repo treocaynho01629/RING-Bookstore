@@ -80,30 +80,19 @@ const AddressPreview = ({ addressInfo, handleOpen, loadAddress }) => {
     <PreviewWrapper>
       <DetailTitle>Vận chuyển:</DetailTitle>
       <PreviewContainer>
-        <Box
-          display="flex"
-          flexDirection={"column"}
-          position="relative"
-          width="100%"
-        >
+        <Box display="flex" flexDirection={"column"} position="relative" width="100%">
           {!addressInfo && loadAddress ? (
             <Box>Đang cập nhật...</Box>
           ) : (
             <Box display="flex" width={{ xs: "95%", md: "100%" }}>
               <LocalShippingOutlined />
               <Box overflow="hidden">
-                <AddressInfo
-                  aria-label="toggle address dialog"
-                  disabled={loadAddress}
-                  onClick={handleClickOpen}
-                >
+                <AddressInfo aria-label="toggle address dialog" disabled={loadAddress} onClick={handleClickOpen}>
                   &nbsp;Vận chuyển tới:&emsp;
                   <Address>
-                    {fullAddress.length > 2 ? fullAddress : "Không xác định"}
+                    {fullAddress.length > 2 ? fullAddress : "Không xác định"} // TODO: Do something with this
                   </Address>
-                  <KeyboardArrowDown
-                    sx={{ display: { xs: "none", md: "block" } }}
-                  />
+                  <KeyboardArrowDown sx={{ display: { xs: "none", md: "block" } }} />
                 </AddressInfo>
                 <AddressInfo className="hide-on-mobile">
                   &nbsp;Phí vận chuyển:&emsp;

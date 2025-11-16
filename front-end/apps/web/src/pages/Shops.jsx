@@ -126,7 +126,7 @@ const Shops = () => {
   }, [searchParams]);
 
   // Set title
-  useTitle("Danh sách cửa hàng");
+  //useTitle("Danh sách cửa hàng");
 
   // Handle change
   const scrollToTop = useCallback(() => {

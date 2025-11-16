@@ -25,6 +25,10 @@
       "import": "./dist/src/components/DatePicker.js",
       "require": "./dist/src/components/DatePicker.cjs"
     },
+    "./LightboxImage": {
+      "import": "./dist/src/components/LightboxImage.js",
+      "require": "./dist/src/components/LightboxImage.cjs"
+    },
     "./LightboxImages": {
       "import": "./dist/src/components/LightboxImages.js",
       "require": "./dist/src/components/LightboxImages.cjs"

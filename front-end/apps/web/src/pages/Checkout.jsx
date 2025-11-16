@@ -1,19 +1,8 @@
 import styled from "@emotion/styled";
-import {
-  useEffect,
-  useRef,
-  useState,
-  lazy,
-  Suspense,
-  useCallback,
-  useMemo,
-} from "react";
+import { useEffect, useRef, useState, lazy, Suspense, useCallback, useMemo } from "react";
 import { Navigate, NavLink, useLocation, useNavigate } from "react-router";
 import { useGetMyAddressQuery } from "../features/addresses/addressesApiSlice";
-import {
-  useCalculateMutation,
-  useCheckoutMutation,
-} from "../features/orders/ordersApiSlice";
+import { useCalculateMutation, useCheckoutMutation } from "../features/orders/ordersApiSlice";
 import { isEqual } from "lodash-es";
 import { PHONE_REGEX } from "@ring/shared/utils/regex";
 import { getShippingType } from "@ring/shared/enums/shipping";
@@ -49,9 +38,7 @@ import useCheckout from "../hooks/useCheckout";
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
 const ReCaptcha = lazy(() => import("@ring/auth/ReCaptcha"));
 const CouponDialog = lazy(() => import("../components/coupon/CouponDialog"));
-const ShippingSelectDialog = lazy(
-  () => import("../components/address/ShippingSelectDialog")
-);
+const ShippingSelectDialog = lazy(() => import("../components/address/ShippingSelectDialog"));
 const PaymentSelect = lazy(() => import("../components/cart/PaymentSelect"));
 const ConfirmDialog = lazy(() => import("@ring/shared/ConfirmDialog"));
 
@@ -101,7 +88,7 @@ const MiniTitle = styled.h4`
 `;
 
 const StyledStepper = styled(Stepper)(({ theme }) => ({
-  marginTop: theme.spacing(1),
+  "marginTop": theme.spacing(1),
   "& .MuiStepLabel-root": {
     cursor: "pointer",
     [theme.breakpoints.down("sm")]: {
@@ -186,8 +173,7 @@ const Checkout = () => {
     total: 0,
   });
   const [calculated, setCalculated] = useState(null);
-  const [calculate, { isLoading: calculating, isError }] =
-    useCalculateMutation();
+  const [calculate, { isLoading: calculating, isError }] = useCalculateMutation();
 
   // Recaptcha v2
   const [challenge, setChallenge] = useState(false); //Toggle if marked suspicious by v3
@@ -196,8 +182,7 @@ const Checkout = () => {
   // Recaptcha
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
   const recaptchaV3SiteKey = import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY;
-  const { reCaptchaLoaded, generateReCaptchaToken, hideBadge } =
-    useReCaptcha(recaptchaV3SiteKey);
+  const { reCaptchaLoaded, generateReCaptchaToken, hideBadge } = useReCaptcha(recaptchaV3SiteKey);
 
   // Checkout hook
   const [checkout, { isLoading }] = useCheckoutMutation();
@@ -221,7 +206,7 @@ const Checkout = () => {
   }, [reCaptchaLoaded]); // Hide badge cuz it's in the way of stepper
 
   // Set title
-  useTitle("Thanh toán");
+  //useTitle("Thanh toán");
 
   const handleCartChange = () => {
     if (selected?.length > 0 && cartProducts.length > 0) {
@@ -251,9 +236,7 @@ const Checkout = () => {
           if (selected?.indexOf(id) !== -1) {
             // Get selected items in redux store
             // Find or create shop
-            let detail = result.cart.find(
-              (shopItem) => shopItem.shopId === shopId
-            );
+            let detail = result.cart.find((shopItem) => shopItem.shopId === shopId);
 
             if (!detail) {
               const coupon = shopCoupon[shopId];
@@ -261,8 +244,7 @@ const Checkout = () => {
                 shopId,
                 items: [],
                 note: shopNote[shopId],
-                shippingType:
-                  shopShipping[shopId] || Object.keys(ShippingType)[0],
+                shippingType: shopShipping[shopId] || Object.keys(ShippingType)[0],
                 coupon: coupon?.isUsable ? coupon?.code : null,
               };
               result.cart.push(detail);
@@ -309,13 +291,7 @@ const Checkout = () => {
   // Calculate server side
   const handleCalculate = useCallback(
     async (cart) => {
-      if (
-        isLoading ||
-        address == null ||
-        cart == null ||
-        cart.length == 0 ||
-        isEqual(prevPayload.current, cart)
-      )
+      if (isLoading || address == null || cart == null || cart.length == 0 || isEqual(prevPayload.current, cart))
         return;
 
       calculate(cart)
@@ -340,23 +316,12 @@ const Checkout = () => {
 
   // Sync checkout cart between client and server
   const handleSyncCart = (cart) => {
-    syncCart(
-      cart,
-      setDiscount,
-      setShopDiscount,
-      coupon,
-      setCoupon,
-      shopCoupon,
-      setShopCoupon,
-      handleOpenWarning
-    );
+    syncCart(cart, setDiscount, setShopDiscount, coupon, setCoupon, shopCoupon, setShopCoupon, handleOpenWarning);
   };
 
   // Separate by shop
   const reduceCart = () => {
-    let selectedCart = cartProducts.filter((product) =>
-      selected?.includes(product.id)
-    );
+    let selectedCart = cartProducts.filter((product) => selected?.includes(product.id));
     let resultCart = selectedCart.reduce((result, item) => {
       if (!result[item.shopId]) {
         // Check if not exists shop >> Add new one
@@ -372,23 +337,13 @@ const Checkout = () => {
   };
   const reducedCart = useMemo(() => reduceCart(), [cartProducts]);
   const displayInfo = {
-    deal:
-      calculating || !calculated ? estimated?.deal : calculated?.dealDiscount,
-    subTotal:
-      calculating || !calculated
-        ? estimated?.subTotal
-        : calculated?.productsTotal,
-    shipping:
-      calculating || !calculated
-        ? estimated?.shipping
-        : calculated?.shippingFee,
+    deal: calculating || !calculated ? estimated?.deal : calculated?.dealDiscount,
+    subTotal: calculating || !calculated ? estimated?.subTotal : calculated?.productsTotal,
+    shipping: calculating || !calculated ? estimated?.shipping : calculated?.shippingFee,
     couponDiscount: calculated?.couponDiscount || 0,
     totalDiscount: calculated?.totalDiscount || 0,
     shippingDiscount: calculated?.shippingDiscount || 0,
-    total:
-      calculating || !calculated
-        ? estimated?.total
-        : calculated?.total - calculated?.totalDiscount,
+    total: calculating || !calculated ? estimated?.total : calculated?.total - calculated?.totalDiscount,
   };
 
   const scrollToTop = useCallback(() => {
@@ -412,9 +367,7 @@ const Checkout = () => {
     setOpenCoupon(true);
     setContextShop(shopId);
     setContextState(
-      shopId
-        ? checkState?.details[shopId]
-        : { value: checkState?.value, quantity: checkState?.quantity }
+      shopId ? checkState?.details[shopId] : { value: checkState?.value, quantity: checkState?.quantity }
     );
     setContextCoupon(shopId ? shopCoupon[shopId] : coupon);
   };
@@ -479,12 +432,7 @@ const Checkout = () => {
     if (!valid && addressInfo?.phone) {
       setErrMsg("Sai định dạng số điện thoại!");
       return;
-    } else if (
-      !addressInfo?.name ||
-      !addressInfo?.phone ||
-      !addressInfo?.city ||
-      !addressInfo?.address
-    ) {
+    } else if (!addressInfo?.name || !addressInfo?.phone || !addressInfo?.city || !addressInfo?.address) {
       setErrMsg("Vui lòng nhập địa chỉ giao hàng!");
       return;
     }
@@ -492,9 +440,7 @@ const Checkout = () => {
     const { enqueueSnackbar } = await import("notistack");
     const checkoutCart = getCheckoutCart();
 
-    const recaptchaToken = challenge
-      ? token
-      : await generateReCaptchaToken("checkout");
+    const recaptchaToken = challenge ? token : await generateReCaptchaToken("checkout");
     checkout({
       token: recaptchaToken,
       source: challenge ? "v2" : "v3",
@@ -533,9 +479,7 @@ const Checkout = () => {
       });
   };
 
-  const calculatedContextShop = calculated?.details?.find(
-    (detail) => detail?.shopId == contextShop
-  );
+  const calculatedContextShop = calculated?.details?.find((detail) => detail?.shopId == contextShop);
   //#endregion
 
   if (selected?.length) {
@@ -543,18 +487,10 @@ const Checkout = () => {
       <Wrapper>
         {(isLoading || pending) && (
           <Suspense fallBack={null}>
-            <PendingModal
-              open={isLoading || pending}
-              message="Đang xử lý đơn hàng..."
-            />
+            <PendingModal open={isLoading || pending} message="Đang xử lý đơn hàng..." />
           </Suspense>
         )}
-        <CustomBreadcrumbs
-          separator="›"
-          maxItems={4}
-          aria-label="breadcrumb"
-          className="transparent"
-        >
+        <CustomBreadcrumbs separator="›" maxItems={4} aria-label="breadcrumb" className="transparent">
           <NavLink to={"/cart"}>Giỏ hàng</NavLink>
           <NavLink to={"/checkout"}>Thanh toán</NavLink>
         </CustomBreadcrumbs>
@@ -563,17 +499,9 @@ const Checkout = () => {
             <ShoppingCartCheckout />
             &nbsp;THANH TOÁN
           </Title>
-          <Grid
-            container
-            spacing={2}
-            sx={{ position: "relative", mb: 10, justifyContent: "flex-end" }}
-          >
+          <Grid container spacing={2} sx={{ position: "relative", mb: 10, justifyContent: "flex-end" }}>
             <Grid size={{ xs: 12, md_lg: 8 }} position="relative">
-              <StyledStepper
-                activeStep={activeStep}
-                orientation="vertical"
-                connector={null}
-              >
+              <StyledStepper activeStep={activeStep} orientation="vertical" connector={null}>
                 <Step key={0}>
                   <StepLabel
                     error={errMsg !== "" && err?.status === 400}
@@ -629,10 +557,7 @@ const Checkout = () => {
                 </Step>
                 <Step key={1}>
                   <StepLabel
-                    error={
-                      errMsg !== "" &&
-                      (err?.status == 409 || err?.status == 404)
-                    }
+                    error={errMsg !== "" && (err?.status == 409 || err?.status == 404)}
                     optional={
                       errMsg !== "" &&
                       (err?.status == 409 || err?.status == 404) && (
@@ -644,30 +569,22 @@ const Checkout = () => {
                   >
                     <SemiTitle
                       onClick={() => {
-                        if (validAddressInfo && activeStep > 1)
-                          setActiveStep(1);
+                        if (validAddressInfo && activeStep > 1) setActiveStep(1);
                       }}
                     >
                       <ProductionQuantityLimits />
                       &nbsp;Kiểm tra lại sản phẩm
                     </SemiTitle>
                   </StepLabel>
-                  <StyledStepContent
-                    slotProps={{ transition: { unmountOnExit: false } }}
-                  >
+                  <StyledStepContent slotProps={{ transition: { unmountOnExit: false } }}>
                     <TableContainer>
                       <Table aria-label="checkout-table">
                         <TableBody>
                           {Object.keys(reducedCart).map((shopId, index) => {
                             const shop = reducedCart[shopId];
-                            const calculatedShop = calculated?.details?.find(
-                              (detail) => detail?.shopId == shopId
-                            );
-                            const shippingFee =
-                              calculatedShop?.shippingFee ??
-                              estimated?.shipping;
-                            const shippingDiscount =
-                              calculatedShop?.shippingDiscount ?? 0;
+                            const calculatedShop = calculated?.details?.find((detail) => detail?.shopId == shopId);
+                            const shippingFee = calculatedShop?.shippingFee ?? estimated?.shipping;
+                            const shippingDiscount = calculatedShop?.shippingDiscount ?? 0;
 
                             return (
                               <PreviewDetailRow
@@ -706,12 +623,9 @@ const Checkout = () => {
                           {...{
                             open: openShipping,
                             handleClose: handleCloseShippingDialog,
-                            selectedShipping:
-                              shopShipping[contextShop] ||
-                              Object.keys(ShippingType)[0],
+                            selectedShipping: shopShipping[contextShop] || Object.keys(ShippingType)[0],
                             shippingFee: calculatedContextShop?.shippingFee,
-                            shippingDiscount:
-                              calculatedContextShop?.shippingDiscount,
+                            shippingDiscount: calculatedContextShop?.shippingDiscount,
                             onSubmit: handleChangeShipping,
                           }}
                         />
@@ -721,10 +635,7 @@ const Checkout = () => {
                 </Step>
                 <Step key={2}>
                   <StepLabel
-                    error={
-                      errMsg !== "" &&
-                      (err?.status == 412 || err?.status == 403)
-                    }
+                    error={errMsg !== "" && (err?.status == 412 || err?.status == 403)}
                     optional={
                       errMsg !== "" &&
                       (err?.status == 412 || err?.status == 404) && (
@@ -752,21 +663,14 @@ const Checkout = () => {
                     </Suspense>
                     {reCaptchaLoaded && challenge && (
                       <Suspense fallback={null}>
-                        <ReCaptcha
-                          onVerify={(token) => setToken(token)}
-                          recaptchaSiteKey={recaptchaSiteKey}
-                        />
+                        <ReCaptcha onVerify={(token) => setToken(token)} recaptchaSiteKey={recaptchaSiteKey} />
                       </Suspense>
                     )}
                   </StyledStepContent>
                 </Step>
               </StyledStepper>
             </Grid>
-            <Grid
-              size={{ xs: 12, md_lg: 4 }}
-              position={{ xs: "sticky", md_lg: "relative" }}
-              bottom={0}
-            >
+            <Grid size={{ xs: 12, md_lg: 4 }} position={{ xs: "sticky", md_lg: "relative" }} bottom={0}>
               <Box py={2}>
                 <SemiTitle className="end">Tổng quan</SemiTitle>
               </Box>

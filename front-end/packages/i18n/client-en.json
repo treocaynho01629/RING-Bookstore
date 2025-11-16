@@ -34,12 +34,8 @@
     "product.discount": "Product discount",
     "coupon.discount": "Coupon discount"
   },
-  "shop.explore": "Explore",
-  "order": {
-    "label": "Order",
-    "description": "View your orders"
-  },
   "coupon": {
+    "label": "Coupons",
     "title": "Coupon listing",
     "discount": "Discount coupons",
     "shipping": "Shipping coupons",
@@ -92,6 +88,14 @@
     "close": "Close search dialog",
     "suggest": "Suggestions"
   },
+  "profile": {
+    "following": "Following",
+    "joined": "Joined",
+    "orders": "Orders tracking",
+    "edit": "Edit profile"
+  },
   "required.login": "Please login to {{action}}",
-  "required.select": "Please select any items in cart"
+  "required.select": "Please select any items in cart",
+  "shop.explore": "Explore",
+  "help.center": "Help center"
 }

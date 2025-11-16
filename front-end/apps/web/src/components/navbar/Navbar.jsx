@@ -264,8 +264,8 @@ const SearchComponent = ({ tabletMode, show, toggle, setToggle, isSearch, isShop
           </StyledIconButton>
         </Link>
       ) : (
-        <Link to={"/store"} title={t("shop.explore", { ns: "client" })}>
-          <StyledIconButton aria-label={t("shop.explore", { ns: "client" })}>
+        <Link to={"/store"} title={t("shop.explore")}>
+          <StyledIconButton aria-label={t("shop.explore")}>
             <Storefront />
           </StyledIconButton>
         </Link>
@@ -281,8 +281,8 @@ const SearchComponent = ({ tabletMode, show, toggle, setToggle, isSearch, isShop
           }}
         />
         {tabletMode && isSearch ? (
-          <Link to={"/cart"} title={t("cart.label", { ns: "client" })}>
-            <StyledIconButton aria-label={t("cart.label", { ns: "client" })} sx={{ mr: { xs: 0.3, md: 0 } }}>
+          <Link to={"/cart"} title={t("cart.label")}>
+            <StyledIconButton aria-label={t("cart.label")} sx={{ mr: { xs: 0.3, md: 0 } }}>
               <Badge
                 color="primary"
                 badgeContent={products?.length}
@@ -296,11 +296,7 @@ const SearchComponent = ({ tabletMode, show, toggle, setToggle, isSearch, isShop
             </StyledIconButton>
           </Link>
         ) : (
-          <StyledIconButton
-            aria-label={t("search.toggle", { ns: "client" })}
-            onClick={toggleSearch}
-            sx={{ mr: { xs: 0.3, md: 0 } }}
-          >
+          <StyledIconButton aria-label={t("search.toggle")} onClick={toggleSearch} sx={{ mr: { xs: 0.3, md: 0 } }}>
             {show ? <SearchOff /> : <Search />}
           </StyledIconButton>
         )}
@@ -383,8 +379,8 @@ const PopoverComponents = ({ mode, setMode, cartProducts, username, image, handl
             onMouseEnter={handleCartPopover}
             onMouseLeave={handleCartClose}
           >
-            <Link to={"/cart"} title={t("cart.label", { ns: "client" })}>
-              <StyledIconButton className="nav" aria-label={t("cart.label", { ns: "client" })}>
+            <Link to={"/cart"} title={t("cart.label")}>
+              <StyledIconButton className="nav" aria-label={t("cart.label")}>
                 <Badge
                   color="primary"
                   badgeContent={cartProducts?.length}
@@ -395,7 +391,7 @@ const PopoverComponents = ({ mode, setMode, cartProducts, username, image, handl
                 >
                   <ShoppingCartOutlined />
                 </Badge>
-                <IconText>{t("cart.label", { ns: "client" })}</IconText>
+                <IconText>{t("cart.label")}</IconText>
               </StyledIconButton>
             </Link>
             {anchorElCart !== undefined && (
@@ -417,8 +413,8 @@ const PopoverComponents = ({ mode, setMode, cartProducts, username, image, handl
             onMouseLeave={handleProfileClose}
           >
             {username ? (
-              <Link to={"/profile/detail"} title={t("profile")}>
-                <StyledIconButton className="nav" aria-label={t("profile")}>
+              <Link to={"/profile/detail"} title={t("profile.navigation")}>
+                <StyledIconButton className="nav" aria-label={t("profile.navigation")}>
                   <Avatar sx={{ width: 24, height: 24, fontSize: "16px" }} src={image ?? null} />
                   <IconText className="username">{username}</IconText>
                 </StyledIconButton>

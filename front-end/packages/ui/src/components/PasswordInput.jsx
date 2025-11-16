@@ -8,7 +8,7 @@ import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 export default function PasswordInput(props) {
   const [showPassword, setShowPassword] = useState(false);
 
-  //Toggle type
+  // Toggle type
   const handleClickShowPassword = () => setShowPassword((prev) => !prev);
   const handleMouseDownPassword = (e) => {
     e.preventDefault();

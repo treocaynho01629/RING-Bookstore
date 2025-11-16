@@ -159,7 +159,7 @@ function EnhancedTableHead({ onSelectAllClick, numSelected, rowCount, handleDele
             disableRipple
             onClick={handleDeleteMultiple}
           >
-            {t("remove")}
+            {t("delete")}
           </StyledDeleteButton>
         </ActionTableCell>
       </TableRow>
@@ -595,7 +595,7 @@ const CartContent = ({ confirm }) => {
         <TitleContainer>
           <Title>
             <ShoppingCartIcon />
-            &nbsp;{t("cart.label", { ns: "client" })} ({cartProducts?.length})
+            &nbsp;{t("cart.label")} ({cartProducts?.length})
           </Title>
         </TitleContainer>
         <Table aria-label="cart-table">
@@ -656,7 +656,7 @@ const CartContent = ({ confirm }) => {
         <Box mt={1} display="flex">
           <Link to={"/"}>
             <Button variant="outlined" color="secondary" startIcon={<ChevronLeft />}>
-              {t("cart.continue", { ns: "client" })}
+              {t("cart.continue")}
             </Button>
           </Link>
         </Box>
@@ -665,7 +665,7 @@ const CartContent = ({ confirm }) => {
         <TitleContainer className="end">
           <Title>
             <Sell />
-            &nbsp;{t("cart.estimate", { ns: "client" })}
+            &nbsp;{t("cart.estimate")}
           </Title>
         </TitleContainer>
         <CheckoutDialog
@@ -715,13 +715,13 @@ const CartContent = ({ confirm }) => {
               <ListItemIcon>
                 <DeleteIcon sx={{ color: "error.main" }} fontSize="small" />
               </ListItemIcon>
-              <ListItemText sx={{ color: "error.main" }}>{t("cart.remove", { ns: "client" })}</ListItemText>
+              <ListItemText sx={{ color: "error.main" }}>{t("cart.remove")}</ListItemText>
             </MenuItem>
             <MenuItem onClick={handleFindSimilar}>
               <ListItemIcon>
                 <Search fontSize="small" />
               </ListItemIcon>
-              <ListItemText>{t("cart.find.similar", { ns: "client" })}</ListItemText>
+              <ListItemText>{t("cart.find.similar")}</ListItemText>
             </MenuItem>
           </Menu>
         )}
@@ -731,8 +731,8 @@ const CartContent = ({ confirm }) => {
           <ConfirmDialog
             {...{
               open: warningMessage !== "",
-              title: t("cart.remove.title", { ns: "client" }),
-              message: `${t("cart.remove.message", { ns: "client" })} \n${warningMessage}`,
+              title: t("cart.remove.title"),
+              message: `${t("cart.remove.message")} \n${warningMessage}`,
               handleConfirm: handleCloseWarning,
             }}
             fullScreen={mobileMode}

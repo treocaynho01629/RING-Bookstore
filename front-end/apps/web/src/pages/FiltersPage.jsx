@@ -140,7 +140,7 @@ const FiltersPage = () => {
   }, [cSlug, searchParams]);
 
   // Set title
-  useTitle("Cửa hàng");
+  //useTitle("Cửa hàng");
 
   // Handle change
   const scrollToTop = useCallback(() => {

@@ -43,10 +43,10 @@ const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, handleSignO
 
   const mainPopover = [
     username ? (
-      <Link to={"/profile/detail"} key="profile-detail" title={t("profile")}>
+      <Link to={"/profile/detail"} key="profile-detail" title={t("profile.navigation")}>
         <MenuItem>
           <Avatar sx={{ width: 30, height: 30, ml: -0.5, mr: 1.5 }} src={image ?? null} />
-          {t("profile")}
+          {t("profile.navigation")}
         </MenuItem>
       </Link>
     ) : (
@@ -58,12 +58,12 @@ const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, handleSignO
       </Link>
     ),
     username ? (
-      <Link to={"/profile/order"} key="profile-order" title={t("order.label", { ns: "client" })}>
+      <Link to={"/profile/order"} key="profile-order" title={t("profile.orders")}>
         <MenuItem>
           <ListItemIcon>
             <LocalShippingOutlined fontSize="small" />
           </ListItemIcon>
-          {t("order.label", { ns: "client" })}
+          {t("profile.orders")}
         </MenuItem>
       </Link>
     ) : (

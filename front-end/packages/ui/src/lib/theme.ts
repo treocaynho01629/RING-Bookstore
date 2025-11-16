@@ -161,6 +161,11 @@ export const theme = createTheme({
       },
     },
     MuiDialog: {
+      defaultProps: {
+        PaperProps: {
+          elevation: 1,
+        }
+      },
       styleOverrides: {
         paperFullScreen: ({ theme }) => ({
           ["& .MuiDialogTitle-root"]: {

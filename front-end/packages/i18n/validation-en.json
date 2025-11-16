@@ -6,9 +6,17 @@
       "size.range": "{{field}} must be between {{min}} and {{max}} characters!",
       "size.max": "{{field}} cannot exceed {{max}} characters!",
       "size.min": "{{field}} must be greater than {{min}} characters!",
+      "image.size": "Image size cannot exceed {{max}} MB!",
       "date.past": "{{field}} must be before today!",
       "range": "{{field}} must be between {{min}} and {{max}}!",
-      "password.match": "Passwords do not match!"
+      "password.match": "Passwords do not match!",
+      "password.evaluate": {
+        "helper": "Password length must be between {{min}}-{{max}} characters including lowercase letters and a number.",
+        "length": "Invalid length",
+        "chars": "Password must contain lowercase letters and a number or a special character",
+        "common": "Common password",
+        "strong": "Strong password"
+      }
     }
   }
 }

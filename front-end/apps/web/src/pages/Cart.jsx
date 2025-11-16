@@ -42,13 +42,10 @@ const StyledEmptyIcon = styled(EmptyIcon)`
 const Cart = () => {
   const { cartProducts } = useCart();
   const { t } = useTranslation();
-  const [ConfirmationDialog, confirm] = useConfirm(
-    t("cart.remove", { ns: "client" }),
-    t("cart.remove.description", { ns: "client" })
-  );
+  const [ConfirmationDialog, confirm] = useConfirm(t("cart.remove"), t("cart.remove.description"));
 
   // Set title
-  useTitle(t("cart.label", { ns: "client" }));
+  //useTitle(t("cart.label"));
 
   useLayoutEffect(() => {
     if (cartProducts.length == 0) window.scrollTo({ top: 0, behavior: "smooth" });
@@ -57,15 +54,15 @@ const Cart = () => {
   return (
     <Wrapper>
       <CustomBreadcrumbs separator="›" maxItems={4} aria-label="Breadcrumbs" className="transparent">
-        <NavLink to={"/cart"}>{t("cart.label", { ns: "client" })}</NavLink>
+        <NavLink to={"/cart"}>{t("cart.label")}</NavLink>
       </CustomBreadcrumbs>
       {!cartProducts.length ? (
         <EmptyWrapper>
           <StyledEmptyIcon />
-          <h2>{t("cart.empty.description", { ns: "client" })}</h2>
+          <h2>{t("cart.empty.description")}</h2>
           <NavLink to={"/"}>
             <Button variant="contained" color="primary" startIcon={<ChevronLeft />}>
-              {t("cart.continue", { ns: "client" })}
+              {t("cart.continue")}
             </Button>
           </NavLink>
         </EmptyWrapper>

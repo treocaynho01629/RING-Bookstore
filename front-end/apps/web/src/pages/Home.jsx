@@ -499,7 +499,7 @@ const Home = () => {
   }, [publishers]);
 
   //Set title
-  useTitle("RING! - Bookstore");
+  //useTitle("RING! - Bookstore");
 
   //Show more
   const handleShowMore = () => {

@@ -13,7 +13,7 @@ import "simplebar-react/dist/simplebar.min.css";
 
 function App() {
   useReachable(import.meta.env.VITE_API_URL); // Test connection to server
-  useGetEnums();
+  useGetEnums(); // TODO: Remove this
 
   const router = createBrowserRouter(
     [
@@ -24,6 +24,7 @@ function App() {
         children: [
           {
             path: "reset/:token?",
+            handle: { title: "password.reset" },
             lazy: async () => {
               let ResetPage = await import("./pages/ResetPage");
               return { Component: ResetPage.default };
@@ -31,6 +32,7 @@ function App() {
           },
           {
             path: "unauthorized",
+            handle: { title: "unauthorized" },
             lazy: async () => {
               let Unauthorized = await import("./pages/Unauthorized");
               return { Component: Unauthorized.default };
@@ -38,6 +40,7 @@ function App() {
           },
           {
             path: "*",
+            handle: { title: "page.not.found" },
             lazy: async () => {
               let Missing = await import("./pages/Missing");
               return { Component: Missing.default };
@@ -45,6 +48,7 @@ function App() {
           },
           {
             path: "auth/:tab",
+            handle: { title: "welcome" },
             lazy: async () => {
               let AuthPage = await import("./pages/AuthPage");
               return { Component: AuthPage.default };
@@ -55,6 +59,7 @@ function App() {
             children: [
               {
                 path: "payment/:id?",
+                handle: { title: "payment" },
                 lazy: async () => {
                   let Payment = await import("./pages/Payment");
                   return { Component: Payment.default };
@@ -72,6 +77,7 @@ function App() {
                   },
                   {
                     path: "store/:cSlug?",
+                    handle: { title: "store" },
                     lazy: async () => {
                       let FiltersPage = await import("./pages/FiltersPage");
                       return { Component: FiltersPage.default };
@@ -79,6 +85,7 @@ function App() {
                   },
                   {
                     path: "shop",
+                    handle: { title: "shops" },
                     lazy: async () => {
                       let Shops = await import("./pages/Shops");
                       return { Component: Shops.default };
@@ -86,6 +93,7 @@ function App() {
                   },
                   {
                     path: "shop/:id",
+                    handle: { title: "shop.detail" },
                     lazy: async () => {
                       let ShopDetail = await import("./pages/ShopDetail");
                       return { Component: ShopDetail.default };
@@ -93,6 +101,7 @@ function App() {
                   },
                   {
                     path: "product/:slug",
+                    handle: { title: "product.detail" },
                     lazy: async () => {
                       let ProductDetail = await import("./pages/ProductDetail");
                       return { Component: ProductDetail.default };
@@ -100,6 +109,7 @@ function App() {
                   },
                   {
                     path: "product-id/:id",
+                    handle: { title: "product.detail" },
                     lazy: async () => {
                       let ProductDetail = await import("./pages/ProductDetail");
                       return { Component: ProductDetail.default };
@@ -107,6 +117,7 @@ function App() {
                   },
                   {
                     path: "cart",
+                    handle: { title: "cart.label" },
                     lazy: async () => {
                       let Cart = await import("./pages/Cart");
                       return { Component: Cart.default };
@@ -117,6 +128,7 @@ function App() {
                     children: [
                       {
                         path: "checkout",
+                        handle: { title: "cart.checkout" },
                         lazy: async () => {
                           let Checkout = await import("./pages/Checkout");
                           return { Component: Checkout.default };
@@ -130,6 +142,7 @@ function App() {
                         children: [
                           {
                             path: "profile/detail/:tab?",
+                            handle: { title: "profile.label" },
                             lazy: async () => {
                               let Profile = await import("./pages/Profile");
                               return { Component: Profile.default };
@@ -137,6 +150,7 @@ function App() {
                           },
                           {
                             path: "profile/order",
+                            handle: { title: "orders.title" },
                             lazy: async () => {
                               let Orders = await import("./pages/Orders");
                               return { Component: Orders.default };
@@ -144,6 +158,7 @@ function App() {
                           },
                           {
                             path: "profile/order/detail/:id",
+                            handle: { title: "order.detail" },
                             lazy: async () => {
                               let OrderDetail = await import("./pages/OrderDetail");
                               return { Component: OrderDetail.default };
@@ -151,6 +166,7 @@ function App() {
                           },
                           {
                             path: "profile/order/checkout/:id",
+                            handle: { title: "order.checkout" },
                             lazy: async () => {
                               let CheckoutDetail = await import("./pages/CheckoutDetail");
                               return { Component: CheckoutDetail.default };
@@ -158,6 +174,7 @@ function App() {
                           },
                           {
                             path: "profile/review",
+                            handle: { title: "reviews.title" },
                             lazy: async () => {
                               let Reviews = await import("./pages/Reviews");
                               return { Component: Reviews.default };
@@ -165,6 +182,7 @@ function App() {
                           },
                           {
                             path: "profile/coupon",
+                            handle: { title: "coupons.title" },
                             lazy: async () => {
                               let Coupons = await import("./pages/Coupons");
                               return { Component: Coupons.default };

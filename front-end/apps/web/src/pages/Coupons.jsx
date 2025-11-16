@@ -16,7 +16,7 @@ const Coupons = () => {
   const [open, setOpen] = useState(true);
 
   // Set title
-  useTitle("Mã giảm giá");
+  //useTitle("Mã giảm giá");
 
   const handleClose = (e) => {
     e.preventDefault();

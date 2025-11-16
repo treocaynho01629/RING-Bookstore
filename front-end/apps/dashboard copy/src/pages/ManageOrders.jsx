@@ -14,7 +14,7 @@ const ManageOrders = () => {
   const { data: salesAnalytics } = useGetSalesAnalyticsQuery(shop ?? null);
 
   //Set title
-  useTitle("Doanh thu");
+  //useTitle("Doanh thu");
 
   return (
     <>
@@ -28,11 +28,7 @@ const ManageOrders = () => {
         </Breadcrumbs>
       </Box>
       <Box mb={3}>
-        <InfoCard
-          icon={<AttachMoney color="success" />}
-          info={salesAnalytics}
-          color="success"
-        />
+        <InfoCard icon={<AttachMoney color="success" />} info={salesAnalytics} color="success" />
       </Box>
       <Box mb={3}>
         <ChartSales shop={shop} />

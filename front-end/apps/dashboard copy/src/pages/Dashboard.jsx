@@ -1,18 +1,9 @@
 import { useState } from "react";
-import {
-  AutoStories,
-  Group,
-  AttachMoney,
-  Storefront,
-  LocalFireDepartment,
-} from "@mui/icons-material";
+import { AutoStories, Group, AttachMoney, Storefront, LocalFireDepartment } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import useTitle from "@ring/shared/useTitle";
 import useAuth from "@ring/auth/useAuth";
-import {
-  useGetBookAnalyticsQuery,
-  useGetBooksQuery,
-} from "../features/books/booksApiSlice";
+import { useGetBookAnalyticsQuery, useGetBooksQuery } from "../features/books/booksApiSlice";
 import { useGetUserAnalyticsQuery } from "../features/users/usersApiSlice";
 import { useGetSalesAnalyticsQuery } from "../features/orders/ordersApiSlice";
 import { useGetShopAnalyticsQuery } from "../features/shops/shopsApiSlice";
@@ -54,9 +45,7 @@ const TopProducts = ({ shop }) => {
 
 const Dashboard = () => {
   const { id, roles, username, shop } = useAuth();
-  const isAdmin = roles?.find((role) =>
-    ["ROLE_ADMIN", "ROLE_GUEST"].includes(role)
-  );
+  const isAdmin = roles?.find((role) => ["ROLE_ADMIN", "ROLE_GUEST"].includes(role));
   const { data: bookAnalytics } = useGetBookAnalyticsQuery(
     { shopId: shop ?? null, userId: isAdmin ? null : id },
     { skip: !id }
@@ -66,7 +55,7 @@ const Dashboard = () => {
   const { data: shopAnalytics } = useGetShopAnalyticsQuery();
 
   //Set title
-  useTitle("Dashboard");
+  //useTitle("Dashboard");
 
   return (
     <>
@@ -78,32 +67,16 @@ const Dashboard = () => {
           <p>STUFF</p>
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md_lg: 3 }}>
-          <InfoCard
-            icon={<AutoStories color="primary" />}
-            info={bookAnalytics}
-            color="primary"
-          />
+          <InfoCard icon={<AutoStories color="primary" />} info={bookAnalytics} color="primary" />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md_lg: 3 }}>
-          <InfoCard
-            icon={<Storefront color="info" />}
-            info={shopAnalytics}
-            color="info"
-          />
+          <InfoCard icon={<Storefront color="info" />} info={shopAnalytics} color="info" />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md_lg: 3 }}>
-          <InfoCard
-            icon={<Group color="warning" />}
-            info={userAnalytics}
-            color="warning"
-          />
+          <InfoCard icon={<Group color="warning" />} info={userAnalytics} color="warning" />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md_lg: 3 }}>
-          <InfoCard
-            icon={<AttachMoney color="success" />}
-            info={salesAnalytics}
-            color="success"
-          />
+          <InfoCard icon={<AttachMoney color="success" />} info={salesAnalytics} color="success" />
         </Grid>
         <Grid size={{ xs: 12, md_lg: 4 }}>
           <p>STUFF</p>

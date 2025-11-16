@@ -5,24 +5,17 @@ import { NavLink } from "react-router";
 import { HeaderContainer } from "../components/custom/Components";
 import useTitle from "@ring/shared/useTitle";
 import useAuth from "@ring/auth/useAuth";
-import {
-  couponsApiSlice,
-  useGetCouponAnalyticsQuery,
-} from "../features/coupons/couponsApiSlice";
+import { couponsApiSlice, useGetCouponAnalyticsQuery } from "../features/coupons/couponsApiSlice";
 import InfoCard from "../components/custom/InfoCard";
 import CustomBreadcrumbs from "../components/custom/CustomBreadcrumbs";
 import TableCoupons from "../components/table/TableCoupons";
 
-const CouponFormDialog = lazy(
-  () => import("../components/dialog/CouponFormDialog")
-);
+const CouponFormDialog = lazy(() => import("../components/dialog/CouponFormDialog"));
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
 
 const ManageCoupons = () => {
   const { id, roles, shop } = useAuth();
-  const isAdmin = roles?.find((role) =>
-    ["ROLE_ADMIN", "ROLE_GUEST"].includes(role)
-  );
+  const isAdmin = roles?.find((role) => ["ROLE_ADMIN", "ROLE_GUEST"].includes(role));
   const [contextCoupon, setContextCoupon] = useState(null);
   const [open, setOpen] = useState(undefined);
   const [pending, setPending] = useState(false);
@@ -33,7 +26,7 @@ const ManageCoupons = () => {
   const [getCoupon, { isLoading }] = couponsApiSlice.useLazyGetCouponQuery();
 
   //Set title
-  useTitle("Mã giảm giá");
+  //useTitle("Mã giảm giá");
 
   const handleOpen = () => {
     setContextCoupon(null);
@@ -58,10 +51,7 @@ const ManageCoupons = () => {
     <>
       {(isLoading || pending) && (
         <Suspense fallBack={null}>
-          <PendingModal
-            open={isLoading || pending}
-            message="Đang gửi yêu cầu..."
-          />
+          <PendingModal open={isLoading || pending} message="Đang gửi yêu cầu..." />
         </Suspense>
       )}
       <HeaderContainer>
@@ -76,15 +66,9 @@ const ManageCoupons = () => {
         </Button>
       </HeaderContainer>
       <Box mb={3}>
-        <InfoCard
-          icon={<Loyalty color="error" />}
-          info={couponAnalytics}
-          color="error"
-        />
+        <InfoCard icon={<Loyalty color="error" />} info={couponAnalytics} color="error" />
       </Box>
-      <TableCoupons
-        {...{ shop, userId: id, isAdmin, handleOpenEdit, pending, setPending }}
-      />
+      <TableCoupons {...{ shop, userId: id, isAdmin, handleOpenEdit, pending, setPending }} />
       <Suspense fallback={null}>
         {open !== undefined && (
           <CouponFormDialog

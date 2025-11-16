@@ -16,7 +16,7 @@ const Reviews = () => {
   const navigate = useNavigate();
 
   // Set title
-  useTitle("Đánh giá");
+  //useTitle("Đánh giá");
 
   const handleClose = (e) => {
     e.preventDefault();

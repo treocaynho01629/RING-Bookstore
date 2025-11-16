@@ -28,12 +28,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link ApplicationExceptionHandler} is a global exception handler for the application.
- * It handles different types of exceptions and returns appropriate {@link ExceptionResponse} for each.
+ * {@link ApplicationExceptionHandler} is a global exception handler for the
+ * application.
+ * It handles different types of exceptions and returns appropriate
+ * {@link ExceptionResponse} for each.
  */
 @RestControllerAdvice
 @RequiredArgsConstructor
-public class ApplicationExceptionHandler{
+public class ApplicationExceptionHandler {
 
     private final MessageService messageService;
 
@@ -46,8 +48,7 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 AppConstants.INTERNAL_SERVER_ERROR,
-                message
-        );
+                message);
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -59,8 +60,7 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 AppConstants.INTERNAL_SERVER_ERROR,
-                message
-        );
+                message);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -81,8 +81,7 @@ public class ApplicationExceptionHandler{
                 HttpStatus.BAD_REQUEST.value(),
                 AppConstants.INVALID_ARGUMENT,
                 errorsMap,
-                message
-        );
+                message);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -91,7 +90,7 @@ public class ApplicationExceptionHandler{
 
         Map<String, String> errorsMap = new HashMap<>();
 
-        String errorMessage = messageService.getMessage("exception.empty", new Object[]{ e.getRequestPartName() });
+        String errorMessage = messageService.getMessage("exception.empty", new Object[] { e.getRequestPartName() });
         errorsMap.put(e.getRequestPartName(), errorMessage);
 
         String message = messageService.getMessage("exception.invalid.argument");
@@ -100,8 +99,7 @@ public class ApplicationExceptionHandler{
                 HttpStatus.BAD_REQUEST.value(),
                 AppConstants.INVALID_ARGUMENT,
                 errorsMap,
-                message
-        );
+                message);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -111,8 +109,7 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 AppConstants.MISSING_COOKIE,
-                e.getLocalizedMessage()
-        );
+                e.getLocalizedMessage());
     }
 
     @ExceptionHandler(HttpResponseException.class)
@@ -121,8 +118,7 @@ public class ApplicationExceptionHandler{
         ExceptionResponse response = new ExceptionResponse(
                 e.getStatus().value(),
                 e.getError(),
-                e.getLocalizedMessage()
-        );
+                e.getLocalizedMessage());
 
         return new ResponseEntity<>(response, e.getStatus());
     }
@@ -134,8 +130,7 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.NOT_FOUND.value(),
                 e.getError(),
-                e.getLocalizedMessage()
-        );
+                e.getLocalizedMessage());
     }
 
     @ResponseStatus(HttpStatus.PAYMENT_REQUIRED)
@@ -145,19 +140,17 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.PAYMENT_REQUIRED.value(),
                 e.getError(),
-                e.getLocalizedMessage()
-        );
+                e.getLocalizedMessage());
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(EntityOwnershipException.class)
     public ExceptionResponse handleEntityOwnershipException(EntityOwnershipException e) {
-        
+
         return new ExceptionResponse(
                 HttpStatus.FORBIDDEN.value(),
                 e.getError(),
-                e.getLocalizedMessage()
-        );
+                e.getLocalizedMessage());
     }
 
     @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
@@ -167,8 +160,7 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.EXPECTATION_FAILED.value(),
                 e.getError(),
-                e.getLocalizedMessage()
-        );
+                e.getLocalizedMessage());
     }
 
     @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
@@ -178,21 +170,20 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.EXPECTATION_FAILED.value(),
                 e.getError(),
-                e.getLocalizedMessage()
-        );
+                e.getLocalizedMessage());
     }
-    
+
     @ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ExceptionResponse handleMaxSizeException(MaxUploadSizeExceededException e) {
 
-        String message = messageService.getMessage("exception.image.size", new Object[]{ e.getMaxUploadSize() });
+        String message = messageService.getMessage("exception.image.size",
+                new Object[] { e.getMaxUploadSize() / 1024 / 1024 });
 
         return new ExceptionResponse(
                 e.getStatusCode().value(),
                 AppConstants.FILE_SIZE_EXCEED_MAXIMUM_LIMIT,
-                message
-        );
+                message);
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -204,8 +195,7 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.FORBIDDEN.value(),
                 AppConstants.AUTHORIZATION_FAILED,
-                message
-        );
+                message);
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -215,8 +205,7 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.FORBIDDEN.value(),
                 AppConstants.AUTHORIZATION_FAILED,
-                e.getLocalizedMessage()
-        );
+                e.getLocalizedMessage());
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -226,8 +215,7 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.FORBIDDEN.value(),
                 e.getError(),
-                e.getLocalizedMessage()
-        );
+                e.getLocalizedMessage());
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -237,8 +225,7 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.FORBIDDEN.value(),
                 e.getError(),
-                e.getLocalizedMessage()
-        );
+                e.getLocalizedMessage());
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -248,8 +235,7 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.FORBIDDEN.value(),
                 e.getError(),
-                e.getLocalizedMessage()
-        );
+                e.getLocalizedMessage());
     }
 
     @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
@@ -259,8 +245,7 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.PRECONDITION_FAILED.value(),
                 e.getError(),
-                e.getLocalizedMessage()
-        );
+                e.getLocalizedMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -272,10 +257,10 @@ public class ApplicationExceptionHandler{
         if (e.getCause() instanceof InvalidFormatException ifx) {
             if (ifx.getTargetType() != null && ifx.getTargetType().isEnum()) {
 
-                message = messageService.getMessage("exception.invalid.enum", new Object[]{
-                    ifx.getValue(), 
-                    ifx.getPath().get(ifx.getPath().size() - 1).getFieldName(), 
-                    Arrays.toString(ifx.getTargetType().getEnumConstants())
+                message = messageService.getMessage("exception.invalid.enum", new Object[] {
+                        ifx.getValue(),
+                        ifx.getPath().get(ifx.getPath().size() - 1).getFieldName(),
+                        Arrays.toString(ifx.getTargetType().getEnumConstants())
                 });
             }
         }
@@ -283,8 +268,7 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 AppConstants.INVALID_ARGUMENT,
-                message
-        );
+                message);
     }
 
     @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
@@ -296,7 +280,6 @@ public class ApplicationExceptionHandler{
         return new ExceptionResponse(
                 HttpStatus.EXPECTATION_FAILED.value(),
                 AppConstants.UPLOAD_IMAGE_FAILED,
-                message
-        );
+                message);
     }
 }

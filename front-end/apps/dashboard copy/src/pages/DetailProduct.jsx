@@ -1,28 +1,10 @@
 import { useState } from "react";
-import {
-  TextareaAutosize,
-  Box,
-  Card,
-  IconButton,
-  Typography,
-  Stack,
-  Grid,
-} from "@mui/material";
+import { TextareaAutosize, Box, Card, IconButton, Typography, Stack, Grid } from "@mui/material";
 import { NavLink, useParams } from "react-router";
 import { useGetBookQuery } from "../features/books/booksApiSlice";
 import { Launch, Edit as EditIcon } from "@mui/icons-material";
-import {
-  ButtonContainer,
-  HeaderContainer,
-  InfoTable,
-} from "../components/custom/Components";
-import {
-  useTitle,
-  getBookType,
-  getBookLanguage,
-  currencyFormat,
-  getImageSize,
-} from "@ring/shared";
+import { ButtonContainer, HeaderContainer, InfoTable } from "../components/custom/Components";
+import { useTitle, getBookType, getBookLanguage, currencyFormat, getImageSize } from "@ring/shared";
 import ProductImages from "@ring/ui/ProductImages";
 import SummaryTableOrders from "../components/table/SummaryTableOrders";
 import CustomBreadcrumbs from "../components/custom/CustomBreadcrumbs";
@@ -44,12 +26,10 @@ const DetailProduct = () => {
   };
 
   //Set title
-  useTitle(`${data?.title ?? "Sản phẩm"}`);
+  //useTitle(`${data?.title ?? "Sản phẩm"}`);
 
   //Images
-  let initialImages = data?.previews
-    ? [].concat(data?.image, data?.previews)
-    : [].concat(data?.image);
+  let initialImages = data?.previews ? [].concat(data?.image, data?.previews) : [].concat(data?.image);
   let images = initialImages.map((image, index) => {
     const srcSet = image?.srcSet;
 
@@ -72,14 +52,8 @@ const DetailProduct = () => {
   });
 
   const stockProgress = Math.min((data?.amount / maxStocks) * 100, 100);
-  const stockColor =
-    stockProgress == 0 ? "error" : stockProgress < 20 ? "warning" : "primary";
-  const stockLabel =
-    stockProgress == 0
-      ? "Hết hàng"
-      : stockProgress < 20
-        ? "Gần hết hàng"
-        : "Còn hàng";
+  const stockColor = stockProgress == 0 ? "error" : stockProgress < 20 ? "warning" : "primary";
+  const stockLabel = stockProgress == 0 ? "Hết hàng" : stockProgress < 20 ? "Gần hết hàng" : "Còn hàng";
 
   return (
     <>
@@ -104,23 +78,14 @@ const DetailProduct = () => {
           </IconButton>
         </ButtonContainer>
       </HeaderContainer>
-      <Grid
-        container
-        size="grow"
-        spacing={{ xs: 0, md: 1, lg: 2 }}
-        position="relative"
-      >
+      <Grid container size="grow" spacing={{ xs: 0, md: 1, lg: 2 }} position="relative">
         <Grid size={{ xs: 12, md: 6 }} position="relative">
           {isLoading ? <ProductImages /> : <ProductImages images={images} />}
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <Stack spacing={1} px={{ xs: 1, md: 0 }}>
             <Box display="flex" justifyContent="space-between">
-              <Typography
-                variant="button"
-                color={stockColor}
-                sx={{ textTransform: "uppercase" }}
-              >
+              <Typography variant="button" color={stockColor} sx={{ textTransform: "uppercase" }}>
                 {stockLabel}
               </Typography>
               <Typography variant="subtitle2" color="text.secondary">
@@ -128,27 +93,16 @@ const DetailProduct = () => {
               </Typography>
             </Box>
             <Typography variant="h6">{data?.title}</Typography>
-            <Stack
-              spacing={1}
-              direction="row"
-              display="flex"
-              alignItems="center"
-            >
+            <Stack spacing={1} direction="row" display="flex" alignItems="center">
               <Typography variant="h6" color="primary">
                 {currencyFormat.format(data?.price * (1 - data?.discount))}
               </Typography>
               {data?.discount > 0 && (
                 <>
-                  <Typography
-                    variant="body1"
-                    sx={{ textDecoration: "line-through" }}
-                    color="text.secondary"
-                  >
+                  <Typography variant="body1" sx={{ textDecoration: "line-through" }} color="text.secondary">
                     {currencyFormat.format(data?.price)}
                   </Typography>
-                  <Typography variant="subtitle2">
-                    -{data?.discount * 100}%
-                  </Typography>
+                  <Typography variant="subtitle2">-{data?.discount * 100}%</Typography>
                 </>
               )}
             </Stack>
@@ -217,32 +171,16 @@ const DetailProduct = () => {
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={4}>
-                <Typography
-                  variant="subtitle1"
-                  color="text.primary"
-                  sx={{ fontWeight: "bold" }}
-                >
+                <Typography variant="subtitle1" color="text.primary" sx={{ fontWeight: "bold" }}>
                   Mã hàng:
                 </Typography>
-                <Typography
-                  variant="subtitle1"
-                  color="text.primary"
-                  sx={{ fontWeight: "bold" }}
-                >
+                <Typography variant="subtitle1" color="text.primary" sx={{ fontWeight: "bold" }}>
                   Trọng lượng (gr):
                 </Typography>
-                <Typography
-                  variant="subtitle1"
-                  color="text.primary"
-                  sx={{ fontWeight: "bold" }}
-                >
+                <Typography variant="subtitle1" color="text.primary" sx={{ fontWeight: "bold" }}>
                   Kích thước:
                 </Typography>
-                <Typography
-                  variant="subtitle1"
-                  color="text.primary"
-                  sx={{ fontWeight: "bold" }}
-                >
+                <Typography variant="subtitle1" color="text.primary" sx={{ fontWeight: "bold" }}>
                   Số trang:
                 </Typography>
               </Grid>
