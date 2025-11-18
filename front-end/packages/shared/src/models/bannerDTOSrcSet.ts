@@ -6,11 +6,4 @@
  * OpenAPI spec version: 2.0
  */
 
-export interface Review {
-  createdDate?: string;
-  lastModifiedDate?: string;
-  id?: number;
-  rating?: number;
-  hidden?: boolean;
-  rcontent?: string;
-}
+export type BannerDTOSrcSet = { [key: string]: string };

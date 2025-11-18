@@ -10,7 +10,7 @@ import {
   StyledTableCell,
 } from "../custom/TableComponents";
 import { currencyFormat } from "@ring/shared/utils/convert";
-import { getImageSize } from "@ring/shared/enums/image";
+import { getImageSrc } from "@ring/shared/enums/image";
 import { StyledCheckbox } from "../custom/CartComponents";
 import { useTranslation } from "react-i18next";
 import IconButton from "@mui/material/IconButton";
@@ -194,7 +194,6 @@ const StyledIconButton = styled(IconButton)`
 `;
 //#endregion
 
-const ImageSize = getImageSize();
 const MIN_VALUE = 1;
 const MAX_VALUE = 199;
 
@@ -283,7 +282,7 @@ function ItemRow({
         <ItemContainer>
           <Link to={`/product/${product.slug}`}>
             <StyledLazyImage
-              src={product?.image?.srcSet[ImageSize?.SMALL?.value]}
+              src={getImageSrc(product?.srcSet, 90)}
               alt={`${product.title} Cart item`}
               placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
             />

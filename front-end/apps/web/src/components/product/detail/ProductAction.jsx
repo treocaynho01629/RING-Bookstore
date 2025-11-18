@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { lazy, Suspense, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { getImageSize } from "@ring/shared/enums/image";
+import { getImageSrc } from "@ring/shared/enums/image";
 import { currencyFormat } from "@ring/shared/utils/convert";
 import Button, { buttonClasses } from "@mui/material/Button";
 import Box from "@mui/material/Box";
@@ -135,7 +135,6 @@ const Discount = styled(Price)`
 `;
 //#endregion
 
-const ImageSize = getImageSize();
 const MIN_VALUE = 1;
 const MAX_VALUE = 199;
 
@@ -251,11 +250,7 @@ export const ActionButtons = ({ book, outlined = false }) => {
           >
             <DrawerContainer>
               <ProductDetailContainer>
-                <StyledImage
-                  src={book?.image?.srcSet[ImageSize?.MEDIUM?.value]}
-                  alt={`${book?.title} preview image`}
-                  sizes="250px"
-                />
+                <StyledImage src={getImageSrc(book?.srcSet, 250)} alt={`${book?.title} preview image`} />
                 <Box>
                   <Box display="flex">
                     <Price>{currencyFormat.format(book?.price * (1 - book?.discount))}</Price>

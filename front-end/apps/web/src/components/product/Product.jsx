@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { Link } from "react-router";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { currencyFormat } from "@ring/shared/utils/convert";
-import { getImageSize } from "@ring/shared/enums/image";
+import { getImageSrc } from "@ring/shared/enums/image";
 import { numFormat } from "@ring/shared/utils/convert";
 import StarIcon from "@mui/icons-material/Star";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -248,8 +248,6 @@ const ProductTag = styled.span`
 `;
 //#endregion
 
-const ImageSize = getImageSize();
-
 const Product = ({ book, scrollPosition }) => {
   const { addProduct } = useCart();
   const handleAddToCart = (book) => {
@@ -269,7 +267,7 @@ const Product = ({ book, scrollPosition }) => {
               )}
               <ImageContainer>
                 <StyledLazyImage
-                  src={book?.image?.srcSet[ImageSize?.SMALL?.value]}
+                  src={getImageSrc(book?.srcSet, 200)}
                   alt={`${book?.title} Thumbnail`}
                   scrollPosition={scrollPosition}
                   placeholder={<StyledSkeleton variant="rectangular" animation={false} />}

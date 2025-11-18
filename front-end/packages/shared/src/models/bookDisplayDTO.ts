@@ -5,13 +5,13 @@
  * OpenAPI documentation.
  * OpenAPI spec version: 2.0
  */
-import type { ImageDTO } from "./imageDTO";
+import type { BookDisplayDTOSrcSet } from "./bookDisplayDTOSrcSet";
 
 export interface BookDisplayDTO {
   id?: number;
   slug?: string;
   title?: string;
-  image?: ImageDTO;
+  srcSet?: BookDisplayDTOSrcSet;
   description?: string;
   price?: number;
   discount?: number;

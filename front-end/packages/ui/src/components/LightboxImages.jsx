@@ -1,5 +1,6 @@
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+import { getImageSrc } from "@ring/shared/enums/image";
 import Lightbox from "yet-another-react-lightbox";
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
@@ -8,9 +9,23 @@ import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/thumbnails.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 
-const LightboxImages = ({ images, open, handleClose }) => {
+const LightboxImages = ({ srcSetList, open, handleClose }) => {
   const theme = useTheme();
   const mobileMode = useMediaQuery((theme) => theme.breakpoints.down("sm"));
+  const images = srcSetList?.map((srcSet, index) => {
+    return {
+      src: getImageSrc(srcSet, 450),
+      alt: `Image ${index + 1} of ${srcSetList?.length}`,
+      width: 600,
+      height: 600,
+      srcSet: Object.entries(srcSet).map(([key, value]) => ({
+        src: value,
+        width: +key,
+        height: +key,
+      })),
+      sizes: "(min-width: 450px) 450px, 100vw",
+    };
+  });
 
   return (
     <Lightbox
@@ -44,8 +59,7 @@ const LightboxImages = ({ images, open, handleClose }) => {
         container: { backgroundColor: "rgba(0, 0, 0, .95)" },
         root: {
           "--yarl__thumbnails_thumbnail_border_color": "transparent",
-          "--yarl__thumbnails_thumbnail_active_border_color":
-            theme.vars.palette.primary.main,
+          "--yarl__thumbnails_thumbnail_active_border_color": theme.vars.palette.primary.main,
         },
       }}
     />

@@ -6,8 +6,7 @@
  * OpenAPI spec version: 2.0
  */
 
-export type CouponCriteria =
-  (typeof CouponCriteria)[keyof typeof CouponCriteria];
+export type CouponCriteria = (typeof CouponCriteria)[keyof typeof CouponCriteria];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const CouponCriteria = {

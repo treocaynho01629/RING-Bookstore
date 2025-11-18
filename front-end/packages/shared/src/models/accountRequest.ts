@@ -30,5 +30,5 @@ export interface AccountRequest {
   phone?: string;
   dob?: string;
   gender?: Gender;
-  image?: string;
+  removeImage?: boolean;
 }

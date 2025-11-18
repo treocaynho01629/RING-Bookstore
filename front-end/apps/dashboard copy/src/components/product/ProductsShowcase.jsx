@@ -1,14 +1,10 @@
 import styled from "@emotion/styled";
 import { Paper, Rating, Skeleton, Stack } from "@mui/material";
-import {
-  LazyLoadImage,
-  trackWindowScroll,
-} from "react-lazy-load-image-component";
+import { LazyLoadImage, trackWindowScroll } from "react-lazy-load-image-component";
 import { Star, StarBorder } from "@mui/icons-material";
 import { Link } from "react-router";
 import { Message } from "@ring/ui/Components";
 import { currencyFormat, numFormat } from "@ring/shared/utils/convert";
-import { getImageSize } from "@ring/shared";
 import { Title } from "../custom/Components";
 
 //#region styled
@@ -149,8 +145,6 @@ const ProductShop = styled.span`
 `;
 //#endregion
 
-const ImageSize = getImageSize();
-
 const ProductItem = ({ book, scrollPosition }) => {
   return (
     <ItemContainer>
@@ -159,9 +153,7 @@ const ProductItem = ({ book, scrollPosition }) => {
           src={book?.image?.srcSet[ImageSize?.SMALL?.value]}
           alt={`Top item: ${book?.title}`}
           scrollPosition={scrollPosition}
-          placeholder={
-            <StyledSkeleton variant="rectangular" animation={false} />
-          }
+          placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
         />
       ) : (
         <StyledSkeleton variant="rectangular" animation={false} />
@@ -185,17 +177,13 @@ const ProductItem = ({ book, scrollPosition }) => {
                 <StyledRating
                   name="product-rating"
                   value={book?.rating ?? 0}
-                  getLabelText={(value) =>
-                    `${value} Star${value !== 1 ? "s" : ""}`
-                  }
+                  getLabelText={(value) => `${value} Star${value !== 1 ? "s" : ""}`}
                   precision={0.5}
                   icon={<Star style={{ fontSize: 14 }} />}
                   emptyIcon={<StarBorder style={{ fontSize: 14 }} />}
                   readOnly
                 />
-                <TextMore>
-                  Đã bán {numFormat.format(book?.totalOrders)}
-                </TextMore>
+                <TextMore>Đã bán {numFormat.format(book?.totalOrders)}</TextMore>
               </Stat>
             </>
           ) : (
@@ -219,15 +207,7 @@ const ProductItem = ({ book, scrollPosition }) => {
   );
 };
 
-const ProductsShowcase = ({
-  title,
-  size = 5,
-  data,
-  isError,
-  isLoading,
-  isSuccess,
-  scrollPosition,
-}) => {
+const ProductsShowcase = ({ title, size = 5, data, isError, isLoading, isSuccess, scrollPosition }) => {
   const tempProducts = [...Array(size)].map((item, index) => (
     <ProductContainer key={`temp-top-${index}`}>
       <Rank className={index == 0 ? "first" : index == 1 ? "second" : ""}>
@@ -250,11 +230,7 @@ const ProductsShowcase = ({
         return (
           <Link to={`/product/${id}`} key={`top-${id}-${index}`}>
             <ProductContainer>
-              <Rank
-                className={index == 0 ? "first" : index == 1 ? "second" : ""}
-              >
-                {index + 1}
-              </Rank>
+              <Rank className={index == 0 ? "first" : index == 1 ? "second" : ""}>{index + 1}</Rank>
               <ProductItem {...{ book, scrollPosition }} />
             </ProductContainer>
           </Link>

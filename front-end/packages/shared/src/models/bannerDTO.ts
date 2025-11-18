@@ -5,13 +5,13 @@
  * OpenAPI documentation.
  * OpenAPI spec version: 2.0
  */
-import type { ImageDTO } from "./imageDTO";
+import type { BannerDTOSrcSet } from "./bannerDTOSrcSet";
 
 export interface BannerDTO {
   id?: number;
   shopId?: number;
   name?: string;
   description?: string;
-  image?: ImageDTO;
+  srcSet?: BannerDTOSrcSet;
   url?: string;
 }

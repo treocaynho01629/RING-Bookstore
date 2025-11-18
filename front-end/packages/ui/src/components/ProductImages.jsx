@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { useRef, useState, lazy, Suspense } from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import { getImageSrc } from "@ring/shared/enums/image";
 import Skeleton from "@mui/material/Skeleton";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
@@ -215,7 +216,7 @@ const CustomArrow = ({ onClick, className, direction }) => (
   </CustomArrowButton>
 );
 
-const ButtonGroup = ({ images, goToSlide, currentSlide, responsive }) => {
+const ButtonGroup = ({ srcSetList, goToSlide, currentSlide, responsive }) => {
   return (
     <MoreImageContainer>
       <Carousel
@@ -227,18 +228,16 @@ const ButtonGroup = ({ images, goToSlide, currentSlide, responsive }) => {
         minimumTouchDrag={80}
         partialVisible
       >
-        {images?.length
-          ? images.map((image, index) => (
+        {srcSetList?.length
+          ? srcSetList.map((srcSet, index) => (
               <SmallImageSlide
                 key={index}
                 className={`${index === currentSlide ? "active" : ""}`}
                 onClick={() => goToSlide(index)}
               >
                 <StyledSmallLazyImage
-                  src={image?.src}
-                  srcSet={image?.srcSet.map((item) => `${item.src} ${item.width}w`).join(", ")}
-                  sizes="70px"
-                  alt={image?.alt}
+                  src={getImageSrc(srcSet, 70)}
+                  alt={`Thumbnail ${index + 1}`}
                   placeholder={<StyledSmallSkeleton variant="rectangular" animation={false} />}
                 />
               </SmallImageSlide>
@@ -253,7 +252,7 @@ const ButtonGroup = ({ images, goToSlide, currentSlide, responsive }) => {
   );
 };
 
-const ProductImages = ({ images }) => {
+const ProductImages = ({ srcSetList }) => {
   let sliderRef = useRef();
   const [slideIndex, setSlideIndex] = useState(0);
   const [open, setOpen] = useState(undefined);
@@ -286,19 +285,23 @@ const ProductImages = ({ images }) => {
       }}
       rewind
     >
-      {images?.length ? (
-        images.map((image, index) => (
-          <ImageSlide key={index} onClick={handleOpen}>
-            <StyledLazyImage
-              src={image?.src}
-              srcSet={image?.srcSet.map((item) => `${item.src} ${item.width}w`).join(", ")}
-              sizes={image?.sizes}
-              alt={image?.alt}
-              visibleByDefault={index == 0}
-              placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
-            />
-          </ImageSlide>
-        ))
+      {srcSetList?.length ? (
+        srcSetList.map((srcSet, index) => {
+          return (
+            <ImageSlide key={index} onClick={handleOpen}>
+              <StyledLazyImage
+                src={getImageSrc(srcSet, 450)}
+                srcSet={Object.entries(srcSet)
+                  .map(([key, value]) => `${value} ${key}w`)
+                  .join(", ")}
+                sizes="(min-width: 450px) 405px, 100vw"
+                alt={`Image ${index + 1} of ${srcSetList?.length}`}
+                visibleByDefault={index == 0}
+                placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
+              />
+            </ImageSlide>
+          );
+        })
       ) : (
         <ImageSlide>
           <StyledSkeleton variant="rectangular" />
@@ -311,9 +314,9 @@ const ProductImages = ({ images }) => {
     <>
       <ImgContainer>
         <TopContainer>
-          {images?.length ? (
+          {srcSetList?.length ? (
             <ImageNumber>
-              {slideIndex + 1}/{images.length}
+              {slideIndex + 1}/{srcSetList?.length}
             </ImageNumber>
           ) : (
             <ImageNumber>Đang tải...</ImageNumber>
@@ -322,14 +325,16 @@ const ProductImages = ({ images }) => {
         </TopContainer>
         <ButtonGroup
           {...{
-            images,
+            srcSetList,
             goToSlide,
             currentSlide: slideIndex,
             responsive: responsiveGroup,
           }}
         />
       </ImgContainer>
-      <Suspense fallback={null}>{open !== undefined && <LightboxImages {...{ images, open, handleClose }} />}</Suspense>
+      <Suspense fallback={null}>
+        {open !== undefined && <LightboxImages {...{ srcSetList, open, handleClose }} />}
+      </Suspense>
     </>
   );
 };

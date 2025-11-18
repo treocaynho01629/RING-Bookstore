@@ -3,7 +3,6 @@ import { lazy, Suspense, useState } from "react";
 import { Link } from "react-router";
 import { currencyFormat, numFormat } from "@ring/shared/utils/convert";
 import { getBookType } from "@ring/shared/enums/book";
-import { getImageSize } from "@ring/shared/enums/image";
 import { useGetMyAddressQuery } from "../../../features/addresses/addressesApiSlice";
 import useAuth from "../../../hooks/useAuth";
 import StarIcon from "@mui/icons-material/Star";
@@ -271,7 +270,6 @@ const policiesPlaceholder = (
 //#endregion
 
 const BookType = getBookType();
-const ImageSize = getImageSize();
 
 const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
   const { username } = useAuth();
@@ -283,7 +281,7 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
   });
   const [openDialog, setOpenDialog] = useState(false);
 
-  //Fetch address
+  // Fetch address
   const { data: address, isLoading: loadAddress } = useGetMyAddressQuery({}, { skip: !username });
 
   const handleViewReview = (value) => {
@@ -296,34 +294,13 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
     setOpenDialog(false);
   };
 
-  //Images
-  let initialImages = book?.previews ? [].concat(book?.image, book?.previews) : [].concat(book?.image);
-  let images = initialImages.map((image, index) => {
-    const srcSet = image?.srcSet;
-
-    if (srcSet) {
-      return {
-        //The effect vary from different monitors with different pixel density (DPR), set it the 1.0 before testing ~ ~
-        src: image?.url,
-        alt: `${book?.title} preview image #${index + 1}`,
-        width: 600,
-        height: 600,
-        srcSet: Object.values(ImageSize)
-          .map((size, index) => ({
-            src: srcSet[size?.value],
-            width: size.width,
-            height: size.width,
-          }))
-          .concat({ src: image?.url, width: 600, height: 600 }),
-        sizes: "(min-width: 450px) 450px, 100vw",
-      };
-    }
-  });
+  // Images
+  const srcSetList = book?.previewsSrcSet ? [].concat(book?.srcSet, book?.previewsSrcSet) : [].concat(book?.srcSet);
 
   return (
     <Grid container size="grow" spacing={{ xs: 0, md: 1, lg: 2 }} position="relative">
       <Grid size={{ xs: 12, md: 5.5, lg: 5 }} position="relative">
-        <ImageContainer>{!book ? <ProductImages /> : <ProductImages images={images} />}</ImageContainer>
+        <ImageContainer>{!book ? <ProductImages /> : <ProductImages srcSetList={srcSetList} />}</ImageContainer>
       </Grid>
       <Grid size={{ xs: 12, md: 6.5, lg: 7 }}>
         <InfoContainer>

@@ -5,7 +5,8 @@
  * OpenAPI documentation.
  * OpenAPI spec version: 2.0
  */
-import type { ImageDTO } from "./imageDTO";
+import type { BookDetailDTOSrcSet } from "./bookDetailDTOSrcSet";
+import type { BookDetailDTOPreviewsSrcSetItem } from "./bookDetailDTOPreviewsSrcSetItem";
 import type { BookType } from "./bookType";
 import type { PublisherDTO } from "./publisherDTO";
 import type { CategoryDTO } from "./categoryDTO";
@@ -15,8 +16,8 @@ import type { ReviewsInfoDTO } from "./reviewsInfoDTO";
 export interface BookDetailDTO {
   id?: number;
   slug?: string;
-  image?: ImageDTO;
-  previews?: ImageDTO[];
+  srcSet?: BookDetailDTOSrcSet;
+  previewsSrcSet?: BookDetailDTOPreviewsSrcSetItem[];
   price?: number;
   discount?: number;
   title?: string;

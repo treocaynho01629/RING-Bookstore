@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { StyledItemTableRow, StyledTableRow, SpaceTableRow, StyledTableCell } from "../custom/TableComponents";
 import { currencyFormat } from "@ring/shared/utils/convert";
-import { getImageSize } from "@ring/shared/enums/image";
+import { getImageSrc } from "@ring/shared/enums/image";
 import { getShippingType } from "@ring/shared/enums/shipping";
 import { iconList } from "@ring/shared/utils/icon";
 import Box from "@mui/material/Box";
@@ -223,7 +223,6 @@ const StyledSkeleton = styled(Skeleton)`
 `;
 //#endregion
 
-const ImageSize = getImageSize();
 const ShippingType = getShippingType();
 
 function ItemRow({ product, index }) {
@@ -234,7 +233,7 @@ function ItemRow({ product, index }) {
       <StyledTableCell className="preview" component="th" scope="row">
         <ItemContainer>
           <StyledLazyImage
-            src={product?.image?.srcSet[ImageSize?.TINY?.value]}
+            src={getImageSrc(product?.srcSet, 50)}
             alt={`${product.title} Cart item`}
             placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
           />

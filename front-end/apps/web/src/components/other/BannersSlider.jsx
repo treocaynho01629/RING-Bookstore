@@ -3,7 +3,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { useGetBannersQuery } from "../../features/banners/bannersApiSlice";
 import { Link } from "react-router";
-import { getImageSize } from "@ring/shared/enums/image";
+import { getImageSrc } from "@ring/shared/enums/image";
 import Skeleton from "@mui/material/Skeleton";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Grid from "@mui/material/Grid";
@@ -180,7 +180,6 @@ const StyledLink = styled(Link)`
 `;
 //#endregion
 
-const ImageSize = getImageSize();
 const responsive = {
   default: {
     breakpoint: {
@@ -216,19 +215,19 @@ function Item({ banner, index }) {
           <BackdropContainer>
             <BackdropImage
               aria-hidden
-              src={banner?.image?.srcSet[ImageSize?.TINY?.value]}
+              src={getImageSrc(banner?.srcSet, 100)}
               visibleByDefault={index == 0}
               placeholder={<BackdropPlaceholder variant="rectangular" animation={false} />}
             />
           </BackdropContainer>
           <StyledLink to={banner?.url}>
             <StyledLazyImage
-              src={banner?.image.url}
-              srcSet={Object.values(ImageSize)
-                .map((size) => `${banner?.image?.srcSet[size?.value]} ${size?.width}w`)
-                .concat(`${banner?.image.url} 600w`)
+              src={getImageSrc(banner?.srcSet, 600)}
+              srcSet={Object.values(banner?.srcSet)
+                .map(([key, value]) => `${value} ${key}w`)
                 .join(", ")}
-              alt={banner?.name}
+              sizes="(min-width: 450px) 300px, (min-width: 760px) 600px, (min-width: 900px) 800px, 100vw"
+              alt={`Banner: ${banner?.name}`}
               visibleByDefault={index == 0}
               placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
             />
@@ -252,8 +251,8 @@ function ExtraItem({ banner }) {
       <ExtraContainer>
         <StyledLink to={banner?.url}>
           <StyledLazyImage
-            src={banner?.image?.srcSet[ImageSize?.MEDIUM?.value]}
-            alt={banner?.name}
+            src={getImageSrc(banner?.srcSet, 400)}
+            alt={`Extra banner: ${banner?.name}`}
             visibleByDefault={true}
             placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
           />

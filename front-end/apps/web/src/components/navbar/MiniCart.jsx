@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { Link } from "react-router";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { currencyFormat } from "@ring/shared/utils/convert";
-import { getImageSize } from "@ring/shared/enums/image";
+import { getImageSrc } from "@ring/shared/enums/image";
 import { useTranslation } from "react-i18next";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import Button from "@mui/material/Button";
@@ -92,8 +92,6 @@ const ActionContainer = styled.div`
 `;
 //#endregion
 
-const ImageSize = getImageSize();
-
 const MiniCart = ({ anchorEl, handleClose, products }) => {
   const { t } = useTranslation();
   const open = Boolean(anchorEl);
@@ -155,7 +153,7 @@ const MiniCart = ({ anchorEl, handleClose, products }) => {
                   width={50}
                   height={50}
                   style={{ objectFit: "contain" }}
-                  src={product?.image?.srcSet[ImageSize?.TINY?.value]}
+                  src={getImageSrc(product?.srcSet, 50)}
                   alt={`Cart item: ${product?.title}`}
                   placeholder={
                     <Skeleton

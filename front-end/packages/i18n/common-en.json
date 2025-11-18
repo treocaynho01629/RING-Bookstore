@@ -40,7 +40,7 @@
   "notification": "Notification",
   "ring": "RING!",
   "home": "Home",
-  "search": "Search",
+  "search.label": "Search",
   "store": "Store",
   "saved": "Saved",
   "items": "items",

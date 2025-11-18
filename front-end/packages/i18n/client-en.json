@@ -84,7 +84,8 @@
     "for": "Search {{value}}:",
     "history": "Search history",
     "remove": "Remove '{{value}}' from history",
-    "clear": "Clear search history",
+    "clear": "Clear search value",
+    "clear.all": "Clear search history",
     "close": "Close search dialog",
     "suggest": "Suggestions"
   },

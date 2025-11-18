@@ -1,10 +1,7 @@
 import styled from "@emotion/styled";
-import {
-  LazyLoadImage,
-  trackWindowScroll,
-} from "react-lazy-load-image-component";
+import { LazyLoadImage, trackWindowScroll } from "react-lazy-load-image-component";
 import { currencyFormat, numFormat } from "@ring/shared/utils/convert";
-import { getImageSize } from "@ring/shared/enums/image";
+import { getImageSrc } from "@ring/shared/enums/image";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Message } from "@ring/ui/Components";
@@ -223,8 +220,7 @@ const Description = styled.div`
   height: 200px;
   font-size: 15px;
   overflow-y: scroll;
-  scrollbar-color: ${({ theme }) => theme.vars.palette.action.disabled}
-    transparent;
+  scrollbar-color: ${({ theme }) => theme.vars.palette.action.disabled} transparent;
   scrollbar-width: thin;
 `;
 
@@ -272,19 +268,15 @@ const ProductShop = styled.span`
 `;
 //#endregion
 
-const ImageSize = getImageSize();
-
 const TopItem = ({ book, scrollPosition }) => {
   return (
     <ItemContainer>
       {book ? (
         <StyledLazyImage
-          src={book?.image?.srcSet[ImageSize?.TINY?.value]}
+          src={getImageSrc(book?.srcSet, 90)}
           alt={`Top item: ${book?.title}`}
           scrollPosition={scrollPosition}
-          placeholder={
-            <StyledSkeleton variant="rectangular" animation={false} />
-          }
+          placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
         />
       ) : (
         <StyledSkeleton variant="rectangular" animation={false} />
@@ -300,13 +292,7 @@ const TopItem = ({ book, scrollPosition }) => {
             </>
           )}
         </ProductTitle>
-        <ProductShop>
-          {book ? (
-            `Shop: ${book?.shopName}`
-          ) : (
-            <Skeleton variant="text" width="30%" />
-          )}
-        </ProductShop>
+        <ProductShop>{book ? `Shop: ${book?.shopName}` : <Skeleton variant="text" width="30%" />}</ProductShop>
         {book ? (
           <MoreInfo>
             <StyledRating
@@ -398,13 +384,8 @@ const ProductsTop = ({
         const book = entities[id];
         return (
           <Link to={`/product/${book?.slug}`} key={`top-${id}-${index}`}>
-            <ProductContainer
-              className={selected == id ? "selected" : ""}
-              onMouseEnter={() => setSelected(id)}
-            >
-              <Rank
-                className={index == 0 ? "first" : index == 1 ? "second" : ""}
-              >
+            <ProductContainer className={selected == id ? "selected" : ""} onMouseEnter={() => setSelected(id)}>
+              <Rank className={index == 0 ? "first" : index == 1 ? "second" : ""}>
                 <b>{index + 1}</b>
                 <StarRounded />
               </Rank>
@@ -423,34 +404,23 @@ const ProductsTop = ({
       <Link to={`/product/${selectedBook?.slug}`}>
         <Display>
           <StyledDisplayLazyImage
-            src={selectedBook?.image?.url}
-            srcSet={Object.values(ImageSize)
-              .map(
-                (size) =>
-                  `${selectedBook?.image?.srcSet[size?.value]} ${size?.width}w`
-              )
+            src={getImageSrc(selectedBook?.srcSet, 450)}
+            srcSet={Object.values(selectedBook?.srcSet)
+              .map(([key, value]) => `${value} ${key}w`)
               .join(", ")}
             sizes="(min-width: 450px) 450px, 100vw"
             alt={`${selectedBook?.title} showcase image`}
             scrollPosition={scrollPosition}
-            placeholder={
-              <StyledDisplaySkeleton variant="rectangular" animation={false} />
-            }
+            placeholder={<StyledDisplaySkeleton variant="rectangular" animation={false} />}
           />
           <InfoWrapper>
             <DisplayTitle>{selectedBook?.title}</DisplayTitle>
             <ProductShop>{selectedBook?.shopName}</ProductShop>
-            <Price>
-              {currencyFormat.format(
-                selectedBook?.price * (1 - selectedBook?.discount)
-              )}
-            </Price>
+            <Price>{currencyFormat.format(selectedBook?.price * (1 - selectedBook?.discount))}</Price>
             <DiscountContainer>
               {selectedBook?.discount > 0 ? (
                 <>
-                  <Discount>
-                    {currencyFormat.format(selectedBook?.price)}
-                  </Discount>
+                  <Discount>{currencyFormat.format(selectedBook?.price)}</Discount>
                   <Percentage>-{selectedBook?.discount * 100}%</Percentage>
                 </>
               ) : (
@@ -471,11 +441,7 @@ const ProductsTop = ({
 
   return (
     <Container>
-      {loading && (
-        <Progress
-          color={`${isError || isUninitialized ? "error" : "primary"}`}
-        />
-      )}
+      {loading && <Progress color={`${isError || isUninitialized ? "error" : "primary"}`} />}
       <Stack spacing={1} sx={{ py: 1, width: "100%" }}>
         {products}
       </Stack>

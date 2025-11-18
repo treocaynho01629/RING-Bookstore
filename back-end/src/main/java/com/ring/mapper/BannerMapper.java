@@ -1,15 +1,14 @@
 package com.ring.mapper;
 
+import java.util.Map;
+import java.util.function.Function;
+
 import com.ring.dto.projection.banners.IBanner;
 import com.ring.dto.projection.images.IImage;
 import com.ring.dto.response.banners.BannerDTO;
-import com.ring.dto.response.images.ImageDTO;
 import com.ring.common.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
-import java.util.function.Function;
 
 /**
  * A mapper for {@link IBanner} to {@link BannerDTO}.
@@ -32,13 +31,14 @@ public class BannerMapper implements Function<IBanner, BannerDTO> {
         IImage image = banner.getImage();
 
         // Generate image URL
-        Map<String, String> srcSet = fileUploadUtil.generateUrl(image.getPublicId());
+        Map<Integer, String> srcSet = fileUploadUtil.generateSrcSet(image.getPublicId(),
+                FileUploadUtil.BANNER_SIZES);
 
         return new BannerDTO(banner.getId(),
                 banner.getShopId(),
                 banner.getName(),
                 banner.getDescription(),
-                new ImageDTO(image.getUrl(), srcSet),
+                srcSet,
                 banner.getUrl());
     }
 }

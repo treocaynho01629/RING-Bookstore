@@ -382,11 +382,11 @@ const AutocompleteComponent = ({
   let endAdornment = (
     <AdornmentContainer>
       {inputValue !== "" && (
-        <StyledIconButton {...getClearProps()} aria-label="Clear search value">
+        <StyledIconButton {...getClearProps()} aria-label={t("search.clear")}>
           <Close />
         </StyledIconButton>
       )}
-      <SearchButton type="submit" size="small" aria-label="Submit search">
+      <SearchButton type="submit" size="small" aria-label={t("search.label")}>
         <Search />
       </SearchButton>
     </AdornmentContainer>
@@ -398,12 +398,12 @@ const AutocompleteComponent = ({
         <>
           <SearchInputContainer>
             {mobileMode && (
-              <StyledIconButton onClick={handleCloseDialog} aria-label="Close search dialog">
+              <StyledIconButton onClick={handleCloseDialog} aria-label={t("search.close")}>
                 <KeyboardArrowLeft />
               </StyledIconButton>
             )}
             <StyledSearchInput
-              placeholder={capitalize(`${t("search")} ${isShop ? (id ? t("search.store") : t("store")) : ""}...`)}
+              placeholder={capitalize(`${t("search.label")} ${isShop ? (id ? t("search.store") : t("store")) : ""}...`)}
               size="small"
               autoFocus
               slotProps={{
@@ -425,7 +425,7 @@ const AutocompleteComponent = ({
                       {group?.group == "HISTORY" ? (
                         <GroupHeader>
                           {t("search.history")}
-                          <StyledIconButton onClick={clearKeywords} aria-label={t("search.clear")}>
+                          <StyledIconButton onClick={clearKeywords} aria-label={t("search.clear.all")}>
                             <Delete />
                           </StyledIconButton>
                         </GroupHeader>
@@ -496,7 +496,7 @@ const AutocompleteComponent = ({
         <>
           <SearchInputContainer>
             <StyledSearchInput
-              placeholder={capitalize(`${t("search")} ${isShop ? (id ? t("search.store") : t("store")) : ""}...`)}
+              placeholder={capitalize(`${t("search.label")} ${isShop ? (id ? t("search.store") : t("store")) : ""}...`)}
               size="small"
               slotProps={{
                 input: {
@@ -621,7 +621,7 @@ const SearchInput = ({ mobileMode, tabletMode, show, isFocus, isShop }) => {
       {tabletMode ? (
         <AutocompleteContainer className={show ? "" : "hidden"}>
           <StyledSearchInput
-            placeholder={capitalize(`${t("search")} ${isShop ? (id ? t("search.store") : t("store")) : ""}...`)}
+            placeholder={capitalize(`${t("search.label")} ${isShop ? (id ? t("search.store") : t("store")) : ""}...`)}
             size="small"
             value={displayRef.current}
             onClick={handleOpenDialog}

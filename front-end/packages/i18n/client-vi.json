@@ -79,12 +79,13 @@
     "copyright": "{{year}} - Bản quyền thuộc về RING! - Bookstore."
   },
   "search": {
-    "toggle": "Hộ thoại tìm kiếm",
+    "toggle": "Hộp thoại tìm kiếm",
     "store": "trong cửa hàng",
     "for": "Tìm kiếm {{value}}:",
     "history": "Lịch sử tìm kiếm",
     "remove": "Xóa '{{value}}' khỏi lịch sử tìm kiếm",
-    "clear": "Xóa lịch sử tìm kiếm",
+    "clear": "Đặt lại giá trị tìm kiếm",
+    "clear.all": "Xóa lịch sử tìm kiếm",
     "close": "Đóng hộp thoại tìm kiếm",
     "suggest": "Gợi ý"
   },

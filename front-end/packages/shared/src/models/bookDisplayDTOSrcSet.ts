@@ -5,9 +5,5 @@
  * OpenAPI documentation.
  * OpenAPI spec version: 2.0
  */
-import type { ImageDTOSrcSet } from "./imageDTOSrcSet";
 
-export interface ImageDTO {
-  url?: string;
-  srcSet?: ImageDTOSrcSet;
-}
+export type BookDisplayDTOSrcSet = { [key: string]: string };

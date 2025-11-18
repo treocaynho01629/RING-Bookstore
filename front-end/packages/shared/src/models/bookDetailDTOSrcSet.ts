@@ -6,4 +6,4 @@
  * OpenAPI spec version: 2.0
  */
 
-export type ImageDTOSrcSet = { [key: string]: string };
+export type BookDetailDTOSrcSet = { [key: string]: string };

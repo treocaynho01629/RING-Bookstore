@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { Skeleton, Button } from "@mui/material";
 import { currencyFormat } from "@ring/shared/utils/convert";
-import { getImageSize } from "@ring/shared/enums/image";
+import { getImageSrc } from "@ring/shared/enums/image";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import useCart from "../../hooks/useCart";
 
@@ -106,8 +106,6 @@ const StyledSkeleton = styled(Skeleton)`
 `;
 //#endregion
 
-const ImageSize = getImageSize();
-
 const ProductSimple = ({ book, scrollPosition }) => {
   const { addProduct } = useCart();
   const handleAddToCart = (book) => {
@@ -120,7 +118,7 @@ const ProductSimple = ({ book, scrollPosition }) => {
         <Link to={`/product/${book?.slug}`} style={{ width: "100%" }}>
           <ImgContainer>
             <StyledLazyImage
-              src={book?.image?.srcSet[ImageSize?.SMALL?.value]}
+              src={getImageSrc(book?.srcSet, 200)}
               alt={`${book?.title} Thumbnail`}
               width={"100%"}
               scrollPosition={scrollPosition}

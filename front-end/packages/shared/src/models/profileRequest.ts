@@ -17,5 +17,5 @@ export interface ProfileRequest {
   phone?: string;
   dob?: string;
   gender?: Gender;
-  image?: string;
+  removeImage?: boolean;
 }
