@@ -4,7 +4,7 @@ export default {
       mode: "split",
       target: "src/models", // folder to generate models/enums
       schemas: "src/models", // folder for schema definitions
-      clean: true, // removes old generated files
+      // clean: true, // removes old generated files
       indexFiles: true,
       override: {
         zod: {
@@ -20,13 +20,12 @@ export default {
       },
     },
     outputOptions: {
-      exportModels: true, // ✅ only generate components.schemas
+      exportModels: true, // only generate components.schemas
       exportSchemas: false,
     },
     hooks: {
       afterAllFilesWrite: "prettier --write",
     },
-    // 👇 disables client generation (model-only mode)
     mock: false,
     override: {
       mutator: undefined,

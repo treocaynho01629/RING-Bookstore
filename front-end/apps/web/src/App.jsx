@@ -150,7 +150,7 @@ function App() {
                           },
                           {
                             path: "profile/order",
-                            handle: { title: "orders.title" },
+                            handle: { title: "order.label" },
                             lazy: async () => {
                               let Orders = await import("./pages/Orders");
                               return { Component: Orders.default };
@@ -174,7 +174,7 @@ function App() {
                           },
                           {
                             path: "profile/review",
-                            handle: { title: "reviews.title" },
+                            handle: { title: "review.label" },
                             lazy: async () => {
                               let Reviews = await import("./pages/Reviews");
                               return { Component: Reviews.default };
@@ -182,7 +182,7 @@ function App() {
                           },
                           {
                             path: "profile/coupon",
-                            handle: { title: "coupons.title" },
+                            handle: { title: "coupon.label" },
                             lazy: async () => {
                               let Coupons = await import("./pages/Coupons");
                               return { Component: Coupons.default };

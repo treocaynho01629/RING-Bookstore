@@ -18,6 +18,7 @@ import {
 } from "../custom/CartComponents";
 import { lazy, Suspense, useRef, useState } from "react";
 import { getAddressType } from "@ring/shared/enums/address";
+import { useTranslation } from "react-i18next";
 import { currencyFormat } from "@ring/shared/utils/convert";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Edit from "@mui/icons-material/Edit";
@@ -121,28 +122,33 @@ const FinalCheckoutDialog = ({
   handleSubmit,
   reCaptchaLoaded,
 }) => {
+  const { t } = useTranslation();
   const overlapRef = useRef(null);
   const mobileMode = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md_lg"));
   const fullAddress = [addressInfo?.city, addressInfo?.address].join(", ");
   const [open, setOpen] = useState(undefined);
 
+  /**
+   * Handle toggle drawer
+   * @param {boolean} newOpen
+   */
   const toggleDrawer = (newOpen) => {
     setOpen(newOpen);
   };
   const address = addressInfo?.type ? AddressType[addressInfo.type] : null;
 
-  //Prevent overlap
+  // Prevent overlap with scroll to top button
   useOffset(overlapRef);
 
-  //Component stuff
+  // Component stuff
   let checkoutDetail = (
     <>
       <PriceDisplay displayInfo={displayInfo} loggedIn={true} />
       <CheckoutRow>
         <PriceContainer>
           <CheckoutPrice>
-            <b>Tổng:</b>
+            <b>{t("total", { ns: "common" })}:</b>
             <NumberFlow
               value={displayInfo.total}
               format={{ style: "currency", currency: "VND" }}
@@ -153,13 +159,22 @@ const FinalCheckoutDialog = ({
             />
           </CheckoutPrice>
           {!calculating && displayInfo.totalDiscount > 0 && (
-            <SavePrice>Tiết kiệm {currencyFormat.format(displayInfo.totalDiscount)}</SavePrice>
+            <SavePrice>
+              {t("saved", { ns: "common" })} {currencyFormat.format(displayInfo.totalDiscount)}
+            </SavePrice>
           )}
-          <SubText>(Giá này đã bao gồm thuế GTGT, phí đóng gói, phí vận chuyển và các chi phí phát sinh khác)</SubText>
+          <SubText>({t("checkout.vat.description", { ns: "authenticated" })})</SubText>
         </PriceContainer>
       </CheckoutRow>
     </>
   );
+
+  const couponText =
+    coupon && discount
+      ? t("cart.coupon.saved", { discount: currencyFormat.format(discount) })
+      : !coupon
+        ? t("cart.coupon.add")
+        : t("cart.coupon.change");
 
   return (
     <>
@@ -171,9 +186,7 @@ const FinalCheckoutDialog = ({
                 <span>
                   <LocalActivityOutlined color="error" />
                   &nbsp;
-                  {coupon && discount
-                    ? `Đã giảm ${currencyFormat.format(discount)}`
-                    : `Chọn mã giảm giá ${coupon != null ? "khác" : ""}`}
+                  {couponText}
                 </span>
                 <MiniCouponContainer>
                   {coupon && <CouponDisplay coupon={coupon} />}
@@ -186,7 +199,7 @@ const FinalCheckoutDialog = ({
                 <PriceContainer>
                   <CheckoutPrice>
                     <b>
-                      Tổng: ({activeStep + 1}/{maxSteps})
+                      {t("total")}: ({activeStep + 1}/{maxSteps})
                     </b>
                     <NumberFlow
                       value={displayInfo.total}
@@ -198,7 +211,9 @@ const FinalCheckoutDialog = ({
                     />
                   </CheckoutPrice>
                   {!calculating && displayInfo.totalDiscount > 0 && (
-                    <SavePrice>Tiết kiệm {currencyFormat.format(displayInfo.totalDiscount)}</SavePrice>
+                    <SavePrice>
+                      {t("cart.saved", { discount: currencyFormat.format(displayInfo.totalDiscount) })}
+                    </SavePrice>
                   )}
                 </PriceContainer>
               </AltCheckoutBox>
@@ -212,7 +227,7 @@ const FinalCheckoutDialog = ({
                   disabled={!isValid || calculating}
                   endIcon={<KeyboardDoubleArrowDown />}
                 >
-                  Tiếp tục
+                  {t("continue")}
                 </CheckoutButton>
               ) : (
                 <CheckoutButton
@@ -223,7 +238,7 @@ const FinalCheckoutDialog = ({
                   disabled={calculating || !reCaptchaLoaded}
                   onClick={handleSubmit}
                 >
-                  Đặt hàng
+                  {t("checkout.order", { ns: "authenticated" })}
                 </CheckoutButton>
               )}
             </CheckoutStack>
@@ -235,9 +250,7 @@ const FinalCheckoutDialog = ({
                 <span>
                   <LocalActivityOutlined color="error" />
                   &nbsp;
-                  {coupon && discount
-                    ? `Đã giảm ${currencyFormat.format(discount)}`
-                    : `Chọn mã giảm giá ${coupon != null ? "khác" : ""}`}
+                  {couponText}
                 </span>
                 <MiniCouponContainer>
                   <Suspense fallback={null}>{coupon && <CouponDisplay coupon={coupon} />}</Suspense>
@@ -248,7 +261,7 @@ const FinalCheckoutDialog = ({
             <CheckoutStack>
               <CheckoutPriceContainer onClick={() => toggleDrawer(true)}>
                 <PriceContainer className="row">
-                  <CheckoutText>Tổng thanh toán:</CheckoutText>
+                  <CheckoutText>{t("cart.total")}:</CheckoutText>
                 </PriceContainer>
                 <PriceContainer className="row">
                   <CheckoutPrice>
@@ -263,7 +276,9 @@ const FinalCheckoutDialog = ({
                   </CheckoutPrice>
                   &emsp;
                   {!calculating && displayInfo.totalDiscount > 0 && (
-                    <SavePrice>Tiết kiệm {currencyFormat.format(displayInfo.totalDiscount)}</SavePrice>
+                    <SavePrice>
+                      {t("cart.saved", { discount: currencyFormat.format(displayInfo.totalDiscount) })}
+                    </SavePrice>
                   )}
                 </PriceContainer>
               </CheckoutPriceContainer>
@@ -277,7 +292,7 @@ const FinalCheckoutDialog = ({
                   disabled={!isValid || calculating}
                   endIcon={<KeyboardDoubleArrowDown />}
                 >
-                  Tiếp tục ({activeStep + 1}/{maxSteps})
+                  {t("continue")} ({activeStep + 1}/{maxSteps})
                 </CheckoutButton>
               ) : (
                 <CheckoutButton
@@ -288,7 +303,7 @@ const FinalCheckoutDialog = ({
                   disabled={calculating || !reCaptchaLoaded}
                   onClick={handleSubmit}
                 >
-                  Đặt hàng
+                  {t("checkout.order", { ns: "authenticated" })}
                 </CheckoutButton>
               )}
             </CheckoutStack>
@@ -298,10 +313,10 @@ const FinalCheckoutDialog = ({
             {activeStep > 0 && addressInfo && (
               <CheckoutBox>
                 <CheckoutTitle>
-                  GIAO TỚI
+                  {t("address.to", { ns: "authenticated" })}
                   {coupon && (
                     <EditButton onClick={backFirstStep}>
-                      <Edit /> Thay đổi
+                      <Edit /> {t("edit")}
                     </EditButton>
                   )}
                 </CheckoutTitle>
@@ -313,7 +328,7 @@ const FinalCheckoutDialog = ({
                     </AddressContent>
                     <Address>
                       {address && <AddressTag className={address.color}>{address.label}</AddressTag>}
-                      {fullAddress.length > 2 ? fullAddress : "Không xác định"}
+                      {fullAddress.length > 2 ? fullAddress : t("unknown")}
                     </Address>
                   </AddressContainer>
                 </CheckoutRow>
@@ -322,24 +337,22 @@ const FinalCheckoutDialog = ({
             {activeStep > 0 && (
               <CheckoutBox>
                 <CheckoutTitle>
-                  KHUYẾN MÃI
-                  {coupon && <span>Đã áp dụng</span>}
+                  {t("cart.discount")}
+                  {coupon && <span>{t("cart.coupon.applied")}</span>}
                 </CheckoutTitle>
                 <CheckoutRow>{coupon && <CouponDisplay coupon={coupon} />}</CheckoutRow>
                 <CouponButton onClick={() => handleOpenDialog()}>
                   <span>
                     <LocalActivityOutlined color="error" />
                     &nbsp;
-                    {coupon && discount
-                      ? `Đã giảm ${currencyFormat.format(discount)}`
-                      : `Chọn mã giảm giá ${coupon != null ? "khác" : ""}`}
+                    {couponText}
                   </span>
                   <KeyboardArrowRight fontSize="small" />
                 </CouponButton>
               </CheckoutBox>
             )}
             <CheckoutBox className="sticky">
-              <CheckoutTitle>ĐƠN HÀNG</CheckoutTitle>
+              <CheckoutTitle>{t("order.receipt")}</CheckoutTitle>
               {checkoutDetail}
               {activeStep < 2 ? (
                 <CheckoutButton
@@ -351,7 +364,7 @@ const FinalCheckoutDialog = ({
                   disabled={!isValid || calculating}
                   endIcon={<KeyboardDoubleArrowDown />}
                 >
-                  Tiếp tục ({activeStep + 1}/{maxSteps})
+                  {t("continue")} ({activeStep + 1}/{maxSteps})
                 </CheckoutButton>
               ) : (
                 <CheckoutButton
@@ -362,7 +375,7 @@ const FinalCheckoutDialog = ({
                   disabled={calculating || !reCaptchaLoaded}
                   onClick={handleSubmit}
                 >
-                  Đặt hàng
+                  {t("checkout.order", { ns: "authenticated" })}
                 </CheckoutButton>
               )}
             </CheckoutBox>
@@ -383,7 +396,7 @@ const FinalCheckoutDialog = ({
               {activeStep > 0 && addressInfo && (
                 <>
                   <CheckoutTitle>
-                    GIAO TỚI
+                    {t("address.to", { ns: "authenticated" })}
                     {coupon && (
                       <EditButton
                         onClick={() => {
@@ -391,7 +404,7 @@ const FinalCheckoutDialog = ({
                           toggleDrawer(false);
                         }}
                       >
-                        <Edit /> Thay đổi
+                        <Edit /> {t("edit")}
                       </EditButton>
                     )}
                   </CheckoutTitle>
@@ -403,14 +416,14 @@ const FinalCheckoutDialog = ({
                       </AddressContent>
                       <Address>
                         {address && <AddressTag className={address.color}>{address.label}</AddressTag>}
-                        {fullAddress.length > 2 ? fullAddress : "Không xác định"}
+                        {fullAddress.length > 2 ? fullAddress : t("unknown")}
                       </Address>
                     </AddressContainer>
                   </CheckoutRow>
                   <AddressDivider />
                 </>
               )}
-              <CheckoutTitle>ĐẶT HÀNG</CheckoutTitle>
+              <CheckoutTitle>{t("checkout.order", { ns: "authenticated" })}</CheckoutTitle>
               {checkoutDetail}
             </CheckoutBox>
           </SwipeableDrawer>

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { NavLink } from "react-router";
 import { MobileExtendButton } from "@ring/ui/Components";
 import { numFormat } from "@ring/shared/utils/convert";
-import { getOrderStatus } from "@ring/shared/enums/order";
+import { OrderStatus } from "@ring/shared/models/orderStatus";
 import { getUserRole } from "@ring/shared/enums/user";
 import { UserRole } from "@ring/shared/models/userRole";
 import { useTranslation } from "react-i18next";
@@ -260,27 +260,26 @@ const NavItem = styled(NavLink)`
 `;
 //#endregion
 
-const OrderStatus = getOrderStatus();
 const items = [
   {
-    label: "order.status.pending",
+    label: "order.tabs.pending",
     icon: <PendingOutlined />,
-    url: `/profile/order?status=${OrderStatus.PENDING.value}`,
+    url: `/profile/order?status=${OrderStatus.PENDING}`,
   },
   {
-    label: "order.status.shipping",
+    label: "order.tabs.shipping",
     icon: <LocalShippingOutlined />,
-    url: `/profile/order?status=${OrderStatus.SHIPPING.value}`,
+    url: `/profile/order?status=${OrderStatus.SHIPPING}`,
   },
   {
-    label: "order.status.completed",
+    label: "order.tabs.completed",
     icon: <DomainVerification />,
-    url: `/profile/order?status=${OrderStatus.COMPLETED.value}`,
+    url: `/profile/order?status=${OrderStatus.COMPLETED}`,
   },
   {
-    label: "order.status.refunded",
+    label: "order.tabs.refunded",
     icon: <Replay />,
-    url: `/profile/order?status=${OrderStatus.REFUNDED.value}`,
+    url: `/profile/order?status=${OrderStatus.REFUNDED}`,
   },
 ];
 

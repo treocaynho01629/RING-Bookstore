@@ -481,7 +481,7 @@ const CouponDialog = ({
   let errorMessage = errorCode
     ? t("coupon.invalid")
     : !loggedIn
-      ? capitalize("required.login", { ns: "client", action: t("cart.coupon.apply") })
+      ? capitalize("required.login", { action: t("cart.coupon.apply") })
       : !numSelected
         ? t("required.select")
         : "";

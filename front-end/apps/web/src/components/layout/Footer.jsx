@@ -383,7 +383,7 @@ const Footer = () => {
         </Grid>
       </Container>
       <BotFooter>
-        <BotText>{t("footer.copyright", { year: new Date().getFullYear(), ns: "client" })}</BotText>
+        <BotText>{t("footer.copyright", { year: new Date().getFullYear() })}</BotText>
         <Name>DoraZ</Name>
       </BotFooter>
     </Wrapper>

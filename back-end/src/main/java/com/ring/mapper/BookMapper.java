@@ -88,6 +88,7 @@ public class BookMapper {
                                         // Generate image srcSet
                                         Map<Integer, String> srcSet = fileUploadUtil.generateSrcSet(image.getPublicId(),
                                                         FileUploadUtil.PRODUCT_SIZES);
+                                        srcSet.put(600, image.getUrl());
                                         return srcSet;
                                 })
                                 .collect(Collectors.toList())
@@ -115,6 +116,8 @@ public class BookMapper {
                 IImage image = book.getImage();
                 Map<Integer, String> srcSet = fileUploadUtil.generateSrcSet(image.getPublicId(),
                                 FileUploadUtil.PRODUCT_SIZES);
+                srcSet.put(600, image.getUrl());
+
                 return new BookDetailDTO(book.getId(),
                                 book.getSlug(),
                                 srcSet,

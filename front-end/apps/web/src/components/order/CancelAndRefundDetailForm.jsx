@@ -1,6 +1,7 @@
 import { Instruction } from "@ring/ui/Components";
 import { useEffect, useState } from "react";
 import { useCancelOrderMutation, useRefundOrderMutation } from "../../features/orders/ordersApiSlice";
+import { useTranslation } from "react-i18next";
 import Check from "@mui/icons-material/Check";
 import Close from "@mui/icons-material/Close";
 import HelpOutline from "@mui/icons-material/HelpOutline";
@@ -15,24 +16,24 @@ import TextareaAutosize from "@mui/material/TextareaAutosize";
 import TextField from "@mui/material/TextField";
 
 const cancelOptions = [
-  "Muốn thay đổi địa chỉ giao hàng",
-  "Muốn nhập/thay đổi mã giảm giá",
-  "Muốn đổi sản phẩm trong đơn hàng",
-  "Muốn đổi hình thức thanh toán",
-  "Tìm thấy sản phẩm rẻ hơn ở chỗ khác",
-  "Đổi ý, không muốn mua nữa",
+  "order.reason.address",
+  "order.reason.coupon",
+  "order.reason.product",
+  "order.reason.payment",
+  "order.reason.alternative",
+  "order.reason.interested",
 ];
 
 const refundOptions = [
-  "Sản phẩm lỗi",
-  "Sản phẩm khác với mô tả",
-  "Sản phẩm đã qua sử dụng",
-  "Sản phẩm là giả, nhái",
-  "Tìm thấy sản phẩm rẻ hơn ở chỗ khác",
-  "Không còn nhu cầu sử dụng (sẽ trả nguyên trạng sản phẩm)",
+  "order.reason.broken",
+  "order.reason.different",
+  "order.reason.used",
+  "order.reason.fake",
+  "order.reason.needed",
 ];
 
 const CancelAndRefundDetailForm = ({ id, pending, setPending, handleClose, isRefund }) => {
+  const { t } = useTranslation();
   const [value, setValue] = useState(isRefund ? refundOptions[0] : cancelOptions[0]);
   const [otherReason, setOtherReason] = useState("");
   const [err, setErr] = useState([]);
@@ -47,6 +48,9 @@ const CancelAndRefundDetailForm = ({ id, pending, setPending, handleClose, isRef
     setOtherReason("");
   }, [id, isRefund]);
 
+  /**
+   * Handle submit form
+   */
   const handleSubmit = async () => {
     if (canceling || refunding || pending) return;
     setPending(true);
@@ -57,7 +61,7 @@ const CancelAndRefundDetailForm = ({ id, pending, setPending, handleClose, isRef
       refund({ id, reason: value ? value : otherReason })
         .unwrap()
         .then((data) => {
-          enqueueSnackbar("Hoàn trả đơn hàng thành công!", {
+          enqueueSnackbar(t("message.success", { action: t("refund.order", { ns: "authenticated" }) }), {
             variant: "success",
           });
           setErr([]);
@@ -68,16 +72,20 @@ const CancelAndRefundDetailForm = ({ id, pending, setPending, handleClose, isRef
           handleClose();
         })
         .catch((err) => {
-          enqueueSnackbar("Hoàn trả đơn hàng thất bại!", { variant: "error" });
+          enqueueSnackbar(t("message.error", { action: t("refund.order", { ns: "authenticated" }) }), {
+            variant: "error",
+          });
           setErr(err);
-          setErrMsg("Lý do không hợp lệ!");
+          setErrMsg(t("order.reason.invalid", { ns: "authenticated" }));
           setPending(false);
         });
     } else {
       cancel({ id, reason: value ? value : otherReason })
         .unwrap()
         .then((data) => {
-          enqueueSnackbar("Huỷ đơn hàng thành công!", { variant: "success" });
+          enqueueSnackbar(t("message.success", { action: t("cancel.order", { ns: "authenticated" }) }), {
+            variant: "success",
+          });
           setErr([]);
           setErrMsg("");
           setValue(isRefund ? refundOptions[0] : cancelOptions[0]);
@@ -86,9 +94,11 @@ const CancelAndRefundDetailForm = ({ id, pending, setPending, handleClose, isRef
           handleClose();
         })
         .catch((err) => {
-          enqueueSnackbar("Huỷ đơn hàng thất bại!", { variant: "error" });
+          enqueueSnackbar(t("message.error", { action: t("cancel.order", { ns: "authenticated" }) }), {
+            variant: "error",
+          });
           setErr(err);
-          setErrMsg("Lý do không hợp lệ!");
+          setErrMsg(t("order.reason.invalid", { ns: "authenticated" }));
           setPending(false);
         });
     }
@@ -98,9 +108,10 @@ const CancelAndRefundDetailForm = ({ id, pending, setPending, handleClose, isRef
     <>
       <DialogTitle id="cancel-dialog-title" sx={{ display: "flex", alignItems: "center" }}>
         <HelpOutline />
-        &nbsp;{isRefund ? "Chọn lý do hoàn trả" : "Chọn lý do huỷ đơn"}
+        &nbsp;
+        {isRefund ? t("order.refund.title", { ns: "authenticated" }) : t("order.cancel.title", { ns: "authenticated" })}
       </DialogTitle>
-      <DialogContent>
+      <DialogContent dividers>
         <form onSubmit={handleSubmit}>
           <Instruction display={errMsg ? "block" : "none"} aria-live="assertive">
             {errMsg}
@@ -112,12 +123,17 @@ const CancelAndRefundDetailForm = ({ id, pending, setPending, handleClose, isRef
             onChange={(e) => setValue(e.target.value)}
           >
             {(isRefund ? refundOptions : cancelOptions).map((option, index) => (
-              <FormControlLabel key={index} value={option} label={option} control={<Radio />} />
+              <FormControlLabel
+                key={index}
+                value={option}
+                label={t(option, { ns: "authenticated" })}
+                control={<Radio />}
+              />
             ))}
-            <FormControlLabel value="" label="Khác" control={<Radio />} />
+            <FormControlLabel value="" label={t("other")} control={<Radio />} />
           </RadioGroup>
           <TextField
-            placeholder="Nhập lý do khác"
+            placeholder={t("order.reason.other", { ns: "authenticated" })}
             error={err?.data?.errors?.reason}
             helperText={err?.data?.errors?.reason}
             value={otherReason}
@@ -139,10 +155,10 @@ const CancelAndRefundDetailForm = ({ id, pending, setPending, handleClose, isRef
       </DialogContent>
       <DialogActions>
         <Button variant="outlined" color="error" size="large" autoFocus onClick={handleClose} startIcon={<Close />}>
-          Huỷ
+          {t("cancel")}
         </Button>
         <Button variant="contained" size="large" onClick={handleSubmit} startIcon={<Check />}>
-          Đồng ý
+          {t("confirm")}
         </Button>
       </DialogActions>
     </>

@@ -33,6 +33,7 @@ public class BannerMapper implements Function<IBanner, BannerDTO> {
         // Generate image URL
         Map<Integer, String> srcSet = fileUploadUtil.generateSrcSet(image.getPublicId(),
                 FileUploadUtil.BANNER_SIZES);
+        srcSet.put(1200, image.getUrl());
 
         return new BannerDTO(banner.getId(),
                 banner.getShopId(),

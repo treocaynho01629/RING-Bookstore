@@ -1,10 +1,13 @@
 import styled from "@emotion/styled";
 import { Suspense, lazy, useState, forwardRef } from "react";
 import { StyledDialogTitle } from "../custom/ProfileComponents";
-import { getPaymentStatus, getPaymentType } from "@ring/shared/enums/payment";
+import { getPaymentStatus } from "@ring/shared/enums/payment";
+import { PaymentStatus } from "@ring/shared/models/paymentStatus";
+import { PaymentType } from "@ring/shared/models/paymentType";
 import { idFormatter, timeFormatter, dateFormatter } from "@ring/shared/utils/convert";
 import { Link } from "react-router";
 import { MobileExtendButton } from "@ring/ui/Components";
+import { useTranslation } from "react-i18next";
 import { StatusContent } from "../custom/OrderComponents";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -13,12 +16,12 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
 import Paper from "@mui/material/Paper";
-import Close from "@mui/icons-material/Close";
-import Inbox from "@mui/icons-material/Inbox";
-import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
-import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
-import Receipt from "@mui/icons-material/Receipt";
-import Sell from "@mui/icons-material/Sell";
+import CloseIcon from "@mui/icons-material/Close";
+import InboxIcon from "@mui/icons-material/Inbox";
+import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import SellIcon from "@mui/icons-material/Sell";
 import CurrencyExchange from "@mui/icons-material/CurrencyExchange";
 import OrderReceiptDetails from "./OrderReceiptDetails";
 import Slide from "@mui/material/Slide";
@@ -216,38 +219,41 @@ const MainButtonContainer = styled.div`
 
 const StatusText = styled.div`
   padding: ${({ theme }) => theme.spacing(1)} 0;
+
+  ${({ theme }) => theme.breakpoints.down("sm")} {
+    padding: 0;
+  }
 `;
 //#endregion
-
-const PaymentStatus = getPaymentStatus();
-const PaymentType = getPaymentType();
 
 function getStepContent(receipt) {
   const date = new Date(receipt?.date);
   const expiredDate = receipt?.expiredAt ? new Date(receipt?.expiredAt) : null;
 
   switch (receipt?.paymentStatus) {
-    case PaymentStatus.PENDING.value:
+    case PaymentStatus.PENDING:
       return {
-        summary: `Đang chờ thanh toán đơn hàng ${
-          expiredDate ? "trước " + timeFormatter(expiredDate) + " " + dateFormatter(expiredDate) : ""
-        } .`,
+        summary: "checkout.pending",
+        date: expiredDate,
       };
-    case PaymentStatus.PAID.value:
+    case PaymentStatus.PAID:
       return {
-        summary: `Đã thanh toán ngày ${timeFormatter(date)} ${dateFormatter(date)}.`,
+        summary: "checkout.paid",
+        date: date,
       };
-    case PaymentStatus.PENDING_REFUND.value:
+    case PaymentStatus.PENDING_REFUND:
       return {
-        summary: "Đang chờ hoàn tiền.",
+        summary: "checkout.pending.refund",
       };
-    case PaymentStatus.REFUNDED.value:
+    case PaymentStatus.REFUNDED:
       return {
-        summary: `Đã hoàn tiền ngày ${timeFormatter(date)} ${dateFormatter(date)}.`,
+        summary: "checkout.refunded",
+        date: date,
       };
-    case PaymentStatus.CANCELED.value:
+    case PaymentStatus.CANCELED:
       return {
-        summary: `Đã huỷ đơn ngày ${timeFormatter(date)} ${dateFormatter(date)}.`,
+        summary: "checkout.canceled",
+        date: date,
       };
   }
 }
@@ -257,28 +263,35 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mobileMode }) => {
+  const { t, i18n } = useTranslation();
   const [openCancel, setOpenCancel] = useState(undefined);
   const [openUpdate, setOpenUpdate] = useState(undefined);
   const open = Boolean(openCancel || openUpdate);
-  const paymentStatus = PaymentStatus[receipt?.paymentStatus];
+  const paymentMeta = getPaymentStatus(receipt?.paymentStatus);
   const stepContent = getStepContent(receipt);
 
-  //Cancel
+  /**
+   * Cancel order
+   */
   const handleCancelOrder = () => {
     setOpenCancel(true);
   };
 
-  //Refund
+  /**
+   * Update payment
+   */
   const handleUpdatePayment = () => {
     setOpenUpdate(true);
   };
 
+  /**
+   * Close dialog
+   */
   const handleClose = () => {
     setOpenCancel(false);
     setOpenUpdate(false);
   };
 
-  // const detailSummary = getDetailSummary(order);
   const date = new Date(receipt?.date);
 
   return (
@@ -286,44 +299,74 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
       <StyledDialogTitle>
         <TitleContainer>
           <Link to={-1}>
-            <KeyboardArrowLeft />
+            <KeyboardArrowLeftIcon />
           </Link>
-          <Receipt />
-          &nbsp;Mã vận đơn&nbsp;
+          <ReceiptIcon />
+          &nbsp;{t("order.id", { ns: "authenticated" })}&nbsp;
           {!receipt ? <Skeleton variant="text" width={100} /> : idFormatter(receipt?.id)}
           &emsp;
           {!receipt ? (
-            <StatusTag color="secondary">Đang tải</StatusTag>
+            <StatusTag color="secondary">{t("loading")}</StatusTag>
           ) : (
-            <StatusTag color={paymentStatus?.color}>{paymentStatus?.label}</StatusTag>
+            <StatusTag color={paymentMeta?.color}>{t(paymentMeta?.label, { ns: "authenticated" })}</StatusTag>
           )}
         </TitleContainer>
         <SubTitle>
           {!receipt ? <Skeleton variant="text" width={130} /> : `${timeFormatter(date)} ${dateFormatter(date)}`}
         </SubTitle>
       </StyledDialogTitle>
-      <DialogContent sx={{ px: { xs: 0, sm: 2, md: 0 }, mt: { xs: 1, md: 0 } }}>
-        <Paper elevation={3} sx={{ width: "90%", mx: "auto", my: 1 }}>
-          <StatusContent color={paymentStatus?.color}>
-            <StatusText>
-              {paymentStatus?.label}
-              <p>{stepContent?.summary}</p>
-            </StatusText>
-          </StatusContent>
-        </Paper>
+      <DialogContent sx={{ px: { xs: "0 !important", sm: 2, md: 0 }, mt: { xs: 1, md: 0 } }}>
+        <>
+          {!receipt ? (
+            <Skeleton
+              variant="rectangular"
+              sx={{
+                height: { xs: 71, md: 88 },
+                width: "90%",
+                mx: "auto",
+                my: 1,
+              }}
+            />
+          ) : (
+            <Paper elevation={3} sx={{ width: "90%", mx: "auto", my: 1 }}>
+              <StatusContent color={paymentMeta?.color}>
+                <StatusText>
+                  {t(paymentMeta?.label, { ns: "authenticated" })}
+                  <p>
+                    {t(stepContent?.summary, {
+                      ns: "authenticated",
+                      date: dateFormatter(stepContent?.date, i18n.language),
+                      time: timeFormatter(stepContent?.date, i18n.language),
+                    })}
+                  </p>
+                </StatusText>
+              </StatusContent>
+            </Paper>
+          )}
+        </>
         {!tabletMode && (
           <SummaryContainer>
             <Box display="flex" justifyContent="space-between">
               <Box>
-                <SubText>{!receipt ? <Skeleton variant="text" width={280} /> : stepContent?.summary}</SubText>
+                <SubText>
+                  {!receipt ? (
+                    <Skeleton variant="text" width={280} />
+                  ) : (
+                    t(stepContent?.summary, {
+                      ns: "authenticated",
+                      date: dateFormatter(stepContent?.date, i18n.language),
+                      time: timeFormatter(stepContent?.date, i18n.language),
+                    })
+                  )}
+                </SubText>
               </Box>
               <Box>
                 {!receipt ? (
                   <MainButton disabled variant="contained" color="secondary" size="large" fullWidth>
-                    Đang tải
+                    {t("loading")}
                   </MainButton>
                 ) : (
-                  receipt?.paymentStatus == PaymentStatus.PENDING.value && (
+                  receipt?.paymentStatus == PaymentStatus.PENDING && (
                     <>
                       <MainButton
                         variant="outlined"
@@ -333,7 +376,7 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
                         sx={{ mt: 1 }}
                         onClick={handleCancelOrder}
                       >
-                        Huỷ toàn bộ đơn
+                        {t("checkout.cancel.label", { ns: "authenticated" })}
                       </MainButton>
                       <MainButton
                         variant="outlined"
@@ -343,12 +386,12 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
                         sx={{ mt: 1 }}
                         onClick={handleUpdatePayment}
                       >
-                        Thay đổi hình thức thanh toán
+                        {t("checkout.payment.update", { ns: "authenticated" })}
                       </MainButton>
-                      {receipt?.paymentType == PaymentType.ONLINE_PAYMENT.value && (
+                      {receipt?.paymentType == PaymentType.ONLINE_PAYMENT && (
                         <Link to={`/payment/${receipt?.id}`}>
                           <MainButton variant="contained" color="info" size="large" fullWidth sx={{ mt: 1 }}>
-                            Thanh toán
+                            {t("order.pay", { ns: "authenticated" })}
                           </MainButton>
                         </Link>
                       )}
@@ -361,8 +404,8 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
         )}
         <ContentWrapper>
           <Title>
-            <Sell />
-            &nbsp;Địa chỉ người nhận
+            <SellIcon />
+            &nbsp;{t("address.recipient", { ns: "authenticated" })}
           </Title>
           <InfoContainer>
             <div>
@@ -378,14 +421,14 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
                   <Skeleton variant="text" width="30%" />
                 </Box>
               ) : (
-                (receipt?.address ?? "Không xác định")
+                (receipt?.address ?? t("unknown"))
               )}
             </InfoText>
           </InfoContainer>
         </ContentWrapper>
         <Title>
-          <Inbox />
-          &nbsp;Kiện hàng
+          <InboxIcon />
+          &nbsp;{t("order.package", { ns: "authenticated" })}
         </Title>
         <OrderReceiptDetails {...{ receipt, tabletMode }} />
         {!receipt ? (
@@ -393,29 +436,29 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
             <MobileButton>
               <Skeleton variant="text" width={150} />
               <MobileExtendButton>
-                <KeyboardArrowRight fontSize="small" />
+                <KeyboardArrowRightIcon fontSize="small" />
               </MobileExtendButton>
             </MobileButton>
           </ButtonContainer>
         ) : (
-          receipt?.paymentStatus == PaymentStatus.PENDING.value && (
+          receipt?.paymentStatus == PaymentStatus.PENDING && (
             <ButtonContainer>
               <MobileButton onClick={handleCancelOrder}>
                 <span>
-                  <Close fontSize="small" color="error" />
-                  &nbsp;Huỷ toàn bộ đơn
+                  <CloseIcon fontSize="small" color="error" />
+                  &nbsp;{t("checkout.cancel.label", { ns: "authenticated" })}
                 </span>
                 <MobileExtendButton>
-                  <KeyboardArrowRight fontSize="small" />
+                  <KeyboardArrowRightIcon fontSize="small" />
                 </MobileExtendButton>
               </MobileButton>
               <MobileButton onClick={handleUpdatePayment}>
                 <span>
                   <CurrencyExchange fontSize="small" color="warning" />
-                  &nbsp;Thay đổi hình thức thanh toán
+                  &nbsp;{t("checkout.payment.update", { ns: "authenticated" })}
                 </span>
                 <MobileExtendButton>
-                  <KeyboardArrowRight fontSize="small" />
+                  <KeyboardArrowRightIcon fontSize="small" />
                 </MobileExtendButton>
               </MobileButton>
             </ButtonContainer>
@@ -425,16 +468,16 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
           (!receipt ? (
             <MainButtonContainer>
               <MainButton disabled variant="contained" color="secondary" size="large" fullWidth>
-                Đang tải
+                {t("loading")}
               </MainButton>
             </MainButtonContainer>
           ) : (
-            receipt?.paymentStatus == PaymentStatus.PENDING.value &&
-            receipt?.paymentType == PaymentType.ONLINE_PAYMENT.value && (
+            receipt?.paymentStatus == PaymentStatus.PENDING &&
+            receipt?.paymentType == PaymentType.ONLINE_PAYMENT && (
               <Link to={`/payment/${receipt?.id}`}>
                 <MainButtonContainer>
                   <MainButton variant="contained" color="info" size="large" fullWidth>
-                    Thanh toán
+                    {t("order.pay", { ns: "authenticated" })}
                   </MainButton>
                 </MainButtonContainer>
               </Link>

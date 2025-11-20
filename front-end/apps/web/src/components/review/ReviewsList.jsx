@@ -1,7 +1,7 @@
 import { Fragment, Suspense, useCallback, useState, useEffect, lazy } from "react";
 import { useGetMyReviewsQuery } from "../../features/reviews/reviewsApiSlice";
 import { Message } from "@ring/ui/Components";
-import { debounce } from "lodash-es";
+import { capitalize, debounce } from "lodash-es";
 import {
   LoadContainer,
   MessageContainer,
@@ -9,6 +9,7 @@ import {
   StyledEmptyIcon,
   StyledDialogTitle,
 } from "../custom/ProfileComponents";
+import { useTranslation } from "react-i18next";
 import useAuth from "../../hooks/useAuth";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import Try from "@mui/icons-material/Try";
@@ -29,6 +30,7 @@ const defaultSize = 5;
 
 const ReviewsList = ({ mobileMode, tabletMode, pending, setPending, handleClose }) => {
   const { username } = useAuth();
+  const { t } = useTranslation();
   const [openForm, setOpenForm] = useState(undefined);
   const [contextReview, setContextReview] = useState(null);
   const [pagination, setPagination] = useState({
@@ -37,33 +39,46 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending, handleClose 
     isMore: true,
   });
 
-  //Fetch orders
+  // Fetch orders
   const { data, isLoading, isFetching, isSuccess, isError, error } = useGetMyReviewsQuery({
     page: pagination?.number,
     size: pagination?.size,
     loadMore: pagination?.isMore,
   });
 
-  //Show more
+  // Show more
   const handleShowMore = () => {
     if (isFetching || typeof data?.page !== "number" || data?.page < pagination?.number) return;
     const nextPage = data?.page + 1;
     if (nextPage < data?.totalPages) setPagination((prev) => ({ ...prev, number: nextPage }));
   };
 
+  /**
+   * Open the edit form
+   */
   const handleOpenEdit = (review) => {
     setContextReview(review);
     setOpenForm(true);
   };
+
+  /**
+   * Close the edit form
+   */
   const handleCloseForm = () => {
     setOpenForm(false);
   };
 
+  /**
+   * Handle window scroll
+   */
   const handleWindowScroll = (e) => {
     const trigger = document.body.scrollHeight - 300 < window.scrollY + window.innerHeight;
     if (trigger) handleShowMore();
   };
 
+  /**
+   * Handle scroll
+   */
   const handleScroll = (e) => {
     const trigger = e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
     if (trigger) handleShowMore();
@@ -110,7 +125,7 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending, handleClose 
           <MessageContainer>
             <Message>
               <StyledEmptyIcon />
-              Chưa có đánh giá nào
+              {capitalize(t("message.empty", { item: t("review.label") }))}
             </Message>
           </MessageContainer>
         )}
@@ -119,7 +134,7 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending, handleClose 
   } else if (isError) {
     reviewsContent = (
       <MessageContainer>
-        <Message color="error">{error?.error || "Đã xảy ra lỗi"}</Message>
+        <Message color="error">{error?.error || t("error.general")}</Message>
       </MessageContainer>
     );
   }
@@ -131,7 +146,7 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending, handleClose 
           <KeyboardArrowLeft />
         </a>
         <Try />
-        &nbsp;ĐÁNH GIÁ CỦA BẠN
+        &nbsp;{t("review.title", { ns: "authenticated" })}
       </StyledDialogTitle>
       <DialogContent
         sx={{ py: 0, px: { xs: 1, sm: 2, md: 0 }, height: { xs: "100dvh", md: "auto" } }}
@@ -145,7 +160,7 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending, handleClose 
             </LoadContainer>
           )}
           {data?.ids?.length > 0 && data?.ids?.length == data?.totalElements && (
-            <Message color="warning">Không còn đánh giá nào!</Message>
+            <Message color="warning">{capitalize(t("message.out", { item: t("review.label") }))}</Message>
           )}
         </ReviewsContainer>
       </DialogContent>

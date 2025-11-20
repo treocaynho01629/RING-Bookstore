@@ -1,6 +1,6 @@
 import { currencyFormat, idFormatter } from "@ring/shared/utils/convert";
-import { getOrderStatus } from "@ring/shared/enums/order";
 import { getPaymentType } from "@ring/shared/enums/payment";
+import { OrderStatus } from "@ring/shared/models/orderStatus";
 import { Link } from "react-router";
 import {
   ItemTitle,
@@ -25,10 +25,8 @@ import {
   Discount,
 } from "../custom/OrderComponents";
 import { useState } from "react";
-import {
-  LoadContainer,
-  PlaceholderContainer,
-} from "../custom/ProfileComponents";
+import { useTranslation } from "react-i18next";
+import { LoadContainer, PlaceholderContainer } from "../custom/ProfileComponents";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
@@ -40,13 +38,14 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
 import Storefront from "@mui/icons-material/Storefront";
 
-const OrderStatus = getOrderStatus();
-const PaymentType = getPaymentType();
-
 const OrderDetailItems = ({ order, tabletMode }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const paymentSummary = PaymentType[order?.paymentType];
+  const paymentMeta = getPaymentType(order?.paymentType);
 
+  /**
+   * Toggle the price collapse
+   */
   const togglePrice = () => {
     setOpen((prev) => !prev);
   };
@@ -68,7 +67,7 @@ const OrderDetailItems = ({ order, tabletMode }) => {
             <>
               <Link to={`/shops/${order?.shopId}`}>
                 <Shop>
-                  <ShopTag>Đối tác</ShopTag>
+                  <ShopTag>{t("partner")}</ShopTag>
                   <Storefront />
                   &nbsp;{order?.shopName}
                   <KeyboardArrowRight fontSize="small" />
@@ -91,19 +90,14 @@ const OrderDetailItems = ({ order, tabletMode }) => {
             <BodyContainer
               key={`item-${item?.id}-${itemIndex}`}
               className={
-                order?.status == OrderStatus.CANCELED.value ||
-                order?.status == OrderStatus.REFUNDED.value
-                  ? "disabled"
-                  : ""
+                order?.status == OrderStatus.CANCELED || order?.status == OrderStatus.REFUNDED ? "disabled" : ""
               }
             >
               <Link to={`/product/${item?.bookSlug}`}>
                 <StyledLazyImage
                   src={item?.image}
                   alt={`${item?.bookTitle} Order item`}
-                  placeholder={
-                    <StyledSkeleton variant="rectangular" animation={false} />
-                  }
+                  placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
                 />
               </Link>
               <ContentContainer>
@@ -111,42 +105,29 @@ const OrderDetailItems = ({ order, tabletMode }) => {
                   <ItemTitle>{item?.bookTitle}</ItemTitle>
                 </Link>
                 <StuffContainer>
-                  {order?.status == OrderStatus.COMPLETED.value ? (
+                  {order?.status == OrderStatus.COMPLETED ? (
                     <div>
                       <Amount>
-                        Số lượng: <b>{item?.quantity}</b>
+                        {t("quantity")}: <b>{item?.quantity}</b>
                       </Amount>
                       <Link to={`/product/${item?.bookSlug}?review=true`}>
-                        <Button
-                          variant="outlined"
-                          color="info"
-                          size="small"
-                          sx={{ mt: 0.5, minWidth: 100 }}
-                        >
-                          Đánh giá
+                        <Button variant="outlined" color="info" size="small" sx={{ mt: 0.5, minWidth: 100 }}>
+                          {t("review.label")}
                         </Button>
                       </Link>
                     </div>
                   ) : (
                     <Amount>
-                      Số lượng: <b>{item?.quantity}</b>
+                      {t("quantity")}: <b>{item?.quantity}</b>
                     </Amount>
                   )}
                   <div>
                     <Amount className="mobile">
-                      SL: <b>{item?.quantity}</b>
+                      {t("quantity.short")}: <b>{item?.quantity}</b>
                     </Amount>
                     <PriceContainer>
-                      <Price>
-                        {currencyFormat.format(
-                          item.price * (1 - (item?.discount || 0))
-                        )}
-                      </Price>
-                      <Discount>
-                        {item?.discount > 0
-                          ? currencyFormat.format(item.price)
-                          : ""}
-                      </Discount>
+                      <Price>{currencyFormat.format(item.price * (1 - (item?.discount || 0)))}</Price>
+                      <Discount>{item?.discount > 0 ? currencyFormat.format(item.price) : ""}</Discount>
                     </PriceContainer>
                   </div>
                 </StuffContainer>
@@ -158,81 +139,51 @@ const OrderDetailItems = ({ order, tabletMode }) => {
           <FinalPriceContainer>
             <Collapse in={!tabletMode || open} timeout="auto" unmountOnExit>
               <PriceRow>
-                <PriceText className="secondary">Tiền hàng:</PriceText>
+                <PriceText className="secondary">{t("cart.subtotal")}:</PriceText>
                 <PriceText>
-                  {!order ? (
-                    <Skeleton variant="text" width={90} />
-                  ) : (
-                    currencyFormat.format(order?.totalPrice)
-                  )}
+                  {!order ? <Skeleton variant="text" width={90} /> : currencyFormat.format(order?.totalPrice)}
                 </PriceText>
               </PriceRow>
               <PriceRow>
-                <PriceText className="secondary">Phí vận chuyển:</PriceText>
+                <PriceText className="secondary">{t("cart.shipping.fee")}:</PriceText>
                 <PriceText>
-                  {!order ? (
-                    <Skeleton variant="text" width={85} />
-                  ) : (
-                    currencyFormat.format(order?.shippingFee)
-                  )}
+                  {!order ? <Skeleton variant="text" width={85} /> : currencyFormat.format(order?.shippingFee)}
                 </PriceText>
               </PriceRow>
               {order?.shippingDiscount > 0 && (
                 <PriceRow>
-                  <PriceText className="secondary">
-                    Giảm phí vận chuyển:
-                  </PriceText>
-                  <PriceText className="discount">
-                    {currencyFormat.format(-order?.shippingDiscount)}
-                  </PriceText>
+                  <PriceText className="secondary">{t("cart.shipping.discount")}:</PriceText>
+                  <PriceText className="discount">{currencyFormat.format(-order?.shippingDiscount)}</PriceText>
                 </PriceRow>
               )}
               {order?.totalDiscount - order?.shippingDiscount > 0 && (
                 <PriceRow>
-                  <PriceText className="secondary">
-                    Giảm từ mã giảm giá:
-                  </PriceText>
+                  <PriceText className="secondary">{t("cart.product.discount")}:</PriceText>
                   <PriceText className="discount">
-                    {currencyFormat.format(
-                      -(order?.totalDiscount - order?.shippingDiscount)
-                    )}
+                    {currencyFormat.format(-(order?.totalDiscount - order?.shippingDiscount))}
                   </PriceText>
                 </PriceRow>
               )}
               <Divider sx={{ my: 1 }} />
             </Collapse>
             <PriceRow onClick={togglePrice}>
-              <PriceText>Tổng:</PriceText>
+              <PriceText>{t("total")}:</PriceText>
               <FinalPrice color="primary">
                 {!order ? (
                   <Skeleton variant="text" width={90} />
                 ) : (
-                  currencyFormat.format(
-                    order?.totalPrice +
-                      order?.shippingFee -
-                      order?.totalDiscount
-                  )
+                  currencyFormat.format(order?.totalPrice + order?.shippingFee - order?.totalDiscount)
                 )}
                 <ToggleArrow>
-                  {open ? (
-                    <KeyboardArrowUp fontSize="small" />
-                  ) : (
-                    <KeyboardArrowDown fontSize="small" />
-                  )}
+                  {open ? <KeyboardArrowUp fontSize="small" /> : <KeyboardArrowDown fontSize="small" />}
                 </ToggleArrow>
               </FinalPrice>
             </PriceRow>
             <Collapse in={!tabletMode || open} timeout="auto" unmountOnExit>
               <PriceRow>
-                <PriceText className="secondary">
-                  Hình thức thanh toán:
-                </PriceText>
+                <PriceText className="secondary">{t("payment.label")}:</PriceText>
                 <PriceText color="warning">
-                  {!order ? (
-                    <Skeleton variant="text" width={150} />
-                  ) : (
-                    paymentSummary?.label
-                  )}
+                  {!order ? <Skeleton variant="text" width={150} /> : t(paymentMeta?.label)}
                 </PriceText>
               </PriceRow>
             </Collapse>

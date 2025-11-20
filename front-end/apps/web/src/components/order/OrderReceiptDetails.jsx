@@ -1,6 +1,7 @@
 import { currencyFormat } from "@ring/shared/utils/convert";
 import { getPaymentType } from "@ring/shared/enums/payment";
 import { getOrderStatus } from "@ring/shared/enums/order";
+import { OrderStatus } from "@ring/shared/models/orderStatus";
 import { Link } from "react-router";
 import {
   ItemTitle,
@@ -26,10 +27,8 @@ import {
   StatusTag,
 } from "../custom/OrderComponents";
 import { useState } from "react";
-import {
-  LoadContainer,
-  PlaceholderContainer,
-} from "../custom/ProfileComponents";
+import { LoadContainer, PlaceholderContainer } from "../custom/ProfileComponents";
+import { useTranslation } from "react-i18next";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import Collapse from "@mui/material/Collapse";
@@ -40,13 +39,14 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
 import Storefront from "@mui/icons-material/Storefront";
 
-const PaymentType = getPaymentType();
-const OrderStatus = getOrderStatus();
-
 const OrderReceiptDetails = ({ receipt, tabletMode }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const paymentSummary = PaymentType[receipt?.paymentType];
+  const paymentMeta = getPaymentType(receipt?.paymentType);
 
+  /**
+   * Toggle the price collapse
+   */
   const togglePrice = () => {
     setOpen((prev) => !prev);
   };
@@ -86,16 +86,14 @@ const OrderReceiptDetails = ({ receipt, tabletMode }) => {
                   <>
                     <Link to={`/shops/${detail?.shopId}`}>
                       <Shop>
-                        <ShopTag>Đối tác</ShopTag>
+                        <ShopTag>{t("partner")}</ShopTag>
                         <Storefront />
                         &nbsp;{detail?.shopName}
                         <KeyboardArrowRight fontSize="small" />
                       </Shop>
                     </Link>
                     <Link to={`/profile/order/detail/${detail?.id}`}>
-                      <StatusTag color={detailStatus?.color}>
-                        {detailStatus?.label}
-                      </StatusTag>
+                      <StatusTag color={detailStatus?.color}>{detailStatus?.label}</StatusTag>
                     </Link>
                   </>
                 )}
@@ -108,15 +106,11 @@ const OrderReceiptDetails = ({ receipt, tabletMode }) => {
                 </PlaceholderContainer>
               ) : (
                 detail?.items?.map((item, itemIndex) => (
-                  <Link
-                    key={`detail-${item?.id}-${itemIndex}`}
-                    to={`/profile/order/detail/${detail?.id}`}
-                  >
+                  <Link key={`detail-${item?.id}-${itemIndex}`} to={`/profile/order/detail/${detail?.id}`}>
                     <BodyContainer
                       key={`item-${item?.id}-${itemIndex}`}
                       className={
-                        detail?.status == OrderStatus.CANCELED.value ||
-                        detail?.status == OrderStatus.REFUNDED.value
+                        detail?.status == OrderStatus.CANCELED || detail?.status == OrderStatus.REFUNDED
                           ? "disabled"
                           : ""
                       }
@@ -124,34 +118,21 @@ const OrderReceiptDetails = ({ receipt, tabletMode }) => {
                       <StyledLazyImage
                         src={item?.image}
                         alt={`${item?.bookTitle} Order item`}
-                        placeholder={
-                          <StyledSkeleton
-                            variant="rectangular"
-                            animation={false}
-                          />
-                        }
+                        placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
                       />
                       <ContentContainer>
                         <ItemTitle>{item?.bookTitle}</ItemTitle>
                         <StuffContainer>
                           <Amount>
-                            Số lượng: <b>{item?.quantity}</b>
+                            {t("quantity")}: <b>{item?.quantity}</b>
                           </Amount>
                           <div>
                             <Amount className="mobile">
-                              SL: <b>{item?.quantity}</b>
+                              {t("quantity.short")}: <b>{item?.quantity}</b>
                             </Amount>
                             <PriceContainer>
-                              <Price>
-                                {currencyFormat.format(
-                                  item.price * (1 - (item?.discount || 0))
-                                )}
-                              </Price>
-                              <Discount>
-                                {item?.discount > 0
-                                  ? currencyFormat.format(item.price)
-                                  : ""}
-                              </Discount>
+                              <Price>{currencyFormat.format(item.price * (1 - (item?.discount || 0)))}</Price>
+                              <Discount>{item?.discount > 0 ? currencyFormat.format(item.price) : ""}</Discount>
                             </PriceContainer>
                           </div>
                         </StuffContainer>
@@ -169,49 +150,33 @@ const OrderReceiptDetails = ({ receipt, tabletMode }) => {
           <FinalPriceContainer>
             <Collapse in={!tabletMode || open} timeout="auto" unmountOnExit>
               <PriceRow>
-                <PriceText className="secondary">Tiền hàng:</PriceText>
+                <PriceText className="secondary">{t("cart.subtotal")}:</PriceText>
                 <PriceText>
-                  {!receipt ? (
-                    <Skeleton variant="text" width={90} />
-                  ) : (
-                    currencyFormat.format(displayInfo?.subTotal)
-                  )}
+                  {!receipt ? <Skeleton variant="text" width={90} /> : currencyFormat.format(displayInfo?.subTotal)}
                 </PriceText>
               </PriceRow>
               <PriceRow>
-                <PriceText className="secondary">Phí vận chuyển:</PriceText>
+                <PriceText className="secondary">{t("cart.shipping.fee")}:</PriceText>
                 <PriceText>
-                  {!receipt ? (
-                    <Skeleton variant="text" width={85} />
-                  ) : (
-                    currencyFormat.format(displayInfo?.shipping)
-                  )}
+                  {!receipt ? <Skeleton variant="text" width={85} /> : currencyFormat.format(displayInfo?.shipping)}
                 </PriceText>
               </PriceRow>
               {displayInfo?.shippingDiscount > 0 && (
                 <PriceRow>
-                  <PriceText className="secondary">
-                    Giảm phí vận chuyển:
-                  </PriceText>
-                  <PriceText className="discount">
-                    {currencyFormat.format(-displayInfo?.shippingDiscount)}
-                  </PriceText>
+                  <PriceText className="secondary">{t("cart.shipping.discount")}:</PriceText>
+                  <PriceText className="discount">{currencyFormat.format(-displayInfo?.shippingDiscount)}</PriceText>
                 </PriceRow>
               )}
               {displayInfo?.couponDiscount > 0 && (
                 <PriceRow>
-                  <PriceText className="secondary">
-                    Giảm từ mã giảm giá:
-                  </PriceText>
-                  <PriceText className="discount">
-                    {currencyFormat.format(-displayInfo?.couponDiscount)}
-                  </PriceText>
+                  <PriceText className="secondary">{t("cart.product.discount")}:</PriceText>
+                  <PriceText className="discount">{currencyFormat.format(-displayInfo?.couponDiscount)}</PriceText>
                 </PriceRow>
               )}
               <Divider sx={{ my: 1 }} />
             </Collapse>
             <PriceRow onClick={togglePrice}>
-              <PriceText>Tổng:</PriceText>
+              <PriceText>{t("total")}:</PriceText>
               <FinalPrice color="primary">
                 {!receipt ? (
                   <Skeleton variant="text" width={90} />
@@ -219,25 +184,15 @@ const OrderReceiptDetails = ({ receipt, tabletMode }) => {
                   currencyFormat.format(receipt?.total - receipt?.totalDiscount)
                 )}
                 <ToggleArrow>
-                  {open ? (
-                    <KeyboardArrowUp fontSize="small" />
-                  ) : (
-                    <KeyboardArrowDown fontSize="small" />
-                  )}
+                  {open ? <KeyboardArrowUp fontSize="small" /> : <KeyboardArrowDown fontSize="small" />}
                 </ToggleArrow>
               </FinalPrice>
             </PriceRow>
             <Collapse in={!tabletMode || open} timeout="auto" unmountOnExit>
               <PriceRow>
-                <PriceText className="secondary">
-                  Hình thức thanh toán:
-                </PriceText>
+                <PriceText className="secondary">{t("payment.label")}:</PriceText>
                 <PriceText color="warning">
-                  {!receipt ? (
-                    <Skeleton variant="text" width={150} />
-                  ) : (
-                    paymentSummary?.label
-                  )}
+                  {!receipt ? <Skeleton variant="text" width={150} /> : t(paymentMeta?.label)}
                 </PriceText>
               </PriceRow>
             </Collapse>

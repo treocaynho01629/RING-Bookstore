@@ -3,7 +3,10 @@
     "saved": "Sổ địa chỉ",
     "title": "Địa chỉ của bạn",
     "empty": "Chưa có địa chỉ nào",
-    "form.title": "Địa chỉ người nhận",
+    "recipient": "Địa chỉ người nhận",
+    "to.place": "Vận chuyển đến địa chỉ này",
+    "from": "Giao từ",
+    "to": "Giao tới",
     "add": "Thêm địa chỉ",
     "edit": "Sửa địa chỉ",
     "delete": "Xóa địa chỉ",
@@ -24,5 +27,100 @@
     "settings": "Cài đặt khác",
     "type.home": "Nhà riêng",
     "type.office": "Văn phòng"
+  },
+  "checkout": {
+    "pending": "Đang chờ thanh toán đơn hàng trước {{date}} {{time}}.",
+    "paid": "Đã thanh toán ngày {{date}} {{time}}.",
+    "pending.refund": "Đang chờ hoàn tiền",
+    "refunded": "Đã hoàn tiền ngày {{date}} {{time}}.",
+    "canceled": "Đã huỷ đơn ngày {{date}} {{time}}.",
+    "order": "Đặt hàng",
+    "review": "Kiểm tra lại sản phẩm",
+    "payment": "Chọn hình thức thanh toán",
+    "summary": "Tổng quan",
+    "shipping": "Giao hàng",
+    "note.placeholder": "Lời nhắn cho người bán...",
+    "vat.description": "Giá này đã bao gồm thuế GTGT, phí đóng gói, phí vận chuyển và các chi phí phát sinh khác",
+    "total": "Tổng số tiền ({{quantity}} sản phẩm):",
+    "cancel.label": "Huỷ toàn bộ đơn",
+    "payment.update": "Thay đổi hình thức thanh toán",
+    "payment.status": {
+      "pending": "Đang chờ thanh toán đơn hàng.",
+      "paid": "Đã thanh toán đơn hàng.",
+      "pending.refund": "Đang chờ hoàn tiền.",
+      "refunded": "Đã hoàn tiền đơn hàng.",
+      "canceled": "Đã huỷ đơn hàng."
+    },
+    "warning": {
+      "title": "Đã gỡ các sản phẩm!",
+      "message": "Một số sản phẩm đã bị gỡ khỏi trang!"
+    }
+  },
+  "review": {
+    "title": "Đánh giá của bạn",
+    "add": "Đánh giá sản phẩm",
+    "update": "Chỉnh sửa đánh giá",
+    "quality": "Chất lượng sản phẩm",
+    "thought": "Nhận xét của bạn",
+    "view": "Xem đánh giá"
+  },
+  "order": {
+    "your": "Đơn hàng của bạn",
+    "total": "Thành tiền",
+    "id": "Mã vận đơn",
+    "search": "Tìm theo Mã, Tên Shop hoặc Tên sản phẩm",
+    "pay": "Thanh toán",
+    "receive": "Nhận hàng",
+    "completed": "Hoàn tất",
+    "cancelled": "Đã huỷ đơn",
+    "pending.return": "Chờ trả hàng",
+    "pending.check": "Chờ kiểm hàng",
+    "refunded": "Hoàn tiền",
+    "buy.again": "Mua lại",
+    "note": "Ghi chú",
+    "package": "Kiện hàng",
+    "shipping.type": "Hình thức giao hàng",
+    "processing": "Đang xử lý đơn hàng...",
+    "cancel": {
+      "label": "Huỷ đơn hàng",
+      "title": "Chọn lý do huỷ đơn hàng",
+      "summary": "Đã huỷ đơn hàng vào {{date}} {{time}}."
+    },
+    "refund": {
+      "label": "Hoàn trả hàng",
+      "title": "Chọn lý do hoàn trả đơn hàng",
+      "summary": "Đã hoàn trả {{amount}} vào ví của bạn vào {{date}} {{time}}."
+    },
+    "confirm": {
+      "label": "Xác nhận đơn hàng",
+      "confirmed": "Đã nhận hàng",
+      "message": "Xác nhận đã nhận đơn hàng {{id}}?"
+    },
+    "status": {
+      "pending.payment": "Đang chờ thanh toán đơn hàng.",
+      "pending": "Đang chờ nhận hàng từ shop.",
+      "shipping": "Đang giao hàng cho đơn vị vận chuyển.",
+      "pending.return": "Đang chờ hoàn trả hàng.",
+      "pending.refund": "Đang chờ hoàn trả tiền.",
+      "completed": "Cảm ơn bạn vì đã mua hàng!",
+      "cancelled": "Đã huỷ đơn hàng vào {{date}} {{time}}.",
+      "refunded": "Đã hoàn trả {{amount}} vào ví của bạn vào {{date}} {{time}}."
+    },
+    "reason": {
+      "label": "Lý do",
+      "address": "Muốn thay đổi địa chỉ giao hàng",
+      "coupon": "Muốn nhập/thay đổi mã giảm giá",
+      "product": "Muốn đổi sản phẩm trong đơn hàng",
+      "payment": "Muốn đổi hình thức thanh toán",
+      "alternative": "Tìm thấy sản phẩm rẻ hơn ở chỗ khác",
+      "interested": "Đổi ý, không muốn mua nữa",
+      "broken": "Sản phẩm lỗi",
+      "different": "Sản phẩm khác với mô tả",
+      "used": "Sản phẩm đã qua sử dụng",
+      "fake": "Sản phẩm là giả, nhái",
+      "needed": "Không còn nhu cầu sử dụng (sẽ trả nguyên trạng sản phẩm)",
+      "other": "Nhập lý do khác",
+      "invalid": "Lý do không hợp lệ"
+    }
   }
 }

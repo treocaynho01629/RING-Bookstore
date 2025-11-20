@@ -2,6 +2,8 @@ import styled from "@emotion/styled";
 import { Link, useLocation } from "react-router";
 import { useCreateReviewMutation, useUpdateReviewMutation } from "../../features/reviews/reviewsApiSlice";
 import { forwardRef, useEffect, useState } from "react";
+import { capitalize } from "lodash-es";
+import { useTranslation } from "react-i18next";
 import { rateLabels } from "../../utils/filters";
 import Rating from "@mui/material/Rating";
 import Button from "@mui/material/Button";
@@ -74,18 +76,19 @@ const ReviewForm = ({
   pending,
   setPending,
 }) => {
+  const { t } = useTranslation();
   const location = useLocation();
 
-  //Initial value
+  // Initial value
   const [content, setContent] = useState(review?.content ?? "");
   const [rating, setRating] = useState(review?.rating ?? 5);
   const [hover, setHover] = useState(-1);
 
-  //Error
+  // Error
   const [err, setErr] = useState([]);
   const [errMsg, setErrMsg] = useState("");
 
-  //Review hook
+  // Review hook
   const [sendReview, { isLoading: reviewing }] = useCreateReviewMutation();
   const [editReview, { isLoading: editing }] = useUpdateReviewMutation();
 
@@ -94,11 +97,16 @@ const ReviewForm = ({
     setRating(review?.rating ?? 5);
   }, [review]);
 
+  /**
+   * Handle change content
+   */
   const handleChangeContent = (e) => {
     setContent(e.target.value);
   };
 
-  //Review
+  /**
+   * Handle submit review
+   */
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (reviewing || editing || pending) return;
@@ -117,7 +125,7 @@ const ReviewForm = ({
       })
         .unwrap()
         .then((data) => {
-          enqueueSnackbar("Chỉnh sửa thành công!", { variant: "success" });
+          enqueueSnackbar(capitalize(t("message.success", { action: t("update") })), { variant: "success" });
           setErr([]);
           setErrMsg("");
           handleClose();
@@ -126,17 +134,11 @@ const ReviewForm = ({
           console.error(err);
           setErr(err);
           if (!err?.status) {
-            setErrMsg("Server không phản hồi!");
-          } else if (err?.status === 400) {
-            setErrMsg(err.data.errors.content);
-          } else if (err?.status === 403) {
-            setErrMsg("Bạn không có quyền làm điều này!");
-          } else if (err?.status === 409) {
-            setErrMsg(err.data.message);
+            setErrMsg(t("error.server.not.response"));
           } else {
-            setErrMsg("Chỉnh sửa thất bại!");
+            setErrMsg(err.data.message);
           }
-          enqueueSnackbar("Chỉnh sửa thất bại!", { variant: "error" });
+          enqueueSnackbar(capitalize(t("message.error", { action: t("update") })), { variant: "error" });
         });
     } else {
       //New review
@@ -149,7 +151,7 @@ const ReviewForm = ({
       })
         .unwrap()
         .then((data) => {
-          enqueueSnackbar("Đánh giá thành công!", { variant: "success" });
+          enqueueSnackbar(capitalize(t("message.success", { action: t("review.label") })), { variant: "success" });
           setContent("");
           setErr([]);
           setErrMsg("");
@@ -161,17 +163,11 @@ const ReviewForm = ({
           console.error(err);
           setErr(err);
           if (!err?.status) {
-            setErrMsg("Server không phản hồi!");
-          } else if (err?.status === 400) {
-            setErrMsg(err.data.errors.content);
-          } else if (err?.status === 403) {
-            setErrMsg("Bạn không có quyền làm điều này!");
-          } else if (err?.status === 409) {
-            setErrMsg(err.data.message);
+            setErrMsg(t("error.server.not.response"));
           } else {
-            setErrMsg("Đánh giá thất bại!");
+            setErrMsg(err?.data?.message);
           }
-          enqueueSnackbar("Đánh giá thất bại!", { variant: "error" });
+          enqueueSnackbar(capitalize(t("message.error", { action: t("review.label") })), { variant: "error" });
         });
     }
 
@@ -194,14 +190,14 @@ const ReviewForm = ({
       <DialogTitle sx={{ display: "flex", alignItems: "center" }}>
         <Edit />
         &nbsp;
-        {review?.content ? "Chỉnh sửa đánh giá" : "Đánh giá sản phẩm"}
+        {review?.content ? t("review.update", { ns: "authenticated" }) : t("review.add", { ns: "authenticated" })}
       </DialogTitle>
       <DialogContent sx={{ pt: 0, px: { xs: 1, sm: 3 } }}>
         {username ? (
           <div>
             <form onSubmit={handleSubmitReview}>
               <RatingSelect>
-                <SuggestText>Chất lượng sản phẩm: </SuggestText>
+                <SuggestText>{t("review.quality", { ns: "authenticated" })}: </SuggestText>
                 <RateSelect>
                   <Rating
                     name="product-rating"
@@ -218,18 +214,22 @@ const ReviewForm = ({
                     emptyIcon={<StarBorder sx={{ fontSize: "inherit" }} />}
                   />
                   {rating !== null && (
-                    <SuggestText className="label">{rateLabels[hover !== -1 ? hover : rating]}</SuggestText>
+                    <SuggestText className="label">
+                      {t(rateLabels[hover !== -1 ? hover : rating], { ns: "client" })}
+                    </SuggestText>
                   )}
                 </RateSelect>
               </RatingSelect>
               <SuggestText className={`${errMsg ? "error" : ""}`}>
-                {errMsg ? "Đánh giá thất bại!" : "Nhận xét của bạn:"}
+                {errMsg
+                  ? capitalize(t("message.error", { action: t("review.label") }))
+                  : t("review.thought", { ns: "authenticated" })}
               </SuggestText>
               <TextField
                 required
                 margin="dense"
                 id="content"
-                placeholder="Nhận xét của bạn"
+                placeholder={t("review.thought", { ns: "authenticated" })}
                 fullWidth
                 multiline
                 minRows={6}
@@ -249,18 +249,18 @@ const ReviewForm = ({
             </form>
           </div>
         ) : (
-          <SuggestText>Bạn chưa đăng nhập, hãy Đăng nhập để đánh giá</SuggestText>
+          <SuggestText>{capitalize(t("required.login", { action: t("review.label") }))}</SuggestText>
         )}
       </DialogContent>
       <DialogActions>
         <Button variant="outlined" color="error" size="large" onClick={handleClose} startIcon={<Close />}>
-          Huỷ
+          {t("cancel")}
         </Button>
         {username ? (
           err?.data?.code === 208 ? (
             <Link to={"/profile"} title="Xem đánh giá">
               <Button variant="contained" color="primary" size="large" sx={{ marginY: "10px" }}>
-                Xem đánh giá
+                {t("review.view", { ns: "authenticated" })}
               </Button>
             </Link>
           ) : err?.data?.code === 204 ? (
@@ -273,17 +273,17 @@ const ReviewForm = ({
                 scrollTo(0, 0);
               }}
             >
-              Mua ngay
+              {t("buy.now")}
             </Button>
           ) : (
             <Button variant="contained" color="primary" size="large" onClick={handleSubmitReview}>
-              {review?.content ? "Sửa đánh giá" : "Gửi đánh giá"}
+              {review?.content ? t("review.update", { ns: "authenticated" }) : t("review.add", { ns: "authenticated" })}
             </Button>
           )
         ) : (
-          <Link to={"/auth/login"} state={{ from: location }} title="Đăng nhập">
+          <Link to={"/auth/login"} state={{ from: location }} title={t("login")}>
             <Button variant="contained" color="primary" size="large" sx={{ marginY: "10px" }}>
-              Đăng nhập ngay
+              {t("login.now")}
             </Button>
           </Link>
         )}

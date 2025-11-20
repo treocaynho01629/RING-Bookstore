@@ -213,6 +213,10 @@ function ItemRow({
   const isDisabled = !product || product.amount < 1;
   const [quantity, setQuantity] = useState(product.quantity ?? MIN_VALUE);
 
+  /**
+   * Change input quantity
+   * @param {Event} e
+   */
   const onChangeQuantity = (e) => {
     let newValue = e.target.value;
     if (isNaN(newValue)) newValue = "";
@@ -225,6 +229,10 @@ function ItemRow({
     setQuantity(newValue);
   };
 
+  /**
+   * Blur quantity
+   * @param {Event} e
+   */
   const onBlurQuantity = (e) => {
     let newValue = e.target.value;
     if (newValue == "" || isNaN(Number(newValue)) || newValue < MIN_VALUE) {
@@ -235,6 +243,9 @@ function ItemRow({
     }
   };
 
+  /**
+   * Decrease quantity
+   */
   const onDecreaseQuantity = () => {
     if (increaseAmount) {
       if (quantity - 1 < MIN_VALUE) {
@@ -245,10 +256,16 @@ function ItemRow({
     }
   };
 
+  /**
+   * Increase quantity
+   */
   const onIncreaseQuantity = () => {
     if (increaseAmount) increaseAmount(product.id);
   };
 
+  /**
+   * Select item
+   */
   const onSelect = () => {
     if (handleSelect) handleSelect(product.id);
   };
@@ -283,7 +300,7 @@ function ItemRow({
           <Link to={`/product/${product.slug}`}>
             <StyledLazyImage
               src={getImageSrc(product?.srcSet, 90)}
-              alt={`${product.title} Cart item`}
+              alt={`${t("order.item")} ${product.title}`}
               placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
             />
           </Link>
@@ -350,7 +367,7 @@ function ItemRow({
           handleIncrease={onIncreaseQuantity}
         />
         <AmountLeft>
-          {product.amount > 0 ? t("cart.items.left", { quantity: product.amount, ns: "client" }) : t("cart.items.out")}
+          {product.amount > 0 ? t("cart.items.left", { quantity: product.amount }) : t("cart.items.out")}
         </AmountLeft>
       </StyledTableCell>
       <StyledTableCell align="right" sx={{ display: { xs: "none", md: "table-cell" }, width: "130px" }}>
@@ -400,14 +417,13 @@ const CartDetailRow = ({
             ? // Coupon is usable
               t("cart.coupon.saved", {
                 discount: currencyFormat.format(coupon?.discount),
-                ns: "client",
               })
-            : t("cart.coupon.criteria", { criteria: coupon?.summary, ns: "client" }) // Coupon is not usable
+            : t("cart.coupon.criteria", { criteria: coupon?.summary }) // Coupon is not usable
           : t("cart.coupon.change") // Group not selected
         : // Discount not applied
           coupon?.isUsed
           ? t("cart.coupon.change") // Coupon is used
-          : t("cart.coupon.criteria", { criteria: coupon?.summary, ns: "client" }) // Coupon is not usable
+          : t("cart.coupon.criteria", { criteria: coupon?.summary }) // Coupon is not usable
       : t("cart.coupon.add"); // No coupon
   };
 

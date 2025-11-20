@@ -49,8 +49,10 @@
   "loading": "Đang tải...",
   "pending": "Đang gửi yêu cầu...",
   "select.all": "Chọn tất cả",
+  "all": "Tất cả",
   "price": "Đơn giá",
   "quantity": "Số lượng",
+  "quantity.short": "SL",
   "total": "Tổng",
   "delete": "Xoá",
   "partner": "Đối tác",
@@ -60,12 +62,16 @@
   "close": "Đóng",
   "cancel": "Huỷ",
   "none": "Không",
+  "continue": "Tiếp tục",
   "not.yet": "Chưa có",
   "edit": "Thay đổi",
+  "update": "Chỉnh sửa",
   "select": "Chọn",
   "image": "Ảnh",
   "show.more": "Xem thêm",
   "unselect": "Bỏ chọn",
+  "report": "Báo cáo",
+  "other": "Khác",
   "remove": "Gỡ",
   "save": "Lưu",
   "scroll": "Về đầu trang",
@@ -113,11 +119,25 @@
   },
   "order": {
     "label": "Đơn hàng",
-    "status": {
+    "receipt": "Đơn hàng",
+    "detail": "Chi tiết đơn hàng",
+    "checkout": "Chi tiết thanh toán",
+    "item": "Đơn hàng sản phẩm",
+    "tabs": {
       "pending": "Đang xử lý",
       "shipping": "Đang vận chuyển",
       "completed": "Đã giao",
       "refunded": "Đổi trả"
+    },
+    "status": {
+      "completed": "Đã giao",
+      "pending": "Đang chờ hàng",
+      "pending.payment": "Chờ thanh toán",
+      "pending.return": "Chờ trả hàng",
+      "pending.refund": "Chờ hoàn tiền",
+      "shipping": "Đang giao",
+      "refunded": "Đã hoàn tiền",
+      "canceled": "Đã huỷ"
     }
   },
   "profile": {
@@ -135,6 +155,7 @@
     "update": "Cập nhật hồ sơ"
   },
   "payment": {
+    "label": "Hình thức thanh toán",
     "cash": {
       "label": "Thanh toán bằng tiền mặt",
       "summary": "Tiền mặt: Phí thu hộ: 0đ. Ưu đãi về phí vận chuyển (nếu có) áp dụng cả với phí thu hộ."
@@ -145,22 +166,19 @@
       "summary": "Quét Mã QR từ ví điện tử Online hoặc chuyển khoản theo hướng dẫn để thanh toán."
     },
     "status": {
-      "pending": {
-        "label": "Chờ thanh toán"
-      },
-      "paid": {
-        "label": "Đã thanh toán"
-      },
-      "canceled": {
-        "label": "Đã huỷ"
-      },
-      "pending_refund": {
-        "label": "Chờ hoàn tiền"
-      },
-      "refunded": {
-        "label": "Đã hoàn tiền"
-      }
+      "pending": "Chờ thanh toán",
+      "paid": "Đã thanh toán",
+      "canceled": "Đã huỷ",
+      "pending.refund": "Chờ hoàn tiền",
+      "refunded": "Đã hoàn tiền"
     }
+  },
+  "shipping": {
+    "label": "Vận chuyển",
+    "estimate": "{{date}} ngày giao hàng",
+    "economy": "Tiết kiệm",
+    "standard": "Tiêu chuẩn",
+    "express": "Hoả tốc"
   },
   "password.change": {
     "label": "Đổi mật khẩu",
@@ -171,7 +189,9 @@
   },
   "message": {
     "success": "{{action}} thành công!",
-    "error": "{{action}} thất bại!"
+    "error": "{{action}} thất bại!",
+    "empty": "Chưa có {{item}} nào!",
+    "out": "Không còn {{item}} nào!"
   },
   "error": {
     "server.not.response": "Server không phản hồi",

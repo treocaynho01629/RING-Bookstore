@@ -48,6 +48,22 @@
     "add": "Enter coupon code",
     "not.found": "No coupons found"
   },
+  "review": {
+    "label": "Reviews",
+    "quality": {
+      "bad": "Very bad",
+      "poor": "Bad",
+      "average": "Average",
+      "good": "Good",
+      "excellent": "Very good"
+    }
+  },
+  "product": {
+    "out": "Product is out of stock",
+    "add": "Add to cart",
+    "buy.now": "Buy now",
+    "view": "View product"
+  },
   "footer": {
     "address": "Address: 162, Ward 2, District 9, Ho Chi Minh City, Vietnam",
     "support": {
@@ -98,5 +114,6 @@
   "required.login": "Please login to {{action}}",
   "required.select": "Please select any items in cart",
   "shop.explore": "Explore",
-  "help.center": "Help center"
+  "help.center": "Help center",
+  "login.now": "Login now"
 }

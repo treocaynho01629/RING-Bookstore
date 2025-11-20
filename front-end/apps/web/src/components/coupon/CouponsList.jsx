@@ -16,6 +16,7 @@ import { getCouponCriteria, getCouponType } from "@ring/shared/enums/coupon";
 import { useGetCouponsQuery } from "../../features/coupons/couponsApiSlice";
 import { trackWindowScroll } from "react-lazy-load-image-component";
 import { CouponType } from "@ring/shared/models/couponType";
+import { capitalize } from "lodash-es";
 import { useTranslation } from "react-i18next";
 import CircularProgress from "@mui/material/CircularProgress";
 import DialogContent from "@mui/material/DialogContent";
@@ -53,7 +54,7 @@ Object.values(CouponType).forEach((item) => {
   couponItems.push({
     label: getCouponType(item).label,
     filter: {
-      types: [item.value],
+      types: [item],
     },
   });
 });
@@ -244,14 +245,14 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) =>
       <MessageContainer>
         <Message>
           <StyledEmptyIcon />
-          Không có mã giảm giá nào
+          {capitalize(t("message.empty", { item: t("coupon.label") }))}
         </Message>
       </MessageContainer>
     );
   } else if (isError) {
     couponsContent = (
       <MessageContainer>
-        <Message color="error">{error?.error || "Đã xảy ra lỗi"}</Message>
+        <Message color="error">{error?.error || t("error.general")}</Message>
       </MessageContainer>
     );
   }
@@ -263,11 +264,11 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) =>
           <KeyboardArrowLeft />
         </a>
         <Loyalty />
-        &nbsp;Mã giảm giá
+        &nbsp;{t("coupon.label")}
       </StyledDialogTitle>
       <ToggleGroupContainer>
         <CustomTabs value={tab} onChange={handleChangeTab} variant="scrollable" scrollButtons="auto">
-          <CustomTab label="Tất cả" value="" />
+          <CustomTab label={t("all")} value="" />
           {couponItems.map((tab, index) => (
             <CustomTab key={`tab-${index}`} label={t(tab?.label)} value={index} />
           ))}
@@ -279,7 +280,7 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) =>
       >
         <form ref={mobileScrollRef} onSubmit={handleChangeCode}>
           <TextField
-            placeholder="Nhập mã giảm giá"
+            placeholder={t("coupon.add")}
             autoComplete="code"
             id="code"
             size="small"
@@ -305,7 +306,7 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) =>
             </LoadContainer>
           )}
           {data?.ids?.length > 0 && data?.ids?.length == data?.totalElements && (
-            <Message color="warning">Không còn mã giảm giá nào!</Message>
+            <Message color="warning">{capitalize(t("message.out", { item: t("coupon.label") }))}</Message>
           )}
         </MainContainer>
       </DialogContent>

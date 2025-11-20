@@ -10,10 +10,13 @@ import {
   PlaceholderContainer,
 } from "../custom/ProfileComponents";
 import { useSearchParams } from "react-router";
+import { capitalize } from "lodash-es";
 import { booksApiSlice } from "../../features/books/booksApiSlice";
 import { CustomTab, CustomTabs } from "../custom/CustomTabs";
 import { debounce } from "lodash-es";
 import { Message } from "@ring/ui/Components";
+import { useTranslation } from "react-i18next";
+import { OrderStatus } from "@ring/shared/models/orderStatus";
 import { getOrderStatus } from "@ring/shared/enums/order";
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
@@ -27,21 +30,25 @@ import OrderItem from "./OrderItem";
 
 const CancelAndRefundDetailForm = lazy(() => import("./CancelAndRefundDetailForm"));
 
-const OrderStatus = getOrderStatus();
 const defaultSize = 5;
 
 const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }) => {
   const { addProduct } = useCart();
+  const { t } = useTranslation();
+
   const scrollRef = useRef(null);
   const mobileScrollRef = useRef(null);
   const inputRef = useRef(null);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
+
   const [contextOrder, setContextOrder] = useState(null);
   const [filters, setFilters] = useState({
     status: searchParams.get("status") ?? "",
     keyword: searchParams.get("k") ?? "",
   });
+
   const [pagination, setPagination] = useState({
     number: 0,
     size: defaultSize,
@@ -49,7 +56,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
     isMore: true,
   });
 
-  //Fetch orders
+  // Fetch orders
   const { data, isLoading, isFetching, isSuccess, isError, error } = useGetOrdersByUserQuery({
     status: filters.status,
     keyword: filters.keyword,
@@ -76,6 +83,9 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
     }
   }, [data]);
 
+  /**
+   * Scroll to top of the list
+   */
   const scrollToTop = useCallback(() => {
     if (mobileMode) {
       mobileScrollRef?.current?.scrollIntoView({
@@ -90,7 +100,9 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
     }
   }, []);
 
-  //Change tab
+  /**
+   * Change order status tab
+   */
   const handleChangeStatus = (e, newValue) => {
     setFilters((prev) => ({ ...prev, status: newValue, keyword: "" }));
     newValue === "" ? searchParams.delete("status") : searchParams.set("status", newValue);
@@ -99,6 +111,9 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
     handleResetPage();
   };
 
+  /**
+   * Change order keyword
+   */
   const handleChangeKeyword = (e) => {
     e.preventDefault();
     let newValue = inputRef.current.value;
@@ -108,12 +123,17 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
     handleResetPage();
   };
 
+  /**
+   * Reset page to 0
+   */
   const handleResetPage = () => {
     setPagination((prev) => ({ ...prev, number: 0 }));
     scrollToTop();
   };
 
-  //Rebuy
+  /**
+   * Rebuy product
+   */
   const handleAddToCart = async (detail) => {
     if (fetching || pending) return;
     setPending(true);
@@ -121,7 +141,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
     const { enqueueSnackbar } = await import("notistack");
 
     const ids = detail?.items?.map((item) => item.bookId);
-    getBought(ids) //Fetch books with new info
+    getBought(ids) // Fetch books with new info
       .unwrap()
       .then((books) => {
         const { ids, entities } = books;
@@ -129,33 +149,42 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
         ids.forEach((id) => {
           const book = entities[id];
           if (book.amount > 0) {
-            //Check for stock
+            // Check for stock
             addProduct(book, 1);
           } else {
-            enqueueSnackbar("Sản phẩm đã hết hàng!", { variant: "error" });
+            enqueueSnackbar(t("product.out"), { variant: "error" });
           }
         });
         setPending(false);
       })
       .catch((rejected) => {
         console.error(rejected);
-        enqueueSnackbar("Mua lại sản phẩm thất bại!", { variant: "error" });
+        enqueueSnackbar(t("message.error", { action: t("product.add", { ns: "authenticated" }) }), {
+          variant: "error",
+        });
         setPending(false);
       });
   };
 
-  // Cancel
+  /**
+   * Cancel order
+   */
   const handleCancelOrder = (order) => {
     setContextOrder(order);
     setOpen(true);
   };
 
+  /**
+   * Close cancel and refund detail form
+   */
   const handleCloseForm = () => {
     setContextOrder(false);
     setOpen(false);
   };
 
-  // Show more
+  /**
+   * Show more orders
+   */
   const handleShowMore = () => {
     const currentPage = data?.page;
     if (isFetching || typeof currentPage?.number !== "number" || currentPage?.number < pagination?.number) return;
@@ -163,16 +192,25 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
     if (nextPage < currentPage?.totalPages) setPagination((prev) => ({ ...prev, number: nextPage }));
   };
 
+  /**
+   * Handle window scroll
+   */
   const handleWindowScroll = (e) => {
     const trigger = document.body.scrollHeight - 700 < window.scrollY + window.innerHeight;
     if (trigger) handleShowMore();
   };
 
+  /**
+   * Handle scroll
+   */
   const handleScroll = (e) => {
     const trigger = e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
     if (trigger) handleShowMore();
   };
 
+  /**
+   * Handle window scroll listener
+   */
   const windowScrollListener = useCallback(debounce(handleWindowScroll, 500), [data]);
   const scrollListener = useCallback(debounce(handleScroll, 500), [data]);
 
@@ -218,14 +256,14 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
       <MessageContainer>
         <Message>
           <StyledEmptyIcon />
-          Chưa có đơn hàng nào
+          {capitalize(t("message.empty", { item: t("order.label") }))}
         </Message>
       </MessageContainer>
     );
   } else if (isError) {
     ordersContent = (
       <MessageContainer>
-        <Message color="error">{error?.error || "Đã xảy ra lỗi"}</Message>
+        <Message color="error">{error?.error || t("error.general")}</Message>
       </MessageContainer>
     );
   }
@@ -237,14 +275,15 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
           <KeyboardArrowLeft />
         </a>
         <Receipt />
-        &nbsp;Đơn hàng của bạn
+        &nbsp;{t("order.your", { ns: "authenticated" })}
       </StyledDialogTitle>
       <ToggleGroupContainer>
         <CustomTabs value={filters.status} onChange={handleChangeStatus} variant="scrollable" scrollButtons="auto">
-          <CustomTab label="Tất cả" value="" />
-          {Object.values(OrderStatus).map((tab, index) => (
-            <CustomTab key={`tab-${index}`} label={tab.label} value={tab.value} />
-          ))}
+          <CustomTab label={t("all")} value="" />
+          {Object.values(OrderStatus).map((status, index) => {
+            const itemMeta = getOrderStatus(status);
+            return <CustomTab key={`tab-${index}`} label={t(itemMeta?.label)} value={status} />;
+          })}
         </CustomTabs>
       </ToggleGroupContainer>
       <DialogContent
@@ -253,7 +292,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
       >
         <form ref={mobileScrollRef} onSubmit={handleChangeKeyword}>
           <TextField
-            placeholder="Tìm theo Mã, Tên Shop hoặc Tên sản phẩm"
+            placeholder={t("order.search", { ns: "authenticated" })}
             autoComplete="order"
             id="order"
             size="small"
@@ -277,7 +316,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
             </LoadContainer>
           )}
           {data?.ids?.length > 0 && data?.ids?.length == data?.totalElements && (
-            <Message color="warning">Không còn đơn hàng nào!</Message>
+            <Message color="warning">{capitalize(t("message.out", { item: t("order.label") }))}</Message>
           )}
         </MainContainer>
       </DialogContent>

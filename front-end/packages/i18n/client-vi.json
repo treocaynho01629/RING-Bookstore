@@ -48,6 +48,22 @@
     "add": "Nhập mã giảm giá",
     "not.found": "Hiện không có khuyến mãi"
   },
+  "review": {
+    "label": "Đánh giá",
+    "quality": {
+      "bad": "Cực tệ",
+      "poor": "Tệ",
+      "average": "Ổn",
+      "good": "Hài lòng",
+      "excellent": "Cực hài lòng"
+    }
+  },
+  "product": {
+    "out": "Sản phẩm đã hết hàng",
+    "add": "Thêm vào giỏ",
+    "buy.now": "Mua ngay",
+    "view": "Đi đến sản phẩm"
+  },
   "footer": {
     "address": "Địa chỉ: Toà nhà 162, Khu phố 2, Phường 9, TP. Hồ Chí Minh, Việt Nam",
     "support": {
@@ -98,5 +114,6 @@
   "shop.explore": "Duyệt cửa hàng",
   "required.login": "Vui lòng đăng nhập để {{action}}",
   "required.select": "Vui lòng chọn sản phẩm trong giỏ",
-  "help.center": "Trung tâm hỗ trợ"
+  "help.center": "Trung tâm hỗ trợ",
+  "login.now": "Đăng nhập ngay"
 }

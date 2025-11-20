@@ -448,14 +448,14 @@ const AutocompleteComponent = ({
                                 <ListLink to={`/shop?q=${option.value}`}>
                                   <ItemTitle>
                                     <Storefront color="success" />
-                                    {capitalize(t("search.for", { ns: "client", value: t("store") }))} "{option.value}"
+                                    {capitalize(t("search.for", { value: t("store") }))} "{option.value}"
                                   </ItemTitle>
                                 </ListLink>
                               ) : option?.group == "STORE" ? (
                                 <ListLink to={`/store?q=${option.value}`}>
                                   <ItemTitle>
                                     <CategoryOutlined color="success" />
-                                    {capitalize(t("search.for", { ns: "client", value: t("items") }))} "{option.value}"
+                                    {capitalize(t("search.for", { value: t("items") }))} "{option.value}"
                                   </ItemTitle>
                                 </ListLink>
                               ) : option?.group == "HISTORY" ? (
@@ -466,7 +466,7 @@ const AutocompleteComponent = ({
                                   </ItemTitle>
                                   <StyledIconButton
                                     onClick={(e) => handleRemoveKeyword(e, option.value)}
-                                    aria-label={t("search.remove", { ns: "client", value: option.value })}
+                                    aria-label={t("search.remove", { value: option.value })}
                                   >
                                     <Close />
                                   </StyledIconButton>
@@ -526,14 +526,14 @@ const AutocompleteComponent = ({
                         <ListLink className="alt" to={`/shop?q=${option.value}`}>
                           <ItemTitle>
                             <Storefront color="primary" />
-                            {capitalize(t("search.for", { ns: "client", value: t("store") }))} "{option.value}"
+                            {capitalize(t("search.for", { value: t("store") }))} "{option.value}"
                           </ItemTitle>
                         </ListLink>
                       ) : option?.group == "STORE" ? (
                         <ListLink className="alt" to={`/store?q=${option.value}`}>
                           <ItemTitle>
                             <CategoryOutlined color="success" />
-                            {capitalize(t("search.for", { ns: "client", value: t("items") }))} "{option.value}"
+                            {capitalize(t("search.for", { value: t("items") }))} "{option.value}"
                           </ItemTitle>
                         </ListLink>
                       ) : option?.group == "HISTORY" ? (
@@ -544,7 +544,7 @@ const AutocompleteComponent = ({
                           </ItemTitle>
                           <StyledIconButton
                             onClick={(e) => handleRemoveKeyword(e, option.value)}
-                            aria-label={t("search.remove", { ns: "client", value: option.value })}
+                            aria-label={t("search.remove", { value: option.value })}
                           >
                             <Close />
                           </StyledIconButton>

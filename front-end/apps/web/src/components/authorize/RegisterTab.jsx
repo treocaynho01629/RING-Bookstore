@@ -119,12 +119,13 @@ const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaTo
       })
       .catch((err) => {
         console.error(err);
+        enqueueSnackbar(t("message.error", { action: t("signup") }), { variant: "error" });
         setErr(err);
         if (!err?.status) {
           setErrMsg(t("error.server.not.response"));
         } else {
           setErrMsg(err?.data?.message);
-          if (err?.status === 409) setChallenge(true);
+          if (err?.status === 412) setChallenge(true);
         }
         errRef.current.focus();
         setPending(false);

@@ -49,7 +49,7 @@ const PriceDisplay = ({ displayInfo, loggedIn }) => {
               <CheckoutText color="warning">
                 &nbsp;
                 <br />
-                {t("required.login", { ns: "client", action: t("cart.coupon.apply") })}
+                {t("required.login", { action: t("cart.coupon.apply") })}
               </CheckoutText>
             </CheckoutRow>
           </Collapse>

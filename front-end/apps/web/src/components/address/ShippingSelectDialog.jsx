@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { currencyFormat } from "@ring/shared/utils/convert";
+import { ShippingType } from "@ring/shared/models/shippingType";
 import { getShippingType } from "@ring/shared/enums/shipping";
 import { iconList } from "@ring/shared/utils/icon";
 import { Suspense, useEffect, useState, forwardRef } from "react";
@@ -85,7 +86,6 @@ const Estimate = styled.span`
 `;
 //#endregion
 
-const ShippingType = getShippingType();
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
@@ -98,12 +98,16 @@ const ShippingSelectDialog = ({ open, handleClose, selectedShipping, shippingFee
     setValue(selectedShipping);
   }, [selectedShipping]);
 
+  /**
+   * Handle change shipping type
+   * @param {Event} e
+   */
   const handleChange = (e) => {
     setValue(e.target.value);
   };
 
-  const selectedShippingSummary = ShippingType[selectedShipping];
-  const baseShippingFee = shippingFee / selectedShippingSummary?.multiplier;
+  const shippingMeta = getShippingType(selectedShipping);
+  const baseShippingFee = shippingFee / shippingMeta?.multiplier;
 
   return (
     <Dialog

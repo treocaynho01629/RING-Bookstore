@@ -53,9 +53,13 @@ const CheckoutDialog = ({
     shopCoupon,
   };
 
-  // Prevent overlap
+  // Prevent overlap with scroll to top button
   useOffset(overlapRef);
 
+  /**
+   * Handle toggle drawer
+   * @param {boolean} newOpen
+   */
   const toggleDrawer = (newOpen) => {
     setOpen(newOpen);
   };
@@ -81,11 +85,9 @@ const CheckoutDialog = ({
               />
             </CheckoutPrice>
             {!calculating && displayInfo.totalDiscount > 0 && (
-              <SavePrice>
-                {t("cart.saved", { ns: "client", discount: currencyFormat.format(displayInfo.totalDiscount) })}
-              </SavePrice>
+              <SavePrice>{t("cart.saved", { discount: currencyFormat.format(displayInfo.totalDiscount) })}</SavePrice>
             )}
-            <SubText>{t("cart.vat.included")}</SubText>
+            <SubText>({t("cart.vat.included")})</SubText>
           </PriceContainer>
         )}
       </CheckoutRow>
@@ -94,7 +96,7 @@ const CheckoutDialog = ({
 
   const couponText =
     coupon && discount && numSelected > 0
-      ? t("cart.coupon.saved", { ns: "client", discount: currencyFormat.format(discount) })
+      ? t("cart.coupon.saved", { discount: currencyFormat.format(discount) })
       : !coupon
         ? t("cart.coupon.add")
         : t("cart.coupon.change");
@@ -137,7 +139,6 @@ const CheckoutDialog = ({
                     {!calculating && displayInfo.totalDiscount > 0 && (
                       <SavePrice>
                         {t("cart.saved", {
-                          ns: "client",
                           discount: currencyFormat.format(displayInfo.totalDiscount),
                         })}
                       </SavePrice>
@@ -179,7 +180,7 @@ const CheckoutDialog = ({
             <CheckoutStack>
               <CheckoutPriceContainer onClick={() => toggleDrawer(true)}>
                 <PriceContainer className="row">
-                  <CheckoutText>{t("cart.total", { ns: "client", quantity: numSelected })}&emsp;</CheckoutText>
+                  <CheckoutText>{t("cart.total", { quantity: numSelected })}&emsp;</CheckoutText>
                   {numSelected > 0 && <SubText>{t("cart.vat.included")}</SubText>}
                 </PriceContainer>
                 <PriceContainer className="row">
@@ -197,7 +198,6 @@ const CheckoutDialog = ({
                   {!calculating && displayInfo.totalDiscount > 0 && (
                     <SavePrice>
                       {t("cart.saved", {
-                        ns: "client",
                         discount: currencyFormat.format(displayInfo.totalDiscount),
                       })}
                     </SavePrice>
@@ -260,7 +260,7 @@ const CheckoutDialog = ({
               >
                 {loggedIn
                   ? `${t("cart.checkout")} (${numSelected})`
-                  : capitalize(t("required.login", { ns: "client", action: t("cart.checkout") }))}
+                  : capitalize(t("required.login", { action: t("cart.checkout") }))}
               </CheckoutButton>
             </CheckoutBox>
           </>

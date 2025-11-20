@@ -48,10 +48,13 @@
   "loading": "Loading...",
   "pending": "Pending request...",
   "select.all": "Select all",
+  "all": "All",
   "price": "Price",
   "quantity": "Quantity",
+  "quantity.short": "QTY",
   "total": "Total",
   "delete": "Delete",
+  "other": "Other",
   "unknown": "Unknown",
   "partner": "Partner",
   "back": "Back",
@@ -60,11 +63,14 @@
   "close": "Close",
   "cancel": "Cancel",
   "none": "None",
+  "continue": "Continue",
   "not.yet": "None",
   "edit": "Edit",
+  "update": "Update",
   "select": "Select",
   "show.more": "Show more",
   "unselect": "Unselect",
+  "report": "Report",
   "remove": "Remove",
   "save": "Save",
   "scroll": "Scroll back to top",
@@ -123,17 +129,32 @@
   },
   "order": {
     "label": "Orders",
-    "status": {
+    "receipt": "Receipt",
+    "detail": "Order detail",
+    "checkout": "Checkout detail",
+    "item": "Order item",
+    "tabs": {
       "pending": "Pending",
       "shipping": "Shipping",
       "completed": "Completed",
       "refunded": "Refunded"
+    },
+    "status": {
+      "pending": "Pending",
+      "pending.payment": "Pending payment",
+      "pending.return": "Pending return",
+      "pending.refund": "Pending refund",
+      "shipping": "Shipping",
+      "completed": "Completed",
+      "refunded": "Refunded",
+      "canceled": "Canceled"
     }
   },
   "review": {
     "label": "Reviews"
   },
   "payment": {
+    "label": "Payment method",
     "cash": {
       "label": "Cash on delivery",
       "summary": "Cash on delivery. Shipping fee: 0đ. Discount on shipping fee (if any) applies to cash on delivery."
@@ -144,22 +165,19 @@
       "summary": "Scan the QR code from the online wallet or bank transfer to pay."
     },
     "status": {
-      "pending": {
-        "label": "Pending payment"
-      },
-      "paid": {
-        "label": "Paid"
-      },
-      "canceled": {
-        "label": "Canceled"
-      },
-      "pending_refund": {
-        "label": "Pending refund"
-      },
-      "refunded": {
-        "label": "Refunded"
-      }
+      "pending": "Pending payment",
+      "paid": "Paid",
+      "canceled": "Canceled",
+      "pending.refund": "Pending refund",
+      "refunded": "Refunded"
     }
+  },
+  "shipping": {
+    "label": "Delivery",
+    "estimate": "{{date}} delivery days",
+    "economy": "Economy",
+    "standard": "Standard",
+    "express": "Express"
   },
   "password.change": {
     "label": "Change password",
@@ -170,7 +188,9 @@
   },
   "message": {
     "success": "{{action}} successfully!",
-    "error": "{{action}} failed!"
+    "error": "{{action}} failed!",
+    "empty": "No {{item}} found!",
+    "out": "No {{item}} left!"
   },
   "error": {
     "server.not.response": "Server did not respond",

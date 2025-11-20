@@ -233,7 +233,7 @@ const AddressForm = ({
     <>
       <DialogTitle sx={{ display: "flex", alignItems: "center" }}>
         <LocationOnIcon />
-        &nbsp;{t("address.form.title", { ns: "authenticated" })}
+        &nbsp;{t("address.recipient", { ns: "authenticated" })}
       </DialogTitle>
       <DialogContent>
         <form style={{ paddingTop: 10 }} onSubmit={handleSubmit}>

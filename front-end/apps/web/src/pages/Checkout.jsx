@@ -5,9 +5,9 @@ import { useGetMyAddressQuery } from "../features/addresses/addressesApiSlice";
 import { useCalculateMutation, useCheckoutMutation } from "../features/orders/ordersApiSlice";
 import { isEqual } from "lodash-es";
 import { PHONE_REGEX } from "@ring/shared/utils/regex";
-import { getShippingType } from "@ring/shared/enums/shipping";
+import { ShippingType } from "@ring/shared/models/shippingType";
 import { PaymentType } from "@ring/shared/models/paymentType";
-import useTitle from "@ring/shared/useTitle";
+import { useTranslation } from "react-i18next";
 import useDeepEffect from "@ring/shared/useDeepEffect";
 import useAuth from "../hooks/useAuth";
 import useReCaptcha from "@ring/auth/useReCaptcha";
@@ -123,17 +123,19 @@ const StyledStepContent = styled(StepContent)(({ theme }) => ({
 }));
 //#endregion
 
-const ShippingType = getShippingType();
+const MAX_STEPS = 3;
 
 const Checkout = () => {
   //#region construct
+  const { username } = useAuth();
+  const { t } = useTranslation();
+
   const scrollRef = useRef(null);
   const prevPayload = useRef();
-  const { username } = useAuth();
+
   const [activeStep, setActiveStep] = useState(0);
   const [payment, setPayment] = useState(Object.keys(PaymentType)[0]);
   const [pending, setPending] = useState(false);
-  const maxSteps = 3;
 
   // Cart
   const { cartProducts, removeProducts } = useCart();
@@ -205,9 +207,9 @@ const Checkout = () => {
     hideBadge();
   }, [reCaptchaLoaded]); // Hide badge cuz it's in the way of stepper
 
-  // Set title
-  //useTitle("Thanh toán");
-
+  /**
+   * Handle cart change
+   */
   const handleCartChange = () => {
     if (selected?.length > 0 && cartProducts.length > 0) {
       const checkoutCart = getCheckoutCart(); // Include address, shipping method, payment method ...
@@ -225,7 +227,10 @@ const Checkout = () => {
     setErrMsg("");
   };
 
-  // Filter out unusable coupons
+  /**
+   * Get checkout cart
+   * @returns {Object}
+   */
   const getCheckoutCart = () => {
     if (selected?.length > 0 && cartProducts.length > 0) {
       // Reduce cart
@@ -288,7 +293,10 @@ const Checkout = () => {
     [cartProducts]
   );
 
-  // Calculate server side
+  /**
+   * Handle calculate cart on server side
+   * @param {Object} cart
+   */
   const handleCalculate = useCallback(
     async (cart) => {
       if (isLoading || address == null || cart == null || cart.length == 0 || isEqual(prevPayload.current, cart))
@@ -305,7 +313,7 @@ const Checkout = () => {
           console.error(err);
           setErr(err);
           if (!err?.status) {
-            setErrMsg("Server không phản hồi");
+            setErrMsg(t("error.server.not.response"));
           } else {
             setErrMsg(err?.data?.message);
           }
@@ -314,12 +322,18 @@ const Checkout = () => {
     [addressInfo]
   );
 
-  // Sync checkout cart between client and server
+  /**
+   * Sync checkout cart between client and server
+   * @param {Object} cart
+   */
   const handleSyncCart = (cart) => {
     syncCart(cart, setDiscount, setShopDiscount, coupon, setCoupon, shopCoupon, setShopCoupon, handleOpenWarning);
   };
 
-  // Separate by shop
+  /**
+   * Separate cart by shop
+   * @returns {Object}
+   */
   const reduceCart = () => {
     let selectedCart = cartProducts.filter((product) => selected?.includes(product.id));
     let resultCart = selectedCart.reduce((result, item) => {
@@ -346,23 +360,45 @@ const Checkout = () => {
     total: calculating || !calculated ? estimated?.total : calculated?.total - calculated?.totalDiscount,
   };
 
+  /**
+   * Scroll to top
+   */
   const scrollToTop = useCallback(() => {
     scrollRef?.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
+
+  /**
+   * Handle next step
+   */
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
+
+  /**
+   * Handle back to first step
+   */
   const backFirstStep = () => {
     setActiveStep(0);
   };
 
+  /**
+   * Handle open address dialog
+   */
   const handleOpenDialog = () => {
     setOpenAddress(true);
   };
+
+  /**
+   * Handle close address dialog
+   */
   const handleCloseDialog = () => {
     setOpenAddress(false);
   };
 
+  /**
+   * Handle open coupon dialog
+   * @param {string} shopId
+   */
   const handleOpenCouponDialog = (shopId) => {
     setOpenCoupon(true);
     setContextShop(shopId);
@@ -371,6 +407,10 @@ const Checkout = () => {
     );
     setContextCoupon(shopId ? shopCoupon[shopId] : coupon);
   };
+
+  /**
+   * Handle close coupon dialog
+   */
   const handleCloseCouponDialog = () => {
     setOpenCoupon(false);
     setContextShop(null);
@@ -378,15 +418,28 @@ const Checkout = () => {
     setContextCoupon(null);
   };
 
+  /**
+   * Handle open shipping dialog
+   * @param {string} shopId
+   */
   const handleOpenShippingDialog = (shopId) => {
     setOpenShipping(true);
     setContextShop(shopId);
   };
+
+  /**
+   * Handle close shipping dialog
+   */
   const handleCloseShippingDialog = () => {
     setOpenShipping(false);
     setContextShop(null);
   };
 
+  /**
+   * Handle change coupon
+   * @param {Object} coupon
+   * @param {string} shopId
+   */
   const handleChangeCoupon = (coupon, shopId) => {
     if (shopId) {
       setShopCoupon((prev) => ({ ...prev, [shopId]: coupon }));
@@ -395,18 +448,33 @@ const Checkout = () => {
     }
   };
 
+  /**
+   * Handle change shipping
+   * @param {string} value
+   */
   const handleChangeShipping = (value) => {
     setShopShipping((prev) => ({ ...prev, [contextShop]: value }));
     setOpenShipping(false);
   };
 
+  /**
+   * Handle change payment method
+   * @param {Event} e
+   */
   const handleChangeMethod = (e) => {
     setPayment(e.target.value);
   };
 
+  /**
+   * Handle open warning dialog
+   */
   const handleOpenWarning = () => {
     setOpenWarning(true);
   };
+
+  /**
+   * Handle close warning dialog
+   */
   const handleCloseWarning = () => {
     setOpenWarning(false);
   };
@@ -420,7 +488,10 @@ const Checkout = () => {
     !loadAddress,
   ].every(Boolean);
 
-  // Submit checkout
+  /**
+   * Handle submit checkout
+   * @param {Event} e
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isLoading || calculating || pending) return;
@@ -430,10 +501,10 @@ const Checkout = () => {
     const valid = PHONE_REGEX.test(addressInfo?.phone);
 
     if (!valid && addressInfo?.phone) {
-      setErrMsg("Sai định dạng số điện thoại!");
+      setErrMsg(capitalize("validation.constraints.pattern", { ns: "validation", field: t("phone") }));
       return;
     } else if (!addressInfo?.name || !addressInfo?.phone || !addressInfo?.city || !addressInfo?.address) {
-      setErrMsg("Vui lòng nhập địa chỉ giao hàng!");
+      setErrMsg(capitalize("validation.constraints.required.suggest", { ns: "validation", field: t("address") }));
       return;
     }
 
@@ -458,22 +529,14 @@ const Checkout = () => {
         setPending(false);
       })
       .catch((err) => {
-        enqueueSnackbar("Đặt hàng thất bại!", { variant: "error" });
         console.error(err);
+        enqueueSnackbar(t("message.error", { action: t("order") }), { variant: "error" });
         setErr(err);
         if (!err?.status) {
-          setErrMsg("Server không phản hồi!");
-        } else if (err?.status === 409) {
-          setErrMsg(err?.data?.message);
-        } else if (err?.status === 403) {
-          setErrMsg("Bạn không có quyền làm điều này!");
-        } else if (err?.status === 412) {
-          setChallenge(true);
-          setErrMsg("Yêu cầu của bạn cần xác thực lại!");
-        } else if (err?.status === 400) {
-          setErrMsg("Sai định dạng thông tin!");
+          setErrMsg(t("error.server.not.response"));
         } else {
-          setErrMsg("Đặt hàng thất bại!");
+          setErrMsg(err?.data?.message);
+          if (err?.status === 412) setChallenge(true);
         }
         setPending(false);
       });
@@ -487,17 +550,17 @@ const Checkout = () => {
       <Wrapper>
         {(isLoading || pending) && (
           <Suspense fallBack={null}>
-            <PendingModal open={isLoading || pending} message="Đang xử lý đơn hàng..." />
+            <PendingModal open={isLoading || pending} message={t("order.processing", { ns: "authenticated" })} />
           </Suspense>
         )}
-        <CustomBreadcrumbs separator="›" maxItems={4} aria-label="breadcrumb" className="transparent">
-          <NavLink to={"/cart"}>Giỏ hàng</NavLink>
-          <NavLink to={"/checkout"}>Thanh toán</NavLink>
+        <CustomBreadcrumbs separator="›" maxItems={4} aria-label="Breadcrumb" className="transparent">
+          <NavLink to={"/cart"}>{t("cart.title")}</NavLink>
+          <NavLink to={"/checkout"}>{t("checkout.title")}</NavLink>
         </CustomBreadcrumbs>
         <CheckoutContainer>
           <Title ref={scrollRef}>
             <ShoppingCartCheckout />
-            &nbsp;THANH TOÁN
+            &nbsp;{t("checkout.title")}
           </Title>
           <Grid container spacing={2} sx={{ position: "relative", mb: 10, justifyContent: "flex-end" }}>
             <Grid size={{ xs: 12, md_lg: 8 }} position="relative">
@@ -520,7 +583,7 @@ const Checkout = () => {
                       }}
                     >
                       <LocationOn />
-                      &nbsp;Địa chỉ người nhận
+                      &nbsp;{t("address.recipient", { ns: "authenticated" })}
                     </SemiTitle>
                   </StepLabel>
                   <StyledStepContent>
@@ -551,7 +614,7 @@ const Checkout = () => {
                       sx={{ my: 1, display: { xs: "none", sm: "flex" } }}
                       endIcon={<KeyboardDoubleArrowDown />}
                     >
-                      Vận chuyển đến địa chỉ này
+                      {t("address.to.place", { ns: "authenticated" })}
                     </Button>
                   </StyledStepContent>
                 </Step>
@@ -573,12 +636,12 @@ const Checkout = () => {
                       }}
                     >
                       <ProductionQuantityLimits />
-                      &nbsp;Kiểm tra lại sản phẩm
+                      &nbsp;{t("checkout.review", { ns: "authenticated" })}
                     </SemiTitle>
                   </StepLabel>
                   <StyledStepContent slotProps={{ transition: { unmountOnExit: false } }}>
                     <TableContainer>
-                      <Table aria-label="checkout-table">
+                      <Table>
                         <TableBody>
                           {Object.keys(reducedCart).map((shopId, index) => {
                             const shop = reducedCart[shopId];
@@ -615,7 +678,7 @@ const Checkout = () => {
                       sx={{ my: 1, display: { xs: "none", sm: "flex" } }}
                       endIcon={<KeyboardDoubleArrowDown />}
                     >
-                      Tiếp tục
+                      {t("continue")}
                     </Button>
                     <Suspense fallback={null}>
                       {openCoupon !== undefined && (
@@ -647,7 +710,7 @@ const Checkout = () => {
                   >
                     <SemiTitle>
                       <CreditCard />
-                      &nbsp;Chọn hình thức thanh toán
+                      &nbsp;{t("checkout.payment", { ns: "authenticated" })}
                     </SemiTitle>
                   </StepLabel>
                   <StyledStepContent>
@@ -672,7 +735,7 @@ const Checkout = () => {
             </Grid>
             <Grid size={{ xs: 12, md_lg: 4 }} position={{ xs: "sticky", md_lg: "relative" }} bottom={0}>
               <Box py={2}>
-                <SemiTitle className="end">Tổng quan</SemiTitle>
+                <SemiTitle className="end">{t("checkout.summary", { ns: "authenticated" })}</SemiTitle>
               </Box>
               <FinalCheckoutDialog
                 {...{
@@ -683,7 +746,7 @@ const Checkout = () => {
                   displayInfo,
                   isValid: validAddressInfo,
                   activeStep,
-                  maxSteps,
+                  maxSteps: MAX_STEPS,
                   handleOpenDialog: handleOpenCouponDialog,
                   addressInfo,
                   backFirstStep,
@@ -718,8 +781,8 @@ const Checkout = () => {
             <ConfirmDialog
               {...{
                 open: openWarning,
-                title: "Đã gỡ các sản phẩm!",
-                message: "Một số sản phẩm đã bị gỡ khỏi trang!",
+                title: t("checkout.warning.title", { ns: "authenticated" }),
+                message: t("checkout.warning.message", { ns: "authenticated" }),
                 handleConfirm: handleCloseWarning,
               }}
             />

@@ -4,7 +4,9 @@ import { StyledItemTableRow, StyledTableRow, SpaceTableRow, StyledTableCell } fr
 import { currencyFormat } from "@ring/shared/utils/convert";
 import { getImageSrc } from "@ring/shared/enums/image";
 import { getShippingType } from "@ring/shared/enums/shipping";
+import { ShippingType } from "@ring/shared/models/shippingType";
 import { iconList } from "@ring/shared/utils/icon";
+import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import TextField from "@mui/material/TextField";
@@ -147,6 +149,7 @@ const PriceContainer = styled.div`
 `;
 
 const ShippingInfo = styled.p`
+  white-space: nowrap;
   color: ${({ theme }) => theme.vars.palette.info.main};
 `;
 
@@ -223,9 +226,8 @@ const StyledSkeleton = styled(Skeleton)`
 `;
 //#endregion
 
-const ShippingType = getShippingType();
-
 function ItemRow({ product, index }) {
+  const { t } = useTranslation();
   const isDisabled = !product || product.amount < 1;
 
   return (
@@ -234,7 +236,7 @@ function ItemRow({ product, index }) {
         <ItemContainer>
           <StyledLazyImage
             src={getImageSrc(product?.srcSet, 50)}
-            alt={`${product.title} Cart item`}
+            alt={`${t("order.item")} ${product.title}`}
             placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
           />
           <ItemSummary>
@@ -265,7 +267,9 @@ function ItemRow({ product, index }) {
         {product?.discount > 0 && <Discount>{currencyFormat.format(product.price)}</Discount>}
       </StyledTableCell>
       <StyledTableCell className="preview" align="center" sx={{ display: { xs: "none", sm: "table-cell" } }}>
-        <Amount>SL: {product.quantity}</Amount>
+        <Amount>
+          {t("quantity.short")}: {product.quantity}
+        </Amount>
       </StyledTableCell>
       <StyledTableCell className="preview" align="right" sx={{ display: { xs: "none", md: "table-cell" } }}>
         <Price className="total">
@@ -288,16 +292,39 @@ const PreviewDetailRow = ({
   handleOpenCouponDialog,
   handleOpenShippingDialog,
 }) => {
+  const { t } = useTranslation();
+
   // Calculated price for display
   let total = 0;
   let totalQuantity = 0;
-  const shippingSummary = ShippingType[shipping || Object.keys(ShippingType)[0]];
-  const Icon = iconList[shippingSummary?.icon];
+  const shippingMeta = getShippingType(shipping || Object.keys(ShippingType)[0]);
+  const Icon = iconList[shippingMeta?.icon];
 
   for (const product of shop?.products) {
     total += product.quantity * product.price * (1 - (product?.discount || 0));
     totalQuantity += product.quantity;
   }
+
+  const getCouponText = () => {
+    return coupon
+      ? // Have coupon
+        discount
+        ? // Discount applied
+          isGroupSelected
+          ? // Group selected
+            coupon?.isUsable
+            ? // Coupon is usable
+              t("cart.coupon.saved", {
+                discount: currencyFormat.format(discount),
+              })
+            : t("cart.coupon.criteria", { criteria: coupon?.summary }) // Coupon is not usable
+          : t("cart.coupon.change") // Group not selected
+        : // Discount not applied
+          coupon?.isUsed
+          ? t("cart.coupon.change") // Coupon is used
+          : t("cart.coupon.criteria", { criteria: coupon?.summary }) // Coupon is not usable
+      : t("cart.coupon.add"); // No coupon
+  };
 
   return (
     <>
@@ -306,7 +333,7 @@ const PreviewDetailRow = ({
         <StyledTableCell className="preview" align="left" colSpan={5} component="th" scope="row">
           <Shop>
             <Inventory />
-            &nbsp;Giao từ {shop.shopName}
+            &nbsp;{t("address.from", { ns: "authenticated" })} {shop.shopName}
           </Shop>
         </StyledTableCell>
       </StyledTableRow>
@@ -319,16 +346,7 @@ const PreviewDetailRow = ({
             <span>
               &nbsp;
               <LocalActivityOutlined color="error" />
-              &nbsp;
-              {coupon
-                ? discount
-                  ? true
-                    ? `Đã giảm ${currencyFormat.format(discount)}`
-                    : `Mua thêm để ${coupon?.summary?.charAt(0)?.toLowerCase() + coupon?.summary?.slice(1)}`
-                  : coupon?.isUsable
-                    ? `Mua thêm để ${coupon?.summary?.charAt(0)?.toLowerCase() + coupon?.summary?.slice(1)}`
-                    : "Đổi mã giảm giá"
-                : "Thêm mã giảm giá"}
+              &nbsp;{getCouponText()}
             </span>
             <KeyboardArrowRight fontSize="small" />
           </OptionButton>
@@ -338,7 +356,7 @@ const PreviewDetailRow = ({
         <StyledTableCell className="option" align="left" colSpan={6}>
           <Box display="flex" width="100%" flexDirection={{ xs: "column", sm: "row" }}>
             <NoteInput
-              placeholder="Lời nhắn cho người bán ..."
+              placeholder={t("checkout.note.placeholder", { ns: "authenticated" })}
               onChange={(e) =>
                 setShopNote((prev) => ({
                   ...prev,
@@ -353,17 +371,17 @@ const PreviewDetailRow = ({
             <ShippingContainer onClick={() => handleOpenShippingDialog(shop?.id)}>
               <OptionButton>
                 <ButtonLabel>
-                  &nbsp;Vận chuyển:&emsp;
+                  &nbsp;{t("shipping.label")}:&emsp;
                   <Icon color="primary" />
                   &nbsp;
-                  <span className="hide-on-mobile">&emsp;Thay đổi</span>
+                  <span className="hide-on-mobile">&emsp;{t("edit")}</span>
                 </ButtonLabel>
                 <KeyboardArrowRight fontSize="small" />
               </OptionButton>
               <Box display="flex" justifyContent="space-between">
-                <p>&nbsp;{shippingSummary?.label}</p>
+                <p>&nbsp;{t(shippingMeta?.label)}&emsp;</p>
                 <span>
-                  <ShippingInfo>{shippingSummary?.description}</ShippingInfo>
+                  <ShippingInfo>{t("shipping.estimate", { date: shippingMeta?.estimate })}</ShippingInfo>
                   <Box display="flex" alignItems="center" justifyContent="flex-end">
                     <Discount>{shippingDiscount > 0 ? currencyFormat.format(shippingDiscount) : ""}</Discount>
                     <Price className="shipping">{currencyFormat.format(shippingFee - (shippingDiscount || 0))}</Price>
@@ -377,7 +395,7 @@ const PreviewDetailRow = ({
       <StyledTableRow className="bottom" role="total-row">
         <StyledTableCell align="right" colSpan={6}>
           <PriceContainer>
-            &nbsp;Tổng số tiền ({totalQuantity} sản phẩm):&emsp;
+            &nbsp;{t("checkout.total", { ns: "authenticated", quantity: totalQuantity })}&emsp;
             <Price className="final">{currencyFormat.format(total)}</Price>
           </PriceContainer>
         </StyledTableCell>

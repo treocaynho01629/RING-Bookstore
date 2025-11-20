@@ -2,6 +2,7 @@ import useTitle from "@ring/shared/useTitle";
 import { idFormatter } from "@ring/shared/utils/convert";
 import { Navigate, useNavigate, useOutletContext, useParams } from "react-router";
 import { TabContentContainer } from "../components/custom/ProfileComponents";
+import { useTranslation } from "react-i18next";
 import { useGetReceiptDetailQuery } from "../features/orders/ordersApiSlice";
 import { forwardRef, useState } from "react";
 import Dialog from "@mui/material/Dialog";
@@ -13,14 +14,15 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 const CheckoutDetail = () => {
-  const { id } = useParams(); //Order id
+  const { id } = useParams(); // Order id
+  const { t } = useTranslation();
   const { tabletMode, mobileMode } = useOutletContext();
   const navigate = useNavigate();
   const [pending, setPending] = useState(false);
   const { data, isLoading, isSuccess, isError, error } = useGetReceiptDetailQuery(id);
 
-  //Set title
-  //useTitle(`Chi tiết thanh toán ${idFormatter(id)}`);
+  // Set title
+  useTitle(`${t("order.checkout")} ${idFormatter(id)}`);
 
   let content = (
     <CheckoutDetailComponent

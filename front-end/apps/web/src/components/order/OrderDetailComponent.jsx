@@ -2,14 +2,16 @@ import styled from "@emotion/styled";
 import { Suspense, lazy, useState, forwardRef } from "react";
 import { StyledDialogTitle } from "../custom/ProfileComponents";
 import { currencyFormat, dateFormatter, idFormatter, timeFormatter } from "@ring/shared/utils/convert";
-import { getOrderStatus } from "@ring/shared/enums/order";
-import { getPaymentStatus } from "@ring/shared/enums/payment";
 import { getShippingType } from "@ring/shared/enums/shipping";
 import { iconList } from "@ring/shared/utils/icon";
 import { Link } from "react-router";
 import { booksApiSlice } from "../../features/books/booksApiSlice";
 import { MobileExtendButton } from "@ring/ui/Components";
+import { useTranslation } from "react-i18next";
 import { useConfirmOrderMutation } from "../../features/orders/ordersApiSlice";
+import { getOrderStatus } from "@ring/shared/enums/order";
+import { OrderStatus } from "@ring/shared/models/orderStatus";
+import { PaymentStatus } from "@ring/shared/models/paymentStatus";
 import useConfirm from "@ring/shared/useConfirm";
 import Button from "@mui/material/Button";
 import DialogContent from "@mui/material/DialogContent";
@@ -94,15 +96,6 @@ const ShippingTag = styled.span`
   align-items: center;
   font-weight: 450;
   color: ${({ theme, color }) => theme.vars.palette[color]?.dark || theme.vars.palette.primary.dark};
-`;
-
-const StuffContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-
-  ${({ theme }) => theme.breakpoints.down("md")} {
-    align-items: flex-end;
-  }
 `;
 
 const ContentWrapper = styled.div`
@@ -222,10 +215,6 @@ const MainButtonContainer = styled.div`
 `;
 //#endregion
 
-const OrderStatus = getOrderStatus();
-const PaymentStatus = getPaymentStatus();
-const ShippingType = getShippingType();
-
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
@@ -234,63 +223,72 @@ function getStepContent(detail) {
   const date = new Date(detail?.date);
 
   switch (detail?.status) {
-    case OrderStatus.PENDING_PAYMENT.value:
+    case OrderStatus.PENDING_PAYMENT:
       return {
         step: 1,
-        summary: "Đang chờ thanh toán đơn hàng.",
+        summary: "order.status.pending.payment",
       };
-    case OrderStatus.PENDING.value:
+    case OrderStatus.PENDING:
       return {
         step: 1,
-        summary: "Đang chờ nhận hàng từ shop.",
+        summary: "order.status.pending",
       };
-    case OrderStatus.SHIPPING.value:
+    case OrderStatus.SHIPPING:
       return {
         step: 2,
-        summary: "Đang giao hàng cho đơn vị vận chuyển.",
+        summary: "order.status.shipping",
       };
-    case OrderStatus.PENDING_RETURN.value:
+    case OrderStatus.PENDING_RETURN:
       return {
         step: 3,
-        summary: "Đang chờ hoàn trả hàng.",
+        summary: "order.status.pending.return",
       };
-    case OrderStatus.PENDING_REFUND.value:
+    case OrderStatus.PENDING_REFUND:
       return {
         step: 3,
-        summary: "Đang chờ hoàn tiền.",
+        summary: "order.status.pending.refund",
       };
-    case OrderStatus.COMPLETED.value:
+    case OrderStatus.COMPLETED:
       return {
         step: 4,
-        summary: "Cảm ơn bạn đã mua hàng!",
+        summary: "order.status.completed",
       };
-    case OrderStatus.CANCELED.value:
+    case OrderStatus.CANCELED:
       return {
         step: 1,
-        summary: `Đã huỷ đơn vào ${timeFormatter(date)} ${dateFormatter(date)}.`,
+        date: date,
+        summary: "order.status.cancelled",
       };
-    case OrderStatus.REFUNDED.value:
+    case OrderStatus.REFUNDED:
       return {
         step: 4,
-        summary: `Đã hoàn trả ${currencyFormat.format(detail?.totalPrice - detail?.totalDiscount)} vào tài khoản vào ${timeFormatter(date)} ${dateFormatter(date)}.`,
+        price: detail?.totalPrice - detail?.totalDiscount,
+        date: date,
+        summary: "order.status.refunded",
       };
   }
 }
 
 const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMode }) => {
   const { addProduct } = useCart();
+  const { t, i18n } = useTranslation();
+
   const [openCancel, setOpenCancel] = useState(undefined);
   const [openRefund, setOpenRefund] = useState(undefined);
+
   const open = Boolean(openCancel || openRefund);
-  const detailStatus = OrderStatus[order?.status];
+  const detailMeta = getOrderStatus(order?.status);
+
   const [getBought, { isLoading: fetching }] = booksApiSlice.useLazyGetBooksByIdsQuery();
   const [confirmOrder, { isLoading: confirming }] = useConfirmOrderMutation();
   const [ConfirmationDialog, confirm] = useConfirm(
-    "Xác nhận đơn hàng",
-    `Xác nhận đã nhận đơn hàng ${idFormatter(order?.id)}?`
+    t("order.confirm.label", { ns: "authenticated" }),
+    t("order.confirm.message", { ns: "authenticated", id: idFormatter(order?.id) })
   );
 
-  //Rebuy
+  /**
+   * Handle rebuy product
+   */
   const handleAddToCart = async () => {
     if (fetching || pending) return;
     setPending(true);
@@ -306,22 +304,24 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
         ids.forEach((id) => {
           const book = entities[id];
           if (book.amount > 0) {
-            //Check for stock
+            // Check for stock
             addProduct(book, 1);
           } else {
-            enqueueSnackbar("Sản phẩm đã hết hàng!", { variant: "error" });
+            enqueueSnackbar(t("product.out"), { variant: "error" });
           }
         });
         setPending(false);
       })
       .catch((rejected) => {
         console.error(rejected);
-        enqueueSnackbar("Mua lại sản phẩm thất bại!", { variant: "error" });
+        enqueueSnackbar(t("message.error", { action: t("product.add") }), { variant: "error" });
         setPending(false);
       });
   };
 
-  //Confirm
+  /**
+   * Handle confirm order
+   */
   const handleConfirmOrder = async () => {
     const confirmation = await confirm();
     if (confirmation) {
@@ -333,30 +333,35 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
       confirmOrder(order?.id)
         .unwrap()
         .then((data) => {
-          enqueueSnackbar("Xác nhận đơn hàng thành công!", {
+          enqueueSnackbar(t("message.success", { action: t("order.confirm") }), {
             variant: "success",
           });
           setPending(false);
         })
         .catch((err) => {
-          enqueueSnackbar("Xác nhận đơn hàng thất bại!", { variant: "error" });
+          enqueueSnackbar(t("message.error", { action: t("order.confirm") }), { variant: "error" });
           setPending(false);
         });
-    } else {
-      console.log("Cancel");
     }
   };
 
-  //Cancel
+  /**
+   * Handle cancel order
+   */
   const handleCancelOrder = () => {
     setOpenCancel(true);
   };
 
-  //Refund
+  /**
+   * Handle refund order
+   */
   const handleRefundOrder = () => {
     setOpenRefund(true);
   };
 
+  /**
+   * Handle close cancel and refund detail form
+   */
   const handleClose = () => {
     setOpenCancel(false);
     setOpenRefund(false);
@@ -366,8 +371,8 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
   const orderedDate = new Date(order?.orderedDate);
   const date = new Date(order?.date);
   const isRefundable = Math.abs(new Date() - date) / (1000 * 60 * 60 * 24) <= 7;
-  const shippingSummary = ShippingType[order?.shippingType];
-  // const Icon = iconList[shippingSummary?.icon];
+  const shippingMeta = getShippingType(order?.shippingType);
+  const Icon = iconList[shippingMeta?.icon];
 
   return (
     <>
@@ -377,24 +382,24 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
             <KeyboardArrowLeftIcon />
           </Link>
           <ReceiptIcon />
-          &nbsp;Mã vận đơn&nbsp;
+          &nbsp;{t("order.id", { ns: "authenticated" })}&nbsp;
           {!order ? <Skeleton variant="text" width={100} /> : idFormatter(order?.orderId)}
           &emsp;
           {!order ? (
-            <StatusTag color="secondary">Đang tải</StatusTag>
+            <StatusTag color="secondary">{t("loading")}</StatusTag>
           ) : (
-            <StatusTag color={detailStatus?.color}>{detailStatus?.label}</StatusTag>
+            <StatusTag color={detailMeta?.color}>{t(detailMeta?.label)}</StatusTag>
           )}
         </TitleContainer>
         <SubTitle>
           {!order ? (
             <Skeleton variant="text" width={130} />
           ) : (
-            `${timeFormatter(orderedDate)} ${dateFormatter(orderedDate)}`
+            `${timeFormatter(orderedDate, i18n.language)} ${dateFormatter(orderedDate, i18n.language)}`
           )}
         </SubTitle>
       </StyledDialogTitle>
-      <DialogContent sx={{ px: { xs: 0, sm: 2, md: 0 }, mt: { xs: 1, md: 0 } }}>
+      <DialogContent sx={{ px: { xs: "0 !important", sm: 2, md: 0 }, mt: { xs: 1, md: 0 } }}>
         {!order ? (
           <Skeleton
             variant="rectangular"
@@ -425,7 +430,7 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
               {...{
                 status: order?.status,
                 stepContent,
-                detailStatus,
+                detailStatus: detailMeta,
                 orderedDate,
                 date,
                 tabletMode,
@@ -433,15 +438,15 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
             />
             {tabletMode &&
               [
-                OrderStatus.CANCELED.value,
-                OrderStatus.PENDING_RETURN.value,
-                OrderStatus.PENDING_REFUND.value,
-                OrderStatus.REFUNDED.value,
+                OrderStatus.CANCELED,
+                OrderStatus.PENDING_RETURN,
+                OrderStatus.PENDING_REFUND,
+                OrderStatus.REFUNDED,
               ]?.includes(order?.status) &&
               order?.note && (
                 <Box mt={2}>
                   <InfoContainer>
-                    <Name>Lý do:</Name>
+                    <Name>{t("order.reason.label", { ns: "authenticated" })}:</Name>
                     <InfoText>{order?.note}</InfoText>
                   </InfoContainer>
                 </Box>
@@ -452,14 +457,26 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
           <SummaryContainer>
             <Box display="flex" justifyContent="space-between">
               <Box>
-                <SubText>{!order ? <Skeleton variant="text" width={280} /> : stepContent?.summary}</SubText>
+                <SubText>
+                  {!order ? (
+                    <Skeleton variant="text" width={280} />
+                  ) : (
+                    t(stepContent?.summary, {
+                      ns: "authenticated",
+                      date: stepContent?.date
+                        ? `${timeFormatter(stepContent?.date, i18n.language)} ${dateFormatter(stepContent?.date, i18n.language)}`
+                        : undefined,
+                      amount: stepContent?.price ? currencyFormat.format(stepContent?.price) : undefined,
+                    })
+                  )}
+                </SubText>
               </Box>
               <Box>
                 {!order ? (
                   <MainButton disabled variant="contained" color="secondary" size="large" fullWidth>
-                    Đang tải
+                    {t("loading")}
                   </MainButton>
-                ) : order?.status == OrderStatus.PENDING.value ? (
+                ) : order?.status == OrderStatus.PENDING ? (
                   <>
                     <MainButton
                       variant="outlined"
@@ -469,19 +486,19 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
                       sx={{ mt: 1 }}
                       onClick={handleCancelOrder}
                     >
-                      Huỷ đơn hàng
+                      {t("order.cancel.label", { ns: "authenticated" })}
                     </MainButton>
                   </>
-                ) : order?.status == OrderStatus.SHIPPING.value && order?.paymentStatus == PaymentStatus.PAID.value ? (
+                ) : order?.status == OrderStatus.SHIPPING && order?.paymentStatus == PaymentStatus.PAID ? (
                   <MainButton variant="contained" color="success" size="large" fullWidth onClick={handleConfirmOrder}>
-                    Đã nhận hàng
+                    {t("order.confirm.confirmed", { ns: "authenticated" })}
                   </MainButton>
                 ) : (
                   <>
                     <MainButton variant="contained" color="primary" size="large" fullWidth onClick={handleAddToCart}>
-                      Mua lại
+                      {t("order.buy.again", { ns: "authenticated" })}
                     </MainButton>
-                    {order?.status == OrderStatus.COMPLETED.value && isRefundable && (
+                    {order?.status == OrderStatus.COMPLETED && isRefundable && (
                       <MainButton
                         variant="outlined"
                         color="warning"
@@ -491,7 +508,7 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
                         onClick={handleRefundOrder}
                         disabled={!isRefundable}
                       >
-                        Hoàn trả hàng
+                        {t("order.refund.label", { ns: "authenticated" })}
                       </MainButton>
                     )}
                   </>
@@ -499,15 +516,15 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
               </Box>
             </Box>
             {[
-              OrderStatus.CANCELED.value,
-              OrderStatus.PENDING_RETURN.value,
-              OrderStatus.PENDING_REFUND.value,
-              OrderStatus.REFUNDED.value,
+              OrderStatus.CANCELED,
+              OrderStatus.PENDING_RETURN,
+              OrderStatus.PENDING_REFUND,
+              OrderStatus.REFUNDED,
             ]?.includes(order?.status) &&
               order?.note && (
                 <Box mt={2}>
                   <InfoContainer>
-                    <Name>Lý do:</Name>
+                    <Name>{t("order.reason.label", { ns: "authenticated" })}:</Name>
                     <InfoText>{order?.note}</InfoText>
                   </InfoContainer>
                 </Box>
@@ -517,7 +534,7 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
         <ContentWrapper>
           <Title>
             <SellIcon />
-            &nbsp;Địa chỉ người nhận
+            &nbsp;{t("address.recipient", { ns: "authenticated" })}
           </Title>
           <Grid container spacing={1}>
             <Grid size={{ xs: 12, md_lg: 6 }}>
@@ -535,7 +552,7 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
                       <Skeleton variant="text" width="30%" />
                     </Box>
                   ) : (
-                    (order?.address ?? "Không xác định")
+                    (order?.address ?? "Không xác định") // TODO: Do something with this
                   )}
                 </InfoText>
               </InfoContainer>
@@ -543,17 +560,17 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
             <Grid size={{ xs: 12, md_lg: 6 }}>
               <InfoContainer>
                 <Box mb={1}>
-                  <Name>Hình thức giao hàng:</Name>
+                  <Name>{t("order.shipping.type", { ns: "authenticated" })}:</Name>
                   <InfoText>
                     {!order ? (
                       <Skeleton variant="text" width={200} />
                     ) : (
                       <Suspense fallback={null}>
-                        <ShippingTag color={shippingSummary?.color}>
-                          {/* <Icon />  */}
-                          {shippingSummary?.label}:
+                        <ShippingTag color={shippingMeta?.color}>
+                          <Icon />
+                          {t(shippingMeta?.label)}:
                         </ShippingTag>
-                        &nbsp;{shippingSummary?.description}
+                        &nbsp;{shippingMeta?.description}
                       </Suspense>
                     )}
                   </InfoText>
@@ -561,22 +578,22 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
                     {!order ? (
                       <Skeleton variant="text" width={190} />
                     ) : (
-                      `Phí vận chuyển ${currencyFormat.format(order?.shippingFee)}`
+                      `${t("cart.shipping.fee")} ${currencyFormat.format(order?.shippingFee)}`
                     )}
                   </InfoText>
                 </Box>
               </InfoContainer>
             </Grid>
             {![
-              OrderStatus.CANCELED.value,
-              OrderStatus.PENDING_RETURN.value,
-              OrderStatus.PENDING_REFUND.value,
-              OrderStatus.REFUNDED.value,
+              OrderStatus.CANCELED,
+              OrderStatus.PENDING_RETURN,
+              OrderStatus.PENDING_REFUND,
+              OrderStatus.REFUNDED,
             ]?.includes(order?.status) &&
               order?.note && (
                 <Grid size={12}>
                   <InfoContainer>
-                    <Name>Ghi chú:</Name>
+                    <Name>{t("order.note", { ns: "authenticated" })}:</Name>
                     <InfoText>{order?.note}</InfoText>
                   </InfoContainer>
                 </Grid>
@@ -585,7 +602,7 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
         </ContentWrapper>
         <Title>
           <InboxIcon />
-          &nbsp;Kiện hàng
+          &nbsp;{t("order.package", { ns: "authenticated" })}
         </Title>
         <OrderDetailItems {...{ order, tabletMode }} />
         <ButtonContainer>
@@ -596,23 +613,23 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
                 <KeyboardArrowRightIcon fontSize="small" />
               </MobileExtendButton>
             </MobileButton>
-          ) : order?.status == OrderStatus.PENDING.value ? (
+          ) : order?.status == OrderStatus.PENDING ? (
             <MobileButton onClick={handleCancelOrder}>
               <span>
                 <CloseIcon fontSize="small" color="error" />
-                &nbsp;Huỷ đơn hàng
+                &nbsp;{t("order.cancel.label", { ns: "authenticated" })}
               </span>
               <MobileExtendButton>
                 <KeyboardArrowRightIcon fontSize="small" />
               </MobileExtendButton>
             </MobileButton>
           ) : (
-            order?.status == OrderStatus.COMPLETED.value &&
+            order?.status == OrderStatus.COMPLETED &&
             isRefundable && (
               <MobileButton onClick={handleRefundOrder}>
                 <span>
                   <KeyboardReturnIcon fontSize="small" color="warning" />
-                  &nbsp;Hoàn trả đơn hàng
+                  &nbsp;{t("order.refund.label", { ns: "authenticated" })}
                 </span>
                 <MobileExtendButton>
                   <KeyboardArrowRightIcon fontSize="small" disabled={!isRefundable} />
@@ -625,15 +642,15 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
           <MainButtonContainer>
             {!order ? (
               <MainButton disabled variant="contained" color="secondary" size="large" fullWidth>
-                Đang tải
+                {t("loading")}
               </MainButton>
-            ) : order?.status == OrderStatus.SHIPPING.value ? (
+            ) : order?.status == OrderStatus.SHIPPING ? (
               <MainButton variant="contained" color="success" size="large" fullWidth onClick={handleConfirmOrder}>
-                Đã nhận hàng
+                {t("order.confirm.confirmed", { ns: "authenticated" })}
               </MainButton>
             ) : (
               <MainButton variant="contained" color="primary" size="large" fullWidth onClick={handleAddToCart}>
-                Mua lại
+                {t("order.buy.again", { ns: "authenticated" })}
               </MainButton>
             )}
           </MainButtonContainer>

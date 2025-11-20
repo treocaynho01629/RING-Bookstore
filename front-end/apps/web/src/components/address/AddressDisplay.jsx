@@ -1,4 +1,5 @@
 import { getAddressType } from "@ring/shared/enums/address";
+import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -73,12 +74,13 @@ const AddressTag = styled.span`
 const AddressType = getAddressType();
 
 const AddressDisplay = ({ addressInfo, handleOpen, isValid, loadAddress }) => {
+  const { t } = useTranslation();
   const fullAddress = [addressInfo?.city, addressInfo?.address].join(", ");
   const address = addressInfo?.type ? AddressType[addressInfo.type] : null;
 
   return (
     <>
-      <Title>Giao tới</Title>
+      <Title>{t("address.to", { ns: "authenticated" })}</Title>
       <AddressDisplayContainer className={!loadAddress && isValid ? "" : !addressInfo ? "" : "error"}>
         <AddressContainer>
           {!addressInfo && loadAddress ? (
@@ -113,7 +115,7 @@ const AddressDisplay = ({ addressInfo, handleOpen, isValid, loadAddress }) => {
           disabled={loadAddress}
           onClick={handleOpen}
         >
-          Thay đổi
+          {t("edit")}
         </Button>
         <IconButton
           sx={{ mr: -1, display: { xs: "flex", sm: "none" } }}

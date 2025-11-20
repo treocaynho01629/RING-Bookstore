@@ -472,7 +472,7 @@ const CouponItem = ({ coupon, selectMode, onClickApply, className, scrollPositio
                   &nbsp;{dateFormatter(date)}
                 </ExpText>
                 {coupon?.usage < 100 && (
-                  <ExpText color="error">{t("coupon.expired.usage", { ns: "client", count: coupon?.usage })}</ExpText>
+                  <ExpText color="error">{t("coupon.expired.usage", { count: coupon?.usage })}</ExpText>
                 )}
               </Expire>
             </CouponMain>

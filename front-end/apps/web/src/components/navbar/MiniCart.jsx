@@ -175,13 +175,7 @@ const MiniCart = ({ anchorEl, handleClose, products }) => {
         </ItemsContainer>
         {products?.length != 0 && (
           <ActionContainer>
-            <span>
-              {products?.length <= 5 ? (
-                <>&nbsp;</>
-              ) : (
-                `${t("cart.more", { ns: "client", quantity: products?.length - 5 })}`
-              )}
-            </span>
+            <span>{products?.length <= 5 ? <>&nbsp;</> : `${t("cart.more", { quantity: products?.length - 5 })}`}</span>
             <Link to={"/cart"} title={t("cart.view")}>
               <Button variant="outlined" color="info" size="medium">
                 {t("cart.view")}

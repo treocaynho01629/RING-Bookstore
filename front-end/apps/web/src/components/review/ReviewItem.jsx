@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { useTranslation } from "react-i18next";
 import { dateFormatter, timeFormatter } from "@ring/shared/utils/convert";
 import { Link } from "react-router";
 import Avatar from "@mui/material/Avatar";
@@ -118,6 +119,7 @@ const ProductContent = styled.div`
 //#endregion
 
 const ReviewItem = ({ review, username, isPreview, handleClick }) => {
+  const { t, i18n } = useTranslation();
   const date = new Date(review?.date);
 
   return (
@@ -175,7 +177,7 @@ const ReviewItem = ({ review, username, isPreview, handleClick }) => {
                     color: "primary.main",
                   }}
                 />
-                {timeFormatter(date)}
+                {timeFormatter(date, i18n.language)}
               </RatingInfo>
               <RatingInfo>
                 <CalendarMonth
@@ -185,7 +187,7 @@ const ReviewItem = ({ review, username, isPreview, handleClick }) => {
                     color: "primary.main",
                   }}
                 />
-                {dateFormatter(date)}
+                {dateFormatter(date, i18n.language)}
               </RatingInfo>
               {(username && username === review?.username) || isPreview ? (
                 <ActionButton className="mobile" onClick={handleClick}>
@@ -236,7 +238,7 @@ const ReviewItem = ({ review, username, isPreview, handleClick }) => {
         )}
       </RateContent>
       {isPreview && (
-        <Link to={`/product/${review?.bookSlug}`} title="Đi đến sản phẩm">
+        <Link to={`/product/${review?.bookSlug}`} title={t("product.view")}>
           <ProductContent>{review?.bookTitle}</ProductContent>
         </Link>
       )}
@@ -244,12 +246,12 @@ const ReviewItem = ({ review, username, isPreview, handleClick }) => {
         (username && username === review?.username) || isPreview ? (
           <ActionButton onClick={handleClick}>
             <EditOutlined />
-            &nbsp;Chỉnh sửa
+            &nbsp;{t("update")}
           </ActionButton>
         ) : (
           <ActionButton>
             <ReportGmailerrorred />
-            &nbsp;Báo cáo
+            &nbsp;{t("report")}
           </ActionButton>
         )
       ) : (

@@ -1,6 +1,7 @@
 {
   "validation": {
     "constraints": {
+      "required.suggest": "Vui lòng nhập {{field}}!",
       "not.blank": "{{field}} không được để trống!",
       "pattern": "Sai định dạng {{field}}!",
       "size.range": "{{field}} phải từ {{min}} đến {{max}} kí tự!",

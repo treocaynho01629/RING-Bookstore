@@ -3,7 +3,10 @@
     "saved": "Address book",
     "title": "Your addresses",
     "empty": "No addresses found",
-    "form.title": "Recipient address",
+    "recipient": "Shipping address",
+    "to.place": "Deliver to this address",
+    "from": "Deliver from",
+    "to": "Deliver to",
     "add": "New address",
     "edit": "Edit address",
     "delete": "Delete address",
@@ -24,5 +27,93 @@
     "settings": "Additional settings",
     "type.home": "Home",
     "type.office": "Office"
+  },
+  "checkout": {
+    "pending": "Awaiting for payment before {{date}} {{time}}.",
+    "paid": "Paid on {{date}} {{time}}.",
+    "pending.refund": "Awaiting for refund.",
+    "refunded": "Refunded on {{date}} {{time}}.",
+    "canceled": "Cancelled on {{date}} {{time}}.",
+    "order": "Order",
+    "review": "Review your cart",
+    "payment": "Select payment method",
+    "summary": "Summary",
+    "shipping": "Shipping",
+    "note.placeholder": "Note for the seller...",
+    "vat.description": "This price includes VAT, packaging fee, shipping fee and other miscellaneous fees",
+    "total": "Total ({{quantity}} products):",
+    "cancel.label": "Cancel all order",
+    "payment.update": "Update payment method",
+    "warning": {
+      "title": "Removed products!",
+      "message": "Some products have been removed from the cart!"
+    }
+  },
+  "review": {
+    "title": "Your reviews",
+    "add": "Add review",
+    "update": "Update review",
+    "quality": "The product quality",
+    "thought": "Your review",
+    "view": "View review"
+  },
+  "order": {
+    "empty": "No orders found",
+    "out": "No more orders",
+    "your": "Your orders",
+    "total": "Total",
+    "id": "Order ID",
+    "search": "Search by order ID, shop name or product name",
+    "pay": "Pay",
+    "receive": "Receive",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "pending.return": "Pending return",
+    "pending.check": "Pending check",
+    "refunded": "Refunded",
+    "buy.again": "Buy again",
+    "note": "Note",
+    "shipping.type": "Shipping type",
+    "package": "Package",
+    "processing": "Processing order...",
+    "cancel": {
+      "label": "Cancel order",
+      "title": "Choose cancel order reason"
+    },
+    "refund": {
+      "label": "Refund order",
+      "title": "Choose refund order reason"
+    },
+    "confirm": {
+      "label": "Confirm order",
+      "confirmed": "Order confirmed",
+      "message": "Confirm order {{id}}?"
+    },
+    "status": {
+      "pending.payment": "Awaiting for payment.",
+      "pending": "Awaiting for seller's shipment.",
+      "shipping": "Delivering to shipping carrier.",
+      "pending.return": "Awaiting for return to carrier.",
+      "pending.refund": "Pending refund.",
+      "completed": "Thank you for your purchase!",
+      "cancelled": "Cancelled on {{date}} {{time}}.",
+      "refunded": "Refunded {{amount}} to your wallet on {{date}} {{time}}."
+    },
+    "reason": {
+      "label": "Reason",
+      "address": "I want to change the delivery address",
+      "coupon": "I want to change the coupon",
+      "product": "I want to change the product",
+      "payment": "I want to change the payment method",
+      "alternative": "Found a cheaper product elsewhere",
+      "interested": "I'm no longer interested in buying this product",
+      "broken": "The product is broken",
+      "different": "The product is different from the description",
+      "used": "The product is used",
+      "fake": "The product is fake",
+      "needed": "No longer needed (Will return the product in original condition)",
+      "other": "Enter other reason",
+      "invalid": "Invalid reason"
+    }
   }
 }

@@ -44,38 +44,36 @@ export interface PaymentStatusMeta {
   color: string;
 }
 
-export const getPaymentStatus = (
-  paymentStatus: PaymentStatus
-): PaymentStatusMeta => {
+export const getPaymentStatus = (paymentStatus: PaymentStatus): PaymentStatusMeta => {
   switch (paymentStatus) {
     case PaymentStatus.PENDING:
       return {
         value: PaymentStatus.PENDING,
-        label: "payment.status.pending.label",
+        label: "payment.status.pending",
         color: "warning",
       };
     case PaymentStatus.PAID:
       return {
         value: PaymentStatus.PAID,
-        label: "payment.status.paid.label",
+        label: "payment.status.paid",
         color: "success",
       };
     case PaymentStatus.CANCELED:
       return {
         value: PaymentStatus.CANCELED,
-        label: "payment.status.canceled.label",
+        label: "payment.status.canceled",
         color: "error",
       };
     case PaymentStatus.PENDING_REFUND:
       return {
         value: PaymentStatus.PENDING_REFUND,
-        label: "payment.status.pending_refund.label",
+        label: "payment.status.pending.refund",
         color: "warning",
       };
     case PaymentStatus.REFUNDED:
       return {
         value: PaymentStatus.REFUNDED,
-        label: "payment.status.refunded.label",
+        label: "payment.status.refunded",
         color: "error",
       };
     default:

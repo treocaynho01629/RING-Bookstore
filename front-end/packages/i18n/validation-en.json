@@ -1,6 +1,7 @@
 {
   "validation": {
     "constraints": {
+      "required.suggest": "Please enter {{field}}!",
       "not.blank": "{{field}} cannot be blank!",
       "pattern": "{{field}} format is invalid!",
       "size.range": "{{field}} must be between {{min}} and {{max}} characters!",

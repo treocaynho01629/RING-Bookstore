@@ -109,11 +109,11 @@ export const filterShopsValue = {
 
 // Reviews
 export const rateLabels = {
-  1: "Cực tệ",
-  2: "Tệ",
-  3: "Ổn",
-  4: "Hài lòng",
-  5: "Cực hài lòng",
+  1: "review.quality.bad",
+  2: "review.quality.poor",
+  3: "review.quality.average",
+  4: "review.quality.good",
+  5: "review.quality.excellent",
 };
 
 // Other

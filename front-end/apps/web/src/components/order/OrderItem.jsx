@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { currencyFormat } from "@ring/shared/utils/convert";
+import { OrderStatus } from "@ring/shared/models/orderStatus";
 import { getOrderStatus } from "@ring/shared/enums/order";
 import { Link } from "react-router";
 import {
@@ -14,9 +15,9 @@ import {
   StyledSkeleton,
   StatusTag,
 } from "../custom/OrderComponents";
+import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import DeliveryDiningOutlined from "@mui/icons-material/DeliveryDiningOutlined";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import Payment from "@mui/icons-material/Payment";
@@ -102,65 +103,44 @@ const MainButton = styled(Button)`
 `;
 //#endregion
 
-const OrderStatus = getOrderStatus();
-
 const OrderItem = ({ order, handleAddToCart, handleCancelOrder }) => {
-  const detailStatus = OrderStatus[order?.status];
+  const { t } = useTranslation();
+  const detailStatus = getOrderStatus(order?.status);
 
   return (
     <OrderItemContainer>
       <HeadContainer>
         <Link to={`/shops/${order?.shopId}`}>
           <Shop>
-            <ShopTag>Đối tác</ShopTag>
+            <ShopTag>{t("partner")}</ShopTag>
             <Storefront />
             &nbsp;{order?.shopName}
             <KeyboardArrowRight fontSize="small" />
           </Shop>
         </Link>
         <Link to={`/profile/order/detail/${order?.id}`}>
-          <StatusTag color={detailStatus?.color}>
-            {detailStatus?.label}
-          </StatusTag>
+          <StatusTag color={detailStatus?.color}>{t(detailStatus?.label)}</StatusTag>
         </Link>
       </HeadContainer>
       {order?.items?.map((item, itemIndex) => (
-        <Link
-          key={`item-${item?.id}-${itemIndex}`}
-          to={`/profile/order/detail/${order?.id}`}
-        >
+        <Link key={`item-${item?.id}-${itemIndex}`} to={`/profile/order/detail/${order?.id}`}>
           <BodyContainer
-            className={
-              order?.status == OrderStatus.CANCELED.value ||
-              order?.status == OrderStatus.REFUNDED.value
-                ? "disabled"
-                : ""
-            }
+            className={order?.status == OrderStatus.CANCELED || order?.status == OrderStatus.REFUNDED ? "disabled" : ""}
           >
             <StyledLazyImage
               src={item?.image}
-              alt={`${item?.bookTitle} Order item`}
-              placeholder={
-                <StyledSkeleton variant="rectangular" animation={false} />
-              }
+              alt={`${t("order.item")} ${item?.bookTitle}`}
+              placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
             />
             <ContentContainer>
               <ItemTitle>{item?.bookTitle}</ItemTitle>
               <StuffContainer>
                 <Amount>
-                  Số lượng: <b>{item?.quantity}</b>
+                  {t("quantity")}: <b>{item?.quantity}</b>
                 </Amount>
                 <PriceContainer>
-                  <Price>
-                    {currencyFormat.format(
-                      item.price * (1 - (item?.discount || 0))
-                    )}
-                  </Price>
-                  <Discount>
-                    {item?.discount > 0
-                      ? currencyFormat.format(item.price)
-                      : ""}
-                  </Discount>
+                  <Price>{currencyFormat.format(item.price * (1 - (item?.discount || 0)))}</Price>
+                  <Discount>{item?.discount > 0 ? currencyFormat.format(item.price) : ""}</Discount>
                 </PriceContainer>
               </StuffContainer>
             </ContentContainer>
@@ -168,14 +148,14 @@ const OrderItem = ({ order, handleAddToCart, handleCancelOrder }) => {
         </Link>
       ))}
       <BotContainer>
-        {order?.status == OrderStatus.PENDING_PAYMENT.value ? (
+        {order?.status == OrderStatus.PENDING_PAYMENT ? (
           <Link
             to={`/profile/order/checkout/${order?.orderId}`}
             style={{ color: "inherit", display: "flex", alignItems: "center" }}
           >
             <DetailText>
               <Payment />
-              &nbsp;Chi tiết thanh toán
+              &nbsp;{t("order.checkout")}
             </DetailText>
           </Link>
         ) : (
@@ -185,7 +165,7 @@ const OrderItem = ({ order, handleAddToCart, handleCancelOrder }) => {
           >
             <DetailText>
               <DeliveryDiningOutlined />
-              &nbsp;Chi tiết đơn hàng
+              &nbsp;{t("order.detail")}
             </DetailText>
           </Link>
         )}
@@ -198,36 +178,26 @@ const OrderItem = ({ order, handleAddToCart, handleCancelOrder }) => {
               marginBottom: "5px",
             }}
           >
-            <p style={{ margin: 0 }}>Thành tiền:</p>
+            <p style={{ margin: 0 }}>{t("order.total", { ns: "authenticated" })}:</p>
             <Price className="total">
               &nbsp;
-              {currencyFormat.format(
-                order?.totalPrice + order?.shippingFee - order?.totalDiscount
-              )}
+              {currencyFormat.format(order?.totalPrice + order?.shippingFee - order?.totalDiscount)}
             </Price>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-            {order?.status == OrderStatus.PENDING.value ? (
-              <MainButton
-                variant="outlined"
-                color="error"
-                onClick={() => handleCancelOrder(order)}
-              >
-                Huỷ đơn hàng
+            {order?.status == OrderStatus.PENDING ? (
+              <MainButton variant="outlined" color="error" onClick={() => handleCancelOrder(order)}>
+                {t("order.cancel.label", { ns: "authenticated" })}
               </MainButton>
-            ) : order?.status == OrderStatus.PENDING_PAYMENT.value ? (
+            ) : order?.status == OrderStatus.PENDING_PAYMENT ? (
               <Link to={`/payment/${order?.orderId}`}>
                 <MainButton variant="contained" color="info">
-                  Thanh toán
+                  {t("order.pay", { ns: "authenticated" })}
                 </MainButton>
               </Link>
             ) : (
-              <MainButton
-                variant="contained"
-                color="primary"
-                onClick={() => handleAddToCart(order)}
-              >
-                Mua lại
+              <MainButton variant="contained" color="primary" onClick={() => handleAddToCart(order)}>
+                {t("order.buy.again", { ns: "authenticated" })}
               </MainButton>
             )}
           </Box>
