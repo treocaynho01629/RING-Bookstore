@@ -3,6 +3,7 @@ import { lazy, Suspense, useState } from "react";
 import { Link } from "react-router";
 import { currencyFormat, numFormat } from "@ring/shared/utils/convert";
 import { getBookType } from "@ring/shared/enums/book";
+import { useTranslation } from "react-i18next";
 import { useGetMyAddressQuery } from "../../../features/addresses/addressesApiSlice";
 import useAuth from "../../../hooks/useAuth";
 import StarIcon from "@mui/icons-material/Star";
@@ -273,6 +274,7 @@ const BookType = getBookType();
 
 const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
   const { username } = useAuth();
+  const { t } = useTranslation();
   const [addressInfo, setAddressInfo] = useState({
     name: "",
     phone: "",
@@ -284,12 +286,23 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
   // Fetch address
   const { data: address, isLoading: loadAddress } = useGetMyAddressQuery({}, { skip: !username });
 
+  /**
+   * Navigate to review tab
+   */
   const handleViewReview = (value) => {
     if (handleToggleReview) handleToggleReview(value);
   };
+
+  /**
+   * Open address select dialog
+   */
   const handleOpenDialog = () => {
     setOpenDialog(true);
   };
+
+  /**
+   * Close address select dialog
+   */
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
@@ -328,7 +341,7 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
                   <Detail>
                     {book ? (
                       <>
-                        Nhà xuất bản:&nbsp;
+                        {t("publisher.label")}:&nbsp;
                         <Link to={`/store?pubs=${book?.publisher?.id}`}>{book?.publisher?.name}</Link>
                       </>
                     ) : (
@@ -338,7 +351,7 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
                   <Detail>
                     {book ? (
                       <>
-                        Tác giả: &nbsp;
+                        {t("product.author")}: &nbsp;
                         <Link to={`/store?q=${book?.author}`}>{book?.author}</Link>
                       </>
                     ) : (
@@ -349,7 +362,7 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
                 <Detail>
                   {book ? (
                     <>
-                      Hình thức bìa: &nbsp;
+                      {t("product.type")}: &nbsp;
                       <Link to={`/store?types=${book?.type}`}>{BookType[book?.type]?.label}</Link>
                     </>
                   ) : (
@@ -382,15 +395,15 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
                       <Divider orientation="vertical" sx={{ mx: { xs: 0.7, md: 1 } }} flexItem />
                       <UserInfoText className="rate">
                         {book?.reviewsInfo?.total > 0
-                          ? `(${numFormat.format(book?.reviewsInfo?.total)}) Đánh giá`
-                          : "Chưa có đánh giá"}
+                          ? `(${numFormat.format(book?.reviewsInfo?.total)}) ${t("review.label")}`
+                          : t("review.empty")}
                       </UserInfoText>
                     </UserInfoContainer>
                     <Divider orientation="vertical" sx={{ mx: 1, display: { xs: "none", md: "block" } }} flexItem />
                     <UserInfoText className="hide-on-mobile">
-                      Đã bán: {numFormat.format(book?.totalOrders)}
+                      {t("product.sold")}: {numFormat.format(book?.totalOrders)}
                     </UserInfoText>
-                    <UserInfoText className="end">Tố cáo</UserInfoText>
+                    <UserInfoText className="end">{t("report")}</UserInfoText>
                   </>
                 ) : (
                   <Box display="flex" justifyContent="space-between" width="100%">
@@ -411,7 +424,9 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
                         <Percentage>-{book.discount * 100}%</Percentage>
                       </>
                     )}
-                    <UserInfoText className="end mobile">Đã bán: {numFormat.format(book?.totalOrders)}</UserInfoText>
+                    <UserInfoText className="end mobile">
+                      {t("product.sold")}: {numFormat.format(book?.totalOrders)}
+                    </UserInfoText>
                   </>
                 ) : (
                   <Box

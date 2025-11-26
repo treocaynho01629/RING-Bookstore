@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import PropTypes from "prop-types";
 import { numFormat } from "@ring/shared/utils/convert";
+import { useTranslation } from "react-i18next";
 import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
 import Rating from "@mui/material/Rating";
@@ -132,6 +133,13 @@ LinearProgressWithLabel.propTypes = {
 };
 
 const ReviewInfo = ({ handleClick, book, disabled, editable }) => {
+  const { t } = useTranslation();
+
+  /**
+   * Calculate review percentage
+   * @param {number} value
+   * @returns {number}
+   */
   const reviewPercent = (value) => {
     const total = book?.reviewsInfo?.total;
     const result = value == 0 || total == 0 ? 0 : (value / total) * 100;
@@ -155,7 +163,9 @@ const ReviewInfo = ({ handleClick, book, disabled, editable }) => {
               icon={<Star fontSize="inherit" />}
               emptyIcon={<StarBorder fontSize="inherit" />}
             />
-            <TotalLabel>({numFormat.format(book?.reviewsInfo?.total ?? 0)} đánh giá)</TotalLabel>
+            <TotalLabel>
+              ({numFormat.format(book?.reviewsInfo?.total ?? 0)} {t("review.label")})
+            </TotalLabel>
           </>
         ) : (
           <>
@@ -174,7 +184,7 @@ const ReviewInfo = ({ handleClick, book, disabled, editable }) => {
           book ? (
             <LinearProgressWithLabel
               key={`progress-${index + 1}`}
-              label={`${index + 1} sao`}
+              label={`${index + 1} ${index == 0 ? t("review.star") : t("review.stars")}`}
               value={reviewPercent(book?.reviewsInfo?.rates[index])}
             />
           ) : (
@@ -200,7 +210,11 @@ const ReviewInfo = ({ handleClick, book, disabled, editable }) => {
             onClick={handleClick}
             startIcon={<EditOutlined />}
           >
-            {disabled ? "Mua sản phẩm" : editable ? "Sửa đánh giá" : "Viết đánh giá"}
+            {disabled
+              ? t("review.buy")
+              : editable
+                ? t("review.update", { ns: "authenticated" })
+                : t("review.add", { ns: "authenticated" })}
           </Button>
         ) : (
           <Skeleton variant="rectangular" sx={{ height: 42, width: 160 }} />

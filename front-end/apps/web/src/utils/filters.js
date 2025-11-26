@@ -41,37 +41,37 @@ export const suggestPrices = [
   },
   {
     value: [700000, 10000000],
-    label: "700.000 ₫ trở lên",
+    label: "700.000 ₫+",
   },
 ];
 
 export const sortBooksBy = [
   {
     value: "createdDate",
-    label: "Mới nhất",
+    label: "search.sort.newest",
   },
   {
     value: "totalOrders",
-    label: "Bán chạy",
+    label: "search.sort.best-selling",
   },
   {
     value: "rating",
-    label: "Yêu thích",
+    label: "search.sort.favorite",
   },
   {
     value: "price",
-    label: "Giá bán",
+    label: "search.sort.price",
   },
 ];
 
 export const booksAmount = [
   {
     value: 1,
-    label: "Còn hàng",
+    label: "search.sort.in-stock",
   },
   {
     value: 0,
-    label: "Tất cả",
+    label: "all",
   },
 ];
 
@@ -79,26 +79,26 @@ export const booksAmount = [
 export const sortShopsBy = [
   {
     value: "totalFollowers",
-    label: "Nổi bật",
+    label: "search.sort.featured",
   },
   {
     value: "joinedDate",
-    label: "Mới tham gia",
+    label: "search.sort.joined",
   },
   {
     value: "totalReviews",
-    label: "Yêu thích",
+    label: "search.sort.favorite",
   },
 ];
 
 export const filterShopsBy = [
   {
     value: "ALL",
-    label: "Tất cả",
+    label: "all",
   },
   {
     value: "FOLLOWED",
-    label: "Đang theo dõi",
+    label: "following",
   },
 ];
 

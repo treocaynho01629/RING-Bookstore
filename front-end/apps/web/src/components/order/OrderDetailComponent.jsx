@@ -314,7 +314,7 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
       })
       .catch((rejected) => {
         console.error(rejected);
-        enqueueSnackbar(t("message.error", { action: t("product.add") }), { variant: "error" });
+        enqueueSnackbar(t("message.error", { action: t("cart.add") }), { variant: "error" });
         setPending(false);
       });
   };

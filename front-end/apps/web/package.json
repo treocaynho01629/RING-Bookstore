@@ -47,6 +47,7 @@
     "simplebar-react": "^3.3.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "@ring/eslint-config": "*",
     "@ring/vitest-config": "*",
     "@types/react": "^19.2.2",

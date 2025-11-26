@@ -3,6 +3,7 @@ import { lazy, Suspense, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { getImageSrc } from "@ring/shared/enums/image";
 import { currencyFormat } from "@ring/shared/utils/convert";
+import { useTranslation } from "react-i18next";
 import Button, { buttonClasses } from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -139,10 +140,13 @@ const MIN_VALUE = 1;
 const MAX_VALUE = 199;
 
 export const ActionButtons = ({ book, outlined = false }) => {
+  const { addProduct } = useCart();
+  const { t } = useTranslation();
+
   const navigate = useNavigate();
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md"));
+
   const [amountIndex, setAmountIndex] = useState(1); // Amount add to cart
-  const { addProduct } = useCart();
 
   const [open, setOpen] = useState(false);
   const [openNow, setOpenNow] = useState(false);
@@ -184,27 +188,43 @@ export const ActionButtons = ({ book, outlined = false }) => {
     }
   };
 
-  // Add to cart
+  /**
+   * Handle add to cart
+   * @param {Object} book - Book object
+   */
   const handleAddToCart = (book) => {
     handleClose();
     addProduct(book, amountIndex);
   };
 
+  /**
+   * Handle buy now
+   * @param {Object} book - Book object
+   */
   const handleBuyNow = (book) => {
     handleAddToCart(book);
     navigate("/cart");
   };
 
+  /**
+   * Handle open drawer
+   */
   const handleOpen = () => {
     setOpen(true);
     setOpenNow(false);
   };
 
+  /**
+   * Handle open buy now drawer
+   */
   const handleOpenNow = () => {
     setOpen(false);
     setOpenNow(true);
   };
 
+  /**
+   * Handle close drawer
+   */
   const handleClose = () => {
     setOpen(false);
     setOpenNow(false);
@@ -222,7 +242,7 @@ export const ActionButtons = ({ book, outlined = false }) => {
         onClick={handleOpen}
         startIcon={<AddShoppingCart />}
       >
-        <Box display={{ xs: "none", sm: "block" }}>Thêm vào giỏ</Box>
+        <Box display={{ xs: "none", sm: "block" }}>{t("cart.add")}</Box>
       </BuyButton>
       <BuyButton
         variant={outlined ? "outlined" : "contained"}
@@ -232,10 +252,10 @@ export const ActionButtons = ({ book, outlined = false }) => {
         onClick={handleOpenNow}
       >
         {!book
-          ? "Đang tải"
+          ? t("loading")
           : book?.amount == 0
-            ? "Hết hàng"
-            : `Mua ngay (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`}
+            ? t("cart.items.out")
+            : `${t("product.buy.now")} (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`}
       </BuyButton>
       {tabletMode && (
         <Suspense fallback={null}>
@@ -257,12 +277,12 @@ export const ActionButtons = ({ book, outlined = false }) => {
                     {book?.discount > 0 && <Discount>{currencyFormat.format(book?.price)}</Discount>}
                   </Box>
                   <AmountCount className={book?.amount > 0 ? "" : "error"}>
-                    {book?.amount > 0 ? `(${book?.amount}) sản phẩm còn lại` : "Tạm thời hết hàng"}
+                    {book?.amount > 0 ? t("product.left", { quantity: book?.amount }) : t("product.temporary")}
                   </AmountCount>
                 </Box>
               </ProductDetailContainer>
               <Box display="flex" alignItems="center" justifyContent={"space-between"} px={1.5} pt={2} pb={1}>
-                <DetailTitle>Số lượng:</DetailTitle>
+                <DetailTitle>{t("quantity")}:</DetailTitle>
                 <AmountInput
                   disabled={!book || book?.amount == 0}
                   size="small"
@@ -285,12 +305,12 @@ export const ActionButtons = ({ book, outlined = false }) => {
                   onClick={openNow ? () => handleBuyNow(book) : () => handleAddToCart(book)}
                 >
                   {!book
-                    ? "Đang tải"
+                    ? t("loading")
                     : book?.amount == 0
-                      ? "Hết hàng"
+                      ? t("cart.items.out")
                       : openNow
-                        ? `Mua ngay (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`
-                        : `Thêm vào giỏ (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`}
+                        ? `${t("product.buy.now")} (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`
+                        : `${t("cart.add")} (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`}
                 </BuyButton>
               </Box>
             </DrawerContainer>
@@ -301,7 +321,7 @@ export const ActionButtons = ({ book, outlined = false }) => {
   ) : (
     <>
       <Box display="flex" alignItems="center" flexWrap="wrap">
-        <DetailTitle style={{ marginRight: 20 }}>Số lượng:</DetailTitle>
+        <DetailTitle style={{ marginRight: 20 }}>{t("quantity")}:</DetailTitle>
         <Box display="flex" alignItems="center" my={1}>
           <AmountInput
             disabled={!book || book?.amount == 0}
@@ -317,7 +337,7 @@ export const ActionButtons = ({ book, outlined = false }) => {
           />
           {book ? (
             <AmountCount className={book?.amount > 0 ? "" : "error"}>
-              {book?.amount > 0 ? `(${book?.amount}) sản phẩm còn lại` : "Tạm thời hết hàng"}
+              {book?.amount > 0 ? t("product.left", { quantity: book?.amount }) : t("product.temporary")}
             </AmountCount>
           ) : (
             <Skeleton variant="text" sx={{ fontSize: "14px", marginLeft: 2 }} width={200} />
@@ -334,7 +354,7 @@ export const ActionButtons = ({ book, outlined = false }) => {
             disabled={!book || book?.amount == 0}
             onClick={() => handleBuyNow(book)}
           >
-            Mua ngay
+            {t("product.buy.now")}
           </BuyButton>
           <BuyButton
             variant="outlined"
@@ -346,10 +366,10 @@ export const ActionButtons = ({ book, outlined = false }) => {
             startIcon={<AddShoppingCart fontSize="small" />}
           >
             {!book
-              ? "Đang tải"
+              ? t("loading")
               : book?.amount == 0
-                ? "Hết hàng"
-                : `Thêm vào giỏ (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`}
+                ? t("cart.items.out")
+                : `${t("cart.add")} (${currencyFormat.format(book?.price * (1 - book?.discount) * amountIndex)})`}
           </BuyButton>
         </Box>
       </Box>

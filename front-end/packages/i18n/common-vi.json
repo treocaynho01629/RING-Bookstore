@@ -23,11 +23,12 @@
   "email.placeholder": "Địa chỉ email",
   "username": "Tên đăng nhập",
   "password": "Mật khẩu",
+  "password.confirm": "Nhập lại mật khẩu",
   "fullname": "Họ và tên",
   "fullname.placeholder": "Nhập họ và tên",
   "phone": "Số điện thoại",
   "dob": "Ngày sinh",
-  "password.confirm": "Nhập lại mật khẩu",
+  "from": "Từ",
   "recaptcha": "Được bảo vệ bởi reCAPTCHA và Google thông qua",
   "terms": "Điều khoản dịch vụ",
   "policy": "Chính sách bảo mật",
@@ -39,7 +40,6 @@
   "help": "Trợ giúp",
   "login.suggestions": "Đã có tài khoản?",
   "notification": "Thông báo",
-  "search.label": "Tìm kiếm",
   "store": "Cửa hàng",
   "home": "Trang chủ",
   "items": "sản phẩm",
@@ -48,6 +48,7 @@
   "unknown": "Không xác định",
   "loading": "Đang tải...",
   "pending": "Đang gửi yêu cầu...",
+  "updating": "Đang cập nhật...",
   "select.all": "Chọn tất cả",
   "all": "Tất cả",
   "price": "Đơn giá",
@@ -55,7 +56,9 @@
   "quantity.short": "SL",
   "total": "Tổng",
   "delete": "Xoá",
+  "reset": "Đặt lại",
   "partner": "Đối tác",
+  "official": "Đối tác RING!",
   "back": "Quay lại",
   "apply": "Áp dụng",
   "confirm": "Xác nhận",
@@ -69,14 +72,44 @@
   "select": "Chọn",
   "image": "Ảnh",
   "show.more": "Xem thêm",
+  "show.less": "Ẩn bớt",
+  "show.all": "Xem tất cả",
   "unselect": "Bỏ chọn",
   "report": "Báo cáo",
   "other": "Khác",
   "remove": "Gỡ",
   "save": "Lưu",
   "scroll": "Về đầu trang",
+  "above": "trở lên",
   "logout": "Đăng xuất",
   "logout.end": "Kết thúc phiên đăng nhập?",
+  "search": {
+    "label": "Tìm kiếm",
+    "results": "Kết quả tìm kiếm: \"{{keyword}}\"",
+    "shop": "Tìm kiếm 'Cửa hàng' với từ khoá",
+    "filter": "Bộ lọc",
+    "filtering": "Lọc",
+    "filter.clear": "Xoá bộ lọc",
+    "price": {
+      "range": "Khoảng giá",
+      "slider": "Bộ lọc giá"
+    },
+    "sort": {
+      "toggle": "Thay đổi chiều sắp xếp",
+      "label": "Xếp theo",
+      "newest": "Mới nhất",
+      "best-selling": "Bán chạy",
+      "favorite": "Yêu thích",
+      "price": "Giá bán",
+      "in-stock": "Còn hàng",
+      "featured": "Nổi bật",
+      "joined": "Mới tham gia"
+    }
+  },
+  "pagination": {
+    "display": "Hiển thị {{count}}",
+    "jump": "Đi đến trang?"
+  },
   "role": {
     "admin": "Quản trị viên",
     "user": "Người dùng",
@@ -115,7 +148,9 @@
     }
   },
   "review": {
-    "label": "Đánh giá"
+    "label": "Đánh giá",
+    "star": "Sao",
+    "stars": "Sao"
   },
   "order": {
     "label": "Đơn hàng",
@@ -173,6 +208,29 @@
       "refunded": "Đã hoàn tiền"
     }
   },
+  "product": {
+    "id": "Mã hàng",
+    "detail": "Chi tiết sản phẩm",
+    "author": "Tác giả",
+    "type": "Hình thức bìa",
+    "sold": "Đã bán",
+    "label": "Sản phẩm",
+    "year": "Năm xuất bản",
+    "updating": "Đang cập nhật",
+    "weight": "Trọng lượng (gr)",
+    "size": "Kích thước bao bì (cm)",
+    "pages": "Số trang",
+    "description": "Mô tả sản phẩm",
+    "other": "Sản phẩm khác"
+  },
+  "category": {
+    "label": "Danh mục",
+    "title": "Danh mục sản phẩm"
+  },
+  "publisher": {
+    "label": "Nhà xuất bản",
+    "title": "Nhà xuất bản"
+  },
   "shipping": {
     "label": "Vận chuyển",
     "estimate": "{{date}} ngày giao hàng",
@@ -191,7 +249,8 @@
     "success": "{{action}} thành công!",
     "error": "{{action}} thất bại!",
     "empty": "Chưa có {{item}} nào!",
-    "out": "Không còn {{item}} nào!"
+    "out": "Không còn {{item}} nào!",
+    "no": "Không có {{item}} nào!"
   },
   "error": {
     "server.not.response": "Server không phản hồi",

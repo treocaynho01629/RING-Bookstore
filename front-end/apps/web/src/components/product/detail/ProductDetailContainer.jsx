@@ -5,6 +5,7 @@ import { useGetBooksQuery } from "../../../features/books/booksApiSlice";
 import { MobileExtendButton, Showmore, Title } from "@ring/ui/Components";
 import { getBookType, getBookLanguage } from "@ring/shared/enums/book";
 import { idFormatter } from "@ring/shared/utils/convert";
+import { useTranslation } from "react-i18next";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -120,12 +121,14 @@ const BookLanguage = getBookLanguage();
 const BookType = getBookType();
 
 const ProductDetailContainer = ({ loading, book, tabletMode }) => {
+  const { t } = useTranslation();
+
   const descRef = useRef(null);
   const [overflowed, setOverflowed] = useState(false);
   const [minimize, setMinimize] = useState(true);
   const [openDetail, setOpenDetail] = useState(false);
 
-  //Fetch related books
+  // Fetch related books
   const {
     data: relatedBooks,
     isLoading: loadRelated,
@@ -144,6 +147,9 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
     setMinimize(true);
   }, [book]);
 
+  /**
+   * Update showmore button & showmore content overflowed
+   */
   useLayoutEffect(() => {
     function updateShowmore() {
       if (descRef.current.offsetHeight < descRef.current.scrollHeight) {
@@ -159,6 +165,9 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
     return () => window.removeEventListener("resize", updateShowmore);
   }, [descRef, minimize, book]);
 
+  /**
+   * Toggle minimize description
+   */
   const toggleMinimize = () => {
     setMinimize((prev) => !prev);
   };
@@ -171,7 +180,7 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
         <tbody>
           <tr>
             <InfoTitle>
-              <InfoText className="secondary">Mã hàng: </InfoText>
+              <InfoText className="secondary">{t("product.id")}: </InfoText>
             </InfoTitle>
             <InfoStack>
               <InfoText>{idFormatter(book?.id)}</InfoText>
@@ -179,7 +188,7 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
           </tr>
           <tr>
             <InfoTitle>
-              <InfoText className="secondary">Tác giả: </InfoText>
+              <InfoText className="secondary">{t("product.author")}: </InfoText>
             </InfoTitle>
             <InfoStack>
               <Link to={`/store?q=${book?.author}`}>
@@ -189,7 +198,7 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
           </tr>
           <tr>
             <InfoTitle>
-              <InfoText className="secondary">Nhà xuất bản: </InfoText>
+              <InfoText className="secondary">{t("publisher.label")}: </InfoText>
             </InfoTitle>
             <InfoStack>
               <Link to={`/store?pubs=${book?.publisher?.id}`}>
@@ -199,7 +208,7 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
           </tr>
           <tr>
             <InfoTitle>
-              <InfoText className="secondary">Năm xuất bản: </InfoText>
+              <InfoText className="secondary">{t("product.year")}: </InfoText>
             </InfoTitle>
             <InfoStack>
               <InfoText>{new Date(book?.date).getFullYear()}</InfoText>
@@ -207,39 +216,39 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
           </tr>
           <tr>
             <InfoTitle>
-              <InfoText className="secondary">Ngôn ngữ: </InfoText>
+              <InfoText className="secondary">{t("language.label")}: </InfoText>
             </InfoTitle>
             <InfoStack>
-              <InfoText>{BookLanguage[book?.language]?.label ?? "Đang cập nhật"}</InfoText>
+              <InfoText>{BookLanguage[book?.language]?.label ?? t("product.updating")}</InfoText>
             </InfoStack>
           </tr>
           <tr>
             <InfoTitle>
-              <InfoText className="secondary">Trọng lượng (gr): </InfoText>
+              <InfoText className="secondary">{t("product.weight")}: </InfoText>
             </InfoTitle>
             <InfoStack>
-              <InfoText>{book?.weight ? `${book.weight} gr` : "Đang cập nhật"}</InfoText>
+              <InfoText>{book?.weight ? `${book.weight} gr` : t("product.updating")}</InfoText>
             </InfoStack>
           </tr>
           <tr>
             <InfoTitle>
-              <InfoText className="secondary">Kích thước bao bì (cm): </InfoText>
+              <InfoText className="secondary">{t("product.size")}: </InfoText>
             </InfoTitle>
             <InfoStack>
-              <InfoText>{book?.size ? `${book.size} cm` : "Đang cập nhật"}</InfoText>
+              <InfoText>{book?.size ? `${book.size} cm` : t("product.updating")}</InfoText>
             </InfoStack>
           </tr>
           <tr>
             <InfoTitle>
-              <InfoText className="secondary">Số trang: </InfoText>
+              <InfoText className="secondary">{t("product.pages")}: </InfoText>
             </InfoTitle>
             <InfoStack>
-              <InfoText>{book?.pages ?? "Đang cập nhật"}</InfoText>
+              <InfoText>{book?.pages ?? t("product.updating")}</InfoText>
             </InfoStack>
           </tr>
           <tr>
             <InfoTitle>
-              <InfoText className="secondary">Hình thức: </InfoText>
+              <InfoText className="secondary">{t("product.type")}: </InfoText>
             </InfoTitle>
             <InfoStack>
               <Link to={`/store?types=${book?.type}`}>
@@ -310,12 +319,12 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
         <DetailContainer>
           <Box position="relative" mb={-2}>
             <Title>
-              {book ? "Thông tin chi tiết" : <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="40%" />}
+              {book ? t("product.detail") : <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="40%" />}
             </Title>
             <MobileExtendButton disabled={loading || !book} onClick={() => setOpenDetail(true)}>
               {book ? (
                 <>
-                  Tác giả, Nhà xuất bản,... <KeyboardArrowRight fontSize="small" />
+                  {t("product.author")}, {t("publisher.label")},... <KeyboardArrowRight fontSize="small" />
                 </>
               ) : (
                 <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="35%" />
@@ -331,7 +340,7 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
               disableSwipeToOpen={true}
             >
               <DrawerContainer>
-                <Title>Thông tin chi tiết</Title>
+                <Title>{t("product.detail")}</Title>
                 <Box mt={-2} mb={2}>
                   {details}
                 </Box>
@@ -341,7 +350,7 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
             details
           )}
           <Title>
-            {book ? "Mô tả sản phẩm" : <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="40%" />}
+            {book ? t("product.description") : <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="40%" />}
           </Title>
           <DescTitle>{book?.title}</DescTitle>
           <DescriptionContainer>
@@ -362,11 +371,11 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
               <Showmore className={minimize ? "" : "expand"} onClick={toggleMinimize}>
                 {minimize ? (
                   <>
-                    Xem thêm <KeyboardArrowDown />
+                    {t("show.more")} <KeyboardArrowDown />
                   </>
                 ) : (
                   <>
-                    Ẩn bớt <KeyboardArrowUp />
+                    {t("show.less")} <KeyboardArrowUp />
                   </>
                 )}
               </Showmore>
@@ -378,7 +387,7 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
         <ProductsContainer>
           <Box padding={{ xs: "0 12px", md: "10px 20px 0" }}>
             <Title>
-              {book ? "Sản phẩm khác" : <Skeleton variant="text" sx={{ fontSize: "inherit" }} width={150} />}
+              {book ? t("product.other") : <Skeleton variant="text" sx={{ fontSize: "inherit" }} width={150} />}
             </Title>
           </Box>
           <ProductsScroll

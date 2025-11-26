@@ -1,15 +1,11 @@
 import styled from "@emotion/styled";
 import { useState, useEffect, Fragment, memo, useRef } from "react";
 import { getBookType } from "@ring/shared/enums/book";
-import {
-  useGetCategoriesQuery,
-  useGetRelevantCategoriesQuery,
-} from "../../../features/categories/categoriesApiSlice";
-import {
-  useGetPublishersQuery,
-  useGetRelevantPublishersQuery,
-} from "../../../features/publishers/publishersApiSlice";
+import { useGetCategoriesQuery, useGetRelevantCategoriesQuery } from "../../../features/categories/categoriesApiSlice";
+import { useGetPublishersQuery, useGetRelevantPublishersQuery } from "../../../features/publishers/publishersApiSlice";
 import { suggestPrices } from "../../../utils/filters";
+import { useTranslation } from "react-i18next";
+import { capitalize } from "lodash-es";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Checkbox from "@mui/material/Checkbox";
@@ -40,8 +36,7 @@ const FilterWrapper = styled.div`
 
 const StyledSimpleBar = styled(SimpleBar)`
   padding: ${({ theme }) => `0 ${theme.spacing(2)} 0 ${theme.spacing(0.5)}`};
-  max-height: ${({ theme }) =>
-    `calc(100dvh - ${theme.mixins.toolbar.minHeight}px)`};
+  max-height: ${({ theme }) => `calc(100dvh - ${theme.mixins.toolbar.minHeight}px)`};
 
   .simplebar-track {
     &.simplebar-vertical {
@@ -155,11 +150,13 @@ const LIMIT_CATES = 10;
 const LIMIT_PUBS = 10;
 
 const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
+  const { t } = useTranslation();
+
   const childContainedRef = useRef(null);
-  const [open, setOpen] = useState(false); //Open sub cate
+  const [open, setOpen] = useState(false); // Open sub cate
   const [showmore, setShowmore] = useState(false);
   const [pagination, setPagination] = useState({
-    isMore: true, //Merge new data
+    isMore: true, // Merge new data
     number: 0,
     totalPages: 0,
     totalElements: 0,
@@ -185,17 +182,27 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
     }
   }, [data]);
 
-  //Change cate
+  /**
+   * Handle change cate
+   * @param {Object} cate
+   */
   const handleCateChange = (cate) => {
     onChangeCate({ id: cate?.id, slug: cate?.slug });
   };
 
-  //Open sub cate
+  /**
+   * Handle open sub cate
+   * @param {Event} e
+   * @param {string} id
+   */
   const handleClick = (e, id) => {
     setOpen((prev) => ({ ...prev, [id]: !prev[id] }));
     e.stopPropagation();
   };
 
+  /**
+   * Handle show more
+   */
   const handleShowMore = () => {
     let currPage = (pagination?.number || 0) + 1;
     if (pagination?.totalPages <= currPage) {
@@ -234,25 +241,17 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
 
       ids?.forEach((id, index) => {
         const cate = entities[id];
-        const containedSelected =
-          cate?.children && cate.children.some((child) => child.id == cateId);
+        const containedSelected = cate?.children && cate.children.some((child) => child.id == cateId);
         if (containedSelected) childContainedRef.current = id;
         const item = (
           <Fragment key={`cate-${id}-${index}`}>
-            <StyledListItemButton
-              selected={cateId == id}
-              onClick={() => handleCateChange(cate)}
-            >
+            <StyledListItemButton selected={cateId == id} onClick={() => handleCateChange(cate)}>
               <FilterText>{cate?.name}</FilterText>
               {cate.children?.length ? (
                 open[id] ? (
                   <ExpandLess onClick={(e) => handleClick(e, id)} />
                 ) : (
-                  <Badge
-                    color="primary"
-                    variant="dot"
-                    invisible={!containedSelected}
-                  >
+                  <Badge color="primary" variant="dot" invisible={!containedSelected}>
                     <ExpandMore onClick={(e) => handleClick(e, id)} />
                   </Badge>
                 )
@@ -261,11 +260,7 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
             {cate?.children && (
               <Collapse in={open[id]} timeout="auto" unmountOnExit>
                 {cate.children?.map((child, subIndex) => (
-                  <List
-                    key={`${child?.id}-${subIndex}`}
-                    component="div"
-                    disablePadding
-                  >
+                  <List key={`${child?.id}-${subIndex}`} component="div" disablePadding>
                     <StyledListItemButton
                       className="secondary"
                       selected={cateId == child?.id}
@@ -298,7 +293,7 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
     } else {
       catesContent = (
         <StyledListItemButton>
-          <LabelText className="warning">Không có danh mục nào</LabelText>
+          <LabelText className="warning">{capitalize(t("message.no", { item: t("category.label") }))}</LabelText>
         </StyledListItemButton>
       );
     }
@@ -309,14 +304,10 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
       <TitleContainer>
         <FilterText>
           <CategoryOutlined />
-          &nbsp;Danh mục
+          &nbsp;{t("category.label")}
         </FilterText>
       </TitleContainer>
-      <List
-        sx={{ width: "100%", py: 0 }}
-        component="nav"
-        aria-labelledby="nested-list-categories"
-      >
+      <List sx={{ width: "100%", py: 0 }} component="nav" aria-labelledby="nested-list-categories">
         {catesContent}
         {isFetching && !isLoading && (
           <StyledListItemButton>
@@ -330,18 +321,14 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
         <Showmore onClick={handleShowMore}>
           {!showmore || isMore ? (
             <>
-              Xem thêm
-              <Badge
-                color="primary"
-                variant="dot"
-                invisible={!containedSelected()}
-              >
+              {t("show-more")}
+              <Badge color="primary" variant="dot" invisible={!containedSelected()}>
                 <ExpandMore />
               </Badge>
             </>
           ) : (
             <>
-              Ẩn bớt <ExpandLess />
+              {t("show.less")} <ExpandLess />
             </>
           )}
         </Showmore>
@@ -351,10 +338,12 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
 });
 
 const PublisherFilter = memo(({ pubs, cateId, onChangePubs, pubsRef }) => {
+  const { t } = useTranslation();
+
   const [selectedPub, setSelectedPub] = useState(pubs || []);
   const [showmore, setShowmore] = useState(false);
   const [pagination, setPagination] = useState({
-    isMore: true, //Merge new data
+    isMore: true, // Merge new data
     number: 0,
     totalPages: 0,
     totalElements: 0,
@@ -383,7 +372,10 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePubs, pubsRef }) => {
     }
   }, [data]);
 
-  //Change pub
+  /**
+   * Handle change pub
+   * @param {Event} e
+   */
   const handleChangePub = (e) => {
     const selectedIndex = selectedPub.indexOf(e.target.value);
     let newSelected = [];
@@ -395,20 +387,24 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePubs, pubsRef }) => {
     } else if (selectedIndex === selectedPub.length - 1) {
       newSelected = newSelected.concat(selectedPub.slice(0, -1));
     } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selectedPub.slice(0, selectedIndex),
-        selectedPub.slice(selectedIndex + 1)
-      );
+      newSelected = newSelected.concat(selectedPub.slice(0, selectedIndex), selectedPub.slice(selectedIndex + 1));
     }
 
     setSelectedPub(newSelected);
     handleUpdatePubs(newSelected);
   };
 
+  /**
+   * Handle update pubs
+   * @param {Array} newSelected
+   */
   const handleUpdatePubs = (newSelected) => {
     if (onChangePubs) onChangePubs(newSelected);
   };
 
+  /**
+   * Handle show more
+   */
   const handleShowMore = () => {
     let currPage = (pagination?.number || 0) + 1;
     if (pagination?.totalPages <= currPage) {
@@ -445,8 +441,7 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePubs, pubsRef }) => {
       ids?.forEach((id, index) => {
         const pub = entities[id];
         const isItemSelected = isSelected(`${id}`);
-        if (isItemSelected && !containedSelected)
-          containedSelected = isContained(id);
+        if (isItemSelected && !containedSelected) containedSelected = isContained(id);
 
         const item = (
           <FormControlLabel
@@ -484,14 +479,16 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePubs, pubsRef }) => {
         </>
       );
     } else {
-      pubsContent = <LabelText className="warning">Không có NXB nào</LabelText>;
+      pubsContent = (
+        <LabelText className="warning">{capitalize(t("message.no", { item: t("publisher.label") }))}</LabelText>
+      );
     }
   }
 
   return (
     <Filter ref={pubsRef}>
       <TitleContainer>
-        <FilterText>Nhà xuất bản</FilterText>
+        <FilterText>{t("publisher.title")}</FilterText>
       </TitleContainer>
       <FormGroup sx={{ padding: 0, width: "100%" }}>
         {pubsContent}
@@ -505,18 +502,14 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePubs, pubsRef }) => {
         <Showmore onClick={handleShowMore}>
           {!showmore || isMore ? (
             <>
-              Xem thêm
-              <Badge
-                color="primary"
-                variant="dot"
-                invisible={!containedSelected}
-              >
+              {t("show-more")}
+              <Badge color="primary" variant="dot" invisible={!containedSelected}>
                 <ExpandMore />
               </Badge>
             </>
           ) : (
             <>
-              Ẩn bớt <ExpandLess />
+              {t("show.less")} <ExpandLess />
             </>
           )}
         </Showmore>
@@ -525,82 +518,101 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePubs, pubsRef }) => {
   );
 });
 
-const RangeFilter = memo(
-  ({ value, onChangeInputRange, onChangeRange, valueRef }) => {
-    const [valueInput, setValueInput] = useState(value || [0, 10000000]);
+const RangeFilter = memo(({ value, onChangeInputRange, onChangeRange, valueRef }) => {
+  const { t } = useTranslation();
 
-    useEffect(() => {
-      setValueInput(value);
-    }, [value]);
+  const [valueInput, setValueInput] = useState(value || [0, 10000000]);
 
-    //Change
-    const handleSelect = (e) => {
-      let newValue = e.target.value.split(",").map(Number);
-      setValueInput(newValue);
-      handleUpdateInputRange(newValue);
-    };
+  useEffect(() => {
+    setValueInput(value);
+  }, [value]);
 
-    const handleChangeRange = (value) => {
-      setValueInput(value);
-      handleUpdateRange(value);
-    };
+  /**
+   * Handle select
+   * @param {Event} e
+   */
+  const handleSelect = (e) => {
+    let newValue = e.target.value.split(",").map(Number);
+    setValueInput(newValue);
+    handleUpdateInputRange(newValue);
+  };
 
-    const handleUpdateInputRange = (newValue) => {
-      if (onChangeInputRange) onChangeInputRange(newValue);
-    };
-    const handleUpdateRange = (newValue) => {
-      if (onChangeRange) onChangeRange(newValue);
-    };
+  /**
+   * Handle change range
+   * @param {Array} value
+   */
+  const handleChangeRange = (value) => {
+    setValueInput(value);
+    handleUpdateRange(value);
+  };
 
-    const isSelected = (currValue) =>
-      valueInput[0] == currValue[0] && valueInput[1] == currValue[1];
+  /**
+   * Handle update input range
+   * @param {Array} newValue
+   */
+  const handleUpdateInputRange = (newValue) => {
+    if (onChangeInputRange) onChangeInputRange(newValue);
+  };
 
-    return (
-      <Filter ref={valueRef}>
-        <TitleContainer>
-          <FilterText>Khoảng giá</FilterText>
-        </TitleContainer>
-        <FormGroup sx={{ padding: 0, width: "100%", mb: 1 }}>
-          {suggestPrices.map((option, index) => {
-            const isItemSelected = isSelected(option.value);
+  /**
+   * Handle update range
+   * @param {Array} newValue
+   */
+  const handleUpdateRange = (newValue) => {
+    if (onChangeRange) onChangeRange(newValue);
+  };
 
-            return (
-              <FormControlLabel
-                key={`range-${index}`}
-                control={
-                  <Radio
-                    value={option.value}
-                    checked={isItemSelected}
-                    onChange={handleSelect}
-                    disableRipple
-                    disableTouchRipple
-                    disableFocusRipple
-                    name={option.label}
-                    color="primary"
-                    size="small"
-                  />
-                }
-                sx={{ fontSize: "14px", width: "100%", marginRight: 0 }}
-                label={<LabelText>{option.label}</LabelText>}
-              />
-            );
-          })}
-        </FormGroup>
-        <PriceRangeSlider
-          {...{ value: valueInput, onChange: handleChangeRange }}
-        />
-      </Filter>
-    );
-  }
-);
+  const isSelected = (currValue) => valueInput[0] == currValue[0] && valueInput[1] == currValue[1];
+
+  return (
+    <Filter ref={valueRef}>
+      <TitleContainer>
+        <FilterText>{t("search.price.range")}</FilterText>
+      </TitleContainer>
+      <FormGroup sx={{ padding: 0, width: "100%", mb: 1 }}>
+        {suggestPrices.map((option, index) => {
+          const isItemSelected = isSelected(option.value);
+
+          return (
+            <FormControlLabel
+              key={`range-${index}`}
+              control={
+                <Radio
+                  value={option.value}
+                  checked={isItemSelected}
+                  onChange={handleSelect}
+                  disableRipple
+                  disableTouchRipple
+                  disableFocusRipple
+                  name={option.label}
+                  color="primary"
+                  size="small"
+                />
+              }
+              sx={{ fontSize: "14px", width: "100%", marginRight: 0 }}
+              label={<LabelText>{option.label}</LabelText>}
+            />
+          );
+        })}
+      </FormGroup>
+      <PriceRangeSlider {...{ value: valueInput, onChange: handleChangeRange }} />
+    </Filter>
+  );
+});
 
 const TypeFilter = memo(({ types, onChangeTypes, typesRef }) => {
+  const { t } = useTranslation();
+
   const [selectedType, setSelectedType] = useState(types || []);
 
   useEffect(() => {
     setSelectedType(types);
   }, [types]);
 
+  /**
+   * Handle change type
+   * @param {Event} e
+   */
   const handleChangeType = (e) => {
     const selectedIndex = selectedType.indexOf(e.target.value);
     let newSelected = [];
@@ -612,16 +624,17 @@ const TypeFilter = memo(({ types, onChangeTypes, typesRef }) => {
     } else if (selectedIndex === selectedType.length - 1) {
       newSelected = newSelected.concat(selectedType.slice(0, -1));
     } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selectedType.slice(0, selectedIndex),
-        selectedType.slice(selectedIndex + 1)
-      );
+      newSelected = newSelected.concat(selectedType.slice(0, selectedIndex), selectedType.slice(selectedIndex + 1));
     }
 
     setSelectedType(newSelected);
     handleUpdateType(newSelected);
   };
 
+  /**
+   * Handle update type
+   * @param {Array} newSelected
+   */
   const handleUpdateType = (newSelected) => {
     if (onChangeTypes) onChangeTypes(newSelected);
   };
@@ -630,7 +643,7 @@ const TypeFilter = memo(({ types, onChangeTypes, typesRef }) => {
   return (
     <Filter ref={typesRef}>
       <TitleContainer>
-        <FilterText>Hình thức bìa</FilterText>
+        <FilterText>{t("book.type")}</FilterText>
       </TitleContainer>
       <FormGroup sx={{ padding: 0, width: "100%" }}>
         {Object.values(BookType).map((option, index) => {
@@ -661,6 +674,12 @@ const TypeFilter = memo(({ types, onChangeTypes, typesRef }) => {
 });
 
 const RateFilter = memo(({ rating, onChangeRating, rateRef }) => {
+  const { t } = useTranslation();
+
+  /**
+   * Handle change rate
+   * @param {Event} e
+   */
   const handleChangeRate = (e) => {
     let newValue = e.target.value;
     if (onChangeRating) onChangeRating(newValue);
@@ -669,7 +688,7 @@ const RateFilter = memo(({ rating, onChangeRating, rateRef }) => {
   return (
     <Filter ref={rateRef}>
       <TitleContainer>
-        <FilterText>Đánh giá</FilterText>
+        <FilterText>{t("review.label")}</FilterText>
       </TitleContainer>
       <FormGroup sx={{ padding: 0, width: "100%", mb: 1 }}>
         {[...Array(5)].map((item, index) => {
@@ -700,7 +719,7 @@ const RateFilter = memo(({ rating, onChangeRating, rateRef }) => {
                   {[...Array(5 - (index + 1))].map((item, j) => (
                     <StarBorder key={`sb-${index}-${j}`} />
                   ))}
-                  {index < 4 && <>&nbsp;trở lên</>}
+                  {index < 4 && <>&nbsp;{t("above")}</>}
                 </LabelText>
               }
             />
@@ -726,15 +745,12 @@ const FilterList = memo(
     valueRef,
     rateRef,
   }) => {
+    const { t } = useTranslation();
+
     return (
       <FilterWrapper>
         <StyledSimpleBar>
-          <Stack
-            spacing={{ xs: 1 }}
-            useFlexGap
-            flexWrap="wrap"
-            divider={<Divider flexItem />}
-          >
+          <Stack spacing={{ xs: 1 }} useFlexGap flexWrap="wrap" divider={<Divider flexItem />}>
             <CateFilter
               {...{
                 cateId: filters?.cate.id,
@@ -760,12 +776,8 @@ const FilterList = memo(
                 valueRef,
               }}
             />
-            <TypeFilter
-              {...{ types: filters?.types, onChangeTypes, typesRef }}
-            />
-            <RateFilter
-              {...{ rating: filters?.rating, onChangeRating, rateRef }}
-            />
+            <TypeFilter {...{ types: filters?.types, onChangeTypes, typesRef }} />
+            <RateFilter {...{ rating: filters?.rating, onChangeRating, rateRef }} />
           </Stack>
           <ButtonContainer>
             <Button
@@ -776,7 +788,7 @@ const FilterList = memo(
               onClick={onResetFilters}
               startIcon={<FilterAltOff />}
             >
-              Xoá bộ lọc
+              {t("search.filter.clear")}
             </Button>
           </ButtonContainer>
         </StyledSimpleBar>

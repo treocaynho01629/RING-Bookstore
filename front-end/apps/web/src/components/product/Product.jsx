@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { Link } from "react-router";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { currencyFormat } from "@ring/shared/utils/convert";
+import { useTranslation } from "react-i18next";
 import { getImageSrc } from "@ring/shared/enums/image";
 import { numFormat } from "@ring/shared/utils/convert";
 import StarIcon from "@mui/icons-material/Star";
@@ -186,6 +187,7 @@ const AddToCart = styled.p`
   align-items: center;
   transition: all 0.25s ease;
   margin: 9px 0;
+  text-transform: uppercase;
   cursor: pointer;
 
   &.disabled {
@@ -197,10 +199,6 @@ const AddToCart = styled.p`
     &:hover {
       color: ${({ theme }) => theme.vars.palette.primary.main};
     }
-  }
-
-  &:after {
-    content: " THÊM VÀO GIỎ";
   }
 `;
 
@@ -241,7 +239,7 @@ const ProductTag = styled.span`
   left: ${({ theme }) => theme.spacing(1)};
   padding: ${({ theme }) => `${theme.spacing(0.25)} ${theme.spacing(1)}`};
   background-color: ${({ theme, color }) => theme.vars.palette[color]?.light || theme.vars.palette.info.light};
-  color: ${({ theme, color }) => theme.vars.palette[color]?.dark || theme.vars.palette.info.dark};
+  color: ${({ theme, color }) => theme.vars.palette[color]?.contrastText || theme.vars.palette.info.contrastText};
   font-size: 12px;
   font-weight: 500px;
   z-index: 1;
@@ -250,6 +248,12 @@ const ProductTag = styled.span`
 
 const Product = ({ book, scrollPosition }) => {
   const { addProduct } = useCart();
+  const { t } = useTranslation();
+
+  /**
+   * Handle add to cart
+   * @param {Book} book
+   */
   const handleAddToCart = (book) => {
     addProduct(book, 1);
   };
@@ -262,7 +266,7 @@ const Product = ({ book, scrollPosition }) => {
             <ItemContainer>
               {book?.amount < 30 && (
                 <ProductTag color={book?.amount <= 0 ? "error" : "warning"}>
-                  {book?.amount <= 0 ? "Hết hàng" : "Cháy hàng"}
+                  {book?.amount <= 0 ? t("cart.items.out") : t("product.out.fast")}
                 </ProductTag>
               )}
               <ImageContainer>
@@ -301,7 +305,9 @@ const Product = ({ book, scrollPosition }) => {
                       emptyIcon={<StarBorder style={{ fontSize: 14 }} />}
                       readOnly
                     />
-                    <TextMore className="secondary">Đã bán {numFormat.format(book?.totalOrders)}</TextMore>
+                    <TextMore className="secondary">
+                      {t("product.sold")} {numFormat.format(book?.totalOrders)}
+                    </TextMore>
                   </MoreInfo>
                 </MainInfo>
               </Info>
@@ -341,6 +347,7 @@ const Product = ({ book, scrollPosition }) => {
         <AddToCart onClick={() => handleAddToCart(book)} className={book ? "" : "disabled"}>
           <ShoppingCartIcon style={{ fontSize: 14 }} />
           &nbsp;
+          {t("cart.add")}
         </AddToCart>
       </Info>
     </Wrapper>

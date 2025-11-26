@@ -46,10 +46,14 @@
     "used": "Already used",
     "not.usable": "Not applicable",
     "add": "Enter coupon code",
-    "not.found": "No coupons found"
+    "not.found": "No coupons found",
+    "sale": "Discount",
+    "empty": "No discounts available for now"
   },
   "review": {
-    "label": "Reviews",
+    "title": "Product reviews",
+    "suggest": "No reviews yet, you might be the first!",
+    "buy": "Buy product",
     "quality": {
       "bad": "Very bad",
       "poor": "Bad",
@@ -60,9 +64,18 @@
   },
   "product": {
     "out": "Product is out of stock",
-    "add": "Add to cart",
+    "out.fast": "Fast selling",
     "buy.now": "Buy now",
-    "view": "View product"
+    "view": "View product",
+    "recommend": "You might also like",
+    "left": "({{quantity}}) left in stock",
+    "temporary": "Currently out of stock",
+    "policies": {
+      "label": "RING! Promotion policies",
+      "shipping": "Free Shipping",
+      "return": "7 Days Free Return",
+      "quality": "100% Authentic Products"
+    }
   },
   "footer": {
     "address": "Address: 162, Ward 2, District 9, Ho Chi Minh City, Vietnam",
@@ -111,9 +124,17 @@
     "orders": "Orders tracking",
     "edit": "Edit profile"
   },
+  "shop": {
+    "following": "Following",
+    "follow": "Follow",
+    "explore": "Explore",
+    "follower": "Followers",
+    "canceled.rate": "Cancellation rate",
+    "owner": "Owner",
+    "joined": "Joined"
+  },
   "required.login": "Please login to {{action}}",
   "required.select": "Please select any items in cart",
-  "shop.explore": "Explore",
   "help.center": "Help center",
   "login.now": "Login now"
 }

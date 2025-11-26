@@ -46,10 +46,15 @@
     "used": "Đã qua sử dụng",
     "not.usable": "Chưa thoã điều kiện",
     "add": "Nhập mã giảm giá",
-    "not.found": "Hiện không có khuyến mãi"
+    "not.found": "Hiện không có khuyến mãi",
+    "sale": "Ưu đãi",
+    "empty": "Hiện Shop không có khuyến mãi"
   },
   "review": {
-    "label": "Đánh giá",
+    "empty": "Chưa có đánh giá",
+    "title": "Đánh giá sản phẩm",
+    "suggest": "Chưa có đánh giá nào, hãy trở thành người đầu tiên!",
+    "buy": "Mua sản phẩm",
     "quality": {
       "bad": "Cực tệ",
       "poor": "Tệ",
@@ -60,9 +65,18 @@
   },
   "product": {
     "out": "Sản phẩm đã hết hàng",
-    "add": "Thêm vào giỏ",
+    "out.fast": "Cháy hàng",
     "buy.now": "Mua ngay",
-    "view": "Đi đến sản phẩm"
+    "view": "Đi đến sản phẩm",
+    "recommend": "Có thể bạn sẽ thích",
+    "left": "({{quantity}}) sản phẩm còn lại",
+    "temporary": "Tạm thời hết hàng",
+    "policies": {
+      "label": "Chính sách ưu đãi từ RING!",
+      "shipping": "Miễn phí giao hàng",
+      "return": "7 ngày đổi trả - Miễn phí",
+      "quality": "Hàng chính hãng 100%"
+    }
   },
   "footer": {
     "address": "Địa chỉ: Toà nhà 162, Khu phố 2, Phường 9, TP. Hồ Chí Minh, Việt Nam",
@@ -111,7 +125,15 @@
     "orders": "Đơn giao",
     "edit": "Sửa hồ sơ"
   },
-  "shop.explore": "Duyệt cửa hàng",
+  "shop": {
+    "following": "Đang theo dõi",
+    "follow": "Theo dõi",
+    "explore": "Duyệt cửa hàng",
+    "follower": "Theo dõi",
+    "canceled.rate": "Tỉ lệ huỷ hàng",
+    "owner": "Chủ sở hữu",
+    "joined": "Tham gia"
+  },
   "required.login": "Vui lòng đăng nhập để {{action}}",
   "required.select": "Vui lòng chọn sản phẩm trong giỏ",
   "help.center": "Trung tâm hỗ trợ",

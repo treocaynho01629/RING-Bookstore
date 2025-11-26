@@ -159,9 +159,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
       })
       .catch((rejected) => {
         console.error(rejected);
-        enqueueSnackbar(t("message.error", { action: t("product.add", { ns: "authenticated" }) }), {
-          variant: "error",
-        });
+        enqueueSnackbar(t("message.error", { action: t("cart.add") }), { variant: "error" });
         setPending(false);
       });
   };

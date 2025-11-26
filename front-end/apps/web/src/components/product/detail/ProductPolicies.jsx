@@ -1,4 +1,5 @@
 import { MobileExtendButton } from "@ring/ui/Components";
+import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
 import AssignmentReturn from "@mui/icons-material/AssignmentReturn";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
@@ -12,8 +13,14 @@ const PoliciesWrapper = styled.div`
 
 const PoliciesContainer = styled.div`
   display: flex;
-  flex-direction: column;
   overflow: hidden;
+  flex-direction: row;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  ${({ theme }) => theme.breakpoints.down("lg")} {
+    flex-direction: column;
+  }
 
   ${({ theme }) => theme.breakpoints.down("md")} {
     flex-direction: row;
@@ -33,41 +40,65 @@ const DetailTitle = styled.h4`
 `;
 
 const PolicyTitle = styled.span`
-  font-size: 14px;
-  font-weight: bold;
+  font-size: 15px;
+  font-weight: 450;
   display: flex;
   align-items: center;
-  padding-right: 20px;
   white-space: nowrap;
+
+  &:not(:last-child) {
+    margin-right: ${({ theme }) => theme.spacing(2)};
+  }
+
+  svg {
+    font-size: 18px;
+  }
+
+  ${({ theme }) => theme.breakpoints.down("lg")} {
+    &:not(:last-child) {
+      margin-right: 0;
+      margin-bottom: ${({ theme }) => theme.spacing(0.5)};
+    }
+  }
 
   ${({ theme }) => theme.breakpoints.down("md")} {
     margin: 3px 0;
+    font-size: 14px;
+    font-weight: bold;
+    padding-right: 20px;
+
+    svg {
+      font-size: 16px;
+    }
   }
 `;
 //#endregion
 
 const ProductPolicies = () => {
+  const { t } = useTranslation();
+
   return (
     <PoliciesWrapper>
-      <DetailTitle>Chính sách ưu đãi:</DetailTitle>
+      <DetailTitle>{t("product.policies.label")}:</DetailTitle>
       <PoliciesContainer>
         <PolicyTitle>
-          <LocalShipping fontSize="16px" color="error" />
-          &nbsp;Miễn phí giao hàng
+          <LocalShipping color="error" />
+          &nbsp;{t("product.policies.shipping")}
         </PolicyTitle>
         <PolicyTitle>
-          <AssignmentReturn fontSize="16px" color="error" />
-          &nbsp;Đổi trả miễn phí
+          <AssignmentReturn color="error" />
+          &nbsp;{t("product.policies.return")}
         </PolicyTitle>
         <PolicyTitle>
-          <VerifiedUser fontSize="16px" color="error" />
-          &nbsp;Hàng chính hãng 100%
+          <VerifiedUser color="error" />
+          &nbsp;{t("product.policies.quality")}
         </PolicyTitle>
       </PoliciesContainer>
       <MobileExtendButton>
         <KeyboardArrowRight fontSize="small" />
       </MobileExtendButton>
     </PoliciesWrapper>
+    // TODO: Add drawer for policies
   );
 };
 

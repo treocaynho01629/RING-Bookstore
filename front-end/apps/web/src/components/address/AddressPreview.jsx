@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { useLocation, useNavigate } from "react-router";
 import { MobileExtendButton } from "@ring/ui/Components";
+import { useTranslation } from "react-i18next";
 import { currencyFormat } from "@ring/shared/utils/convert";
 import useAuth from "../../hooks/useAuth";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
@@ -63,11 +64,17 @@ const AddressInfo = styled.span`
 //#endregion
 
 const AddressPreview = ({ addressInfo, handleOpen, loadAddress }) => {
+  const { username } = useAuth();
+  const { t } = useTranslation();
+
   const navigate = useNavigate();
   const location = useLocation();
-  const { username } = useAuth();
+
   const fullAddress = [addressInfo?.city, addressInfo?.address].join(", ");
 
+  /**
+   * Handle click open address dialog
+   */
   const handleClickOpen = () => {
     if (!username) {
       navigate("/auth/login", { state: { from: location } });
@@ -78,24 +85,25 @@ const AddressPreview = ({ addressInfo, handleOpen, loadAddress }) => {
 
   return (
     <PreviewWrapper>
-      <DetailTitle>Vận chuyển:</DetailTitle>
+      <DetailTitle>{t("shipping.label")}:</DetailTitle>
       <PreviewContainer>
         <Box display="flex" flexDirection={"column"} position="relative" width="100%">
           {!addressInfo && loadAddress ? (
-            <Box>Đang cập nhật...</Box>
+            <Box>{t("updating")}</Box>
           ) : (
             <Box display="flex" width={{ xs: "95%", md: "100%" }}>
               <LocalShippingOutlined />
               <Box overflow="hidden">
                 <AddressInfo aria-label="toggle address dialog" disabled={loadAddress} onClick={handleClickOpen}>
-                  &nbsp;Vận chuyển tới:&emsp;
+                  &nbsp;{t("shipping.label")}:&emsp;
                   <Address>
-                    {fullAddress.length > 2 ? fullAddress : "Không xác định"} // TODO: Do something with this
+                    {/* TODO: Do something with this */}
+                    {fullAddress.length > 2 ? fullAddress : t("unknown")}
                   </Address>
                   <KeyboardArrowDown sx={{ display: { xs: "none", md: "block" } }} />
                 </AddressInfo>
                 <AddressInfo className="hide-on-mobile">
-                  &nbsp;Phí vận chuyển:&emsp;
+                  &nbsp;{t("cart.shipping.fee")}:&emsp;
                   <Address>{currencyFormat.format(10000)}</Address>
                 </AddressInfo>
               </Box>

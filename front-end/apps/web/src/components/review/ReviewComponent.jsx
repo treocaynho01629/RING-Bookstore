@@ -4,6 +4,7 @@ import { useGetReviewByBookIdQuery, useGetReviewsByBookIdQuery } from "../../fea
 import { Message, MobileExtendButton, Showmore, Title } from "@ring/ui/Components";
 import { numFormat } from "@ring/shared/utils/convert";
 import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
+import { useTranslation } from "react-i18next";
 import { ActionButtons } from "../product/detail/ProductAction";
 import useAuth from "../../hooks/useAuth";
 import Button from "@mui/material/Button";
@@ -101,9 +102,10 @@ const Transition = forwardRef(function Transition(props, ref) {
 const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending, isReview, handleToggleReview }) => {
   //#region construct
   const { username } = useAuth();
+  const { t } = useTranslation();
   const [openForm, setOpenForm] = useState(undefined);
 
-  //Pagination & filter
+  // Pagination & filter
   const [filterBy, setFilterBy] = useState("all");
   const [pagination, setPagination] = useState({
     number: 0,
@@ -111,7 +113,7 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
     sortBy: "createdDate",
   });
 
-  //Fetch reviews
+  // Fetch reviews
   const productReviewsCount = book?.reviewsInfo?.total;
   const haveReviews = !(!book || productReviewsCount == 0);
   const {
@@ -135,26 +137,50 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
   );
   const loading = isLoading || isFetching || isError || isUninitialized;
 
-  //Change page
+  /**
+   * Handle page change
+   * @param {number} page
+   */
   const handlePageChange = (page) => {
     setPagination({ ...pagination, number: page - 1 });
     scrollIntoTab();
   };
 
+  /**
+   * Handle change order
+   * @param {Event} e
+   */
   const handleChangeOrder = (e) => {
     setPagination({ ...pagination, sortBy: e.target.value });
     scrollIntoTab();
   };
 
+  /**
+   * Handle change filter
+   * @param {Event} e
+   */
   const handleChangeFilter = (e) => {
     setFilterBy(e.target.value);
   };
+
+  /**
+   * Handle change size
+   * @param {number} newValue
+   */
   const handleChangeSize = (newValue) => {
     setPagination({ ...pagination, size: newValue, number: 0 });
   };
+
+  /**
+   * Handle open review form
+   */
   const handleOpenForm = () => {
     setOpenForm(true);
   };
+
+  /**
+   * Handle close review form
+   */
   const handleCloseForm = () => {
     setOpenForm(false);
   };
@@ -181,7 +207,6 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
             const review = entities[id];
 
             if (id != userReview?.id) {
-              //User's review exclude cuz it already on top
               return (
                 <Fragment key={`${id}-${index}`}>
                   <ReviewItem {...{ username, review, handleClick: handleOpenForm }} />
@@ -192,19 +217,19 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
         ) : (
           <Message>
             <StyledEmptyIcon />
-            Chưa có đánh giá nào, hãy trở thành người đầu tiên!
+            {t("review.suggest")}
           </Message>
         )}
-        {ids?.length > 0 && ids?.length < pagination.size && <Message color="warning">Không còn đánh giá nào!</Message>}
+        {ids?.length > 0 && ids?.length < pagination.size && <Message color="warning">{t("review.empty")}</Message>}
       </>
     );
   } else if (isError) {
-    reviewsContent = <Message color="error">{error?.error || "Đã xảy ra lỗi"}</Message>;
+    reviewsContent = <Message color="error">{error?.error || t("error.general")}</Message>;
   } else if (isUninitialized && productReviewsCount == 0) {
     reviewsContent = (
       <Message>
         <StyledEmptyIcon />
-        Chưa có đánh giá nào, hãy trở thành người đầu tiên!
+        {t("review.suggest")}
       </Message>
     );
   }
@@ -264,7 +289,7 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
     <ReviewsWrapper>
       <Title>
         <TitleContainer>
-          {book ? "Đánh giá sản phẩm" : <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="40%" />}
+          {book ? t("review.title") : <Skeleton variant="text" sx={{ fontSize: "inherit" }} width="40%" />}
           {tabletMode ? (
             <ReviewSummary>
               {book ? (
@@ -278,7 +303,9 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
                     emptyIcon={<StarBorder sx={{ fontSize: 16 }} />}
                   />
                   <Label>{(book?.reviewsInfo?.rating ?? 0).toFixed(1)}/5</Label>
-                  <Label className="secondary">({numFormat.format(productReviewsCount ?? 0)} đánh giá)</Label>
+                  <Label className="secondary">
+                    ({numFormat.format(productReviewsCount ?? 0)} {t("review.label")})
+                  </Label>
                 </>
               ) : (
                 <Skeleton variant="text" sx={{ fontSize: "16px" }} width={200} />
@@ -301,7 +328,7 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
           <MobileExtendButton disabled={!book} onClick={() => handleToggleReview(true)}>
             {book ? (
               <Label>
-                Xem tất cả <KeyboardArrowRight fontSize="small" />
+                {t("show.all")} <KeyboardArrowRight fontSize="small" />
               </Label>
             ) : (
               <Label>
@@ -313,10 +340,11 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
       </Title>
       <PreviewContainer>{tabletMode ? reviewsContent : mainContent}</PreviewContainer>
       {tabletMode &&
-        book?.reviewsInfo?.total > 0 && ( //View all
+        book?.reviewsInfo?.total > 0 && ( // View all
           <Showmore onClick={() => handleToggleReview(true)}>
             <Label>
-              Xem tất cả ({numFormat.format(productReviewsCount ?? 0)} đánh giá) <KeyboardArrowRight fontSize="small" />
+              {t("show.all")} ({numFormat.format(productReviewsCount ?? 0)} {t("review.label")})
+              <KeyboardArrowRight fontSize="small" />
             </Label>
           </Showmore>
         )}
@@ -335,7 +363,7 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
             >
               <DialogTitle sx={{ display: "flex", alignItems: "center" }}>
                 <KeyboardArrowLeft onClick={() => handleToggleReview(false)} style={{ marginRight: "4px" }} />
-                Đánh giá
+                {t("review.label")}
               </DialogTitle>
               <Suspense fallback={<Placeholder />}>
                 <DialogContent dividers={true} sx={{ px: "0 !important" }}>
@@ -355,7 +383,9 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
                     onClick={() => setOpenForm(true)}
                     startIcon={<EditOutlined />}
                   >
-                    {isEditable ? "Sửa đánh giá" : "Viết đánh giá"}
+                    {isEditable
+                      ? t("review.update", { ns: "authenticated" })
+                      : t("review.add", { ns: "authenticated" })}
                   </Button>
                 )}
               </DialogActions>

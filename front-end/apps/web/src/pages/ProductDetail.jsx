@@ -2,8 +2,9 @@ import { useState, useRef, lazy, Suspense, useEffect } from "react";
 import { Box, Skeleton, Stack, useMediaQuery } from "@mui/material";
 import { useParams, Navigate, NavLink, useSearchParams } from "react-router";
 import { useGetBookDetailQuery, useGetRandomBooksQuery } from "../features/books/booksApiSlice";
-import useTitle from "@ring/shared/useTitle";
+import { useTranslation } from "react-i18next";
 import { useGetShopInfoQuery } from "../features/shops/shopsApiSlice";
+import useTitle from "@ring/shared/useTitle";
 import Placeholder from "@ring/ui/Placeholder";
 import CustomDivider from "../components/custom/CustomDivider";
 import ProductContent from "../components/product/detail/ProductContent";
@@ -52,8 +53,10 @@ const ShopComponent = ({ id, name }) => {
 
 const ProductDetail = () => {
   const { slug, id } = useParams(); // Book id/slug
+  const { t } = useTranslation();
+
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isReview, setIsReview] = useState(searchParams.get("review") ?? undefined); //Is open review tab
+  const [isReview, setIsReview] = useState(searchParams.get("review") ?? undefined); // Is open review tab
   const [pending, setPending] = useState(false); // For reviewing & changing address
   const reviewRef = useRef(null); // Ref for scroll
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md"));
@@ -67,16 +70,19 @@ const ProductDetail = () => {
   );
 
   // Set title
-  //useTitle(`${data?.title ?? "RING - Bookstore!"}`);
+  useTitle(`${data?.title ?? t("product.detail")}`);
 
   useEffect(() => {
     if (isReview) scrollIntoTab();
   }, [isReview]);
 
-  // Toggle review
-  const handleToggleReview = (value) => {
-    setIsReview(value);
-    if (!value) {
+  /**
+   * Toggle review tab
+   * @param {boolean} state
+   */
+  const handleToggleReview = (state) => {
+    setIsReview(state);
+    if (!state) {
       searchParams.delete("review");
     } else {
       searchParams.set("review", true);
@@ -85,6 +91,9 @@ const ProductDetail = () => {
     scrollIntoTab();
   };
 
+  /**
+   * Scroll to review tab
+   */
   const scrollIntoTab = () => {
     reviewRef?.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -101,11 +110,12 @@ const ProductDetail = () => {
     product = <ProductContent />;
   }
 
+  // TODO: Make pending modal global
   return (
     <>
       {pending && (
         <Suspense fallBack={null}>
-          <PendingModal open={pending} message="Đang gửi yêu cầu..." />
+          <PendingModal open={pending} message={t("pending")} />
         </Suspense>
       )}
       <Box display="relative">
@@ -113,7 +123,7 @@ const ProductDetail = () => {
           {data ? (
             [
               <NavLink to={"/store"} key={"store"}>
-                Danh mục sản phẩm
+                {t("category.title")}
               </NavLink>,
               createCrumbs(data?.category),
               <NavLink to={`/store?pubs=${data?.publisher?.id}`} key={"publisher"}>
@@ -200,7 +210,7 @@ const ProductDetail = () => {
             </LazyLoadComponent>
           </Box>
         </Stack>
-        <CustomDivider>Có thể bạn sẽ thích</CustomDivider>
+        <CustomDivider>{t("product.recommend")}</CustomDivider>
         <LazyLoadComponent
           sx={{
             height: "auto",

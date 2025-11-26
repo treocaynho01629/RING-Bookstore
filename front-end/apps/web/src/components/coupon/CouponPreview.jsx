@@ -275,7 +275,7 @@ const CouponPreview = ({ shopId, scrollPosition }) => {
     ) : (
       <CouponMessage>
         <LabelOff fontSize="small" />
-        &nbsp;Hiện Shop không có khuyến mãi
+        &nbsp;{t("coupon.empty")}
       </CouponMessage>
     );
   }
@@ -283,9 +283,9 @@ const CouponPreview = ({ shopId, scrollPosition }) => {
   return (
     <CouponWrapper>
       <DetailTitle>
-        Ưu đãi: &nbsp;
+        {t("coupon.sale")}: &nbsp;
         <MoreButton onClick={handleOpenDialog}>
-          Xem thêm
+          {t("show.more")}
           <KeyboardArrowRight />
         </MoreButton>
       </DetailTitle>

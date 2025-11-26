@@ -27,6 +27,7 @@ export const getBookLanguage = () => {
   );
 };
 
+// TODO: Convert this to normal enums
 export const getBookType = () => {
   const store = getStore();
   const enums = store?.getState()?.enum?.enums;

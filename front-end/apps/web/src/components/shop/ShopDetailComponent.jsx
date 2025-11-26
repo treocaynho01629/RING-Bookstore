@@ -1,18 +1,9 @@
-import {
-  useFollowShopMutation,
-  useUnfollowShopMutation,
-} from "../../features/shops/shopsApiSlice";
+import { useFollowShopMutation, useUnfollowShopMutation } from "../../features/shops/shopsApiSlice";
 import { Link, useLocation, useNavigate } from "react-router";
-import { numFormat } from "@ring/shared/utils/convert";
+import { numFormat, dateFormatter } from "@ring/shared/utils/convert";
+import { useTranslation } from "react-i18next";
+import { ShopContainer, ShopInfo, ShopName, Verified, ShopDetail } from "./ShopComponents";
 import useAuth from "../../hooks/useAuth";
-import {
-  ShopContainer,
-  ShopInfo,
-  ShopName,
-  Verified,
-  ShopDetail,
-} from "./ShopComponents";
-// Replace MUI imports with direct imports
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -31,14 +22,19 @@ import Today from "@mui/icons-material/Today";
 import VerifiedIcon from "@mui/icons-material/Verified";
 
 const ShopDetailComponent = ({ shop, name }) => {
-  //Fetch reviews
   const { username } = useAuth();
+  const { t, i18n } = useTranslation();
+
   const [followShop, { isLoading: following }] = useFollowShopMutation();
   const [unfollowShop, { isLoading: unfollowing }] = useUnfollowShopMutation();
 
   const location = useLocation();
   const navigate = useNavigate();
 
+  /**
+   * Handle click follow shop
+   * @returns {void}
+   */
   const handleClickFollow = () => {
     if (!username) navigate("/auth/login", { state: { from: location } });
     if (!shop || following || unfollowing || !username) return;
@@ -57,6 +53,8 @@ const ShopDetailComponent = ({ shop, name }) => {
         });
     }
   };
+
+  const date = new Date(shop?.joinedDate);
 
   return (
     <ShopContainer>
@@ -86,16 +84,9 @@ const ShopDetailComponent = ({ shop, name }) => {
                       width: { xs: 110, md: "90%" },
                     }}
                   />
-                  <Skeleton
-                    variant="text"
-                    sx={{ fontSize: "13px" }}
-                    width={100}
-                  />
+                  <Skeleton variant="text" sx={{ fontSize: "13px" }} width={100} />
                 </Box>
-                <Skeleton
-                  variant="rectangular"
-                  sx={{ height: 35, width: { xs: 100, md: "100%" } }}
-                />
+                <Skeleton variant="rectangular" sx={{ height: 35, width: { xs: 100, md: "100%" } }} />
               </Box>
             </ShopInfo>
           ) : (
@@ -123,11 +114,8 @@ const ShopDetailComponent = ({ shop, name }) => {
                   <Box mb={{ xs: 0, md: 1 }}>
                     <ShopName>{shop?.name}</ShopName>
                     <Verified>
-                      <VerifiedIcon
-                        sx={{ fontSize: "16px", marginRight: 1 }}
-                        color="primary"
-                      />
-                      Đối tác RING!
+                      <VerifiedIcon sx={{ fontSize: "16px", marginRight: 1 }} color="primary" />
+                      {t("official")}
                     </Verified>
                   </Box>
                 </Link>
@@ -140,7 +128,7 @@ const ShopDetailComponent = ({ shop, name }) => {
                   color={shop?.followed ? "warning" : "primary"}
                   startIcon={shop?.followed ? <Check /> : <Add />}
                 >
-                  {shop?.followed ? "Đang theo dõi" : "Theo dõi"}
+                  {shop?.followed ? t("shop.following") : t("shop.follow")}
                 </Button>
               </Box>
             </ShopInfo>
@@ -153,12 +141,7 @@ const ShopDetailComponent = ({ shop, name }) => {
           justifyContent="center"
           padding={{ xs: 0, md: "0 25px" }}
         >
-          <Stack
-            spacing={2}
-            direction="row"
-            useFlexGap
-            sx={{ flexWrap: "wrap", width: "100%" }}
-          >
+          <Stack spacing={2} direction="row" useFlexGap sx={{ flexWrap: "wrap", width: "100%" }}>
             {!shop ? (
               <>
                 <ShopDetail>
@@ -189,49 +172,35 @@ const ShopDetailComponent = ({ shop, name }) => {
                   />
                 </ShopDetail>
                 <ShopDetail className="hide-on-mobile">
-                  <Skeleton
-                    variant="text"
-                    sx={{ fontSize: { xs: "12px", md: "14px" } }}
-                    width={170}
-                  />
+                  <Skeleton variant="text" sx={{ fontSize: { xs: "12px", md: "14px" } }} width={170} />
                 </ShopDetail>
               </>
             ) : (
               <>
                 <ShopDetail>
                   <LocalActivity />
-                  Đánh giá:
-                  <b>{`${(shop?.rating ?? 0).toFixed(1)} (${numFormat.format(shop?.totalReviews)} đánh giá)`}</b>
+                  {t("review.label")}:
+                  <b>{`${(shop?.rating ?? 0).toFixed(1)} (${numFormat.format(shop?.totalReviews)} ${t("review.label")})`}</b>
                 </ShopDetail>
                 <ShopDetail>
                   <AutoStories />
-                  Sản phẩm:<b>{numFormat.format(shop?.totalProducts)}</b>
+                  {t("product.label")}:<b>{numFormat.format(shop?.totalProducts)}</b>
                 </ShopDetail>
                 <ShopDetail>
                   <PersonAddAlt1 />
-                  Theo dõi:
-                  <b>{numFormat.format(shop?.totalFollowers)}</b>
+                  {t("shop.follower")}:<b>{numFormat.format(shop?.totalFollowers)}</b>
                 </ShopDetail>
                 <ShopDetail className="hide-on-mobile">
                   <Block />
-                  Tỉ lệ huỷ hàng:
-                  <b>{shop?.canceledRate * 100}%</b>
+                  {t("shop.canceled.rate")}:<b>{shop?.canceledRate * 100}%</b>
                 </ShopDetail>
                 <ShopDetail className="hide-on-mobile">
                   <Person4 />
-                  Chủ sở hữu:
-                  <b>{shop?.username}</b>
+                  {t("shop.owner")}:<b>{shop?.username}</b>
                 </ShopDetail>
                 <ShopDetail className="hide-on-mobile">
                   <Today />
-                  Tham gia:
-                  <b>
-                    {new Date(shop?.joinedDate).toLocaleDateString("en-GB", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    })}
-                  </b>
+                  {t("shop.joined")}:<b>{dateFormatter(date, i18n.language)}</b>
                 </ShopDetail>
               </>
             )}

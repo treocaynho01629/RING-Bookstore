@@ -4,6 +4,8 @@ import { getBookType } from "@ring/shared/enums/book";
 import { useGetCategoriesQuery, useGetRelevantCategoriesQuery } from "../../../features/categories/categoriesApiSlice";
 import { useGetPublishersQuery, useGetRelevantPublishersQuery } from "../../../features/publishers/publishersApiSlice";
 import { suggestPrices } from "../../../utils/filters";
+import { useTranslation } from "react-i18next";
+import { capitalize } from "lodash-es";
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
@@ -156,6 +158,7 @@ const LIMIT_PUBS = 4;
 const BookType = getBookType();
 
 const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false); //Open sub cate
   const [showmore, setShowmore] = useState(false);
   const childContainedRef = useRef(null);
@@ -186,16 +189,27 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
     }
   }, [data]);
 
-  // Open sub cate
+  /**
+   * Handle change cate
+   * @param {Object} cate
+   */
   const handleCateChange = (cate) => {
     onChangeCate({ id: cate?.id ?? "", slug: cate?.slug ?? "" });
   };
 
+  /**
+   * Handle click cate
+   * @param {Event} e
+   * @param {string} id
+   */
   const handleClick = (e, id) => {
     setOpen((prev) => ({ ...prev, [id]: !prev[id] }));
     e.stopPropagation();
   };
 
+  /**
+   * Handle show more
+   */
   const handleShowMore = () => {
     let currPage = (pagination?.number || 0) + 1;
     if (pagination?.totalPages <= currPage) {
@@ -206,6 +220,9 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
     }
   };
 
+  /**
+   * Handle contained selected
+   */
   let isMore = pagination?.totalPages > (pagination?.number || 0) + 1;
   let isCollapsable = pagination?.totalElements > LIMIT_CATES;
   let containedSelected = () => {
@@ -285,7 +302,7 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
         </>
       );
     } else {
-      catesContent = <Message>Không có danh mục nào</Message>;
+      catesContent = <Message>{capitalize(t("message.no", { item: t("category.label") }))}</Message>;
     }
   }
 
@@ -294,7 +311,7 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
       <TitleContainer>
         <FilterText>
           <CategoryOutlined />
-          &nbsp;Danh mục
+          &nbsp;{t("category.label")}
         </FilterText>
       </TitleContainer>
       <Stack spacing={{ xs: 1 }} direction="row" useFlexGap flexWrap="wrap">
@@ -310,14 +327,14 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
         <Showmore onClick={handleShowMore}>
           {!showmore || isMore ? (
             <>
-              Xem thêm
+              {t("show.more")}
               <Badge color="primary" variant="dot" invisible={!containedSelected()}>
                 <ExpandMore />
               </Badge>
             </>
           ) : (
             <>
-              Ẩn bớt <ExpandLess />
+              {t("show.less")} <ExpandLess />
             </>
           )}
         </Showmore>
@@ -327,6 +344,7 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
 });
 
 const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
+  const { t } = useTranslation();
   const [selectedPub, setSelectedPub] = useState(pubs || []);
   const [showmore, setShowmore] = useState(false);
   const [pagination, setPagination] = useState({
@@ -359,7 +377,10 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
     }
   }, [data]);
 
-  // Change pub
+  /**
+   * Handle change pub
+   * @param {string} id
+   */
   const handleChangePub = (id) => {
     const selectedIndex = selectedPub.indexOf(id);
     let newSelected = [];
@@ -378,10 +399,17 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
     handleUpdatePubs(newSelected);
   };
 
+  /**
+   * Handle update pubs
+   * @param {Array} newSelected
+   */
   const handleUpdatePubs = (newSelected) => {
     if (onChangePub) onChangePub(newSelected);
   };
 
+  /**
+   * Handle show more
+   */
   const handleShowMore = () => {
     let currPage = (pagination?.number || 0) + 1;
     if (pagination?.totalPages <= currPage) {
@@ -448,14 +476,14 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
         </>
       );
     } else {
-      pubsContent = <Message>Không có NXB nào</Message>;
+      pubsContent = <Message>{capitalize(t("message.no", { item: t("publisher.label") }))}</Message>;
     }
   }
 
   return (
     <Filter>
       <TitleContainer>
-        <FilterText>Nhà xuất bản</FilterText>
+        <FilterText>{t("publisher.title")}</FilterText>
       </TitleContainer>
       <Stack spacing={{ xs: 1 }} direction="row" useFlexGap flexWrap="wrap">
         {pubsContent}
@@ -470,14 +498,14 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
         <Showmore onClick={handleShowMore}>
           {!showmore || isMore ? (
             <>
-              Xem thêm
+              {t("show.more")}
               <Badge color="primary" variant="dot" invisible={!containedSelected}>
                 <ExpandMore />
               </Badge>
             </>
           ) : (
             <>
-              Ẩn bớt <ExpandLess />
+              {t("show.less")} <ExpandLess />
             </>
           )}
         </Showmore>
@@ -487,15 +515,29 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
 });
 
 const RangeFilter = memo(({ value, onChangeRange }) => {
+  const { t } = useTranslation();
   const [valueInput, setValueInput] = useState(value || [0, 10000000]);
 
-  // Change
+  /**
+   * Handle update range
+   * @param {Array} newValue
+   */
   const handleUpdateRange = (newValue) => {
     if (onChangeRange) onChangeRange(newValue);
   };
+
+  /**
+   * Handle touch drag
+   * @param {Event} e
+   */
   const handleTouchDrag = (e) => {
     e.nativeEvent.defaultMuiPrevented = true;
   }; // Prevent drag slider along with drawer
+
+  /**
+   * Handle change range
+   * @param {Array} value
+   */
   const handleChangeRange = (value) => {
     setValueInput(value);
     handleUpdateRange(value);
@@ -506,7 +548,7 @@ const RangeFilter = memo(({ value, onChangeRange }) => {
   return (
     <Filter>
       <TitleContainer>
-        <FilterText>Khoảng giá</FilterText>
+        <FilterText>{t("search.price.range")}</FilterText>
       </TitleContainer>
       <Stack spacing={{ xs: 1 }} direction="row" useFlexGap flexWrap="wrap">
         {suggestPrices.map((option, index) => {
@@ -537,8 +579,13 @@ const RangeFilter = memo(({ value, onChangeRange }) => {
 });
 
 const TypeFilter = memo(({ types, onChangeType }) => {
+  const { t } = useTranslation();
   const [selectedType, setSelectedType] = useState(types || []);
 
+  /**
+   * Handle change type
+   * @param {string} value
+   */
   const handleChangeType = (value) => {
     const selectedIndex = selectedType.indexOf(value);
     let newSelected = [];
@@ -557,6 +604,10 @@ const TypeFilter = memo(({ types, onChangeType }) => {
     handleUpdateType(newSelected);
   };
 
+  /**
+   * Handle update type
+   * @param {Array} newSelected
+   */
   const handleUpdateType = (newSelected) => {
     if (onChangeType) onChangeType(newSelected);
   };
@@ -565,7 +616,7 @@ const TypeFilter = memo(({ types, onChangeType }) => {
   return (
     <Filter>
       <TitleContainer>
-        <FilterText>Hình thức bìa</FilterText>
+        <FilterText>{t("product.type")}</FilterText>
       </TitleContainer>
       <Stack spacing={{ xs: 1 }} direction="row" useFlexGap flexWrap="wrap">
         {Object.values(BookType).map((option, index) => {
@@ -587,6 +638,7 @@ const TypeFilter = memo(({ types, onChangeType }) => {
 });
 
 const RateFilter = memo(({ rating, onChangeRate }) => {
+  const { t } = useTranslation();
   const handleChangeRate = (value) => {
     if (onChangeRate) onChangeRate(value);
   };
@@ -594,7 +646,7 @@ const RateFilter = memo(({ rating, onChangeRate }) => {
   return (
     <Filter>
       <TitleContainer>
-        <FilterText>Đánh giá</FilterText>{" "}
+        <FilterText>{t("review.label")}</FilterText>
       </TitleContainer>
       <Stack spacing={{ xs: 1 }} direction="row" useFlexGap flexWrap="wrap">
         {[...Array(5)].map((item, index) => {
@@ -606,7 +658,7 @@ const RateFilter = memo(({ rating, onChangeRate }) => {
               className={isItemSelected ? "active" : ""}
               onClick={() => handleChangeRate(index + 1)}
             >
-              <ContentText>{`${index < 4 ? "Từ" : ""} ${index + 1} sao`}</ContentText>
+              <ContentText>{`${index < 4 ? t("from") : ""} ${index + 1} ${index == 0 ? t("review.star") : t("review.stars")}`}</ContentText>
             </StyledButton>
           );
         })}
@@ -616,13 +668,21 @@ const RateFilter = memo(({ rating, onChangeRate }) => {
 });
 
 const FilterDrawer = ({ filters, onApplyFilters, onResetFilters, open, handleClose, handleOpen, defaultFilters }) => {
+  const { t } = useTranslation();
   const [currFilters, setCurrFilters] = useState(filters);
 
-  // Update
+  /**
+   * Handle update filters
+   * @param {Object} filters
+   */
   useEffect(() => {
     setCurrFilters(filters);
   }, [filters]);
 
+  /**
+   * Handle change cate
+   * @param {Object} newValue
+   */
   const onChangeCate = (newValue) => {
     setCurrFilters((prev) => ({
       ...prev,
@@ -630,15 +690,35 @@ const FilterDrawer = ({ filters, onApplyFilters, onResetFilters, open, handleClo
       pubs: defaultFilters?.pubIds,
     }));
   };
+
+  /**
+   * Handle change pub
+   * @param {Array} newValue
+   */
   const onChangePub = (newValue) => {
     setCurrFilters((prev) => ({ ...prev, pubIds: newValue }));
   };
+
+  /**
+   * Handle change range
+   * @param {Array} newValue
+   */
   const onChangeRange = (newValue) => {
     setCurrFilters((prev) => ({ ...prev, value: newValue }));
   };
+
+  /**
+   * Handle change type
+   * @param {Array} newValue
+   */
   const onChangeType = (newValue) => {
     setCurrFilters((prev) => ({ ...prev, types: newValue }));
   };
+
+  /**
+   * Handle change rate
+   * @param {number} newValue
+   */
   const onChangeRate = (newValue) => {
     setCurrFilters((prev) => ({
       ...prev,
@@ -646,12 +726,17 @@ const FilterDrawer = ({ filters, onApplyFilters, onResetFilters, open, handleClo
     }));
   };
 
-  // Apply
+  /**
+   * Handle apply filter
+   */
   const handleApplyFilter = () => {
     handleClose();
     if (onApplyFilters) onApplyFilters(currFilters);
   };
 
+  /**
+   * Handle reset filter
+   */
   const handleResetFilter = () => {
     handleClose();
     if (onResetFilters) onResetFilters();
@@ -669,7 +754,7 @@ const FilterDrawer = ({ filters, onApplyFilters, onResetFilters, open, handleClo
       disableSwipeToOpen={false}
     >
       <DrawerContainer>
-        <DialogTitle>BỘ LỌC</DialogTitle>
+        <DialogTitle sx={{ textTransform: "uppercase" }}>{t("search.filter")}</DialogTitle>
         <DialogContent dividers sx={{ px: 2, py: 1, flex: "1 1 auto", overflowY: "auto" }}>
           <CateFilter
             {...{
@@ -699,10 +784,10 @@ const FilterDrawer = ({ filters, onApplyFilters, onResetFilters, open, handleClo
             onClick={handleResetFilter}
             startIcon={<FilterAltOff />}
           >
-            Xoá bộ lọc
+            {t("search.filter.clear")}
           </Button>
           <Button variant="contained" color="primary" size="large" onClick={handleApplyFilter} startIcon={<Check />}>
-            Áp dụng
+            {t("apply")}
           </Button>
         </DialogActions>
       </DrawerContainer>

@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { Pagination, PaginationItem, MenuItem, TextField, paginationItemClasses } from "@mui/material";
 import { pageSizes } from "../../utils/filters";
+import { useTranslation } from "react-i18next";
 
 //#region styled
 const Container = styled.div`
@@ -75,16 +76,25 @@ const StyledPageItem = styled(PaginationItem)`
 //#endregion
 
 const AppPagination = ({ page, count, size, onPageChange, onSizeChange, sizes }) => {
-  //Initial value
+  const { t } = useTranslation();
+
+  // Initial value
   const currPage = page + 1;
   const totalPages = count;
 
-  //Change current page
+  /**
+   * Handle change page
+   * @param {Event} e
+   * @param {number} page
+   */
   const handlePageChange = (e, page) => {
     if (onPageChange) onPageChange(page);
   };
 
-  //Change amount display
+  /**
+   * Handle change size
+   * @param {Event} e
+   */
   const handleChangeSize = (e) => {
     if (onSizeChange) onSizeChange(e.target.value);
   };
@@ -104,7 +114,7 @@ const AppPagination = ({ page, count, size, onPageChange, onSizeChange, sizes })
         <TextField size="small" select value={size} onChange={handleChangeSize}>
           {(sizes ?? pageSizes).map((option, index) => (
             <MenuItem value={option} key={`option-${index}`}>
-              Hiển thị {option}
+              {t("pagination.display", { count: option })}
             </MenuItem>
           ))}
         </TextField>

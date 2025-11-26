@@ -23,10 +23,12 @@
   "email.placeholder": "Email address",
   "username": "Username",
   "password": "Password",
+  "password.confirm": "Confirm password",
   "fullname": "Full name",
   "fullname.placeholder": "Enter full name",
   "phone": "Phone",
   "dob": "Date of birth",
+  "from": "From",
   "recaptcha": "Protected by reCAPTCHA and Google through",
   "terms": "Terms of service",
   "policy": "Privacy policy",
@@ -40,13 +42,13 @@
   "notification": "Notification",
   "ring": "RING!",
   "home": "Home",
-  "search.label": "Search",
   "store": "Store",
   "saved": "Saved",
   "items": "items",
   "image": "Image",
   "loading": "Loading...",
   "pending": "Pending request...",
+  "updating": "Updating...",
   "select.all": "Select all",
   "all": "All",
   "price": "Price",
@@ -54,9 +56,11 @@
   "quantity.short": "QTY",
   "total": "Total",
   "delete": "Delete",
+  "reset": "Reset",
   "other": "Other",
   "unknown": "Unknown",
   "partner": "Partner",
+  "official": "RING! Partner",
   "back": "Back",
   "apply": "Apply",
   "confirm": "Confirm",
@@ -69,11 +73,14 @@
   "update": "Update",
   "select": "Select",
   "show.more": "Show more",
+  "show.less": "Show less",
+  "show.all": "View all",
   "unselect": "Unselect",
   "report": "Report",
   "remove": "Remove",
   "save": "Save",
   "scroll": "Scroll back to top",
+  "above": "and above",
   "logout": "Log out",
   "logout.end": "Log out of this session?",
   "role": {
@@ -113,6 +120,29 @@
       "all": "For all orders"
     }
   },
+  "product": {
+    "id": "Product ID",
+    "detail": "Product detail",
+    "author": "Author",
+    "type": "Cover type",
+    "sold": "Sold",
+    "label": "Products",
+    "year": "Published year",
+    "updating": "Info pending",
+    "weight": "Weight (gr)",
+    "size": "Size (cm)",
+    "pages": "Pages",
+    "description": "Product description",
+    "other": "Other products"
+  },
+  "category": {
+    "label": "Categories",
+    "title": "Product categories"
+  },
+  "publisher": {
+    "label": "Publisher",
+    "title": "Publishers"
+  },
   "profile": {
     "navigation": "Profile",
     "dropdown": "My account",
@@ -151,7 +181,36 @@
     }
   },
   "review": {
-    "label": "Reviews"
+    "label": "Reviews",
+    "star": "Star",
+    "stars": "Stars"
+  },
+  "search": {
+    "label": "Search",
+    "results": "Search results: \"{{keyword}}\"",
+    "shop": "Search 'Store' with keyword",
+    "filter": "Filters",
+    "filtering": "Filter",
+    "filter.clear": "Clear filters",
+    "price": {
+      "range": "Price range",
+      "slider": "Price filter"
+    },
+    "sort": {
+      "toggle": "Change sort direction",
+      "label": "Sort by",
+      "newest": "Newest",
+      "best-selling": "Best selling",
+      "favorite": "Favorite",
+      "price": "Price",
+      "in-stock": "In stock",
+      "featured": "Featured",
+      "joined": "Joined date"
+    }
+  },
+  "pagination": {
+    "display": "Display {{count}}",
+    "jump": "Go to page?"
   },
   "payment": {
     "label": "Payment method",
@@ -190,7 +249,8 @@
     "success": "{{action}} successfully!",
     "error": "{{action}} failed!",
     "empty": "No {{item}} found!",
-    "out": "No {{item}} left!"
+    "out": "No {{item}} left!",
+    "no": "No {{item}} available!"
   },
   "error": {
     "server.not.response": "Server did not respond",

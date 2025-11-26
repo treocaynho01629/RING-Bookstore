@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { Skeleton, Button } from "@mui/material";
@@ -108,6 +109,12 @@ const StyledSkeleton = styled(Skeleton)`
 
 const ProductSimple = ({ book, scrollPosition }) => {
   const { addProduct } = useCart();
+  const { t } = useTranslation();
+
+  /**
+   * Handle add to cart
+   * @param {Book} book
+   */
   const handleAddToCart = (book) => {
     addProduct(book, 1);
   };
@@ -160,10 +167,11 @@ const ProductSimple = ({ book, scrollPosition }) => {
           marginTop: "10px",
           padding: "6px 0",
           width: "93%",
+          textTransform: "uppercase",
         }}
         startIcon={<ShoppingCartIcon />}
       >
-        THÊM VÀO GIỎ
+        {t("cart.add")}
       </Button>
     </Container>
   );
