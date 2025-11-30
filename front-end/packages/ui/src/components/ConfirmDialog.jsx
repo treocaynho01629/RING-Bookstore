@@ -5,8 +5,17 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
-// TODO: Move this
-const ConfirmDialog = ({ open, title, message, handleConfirm, handleCancel, maxWidth = "xs", ...props }) => {
+const ConfirmDialog = ({
+  title,
+  message,
+  cancelText = "Cancel",
+  confirmText = "Confirm",
+  open,
+  handleConfirm,
+  handleCancel,
+  maxWidth = "xs",
+  ...props
+}) => {
   return (
     <Dialog
       open={open}
@@ -24,12 +33,12 @@ const ConfirmDialog = ({ open, title, message, handleConfirm, handleCancel, maxW
       <DialogActions>
         {handleCancel && (
           <Button color="error" autoFocus onClick={handleCancel}>
-            Huỷ
+            {cancelText}
           </Button>
         )}
         {handleConfirm && (
           <Button color="primary" onClick={handleConfirm}>
-            Đồng ý
+            {confirmText}
           </Button>
         )}
       </DialogActions>

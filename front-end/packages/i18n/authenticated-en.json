@@ -43,11 +43,7 @@
     "vat.description": "This price includes VAT, packaging fee, shipping fee and other miscellaneous fees",
     "total": "Total ({{quantity}} products):",
     "cancel.label": "Cancel all order",
-    "payment.update": "Update payment method",
-    "warning": {
-      "title": "Removed products!",
-      "message": "Some products have been removed from the cart!"
-    }
+    "payment.update": "Update payment method"
   },
   "review": {
     "title": "Your reviews",

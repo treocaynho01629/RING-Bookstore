@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { useState, useEffect, Fragment, memo, useRef } from "react";
+import { BookType } from "@ring/shared/models/bookType";
 import { getBookType } from "@ring/shared/enums/book";
 import { useGetCategoriesQuery, useGetRelevantCategoriesQuery } from "../../../features/categories/categoriesApiSlice";
 import { useGetPublishersQuery, useGetRelevantPublishersQuery } from "../../../features/publishers/publishersApiSlice";
@@ -145,7 +146,6 @@ const ButtonContainer = styled.div`
 `;
 //#endregion
 
-const BookType = getBookType();
 const LIMIT_CATES = 10;
 const LIMIT_PUBS = 10;
 
@@ -321,7 +321,7 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
         <Showmore onClick={handleShowMore}>
           {!showmore || isMore ? (
             <>
-              {t("show-more")}
+              {t("show.more")}
               <Badge color="primary" variant="dot" invisible={!containedSelected()}>
                 <ExpandMore />
               </Badge>
@@ -502,7 +502,7 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePubs, pubsRef }) => {
         <Showmore onClick={handleShowMore}>
           {!showmore || isMore ? (
             <>
-              {t("show-more")}
+              {t("show.more")}
               <Badge color="primary" variant="dot" invisible={!containedSelected}>
                 <ExpandMore />
               </Badge>
@@ -643,28 +643,29 @@ const TypeFilter = memo(({ types, onChangeTypes, typesRef }) => {
   return (
     <Filter ref={typesRef}>
       <TitleContainer>
-        <FilterText>{t("book.type")}</FilterText>
+        <FilterText>{t("product.type.label")}</FilterText>
       </TitleContainer>
       <FormGroup sx={{ padding: 0, width: "100%" }}>
         {Object.values(BookType).map((option, index) => {
-          const isItemSelected = isSelected(option.value);
+          const isItemSelected = isSelected(option);
+          const typeMeta = getBookType(option);
 
           return (
             <FormControlLabel
               key={`type-${index}`}
               control={
                 <Checkbox
-                  value={option.value}
+                  value={option}
                   checked={isItemSelected}
                   onChange={handleChangeType}
                   disableRipple
-                  name={option.label}
+                  name={t(typeMeta?.label)}
                   color="primary"
                   size="small"
                 />
               }
               sx={{ fontSize: "14px", width: "100%", marginRight: 0 }}
-              label={<LabelText>{option.label}</LabelText>}
+              label={<LabelText>{t(typeMeta?.label)}</LabelText>}
             />
           );
         })}

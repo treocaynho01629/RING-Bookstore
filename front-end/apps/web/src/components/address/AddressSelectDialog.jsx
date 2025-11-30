@@ -30,6 +30,7 @@ import Close from "@mui/icons-material/Close";
 import AddressItem from "./AddressItem";
 import useAddress from "../../hooks/useAddress";
 import SimpleBar from "simplebar-react";
+import ConfirmDialog from "@ring/ui/ConfirmDialog";
 
 const AddressForm = lazy(() => import("./AddressForm"));
 
@@ -94,10 +95,7 @@ const AddressSelectDialog = ({
   const [selectedValue, setSelectedValue] = useState(-1);
   const openContext = Boolean(anchorEl);
   const fullScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
-  const [ConfirmationDialog, confirm] = useConfirm(
-    t("address.delete.title", { ns: "authenticated" }),
-    t("address.delete.description", { ns: "authenticated" })
-  );
+  const { confirm, ConfirmationDialog } = useConfirm(ConfirmDialog);
 
   // Fetch addresses
   const { data, isLoading, isSuccess, isError, error } = useGetMyAddressesQuery({}, { skip: !loggedIn });
@@ -442,7 +440,12 @@ const AddressSelectDialog = ({
    * @param {Object} address
    */
   const handleClickRemove = async (address) => {
-    const confirmation = await confirm();
+    const confirmation = await confirm(
+      t("address.delete.title", { ns: "authenticated" }),
+      t("address.delete.description", { ns: "authenticated" }),
+      t("cancel"),
+      t("confirm")
+    );
     if (confirmation) handleRemoveAddress(address);
   };
 

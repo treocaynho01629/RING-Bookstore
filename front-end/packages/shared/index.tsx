@@ -5,9 +5,6 @@ export { default as useReachable } from "./src/hooks/useReachable";
 export { default as useGetEnums } from "./src/hooks/useGetEnums";
 export { default as useTitle } from "./src/hooks/useTitle";
 
-// Components
-export { default as ConfirmDialog } from "./src/components/ConfirmDialog";
-
 // Enums
 export * from "./src/enums/address";
 export * from "./src/enums/book";

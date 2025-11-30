@@ -33,6 +33,7 @@ import useCart from "../../hooks/useCart";
 import styled from "@emotion/styled";
 import SearchInput from "./SearchInput";
 import useConfirm from "@ring/shared/useConfirm";
+import ConfirmDialog from "@ring/ui/ConfirmDialog";
 
 const NavDrawer = lazy(() => import("./NavDrawer"));
 const MiniCart = lazy(() => import("./MiniCart"));
@@ -458,7 +459,7 @@ const Navbar = () => {
   const showMenu = useMatch("/");
   const isTransparent = matchRoutes([{ path: "/" }, { path: "/product/*" }], location);
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md"));
-  const [ConfirmationDialog, confirm] = useConfirm(t("signout.confirmation"), t("signout.message"));
+  const { confirm, ConfirmationDialog } = useConfirm(ConfirmDialog);
 
   // Search
   const isStore = useMatch("/store");
@@ -478,7 +479,7 @@ const Navbar = () => {
    * Sign out
    */
   const handleSignOut = async () => {
-    const confirmation = await confirm();
+    const confirmation = await confirm(t("signout.confirmation"), t("signout.message"), t("cancel"), t("confirm"));
     if (confirmation) signOut();
   };
 

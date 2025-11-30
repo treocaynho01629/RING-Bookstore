@@ -8,7 +8,11 @@
   },
   "language": {
     "label": "Language",
-    "description": "Select your language"
+    "description": "Select your language",
+    "vi": "Vietnamese",
+    "en": "English",
+    "jp": "Japanese",
+    "cn": "Chinese"
   },
   "gender": {
     "label": "Gender",
@@ -64,6 +68,8 @@
   "back": "Back",
   "apply": "Apply",
   "confirm": "Confirm",
+  "refresh": "Refresh",
+  "reload": "Reload",
   "close": "Close",
   "cancel": "Cancel",
   "none": "None",
@@ -124,7 +130,6 @@
     "id": "Product ID",
     "detail": "Product detail",
     "author": "Author",
-    "type": "Cover type",
     "sold": "Sold",
     "label": "Products",
     "year": "Published year",
@@ -133,7 +138,14 @@
     "size": "Size (cm)",
     "pages": "Pages",
     "description": "Product description",
-    "other": "Other products"
+    "other": "Other products",
+    "type": {
+      "label": "Cover type",
+      "hard": "Hard cover",
+      "soft": "Soft cover",
+      "wood": "Wood cover",
+      "slip": "Slip cover"
+    }
   },
   "category": {
     "label": "Categories",
@@ -190,8 +202,11 @@
     "results": "Search results: \"{{keyword}}\"",
     "shop": "Search 'Store' with keyword",
     "filter": "Filters",
-    "filtering": "Filter",
     "filter.clear": "Clear filters",
+    "filter.by": "Filter by",
+    "filtering": "Filter",
+    "keyword": "Keyword",
+    "keyword.results": "Results related to",
     "price": {
       "range": "Price range",
       "slider": "Price filter"
@@ -248,9 +263,10 @@
   "message": {
     "success": "{{action}} successfully!",
     "error": "{{action}} failed!",
-    "empty": "No {{item}} found!",
+    "empty": "No {{item}} yet!",
     "out": "No {{item}} left!",
-    "no": "No {{item}} available!"
+    "no": "No {{item}} available!",
+    "none": "No {{item}} found!"
   },
   "error": {
     "server.not.response": "Server did not respond",

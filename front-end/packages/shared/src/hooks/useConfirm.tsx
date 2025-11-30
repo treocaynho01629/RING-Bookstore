@@ -1,23 +1,38 @@
-import { useState } from "react";
-import type { FC } from "react";
-import ConfirmDialog from "../components/ConfirmDialog";
+import { useCallback, useState } from "react";
 
-type UseConfirmReturn = [FC, () => Promise<boolean>];
+type ConfirmParams = {
+  title: string;
+  message: string;
+  cancelText?: string;
+  confirmText?: string;
+};
+
+type DialogProps = {
+  open: boolean;
+  title: string;
+  message: string;
+  cancelText?: string;
+  confirmText?: string;
+  handleConfirm: () => void;
+  handleCancel: () => void;
+};
 
 /**
  * A hook to show a confirmation dialog
  *
- * @param title - The title of the confirmation dialog
- * @param message - The message of the confirmation dialog
- * @returns A tuple containing the confirmation dialog component and the confirm function
+ * @param ConfirmDialog - The confirmation dialog component
+ * @returns The confirmation dialog component and the confirm function
  */
-const useConfirm = (title?: string, message?: string): UseConfirmReturn => {
+const useConfirm = (ConfirmDialog: React.ComponentType<DialogProps>) => {
   const [promise, setPromise] = useState<{ resolve: (value: boolean) => void } | null>(null);
+  const [options, setOptions] = useState<ConfirmParams>({ title: "", message: "", cancelText: "Cancel", confirmText: "Confirm" });
 
-  const confirm = () =>
-    new Promise<boolean>((resolve) => {
+  const confirm = useCallback((title: string, message: string) => {
+    return new Promise<boolean>((resolve) => {
       setPromise({ resolve });
+      setOptions({ title, message });
     });
+  }, []);
 
   const handleClose = () => {
     setPromise(null);
@@ -33,19 +48,19 @@ const useConfirm = (title?: string, message?: string): UseConfirmReturn => {
     handleClose();
   };
 
-  const ConfirmationDialog: FC = () => (
+  const ConfirmationDialog = () => (
     <ConfirmDialog
-      {...{
-        open: promise !== null,
-        title,
-        message,
-        handleConfirm,
-        handleCancel,
-      }}
+      open={promise != null}
+      title={options.title}
+      message={options.message}
+      cancelText={options.cancelText}
+      confirmText={options.confirmText}
+      handleConfirm={handleConfirm}
+      handleCancel={handleCancel}
     />
   );
 
-  return [ConfirmationDialog, confirm];
+  return { confirm, ConfirmationDialog };
 };
 
 export default useConfirm;

@@ -117,9 +117,6 @@ const DescTitle = styled.h4`
 
 //#endregion
 
-const BookLanguage = getBookLanguage();
-const BookType = getBookType();
-
 const ProductDetailContainer = ({ loading, book, tabletMode }) => {
   const { t } = useTranslation();
 
@@ -173,6 +170,8 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
   };
 
   let details;
+  const typeMeta = getBookType(book?.type);
+  const languageMeta = getBookLanguage(book?.language);
 
   if (!loading && book) {
     details = (
@@ -219,7 +218,7 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
               <InfoText className="secondary">{t("language.label")}: </InfoText>
             </InfoTitle>
             <InfoStack>
-              <InfoText>{BookLanguage[book?.language]?.label ?? t("product.updating")}</InfoText>
+              <InfoText>{t(languageMeta?.label) ?? t("product.updating")}</InfoText>
             </InfoStack>
           </tr>
           <tr>
@@ -248,11 +247,11 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
           </tr>
           <tr>
             <InfoTitle>
-              <InfoText className="secondary">{t("product.type")}: </InfoText>
+              <InfoText className="secondary">{t("product.type.label")}: </InfoText>
             </InfoTitle>
             <InfoStack>
               <Link to={`/store?types=${book?.type}`}>
-                <InfoText>{BookType[book?.type]?.label}</InfoText>
+                <InfoText>{t(typeMeta?.label)}</InfoText>
               </Link>
             </InfoStack>
           </tr>

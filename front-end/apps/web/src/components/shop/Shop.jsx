@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
-import { numFormat } from "@ring/shared/utils/convert";
+import { dateFormatter, numFormat } from "@ring/shared/utils/convert";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import Add from "@mui/icons-material/Add";
 import AutoStories from "@mui/icons-material/AutoStories";
 import Check from "@mui/icons-material/Check";
@@ -124,8 +125,7 @@ const ButtonContainer = styled.div`
   display: flex;
   justify-content: space-between;
   width: 100%;
-  padding: ${({ theme }) =>
-    `${theme.spacing(1.5)} ${theme.spacing(1)} ${theme.spacing(1)}`};
+  padding: ${({ theme }) => `${theme.spacing(1.5)} ${theme.spacing(1)} ${theme.spacing(1)}`};
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
     width: auto;
@@ -134,9 +134,16 @@ const ButtonContainer = styled.div`
 //#endregion
 
 const Shop = ({ shop, onClickFollow }) => {
+  const { t, i18n } = useTranslation();
+
+  /**
+   * Click follow
+   */
   const handleClickFollow = () => {
     if (onClickFollow) onClickFollow(shop);
   };
+
+  const date = new Date(shop?.joinedDate);
 
   return (
     <Wrapper>
@@ -156,29 +163,15 @@ const Shop = ({ shop, onClickFollow }) => {
             >
               <Store fontSize="large" />
             </Avatar>
-            <Box
-              display="flex"
-              alignItems="center"
-              flexDirection="column"
-              justifyContent="center"
-            >
+            <Box display="flex" alignItems="center" flexDirection="column" justifyContent="center">
               <ShopName>{shop?.name}</ShopName>
               <Verified>
-                <VerifiedIcon
-                  sx={{ fontSize: "16px", marginRight: 1 }}
-                  color="primary"
-                />
-                Đối tác RING!
+                <VerifiedIcon sx={{ fontSize: "16px", marginRight: 1 }} color="primary" />
+                {t("official")}
               </Verified>
               <DateText>
-                Tham gia:&nbsp;
-                <b>
-                  {new Date(shop?.joinedDate).toLocaleDateString("en-GB", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  })}
-                </b>
+                {t("shop.joined")}:&nbsp;
+                <b>{dateFormatter(date, i18n.language)}</b>
               </DateText>
             </Box>
           </TopContainer>
@@ -191,35 +184,30 @@ const Shop = ({ shop, onClickFollow }) => {
             color={shop?.followed ? "warning" : "primary"}
             startIcon={shop?.followed ? <Check /> : <Add />}
           >
-            {shop?.followed ? "Đang theo dõi" : "Theo dõi"}
+            {shop?.followed ? t("shop.following") : t("shop.follow")}
           </Button>
-          <Button
-            size="small"
-            variant="outlined"
-            color="info"
-            sx={{ display: { xs: "none", sm: "flex" } }}
-          >
-            <Link to={`/shop/${shop?.id}`}>Xem cửa hàng</Link>
+          <Button size="small" variant="outlined" color="info" sx={{ display: { xs: "none", sm: "flex" } }}>
+            <Link to={`/shop/${shop?.id}`}>{t("shop.view")}</Link>
           </Button>
         </ButtonContainer>
       </Container>
       <DetailsContainer>
         <ShopDetail>
-          Đánh giá:
+          {t("review.label")}:
           <Stats>
             <LocalActivity color="warning" />
             <b>{numFormat.format(shop?.totalReviews)}</b>
           </Stats>
         </ShopDetail>
         <ShopDetail>
-          Sản phẩm:
+          {t("product.label")}:
           <Stats>
             <AutoStories color="warning" />
             <b>{numFormat.format(shop?.totalProducts)}</b>
           </Stats>
         </ShopDetail>
         <ShopDetail>
-          Theo dõi:
+          {t("shop.following")}:
           <Stats>
             <PersonAddAlt1 color="warning" />
             <b>{numFormat.format(shop?.totalFollowers)}</b>

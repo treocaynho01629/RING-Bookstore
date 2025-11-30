@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { Fragment, useState, useEffect, memo, useRef } from "react";
 import { getBookType } from "@ring/shared/enums/book";
+import { BookType } from "@ring/shared/models/bookType";
 import { useGetCategoriesQuery, useGetRelevantCategoriesQuery } from "../../../features/categories/categoriesApiSlice";
 import { useGetPublishersQuery, useGetRelevantPublishersQuery } from "../../../features/publishers/publishersApiSlice";
 import { suggestPrices } from "../../../utils/filters";
@@ -155,7 +156,6 @@ const Showmore = styled.div`
 
 const LIMIT_CATES = 4;
 const LIMIT_PUBS = 4;
-const BookType = getBookType();
 
 const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
   const { t } = useTranslation();
@@ -616,19 +616,20 @@ const TypeFilter = memo(({ types, onChangeType }) => {
   return (
     <Filter>
       <TitleContainer>
-        <FilterText>{t("product.type")}</FilterText>
+        <FilterText>{t("product.type.label")}</FilterText>
       </TitleContainer>
       <Stack spacing={{ xs: 1 }} direction="row" useFlexGap flexWrap="wrap">
         {Object.values(BookType).map((option, index) => {
-          const isItemSelected = isSelected(option.value);
+          const isItemSelected = isSelected(option);
+          const typeMeta = getBookType(option);
 
           return (
             <StyledButton
               key={`type-${index}`}
               className={isItemSelected ? "checked" : ""}
-              onClick={() => handleChangeType(option.value)}
+              onClick={() => handleChangeType(option)}
             >
-              <ContentText>{option.label}</ContentText>
+              <ContentText>{t(typeMeta?.label)}</ContentText>
             </StyledButton>
           );
         })}

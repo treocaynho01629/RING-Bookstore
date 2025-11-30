@@ -91,6 +91,18 @@ export const sortShopsBy = [
   },
 ];
 
+// Reviews
+export const sortReviewsBy = [
+  {
+    value: "createdDate",
+    label: "review.sort.newest",
+  },
+  {
+    value: "rating",
+    label: "review.sort.favorite",
+  },
+];
+
 export const filterShopsBy = [
   {
     value: "ALL",
@@ -98,7 +110,7 @@ export const filterShopsBy = [
   },
   {
     value: "FOLLOWED",
-    label: "following",
+    label: "shop.following",
   },
 ];
 

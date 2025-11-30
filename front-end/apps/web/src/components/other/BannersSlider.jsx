@@ -222,11 +222,11 @@ function Item({ banner, index }) {
           </BackdropContainer>
           <StyledLink to={banner?.url}>
             <StyledLazyImage
-              src={getImageSrc(banner?.srcSet, 600)}
-              srcSet={Object.values(banner?.srcSet)
+              src={getImageSrc(banner?.srcSet, 800)}
+              srcSet={Object.entries(banner?.srcSet)
                 .map(([key, value]) => `${value} ${key}w`)
                 .join(", ")}
-              sizes="(min-width: 450px) 300px, (min-width: 760px) 600px, (min-width: 900px) 800px, 100vw"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 600px, 800px"
               alt={`Banner: ${banner?.name}`}
               visibleByDefault={index == 0}
               placeholder={<StyledSkeleton variant="rectangular" animation={false} />}
@@ -312,7 +312,7 @@ const BannersSlider = () => {
         );
       });
 
-      //Dummy
+      // Dummy
       const dummy = entities[ids[0]];
       extraBanners.push(
         <Fragment key={`dummy-${dummy?.id}`}>

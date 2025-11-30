@@ -85,7 +85,7 @@ function App() {
                   },
                   {
                     path: "shop",
-                    handle: { title: "shops" },
+                    handle: { title: "shop.title" },
                     lazy: async () => {
                       let Shops = await import("./pages/Shops");
                       return { Component: Shops.default };
@@ -93,7 +93,7 @@ function App() {
                   },
                   {
                     path: "shop/:id",
-                    handle: { title: "shop.detail" },
+                    handle: { title: "shop.title" },
                     lazy: async () => {
                       let ShopDetail = await import("./pages/ShopDetail");
                       return { Component: ShopDetail.default };

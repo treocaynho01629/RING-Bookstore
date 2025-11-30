@@ -75,8 +75,11 @@ export const FilterTitle = styled.span`
 `;
 
 export const StyledInput = styled(TextField)`
-  margin-right: ${({ theme }) => theme.spacing(1)};
   background-color: ${({ theme }) => theme.vars.palette.background.paper};
+
+  &:not(::last-of-type) {
+    margin-right: ${({ theme }) => theme.spacing(1)};
+  }
 
   &.sort {
     .MuiSelect-select {

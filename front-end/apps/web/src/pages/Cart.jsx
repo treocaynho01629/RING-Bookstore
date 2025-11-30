@@ -2,8 +2,6 @@ import { Suspense, lazy, useLayoutEffect } from "react";
 import { NavLink } from "react-router";
 import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
 import { useTranslation } from "react-i18next";
-import useTitle from "@ring/shared/useTitle";
-import useConfirm from "@ring/shared/useConfirm";
 import Button from "@mui/material/Button";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import Placeholder from "@ring/ui/Placeholder";
@@ -42,10 +40,6 @@ const StyledEmptyIcon = styled(EmptyIcon)`
 const Cart = () => {
   const { cartProducts } = useCart();
   const { t } = useTranslation();
-  const [ConfirmationDialog, confirm] = useConfirm(t("cart.remove"), t("cart.remove.description"));
-
-  // Set title
-  //useTitle(t("cart.label"));
 
   useLayoutEffect(() => {
     if (cartProducts.length == 0) window.scrollTo({ top: 0, behavior: "smooth" });
@@ -74,8 +68,7 @@ const Cart = () => {
             </EmptyWrapper>
           }
         >
-          <CartContent confirm={confirm} />
-          <ConfirmationDialog />
+          <CartContent />
         </Suspense>
       )}
     </Wrapper>

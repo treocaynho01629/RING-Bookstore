@@ -30,6 +30,7 @@ import SellIcon from "@mui/icons-material/Sell";
 import OrderDetailItems from "./OrderDetailItems";
 import useCart from "../../hooks/useCart";
 import Slide from "@mui/material/Slide";
+import ConfirmDialog from "@ring/ui/ConfirmDialog";
 
 const OrderProgress = lazy(() => import("./OrderProgress"));
 const CancelAndRefundDetailForm = lazy(() => import("./CancelAndRefundDetailForm"));
@@ -281,10 +282,7 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
 
   const [getBought, { isLoading: fetching }] = booksApiSlice.useLazyGetBooksByIdsQuery();
   const [confirmOrder, { isLoading: confirming }] = useConfirmOrderMutation();
-  const [ConfirmationDialog, confirm] = useConfirm(
-    t("order.confirm.label", { ns: "authenticated" }),
-    t("order.confirm.message", { ns: "authenticated", id: idFormatter(order?.id) })
-  );
+  const { confirm, ConfirmationDialog } = useConfirm(ConfirmDialog);
 
   /**
    * Handle rebuy product
@@ -323,7 +321,12 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
    * Handle confirm order
    */
   const handleConfirmOrder = async () => {
-    const confirmation = await confirm();
+    const confirmation = await confirm(
+      t("order.confirm.label", { ns: "authenticated" }),
+      t("order.confirm.message", { ns: "authenticated", id: idFormatter(order?.id) })
+      t("cancel"),
+      t("confirm")
+    );
     if (confirmation) {
       if (confirming || pending) return;
       setPending(true);

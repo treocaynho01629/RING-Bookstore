@@ -82,6 +82,7 @@ const TotalLabel = styled.span`
 
 const ProgressLabel = styled.span`
   font-size: 14px;
+  white-space: nowrap;
 `;
 
 const Progress = styled.div`
@@ -99,6 +100,7 @@ const ProgressLabelContainer = styled.div`
 const ProgressBarContainer = styled.div`
   width: 100%;
   margin-right: 6px;
+  margin-left: 6px;
   color: ${({ theme }) => theme.vars.palette.warning.light};
 `;
 //#endregion

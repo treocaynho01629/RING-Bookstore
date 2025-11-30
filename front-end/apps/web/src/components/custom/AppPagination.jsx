@@ -1,7 +1,8 @@
 import styled from "@emotion/styled";
-import { Pagination, PaginationItem, MenuItem, TextField, paginationItemClasses } from "@mui/material";
+import { Pagination, PaginationItem, MenuItem, paginationItemClasses } from "@mui/material";
 import { pageSizes } from "../../utils/filters";
 import { useTranslation } from "react-i18next";
+import { StyledInput } from "./SortComponents";
 
 //#region styled
 const Container = styled.div`
@@ -111,13 +112,13 @@ const AppPagination = ({ page, count, size, onPageChange, onSizeChange, sizes })
         className={totalPages == 0 ? "hidden" : ""}
       />
       <MoreContainer>
-        <TextField size="small" select value={size} onChange={handleChangeSize}>
+        <StyledInput size="small" select value={size} onChange={handleChangeSize}>
           {(sizes ?? pageSizes).map((option, index) => (
             <MenuItem value={option} key={`option-${index}`}>
               {t("pagination.display", { count: option })}
             </MenuItem>
           ))}
-        </TextField>
+        </StyledInput>
       </MoreContainer>
     </Container>
   );

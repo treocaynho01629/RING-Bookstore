@@ -8,6 +8,7 @@ import {
   StyledInput,
   StyledSortButton,
 } from "../custom/SortComponents";
+import { useTranslation } from "react-i18next";
 import MenuItem from "@mui/material/MenuItem";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
@@ -26,19 +27,43 @@ const ShopSortList = ({
   onPageChange,
   onClearKeyword,
 }) => {
+  const { t } = useTranslation();
+
+  /**
+   * Change sort by
+   * @param {Event} e
+   */
   const handleChangeOrder = (e) => {
     if (onChangeOrder) onChangeOrder(e.target.value);
   };
+
+  /**
+   * Change sort direction
+   */
   const handleChangeDir = () => {
     let newValue = pagination?.sortDir == "desc" ? "asc" : "desc";
     if (onChangeDir) onChangeDir(newValue);
   };
+
+  /**
+   * Mouse down
+   * @param {Event} e
+   */
   const handleMouseDown = (e) => {
     e.preventDefault();
   };
+
+  /**
+   * Change followed filter
+   * @param {Event} e
+   */
   const handleChangeFollowed = (e) => {
     if (onChangeFollowed) onChangeFollowed(e.target.value);
   };
+
+  /**
+   * Clear keyword
+   */
   const handleClearKeyword = () => {
     if (onClearKeyword) onClearKeyword();
   };
@@ -46,7 +71,7 @@ const ShopSortList = ({
   const endAdornment = (
     <InputAdornment position="end">
       <IconButton
-        aria-label="toggle sort direction"
+        aria-label={t("search.sort.toggle")}
         onClick={handleChangeDir}
         onMouseDown={handleMouseDown}
         sx={{ padding: 0, mr: -0.5 }}
@@ -54,8 +79,7 @@ const ShopSortList = ({
       >
         <Straight
           style={{
-            transform:
-              pagination?.sortDir == "desc" ? "scaleY(-1)" : "scaleY(1)",
+            transform: pagination?.sortDir == "desc" ? "scaleY(-1)" : "scaleY(1)",
           }}
         />
       </IconButton>
@@ -66,7 +90,7 @@ const ShopSortList = ({
     <SortWrapper>
       <SortContainer>
         <MainContainer>
-          <FilterTitle>Xếp theo</FilterTitle>
+          <FilterTitle>{t("search.sort.label")}</FilterTitle>
           <StyledInput
             size="small"
             select
@@ -80,11 +104,8 @@ const ShopSortList = ({
             }}
           >
             {sortShopsBy.map((option, index) => (
-              <MenuItem
-                key={`sort-${option.label}-${index}`}
-                value={option.value}
-              >
-                {option.label}
+              <MenuItem key={`sort-${option.label}-${index}`} value={option.value}>
+                {t(option.label)}
               </MenuItem>
             ))}
           </StyledInput>
@@ -96,11 +117,8 @@ const ShopSortList = ({
             onChange={handleChangeFollowed}
           >
             {filterShopsBy.map((option, index) => (
-              <MenuItem
-                key={`filter-${option.label}-${index}`}
-                value={option.value}
-              >
-                {option.label}
+              <MenuItem key={`filter-${option.label}-${index}`} value={option.value}>
+                {t(option.label)}
               </MenuItem>
             ))}
           </StyledInput>
@@ -109,13 +127,11 @@ const ShopSortList = ({
             onClick={handleClearKeyword}
             endIcon={<TipsAndUpdatesOutlined color={keyword && "warning"} />}
           >
-            Từ khoá
+            {t("search.keyword")}
           </StyledSortButton>
         </MainContainer>
         <AltContainer>
-          <QuickPagination
-            {...{ pagination, onPageChange, onOpenPagination }}
-          />
+          <QuickPagination {...{ pagination, onPageChange, onOpenPagination }} />
         </AltContainer>
       </SortContainer>
     </SortWrapper>

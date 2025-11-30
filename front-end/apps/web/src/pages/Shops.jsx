@@ -6,8 +6,9 @@ import {
   useGetDisplayShopsQuery,
   useUnfollowShopMutation,
 } from "../features/shops/shopsApiSlice";
-import useTitle from "@ring/shared/useTitle";
 import { filterShopsBy, filterShopsValue, pageSizes, sortShopsBy } from "../utils/filters";
+import { capitalize } from "lodash-es";
+import { useTranslation } from "react-i18next";
 import { Wrapper } from "../components/custom/SortComponents";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -80,10 +81,13 @@ const DEFAULT_PAGINATION = {
 const Pagination = memo(AppPagination);
 
 const Shops = () => {
+  const { t } = useTranslation();
+  const { username } = useAuth();
+
   const scrollRef = useRef(null);
   const mobileMode = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md"));
-  const { username } = useAuth();
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [openPagination, setOpenPagination] = useState(undefined); //Pagination
   const [keyword, setKeyword] = useState(searchParams.get("q") ?? "");
@@ -109,6 +113,9 @@ const Shops = () => {
     keyword: keyword,
   });
 
+  /**
+   * Update filters
+   */
   const updateFilters = () => {
     setKeyword(searchParams.get("q") ?? "");
     setPagination((prev) => ({
@@ -125,46 +132,74 @@ const Shops = () => {
     updateFilters();
   }, [searchParams]);
 
-  // Set title
-  //useTitle("Danh sách cửa hàng");
-
-  // Handle change
+  /**
+   * Scroll to top
+   */
   const scrollToTop = useCallback(() => {
     scrollRef?.current?.scrollIntoView({
       behavior: "smooth",
       block: "start",
     });
   }, []);
+
+  /**
+   * Change page
+   * @param {number} page
+   */
   const handleChangePage = (page) => {
     setPagination((prev) => ({ ...prev, number: page - 1 }));
     page - 1 == DEFAULT_PAGINATION.number ? searchParams.delete("pNo") : searchParams.set("pNo", page);
     setSearchParams(searchParams);
     scrollToTop();
   };
+
+  /**
+   * Change sort by
+   * @param {string} newValue
+   */
   const handleChangeOrder = (newValue) => {
     setPagination((prev) => ({ ...prev, sortBy: newValue }));
     newValue == DEFAULT_PAGINATION.sortBy ? searchParams.delete("sort") : searchParams.set("sort", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
+
+  /**
+   * Change sort direction
+   * @param {string} newValue
+   */
   const handleChangeDir = (newValue) => {
     setPagination((prev) => ({ ...prev, sortDir: newValue }));
     newValue == DEFAULT_PAGINATION.sortDir ? searchParams.delete("dir") : searchParams.set("dir", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
+
+  /**
+   * Change page size
+   * @param {number} newValue
+   */
   const handleChangeSize = (newValue) => {
     setPagination((prev) => ({ ...prev, size: newValue }));
     newValue == DEFAULT_PAGINATION.size ? searchParams.delete("pSize") : searchParams.set("pSize", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
+
+  /**
+   * Change followed filter
+   * @param {string} newValue
+   */
   const handleChangeFollowed = (newValue) => {
     setPagination((prev) => ({ ...prev, followed: newValue }));
     newValue == DEFAULT_PAGINATION.followed ? searchParams.delete("followed") : searchParams.set("followed", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
+
+  /**
+   * Clear keyword
+   */
   const handleClearKeyword = () => {
     setKeyword("");
     searchParams.delete("q");
@@ -172,7 +207,9 @@ const Shops = () => {
     handleResetPage();
   };
 
-  // Reset page
+  /**
+   * Reset page
+   */
   const handleResetPage = () => {
     setPagination((prev) => ({
       ...prev,
@@ -183,6 +220,10 @@ const Shops = () => {
     scrollToTop();
   };
 
+  /**
+   * Click follow
+   * @param {Object} shop
+   */
   const handleClickFollow = (shop) => {
     if (!username) navigate("/auth/login", { state: { from: location } });
     if (isLoading || following || unfollowing || !username) return;
@@ -202,9 +243,16 @@ const Shops = () => {
     }
   };
 
+  /**
+   * Open pagination
+   */
   const handleOpenPagination = () => {
     setOpenPagination(true);
   };
+
+  /**
+   * Close pagination
+   */
   const handleClosePagination = () => {
     setOpenPagination(false);
   };
@@ -230,11 +278,13 @@ const Shops = () => {
         );
       })
     ) : (
-      <Box sx={{ marginTop: 2, width: "100%", textAlign: "center" }}>Không tìm thấy cửa hàng nào!</Box>
+      <Box sx={{ marginTop: 2, width: "100%", textAlign: "center" }}>
+        {capitalize(t("message.none", { item: t("store") }))}
+      </Box>
     );
   } else if (isError) {
     shopsContent = (
-      <Box sx={{ marginTop: 2, width: "100%", textAlign: "center" }}>{error?.error ?? "Đã xảy ra lỗi!"}</Box>
+      <Box sx={{ marginTop: 2, width: "100%", textAlign: "center" }}>{error?.error ?? t("error.general")}</Box>
     );
   }
 
@@ -243,20 +293,20 @@ const Shops = () => {
   return (
     <Wrapper>
       <CustomBreadcrumbs separator="›" maxItems={4} aria-label="breadcrumb">
-        <NavLink to={"/shop"}>Danh sách cửa hàng</NavLink>
+        <NavLink to={"/shop"}>{t("shop.title")}</NavLink>
         {keyword && (
           <NavLink to={"#"} key={"keyword"}>
-            Kết quả tìm kiếm: "{keyword}"
+            {t("search.results", { keyword })}
           </NavLink>
         )}
       </CustomBreadcrumbs>
       <Container ref={scrollRef}>
-        <CustomDivider sx={{ display: { xs: "none", md: "flex" } }}>DANH SÁCH CỬA HÀNG</CustomDivider>
+        <CustomDivider sx={{ display: { xs: "none", md: "flex" } }}>{t("shop.title")}</CustomDivider>
         {!tabletMode && keyword && (
           <Keyword>
             <span>
               <TipsAndUpdatesOutlined />
-              &nbsp;Cửa hàng liên quan đến: '<b>{keyword}</b>'
+              &nbsp;{t("shop.related")}: '<b>{keyword}</b>'
             </span>
             <ClearButton onClick={handleClearKeyword}>
               <Close />

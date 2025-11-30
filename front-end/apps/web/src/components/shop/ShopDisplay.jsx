@@ -189,7 +189,7 @@ const ShopDisplay = ({ shop, name }) => {
                 </ShopDetail>
                 <ShopDetail className="hide-on-mobile">
                   <Today />
-                  {t("shop.joined")}:<b> {dateFormatter(date, i18n.language)}</b>
+                  {t("shop.joined")}:<b>{dateFormatter(date, i18n.language)}</b>
                 </ShopDetail>
               </>
             )}

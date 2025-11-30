@@ -9,10 +9,6 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./ConfirmDialog": {
-      "import": "./dist/src/components/ConfirmDialog.js",
-      "require": "./dist/src/components/ConfirmDialog.cjs"
-    },
     "./enums/locales": {
       "import": "./dist/src/enums/locales.js",
       "require": "./dist/src/enums/locales.cjs"
@@ -108,7 +104,6 @@
   },
   "peerDependencies": {
     "@mui/icons-material": "^7.2.0",
-    "@mui/material": "^7.2.0",
     "@ring/redux": "*",
     "lodash-es": "^4.17.21",
     "notistack": "^3.0.2",

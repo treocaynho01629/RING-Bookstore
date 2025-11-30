@@ -50,10 +50,6 @@
       "pending.refund": "Đang chờ hoàn tiền.",
       "refunded": "Đã hoàn tiền đơn hàng.",
       "canceled": "Đã huỷ đơn hàng."
-    },
-    "warning": {
-      "title": "Đã gỡ các sản phẩm!",
-      "message": "Một số sản phẩm đã bị gỡ khỏi trang!"
     }
   },
   "review": {

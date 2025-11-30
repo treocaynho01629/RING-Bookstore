@@ -28,6 +28,7 @@ import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import Person from "@mui/icons-material/Person";
 import Replay from "@mui/icons-material/Replay";
 import dayjs from "dayjs";
+import ConfirmDialog from "@ring/ui/ConfirmDialog";
 
 const DatePicker = lazy(() => import("@ring/ui/DatePicker"));
 const ProfileImageComponent = lazy(() => import("./ProfileImageComponent"));
@@ -195,7 +196,7 @@ const ProfileDetail = ({
   const [imageSrc, setImageSrc] = useState(undefined);
   const [imageBlob, setImageBlob] = useState([]);
   const [openViewImage, setOpenViewImage] = useState(false);
-  const [ConfirmationDialog, confirm] = useConfirm(t("profile.media.remove"), t("profile.media.remove.message"));
+  const { confirm, ConfirmationDialog } = useConfirm(ConfirmDialog);
 
   // Update profile hook
   const [updateProfile, { isLoading: updating }] = useUpdateProfileMutation();
@@ -261,7 +262,12 @@ const ProfileDetail = ({
    * Handle remove profile image
    */
   const handleRemovePic = async () => {
-    const confirmation = await confirm();
+    const confirmation = await confirm(
+      t("profile.media.remove"),
+      t("profile.media.remove.message"),
+      t("cancel"),
+      t("confirm")
+    );
     if (confirmation) {
       setImageBlob(null);
       handleCloseViewImage();

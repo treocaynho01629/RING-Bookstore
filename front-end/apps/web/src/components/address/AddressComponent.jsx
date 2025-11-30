@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import useConfirm from "@ring/shared/useConfirm";
 import AddressItem from "./AddressItem";
 import useAddress from "../../hooks/useAddress";
+import ConfirmDiaog from "@ring/ui/ConfirmDialog";
 
 const AddressForm = lazy(() => import("./AddressForm"));
 
@@ -78,10 +79,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [contextAddress, setContextAddress] = useState(null);
   const openContext = Boolean(anchorEl);
-  const [ConfirmationDialog, confirm] = useConfirm(
-    t("address.delete.title", { ns: "authenticated" }),
-    t("address.delete.description", { ns: "authenticated" })
-  );
+  const { confirm, ConfirmationDialog } = useConfirm(ConfirmDialog);
 
   // Fetch addresses
   const { data, isLoading, isSuccess, isError, error } = useGetMyAddressesQuery();
@@ -419,7 +417,12 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
    * @param {Object} address
    */
   const handleClickRemove = async (address) => {
-    const confirmation = await confirm();
+    const confirmation = await confirm(
+      t("address.delete.title", { ns: "authenticated" }),
+      t("address.delete.description", { ns: "authenticated" }),
+      t("cancel"),
+      t("confirm")
+    );
     if (confirmation) handleRemoveAddress(address);
   };
 

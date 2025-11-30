@@ -31,10 +31,11 @@ import PropTypes from "prop-types";
 import CartDetailRow from "./CartDetailRow";
 import useCheckout from "../../hooks/useCheckout";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import useConfirm from "@ring/shared/useConfirm";
+import ConfirmDialog from "@ring/ui/ConfirmDialog";
 
 const Menu = lazy(() => import("@mui/material/Menu"));
 const CouponDialog = lazy(() => import("../coupon/CouponDialog"));
-const ConfirmDialog = lazy(() => import("@ring/shared/ConfirmDialog"));
 
 //#region styled
 const TitleContainer = styled.div`
@@ -174,11 +175,12 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
-const CartContent = ({ confirm }) => {
+const CartContent = () => {
   const { t } = useTranslation();
   const { cartProducts, removeProduct, clearCart, decreaseAmount, increaseAmount, changeAmount } = useCart();
   const { estimateCart, syncCart } = useCheckout();
   const { username } = useAuth();
+  const { confirm, ConfirmationDialog } = useConfirm(ConfirmDialog);
   const calCount = useRef(0);
 
   const mobileMode = useMediaQuery((theme) => theme.breakpoints.down("sm"));
@@ -533,7 +535,7 @@ const CartContent = ({ confirm }) => {
    * Handle delete item
    */
   const handleDelete = async (id, changeQuantity = false) => {
-    const confirmation = await confirm();
+    const confirmation = await confirm(t("cart.remove"), t("cart.remove.description"), t("cancel"), t("confirm"));
     if (confirmation) {
       if (isSelected(id)) handleSelect(id);
       removeProduct(id);
@@ -547,7 +549,7 @@ const CartContent = ({ confirm }) => {
    * Handle delete multiple items
    */
   const handleDeleteMultiple = async () => {
-    const confirmation = await confirm();
+    const confirmation = await confirm(t("cart.remove"), t("cart.remove.description"), t("cancel"), t("confirm"));
     if (confirmation) {
       if (selected.length == cartProducts.length) {
         clearCart();
@@ -726,21 +728,18 @@ const CartContent = ({ confirm }) => {
           </Menu>
         )}
       </Suspense>
-      <Suspense fallback={null}>
-        {warningMessage !== "" && (
-          <ConfirmDialog
-            {...{
-              open: warningMessage !== "",
-              title: t("cart.remove.title"),
-              message: `${t("cart.remove.message")} \n${warningMessage}`,
-              handleConfirm: handleCloseWarning,
-            }}
-            fullScreen={mobileMode}
-            maxWidth={"sm"}
-            scroll="paper"
-          />
-        )}
-      </Suspense>
+      <ConfirmDialog
+        {...{
+          open: warningMessage !== "",
+          title: t("cart.remove.title"),
+          message: `${t("cart.remove.message")} \n${warningMessage}`,
+          handleConfirm: handleCloseWarning,
+        }}
+        fullScreen={mobileMode}
+        maxWidth={"sm"}
+        scroll="paper"
+      />
+      <ConfirmationDialog />
     </Grid>
   );
 };

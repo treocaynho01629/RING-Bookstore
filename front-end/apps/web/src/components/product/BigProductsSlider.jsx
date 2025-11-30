@@ -181,8 +181,8 @@ function Item({ book, index }) {
             <Link to={`/product/${book.slug}`}>
               <ImgContainer>
                 <StyledLazyImage
-                  src={getImageSrc(book?.srcSet, 450)}
-                  srcSet={Object.values(book?.srcSet)
+                  src={getImageSrc(book?.srcSet, 500)}
+                  srcSet={Object.entries(book?.srcSet)
                     .map(([key, value]) => `${value} ${key}w`)
                     .join(", ")}
                   sizes="(min-width: 450px) 450px, 100vw"

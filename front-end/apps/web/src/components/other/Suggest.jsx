@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import Grid from "@mui/material/Grid";
 import { Link } from "react-router";
 import { suggest } from "../../utils/suggest";
+import { useTranslation } from "react-i18next";
 
 //#region styled
 const ItemContainer = styled.div`
@@ -79,6 +80,7 @@ const Wrapper = styled.div`
 //#endregion
 
 const Suggest = () => {
+  const { t } = useTranslation();
   return (
     <Wrapper>
       <Grid
@@ -96,7 +98,7 @@ const Suggest = () => {
               <Link to={tab.url} title={tab.label}>
                 <ItemContainer color={tab.color}>
                   {tab.icon}
-                  <ItemName>{tab.label}</ItemName>
+                  <ItemName>{t(tab.label)}</ItemName>
                 </ItemContainer>
               </Link>
             </ItemWrapper>

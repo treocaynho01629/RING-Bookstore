@@ -2,14 +2,12 @@ package com.ring.common;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
-import com.ring.model.enums.ImageSize;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;

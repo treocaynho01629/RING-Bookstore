@@ -40,7 +40,7 @@ const ReCaptcha = lazy(() => import("@ring/auth/ReCaptcha"));
 const CouponDialog = lazy(() => import("../components/coupon/CouponDialog"));
 const ShippingSelectDialog = lazy(() => import("../components/address/ShippingSelectDialog"));
 const PaymentSelect = lazy(() => import("../components/cart/PaymentSelect"));
-const ConfirmDialog = lazy(() => import("@ring/shared/ConfirmDialog"));
+const ConfirmDialog = lazy(() => import("@ring/ui/ConfirmDialog"));
 
 //#region styled
 const Wrapper = styled.div``;
@@ -775,14 +775,13 @@ const Checkout = () => {
             />
           )}
         </Suspense>
-
         <Suspense fallback={null}>
           {openWarning !== undefined && (
             <ConfirmDialog
               {...{
                 open: openWarning,
-                title: t("checkout.warning.title", { ns: "authenticated" }),
-                message: t("checkout.warning.message", { ns: "authenticated" }),
+                title: t("cart.remove.title"),
+                message: t("cart.remove.message"),
                 handleConfirm: handleCloseWarning,
               }}
             />

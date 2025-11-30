@@ -404,8 +404,8 @@ const ProductsTop = ({
       <Link to={`/product/${selectedBook?.slug}`}>
         <Display>
           <StyledDisplayLazyImage
-            src={getImageSrc(selectedBook?.srcSet, 450)}
-            srcSet={Object.values(selectedBook?.srcSet)
+            src={getImageSrc(selectedBook?.srcSet, 600)}
+            srcSet={Object.entries(selectedBook?.srcSet)
               .map(([key, value]) => `${value} ${key}w`)
               .join(", ")}
             sizes="(min-width: 450px) 450px, 100vw"

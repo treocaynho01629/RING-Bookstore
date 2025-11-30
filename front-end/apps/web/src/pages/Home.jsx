@@ -4,9 +4,9 @@ import { Link, useNavigate } from "react-router";
 import { useGetCategoriesQuery } from "../features/categories/categoriesApiSlice";
 import { useGetBooksQuery, useGetRandomBooksQuery } from "../features/books/booksApiSlice";
 import { CustomTab, CustomTabs } from "../components/custom/CustomTabs";
+import { useTranslation } from "react-i18next";
 import { useGetPublishersQuery } from "../features/publishers/publishersApiSlice";
 import { orderTabs } from "../utils/suggest";
-import useTitle from "@ring/shared/useTitle";
 import Button from "@mui/material/Button";
 import Placeholder from "@ring/ui/Placeholder";
 import Suggest from "../components/other/Suggest";
@@ -227,6 +227,7 @@ const Loadable = ({ children, height = 300 }) => {
 };
 
 const SaleList = () => {
+  const { t } = useTranslation();
   const { data, isLoading, isFetching, isSuccess, isError, refetch } = useGetBooksQuery({
     sortBy: "discount",
     sortDir: "desc",
@@ -237,16 +238,16 @@ const SaleList = () => {
       <TitleContainer>
         <ContainerTitle color="error">
           <ThumbUpAlt />
-          &nbsp;Top Khuyến Mãi
+          &nbsp;{t("landing.top.label")}
         </ContainerTitle>
         {isError ? (
           <MoreButton className="error" onClick={() => refetch()}>
-            Tải lại <Replay />
+            {t("reload")} <Replay />
           </MoreButton>
         ) : (
           <Link to={"/store?sort=discount&dir=desc"}>
             <MoreButton>
-              Xem tất cả <KeyboardArrowRight />
+              {t("show.all")} <KeyboardArrowRight />
             </MoreButton>
           </Link>
         )}
@@ -257,15 +258,21 @@ const SaleList = () => {
 };
 
 const ProductsList = ({ tabs, value, title }) => {
-  const listRef = useRef(null); //Scroll ref
-  const [tabValue, setTabValue] = useState(0); //Tab
+  const { t } = useTranslation();
+  const listRef = useRef(null); // Scroll ref
+  const [tabValue, setTabValue] = useState(0); // Tab
 
-  //Products
+  // Products
   const filters = tabs ? { ...tabs[tabValue]?.filters, sortDir: "desc" } : value || {};
   const { data, isLoading, isFetching, isSuccess, isError, refetch } = useGetBooksQuery(tabs || value ? filters : {}, {
     skip: !tabs && !value,
   });
 
+  /**
+   * Change tab value
+   * @param {Event} e
+   * @param {String} newValue
+   */
   const handleChangeValue = (e, newValue) => {
     if (newValue !== null) {
       setTabValue(newValue);
@@ -275,6 +282,11 @@ const ProductsList = ({ tabs, value, title }) => {
       });
     }
   };
+
+  /**
+   * Get params from filterse
+   * @returns {String}
+   */
   const getParams = () => {
     const { sortBy, keyword, cateId, rating, amount, pubIds, type, shopId, sellerId } = filters || {};
 
@@ -300,12 +312,12 @@ const ProductsList = ({ tabs, value, title }) => {
           {title}
           {isError ? (
             <MoreButton className="error" onClick={() => refetch()}>
-              Tải lại <Replay />
+              {t("reload")} <Replay />
             </MoreButton>
           ) : (
             <Link to={`/store${slug ? `/${slug}` : ""}?${getParams()}`}>
               <MoreButton>
-                Xem tất cả <KeyboardArrowRight />
+                {t("show.all")} <KeyboardArrowRight />
               </MoreButton>
             </Link>
           )}
@@ -316,8 +328,8 @@ const ProductsList = ({ tabs, value, title }) => {
           <CustomTabs value={tabValue} onChange={handleChangeValue} scrollButtons="auto">
             {(!tabs?.length ? [...Array(1)] : tabs)?.map((tab, index) => (
               <CustomTab
-                key={`${title}-tabs-${tab?.label}-${index}`}
-                label={tab?.label ?? "Đang cập nhật"}
+                key={`${title}-tabs-${t(tab?.label)}-${index}`}
+                label={t(tab?.label) ?? t("updating")}
                 value={index ?? ""}
               />
             ))}
@@ -332,6 +344,7 @@ const ProductsList = ({ tabs, value, title }) => {
 };
 
 const RandomList = () => {
+  const { t } = useTranslation();
   const { data, isLoading, isFetching, isSuccess, isError, refetch } = useGetRandomBooksQuery({ amount: 10 });
   return (
     <>
@@ -346,7 +359,7 @@ const RandomList = () => {
             endIcon={<Replay sx={{ marginRight: "-10px" }} />}
             onClick={() => refetch()}
           >
-            Tải lại
+            {t("reload")}
           </Button>
         ) : (
           <Button
@@ -357,7 +370,7 @@ const RandomList = () => {
             endIcon={<Replay sx={{ marginRight: "-10px" }} />}
             onClick={() => refetch()}
           >
-            Làm mới
+            {t("refresh")}
           </Button>
         )}
       </ButtonContainer>
@@ -366,6 +379,8 @@ const RandomList = () => {
 };
 
 const TopList = ({ categories }) => {
+  const { t } = useTranslation();
+
   const listSize = 5;
   const listRef = useRef(null); // Scroll ref
   const [tabValue, setTabValue] = useState(categories?.ids[0] ?? null); // Tab
@@ -386,6 +401,11 @@ const TopList = ({ categories }) => {
     setTabValue(categories?.ids[0] ?? null);
   }, [categories]);
 
+  /**
+   * Change tab value
+   * @param {Event} e
+   * @param {String} newValue
+   */
   const handleChangeValue = (e, newValue) => {
     if (newValue !== null) {
       setTabValue(newValue);
@@ -405,13 +425,13 @@ const TopList = ({ categories }) => {
       ids?.map((id, index) => {
         const cate = entities[id];
 
-        return <CustomTab key={`top-tab-${id}-${index}`} label={cate?.name ?? "Đang cập nhật"} value={id ?? ""} />;
+        return <CustomTab key={`top-tab-${id}-${index}`} label={cate?.name ?? t("updating")} value={id ?? ""} />;
       })
     ) : (
-      <CustomTab label={"Đang cập nhật"} value={""} />
+      <CustomTab label={t("updating")} value={""} />
     );
   } else {
-    tabs = <CustomTab label={"Đang cập nhật"} value={""} />;
+    tabs = <CustomTab label={t("updating")} value={""} />;
   }
 
   return (
@@ -419,16 +439,16 @@ const TopList = ({ categories }) => {
       <TitleContainer ref={listRef}>
         <ContainerTitle color="success">
           <BarChart />
-          &nbsp;Top bán chạy
+          &nbsp;{t("landing.top.selling")}
         </ContainerTitle>
         {isError ? (
           <MoreButton className="error" onClick={() => refetch()}>
-            Tải lại <Replay />
+            {t("reload")} <Replay />
           </MoreButton>
         ) : (
           <Link to={`/store`}>
             <MoreButton>
-              Xem tất cả <KeyboardArrowRight />
+              {t("show.all")} <KeyboardArrowRight />
             </MoreButton>
           </Link>
         )}
@@ -446,7 +466,9 @@ const TopList = ({ categories }) => {
 };
 
 const Home = () => {
-  //Initial value
+  const { t } = useTranslation();
+
+  // Initial value
   const navigate = useNavigate();
   const [catesWithChilds, setCatesWithChilds] = useState([]);
   const [cates, setCates] = useState([]);
@@ -457,7 +479,7 @@ const Home = () => {
     isMore: true,
   });
 
-  //Fetch
+  // Fetch
   const {
     data: categories,
     isLoading: loadCates,
@@ -470,7 +492,6 @@ const Home = () => {
     loadMore: pagination?.isMore,
   });
 
-  //Load
   useEffect(() => {
     if (!loadCates && doneCates && categories) {
       const { entities, ids } = categories;
@@ -498,10 +519,9 @@ const Home = () => {
     }
   }, [publishers]);
 
-  //Set title
-  //useTitle("RING! - Bookstore");
-
-  //Show more
+  /**
+   * Show more products
+   */
   const handleShowMore = () => {
     if (pagination?.number >= 5) {
       navigate("/store");
@@ -515,7 +535,7 @@ const Home = () => {
     <Wrapper>
       <BannersSlider />
       <Suggest />
-      <CustomDivider>TIÊU ĐIỂM</CustomDivider>
+      <CustomDivider>{t("landing.featured")}</CustomDivider>
       <SaleContainer>
         <SaleList />
       </SaleContainer>
@@ -538,14 +558,14 @@ const Home = () => {
         <TitleContainer>
           <ContainerTitle>
             <Category color="warning" />
-            &nbsp;Danh mục sản phẩm
+            &nbsp;{t("category.title")}
           </ContainerTitle>
         </TitleContainer>
         <Loadable height={118} key={"cates"}>
           <Categories />
         </Loadable>
       </Container>
-      <CustomDivider>Sản phẩm mới nhất</CustomDivider>
+      <CustomDivider>{t("landing.newest")}</CustomDivider>
       <Container>
         <Loadable height={1140} key={"hot"}>
           <Products {...{ isLoading, data, isSuccess, isError }} />
@@ -559,7 +579,7 @@ const Home = () => {
                 endIcon={<Replay sx={{ marginRight: "-10px" }} />}
                 onClick={() => refetch()}
               >
-                Tải lại
+                {t("reload")}
               </Button>
             ) : (
               <Button
@@ -570,7 +590,7 @@ const Home = () => {
                 onClick={handleShowMore}
                 endIcon={<ExpandMore sx={{ marginRight: "-10px" }} />}
               >
-                Xem thêm
+                {t("show.more")}
               </Button>
             )}
           </ButtonContainer>
@@ -585,7 +605,7 @@ const Home = () => {
               title: (
                 <ContainerTitle>
                   <TrendingUp color="success" />
-                  &nbsp;Trending
+                  &nbsp;{t("landing.trending")}
                 </ContainerTitle>
               ),
             }}
@@ -620,7 +640,7 @@ const Home = () => {
               title: (
                 <ContainerTitle>
                   <TableChart color="warning" />
-                  &nbsp;Thương hiệu nổi bật
+                  &nbsp;{t("landing.top.publisher")}
                 </ContainerTitle>
               ),
             }}
@@ -636,7 +656,7 @@ const Home = () => {
         <TitleContainer>
           <ContainerTitle>
             <Category color="info" />
-            &nbsp;Nhà xuất bản
+            &nbsp;{t("publisher.title")}
           </ContainerTitle>
         </TitleContainer>
         <Loadable height={115} key={"pubs"}>
@@ -667,7 +687,7 @@ const Home = () => {
           );
         }
       })}
-      <CustomDivider>Sản phẩm nổi bật</CustomDivider>
+      <CustomDivider>{t("landing.top.featured")}</CustomDivider>
       <Loadable height={430}>
         <BigProductsSlider />
       </Loadable>
@@ -687,7 +707,7 @@ const Home = () => {
           />
         </Loadable>
       </Container>
-      <CustomDivider>Có thể bạn sẽ thích</CustomDivider>
+      <CustomDivider>{t("product.recommend")}</CustomDivider>
       <Container>
         <Loadable>
           <RandomList />

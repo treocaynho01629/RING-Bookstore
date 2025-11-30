@@ -8,7 +8,11 @@
   },
   "language": {
     "label": "Ngôn ngữ",
-    "description": "Chọn ngôn ngữ của bạn"
+    "description": "Chọn ngôn ngữ của bạn",
+    "vi": "Tiếng Việt",
+    "en": "Tiếng Anh",
+    "jp": "Tiếng Nhật",
+    "cn": "Tiếng Trung"
   },
   "gender": {
     "label": "Giới tính",
@@ -62,6 +66,8 @@
   "back": "Quay lại",
   "apply": "Áp dụng",
   "confirm": "Xác nhận",
+  "refresh": "Làm mới",
+  "reload": "Tải lại",
   "close": "Đóng",
   "cancel": "Huỷ",
   "none": "Không",
@@ -88,8 +94,11 @@
     "results": "Kết quả tìm kiếm: \"{{keyword}}\"",
     "shop": "Tìm kiếm 'Cửa hàng' với từ khoá",
     "filter": "Bộ lọc",
-    "filtering": "Lọc",
     "filter.clear": "Xoá bộ lọc",
+    "filter.by": "Lọc theo",
+    "filtering": "Lọc",
+    "keyword": "Từ khoá",
+    "keyword.results": "Kết quả từ khoá",
     "price": {
       "range": "Khoảng giá",
       "slider": "Bộ lọc giá"
@@ -212,7 +221,6 @@
     "id": "Mã hàng",
     "detail": "Chi tiết sản phẩm",
     "author": "Tác giả",
-    "type": "Hình thức bìa",
     "sold": "Đã bán",
     "label": "Sản phẩm",
     "year": "Năm xuất bản",
@@ -221,7 +229,14 @@
     "size": "Kích thước bao bì (cm)",
     "pages": "Số trang",
     "description": "Mô tả sản phẩm",
-    "other": "Sản phẩm khác"
+    "other": "Sản phẩm khác",
+    "type": {
+      "label": "Hình thức bìa",
+      "hard": "Bìa cứng",
+      "soft": "Bìa mềm",
+      "wood": "Bìa gỗ",
+      "slip": "Bìa rời"
+    }
   },
   "category": {
     "label": "Danh mục",
@@ -250,7 +265,8 @@
     "error": "{{action}} thất bại!",
     "empty": "Chưa có {{item}} nào!",
     "out": "Không còn {{item}} nào!",
-    "no": "Không có {{item}} nào!"
+    "no": "Không có {{item}} nào!",
+    "none": "Không tìm thấy {{item}} nào!"
   },
   "error": {
     "server.not.response": "Server không phản hồi",

@@ -34,6 +34,20 @@
     "product.discount": "Giảm giá sản phẩm",
     "coupon.discount": "Giảm giá từ coupon"
   },
+  "landing": {
+    "hot": "Hot",
+    "new": "Sản phẩm mới",
+    "event": "Sự kiện",
+    "featured": "Tiêu điểm",
+    "newest": "Sản phẩm mới nhất",
+    "trending": "Phổ biến",
+    "top": {
+      "label": "Top Khuyến Mãi",
+      "selling": "Top bán chạy",
+      "publisher": "Thương hiệu nổi bật",
+      "featured": "Sản phẩm nổi bật"
+    }
+  },
   "coupon": {
     "label": "Mã giảm giá",
     "title": "Thông tin ưu đãi",
@@ -51,7 +65,6 @@
     "empty": "Hiện Shop không có khuyến mãi"
   },
   "review": {
-    "empty": "Chưa có đánh giá",
     "title": "Đánh giá sản phẩm",
     "suggest": "Chưa có đánh giá nào, hãy trở thành người đầu tiên!",
     "buy": "Mua sản phẩm",
@@ -61,6 +74,11 @@
       "average": "Ổn",
       "good": "Hài lòng",
       "excellent": "Cực hài lòng"
+    },
+    "sort": {
+      "newest": "Xếp theo mới nhất",
+      "favorite": "Xếp theo đánh giá",
+      "all": "Tất cả đánh giá"
     }
   },
   "product": {
@@ -126,13 +144,16 @@
     "edit": "Sửa hồ sơ"
   },
   "shop": {
+    "title": "Danh sách cửa hàng",
     "following": "Đang theo dõi",
     "follow": "Theo dõi",
     "explore": "Duyệt cửa hàng",
     "follower": "Theo dõi",
     "canceled.rate": "Tỉ lệ huỷ hàng",
     "owner": "Chủ sở hữu",
-    "joined": "Tham gia"
+    "joined": "Tham gia",
+    "view": "Xem cửa hàng",
+    "related": "Cửa hàng liên quan đến"
   },
   "required.login": "Vui lòng đăng nhập để {{action}}",
   "required.select": "Vui lòng chọn sản phẩm trong giỏ",

@@ -252,7 +252,7 @@ const ButtonGroup = ({ srcSetList, goToSlide, currentSlide, responsive }) => {
   );
 };
 
-const ProductImages = ({ srcSetList }) => {
+const ProductImages = ({ srcSetList, loadingLabel = "Loading..." }) => {
   let sliderRef = useRef();
   const [slideIndex, setSlideIndex] = useState(0);
   const [open, setOpen] = useState(undefined);
@@ -319,7 +319,7 @@ const ProductImages = ({ srcSetList }) => {
               {slideIndex + 1}/{srcSetList?.length}
             </ImageNumber>
           ) : (
-            <ImageNumber>Đang tải...</ImageNumber>
+            <ImageNumber>{loadingLabel}</ImageNumber>
           )}
           {carousel}
         </TopContainer>

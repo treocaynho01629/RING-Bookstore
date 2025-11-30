@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
-import { rateLabels } from "../../utils/filters";
+import { sortReviewsBy } from "../../utils/filters";
+import { useTranslation } from "react-i18next";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Star from "@mui/icons-material/Star";
@@ -20,12 +21,16 @@ const SortLabel = styled.b`
 //#endregion
 
 const ReviewSort = ({ sortBy, handleChangeOrder, filterBy, handleChangeFilter, count }) => {
+  const { t } = useTranslation();
   return (
     <SortContainer>
-      <SortLabel>Lọc theo</SortLabel>
+      <SortLabel>{t("search.filter.by")}</SortLabel>
       <TextField size="small" select value={sortBy} onChange={handleChangeOrder} sx={{ marginRight: 1, width: 190 }}>
-        <MenuItem value={"createdDate"}>Xếp theo mới nhất</MenuItem>
-        <MenuItem value={"rating"}>Xếp theo đánh giá</MenuItem>
+        {sortReviewsBy.map((item) => (
+          <MenuItem key={`sort-item=${item.value}`} value={item.value}>
+            {t(item.label)}
+          </MenuItem>
+        ))}
       </TextField>
       <TextField
         size="small"
@@ -40,11 +45,11 @@ const ReviewSort = ({ sortBy, handleChangeOrder, filterBy, handleChangeFilter, c
         }}
       >
         <MenuItem value={"all"} selected>
-          Tất cả đánh giá
+          {t("review.sort.all")}
         </MenuItem>
         {[...Array(5)].map((item, index) => (
           <MenuItem key={`filter-item=${index}`} value={index + 1}>
-            {index + 1} sao ({count[index]})
+            {`${index + 1} ${index == 0 ? t("review.star") : t("review.stars")} (${count[index]})`}
           </MenuItem>
         ))}
       </TextField>

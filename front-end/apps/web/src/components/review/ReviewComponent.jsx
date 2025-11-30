@@ -6,6 +6,7 @@ import { numFormat } from "@ring/shared/utils/convert";
 import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
 import { useTranslation } from "react-i18next";
 import { ActionButtons } from "../product/detail/ProductAction";
+import { capitalize } from "lodash-es";
 import useAuth from "../../hooks/useAuth";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
@@ -220,7 +221,9 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
             {t("review.suggest")}
           </Message>
         )}
-        {ids?.length > 0 && ids?.length < pagination.size && <Message color="warning">{t("review.empty")}</Message>}
+        {ids?.length > 0 && ids?.length < pagination.size && (
+          <Message color="warning">{capitalize(t("message.out", { item: t("review.label") }))}</Message>
+        )}
       </>
     );
   } else if (isError) {

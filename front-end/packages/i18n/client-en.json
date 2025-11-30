@@ -34,6 +34,20 @@
     "product.discount": "Product discount",
     "coupon.discount": "Coupon discount"
   },
+  "landing": {
+    "hot": "Hot",
+    "new": "New",
+    "event": "Event",
+    "featured": "Featured",
+    "newest": "Newest products",
+    "trending": "Trending",
+    "top": {
+      "label": "Top promotions",
+      "selling": "Top selling",
+      "publisher": "Featured publisher",
+      "featured": "Featured products"
+    }
+  },
   "coupon": {
     "label": "Coupons",
     "title": "Coupon listing",
@@ -60,6 +74,11 @@
       "average": "Average",
       "good": "Good",
       "excellent": "Very good"
+    },
+    "sort": {
+      "newest": "Sort by newest",
+      "favorite": "Sort by rating",
+      "all": "All reviews"
     }
   },
   "product": {
@@ -125,13 +144,16 @@
     "edit": "Edit profile"
   },
   "shop": {
+    "title": "Shop list",
     "following": "Following",
     "follow": "Follow",
     "explore": "Explore",
     "follower": "Followers",
     "canceled.rate": "Cancellation rate",
     "owner": "Owner",
-    "joined": "Joined"
+    "joined": "Joined",
+    "view": "View shop",
+    "related": "Shops related to"
   },
   "required.login": "Please login to {{action}}",
   "required.select": "Please select any items in cart",

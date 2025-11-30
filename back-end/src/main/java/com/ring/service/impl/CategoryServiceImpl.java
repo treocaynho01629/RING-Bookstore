@@ -60,6 +60,11 @@ public class CategoryServiceImpl implements CategoryService {
         if (AppConstants.CHILDREN.equalsIgnoreCase(include)) {
 
             Page<Integer> pagedIds = cateRepo.findCateIdsByParent(parentId, pageable);
+
+            for (Integer cateId : pagedIds.getContent()) {
+                System.out.println(cateId);
+            }
+
             List<Integer> cateIds = pagedIds.getContent();
             List<ICategory> fullList = cateRepo.findParentAndSubCatesWithParentIds(cateIds);
 
@@ -68,8 +73,9 @@ public class CategoryServiceImpl implements CategoryService {
 
             // Sort by parent ids
             Map<Integer, Integer> idOrder = new HashMap<>();
-            for (int i = 0; i < cateIds.size(); i++)
+            for (int i = 0; i < cateIds.size(); i++) {
                 idOrder.put(cateIds.get(i), i);
+            }
             catesList.sort(Comparator.comparingInt(c -> idOrder.get(c.id())));
 
             return new PagingResponse<>(
@@ -79,7 +85,7 @@ public class CategoryServiceImpl implements CategoryService {
                     pagedIds.getSize(),
                     pagedIds.getNumber(),
                     pagedIds.isEmpty());
-        // Only categories without child
+            // Only categories without child
         } else {
 
             Page<ICategory> catesList = cateRepo.findCates(parentId, pageable);
@@ -102,33 +108,27 @@ public class CategoryServiceImpl implements CategoryService {
                 pageSize,
                 Sort.by(AppConstants.ID).descending());
 
-        Page<Integer[]> cateIds = cateRepo.findRelevantCategories(shopId, pageable);
-
-        // Joined id & parent id
-        LinkedHashSet<Integer> joinedIdsSet = new LinkedHashSet<>();
-        for (Integer[] arr : cateIds.getContent()) {
-            joinedIdsSet.add(arr[0]);
-            joinedIdsSet.add(arr[1]);
-        }
-        List<Integer> joinedIds = new ArrayList<>(joinedIdsSet.stream().toList());
-        List<ICategory> fullList = cateRepo.findCatesWithIds(joinedIds);
+        Page<Integer> pagedIds = cateRepo.findRelevantCategoryIds(shopId, pageable);
+        List<Integer> cateIds = pagedIds.getContent();
+        List<ICategory> fullList = cateRepo.findParentAndSubCatesWithParentIds(cateIds);
 
         // Map
         List<CategoryDTO> catesList = cateMapper.parentAndChildToCateDTOS(fullList);
 
         // Sort by parent ids
         Map<Integer, Integer> idOrder = new HashMap<>();
-        for (int i = 0; i < joinedIds.size(); i++)
-            idOrder.put(joinedIds.get(i), i);
+        for (int i = 0; i < cateIds.size(); i++) {
+            idOrder.put(cateIds.get(i), i);
+        }
         catesList.sort(Comparator.comparingInt(c -> idOrder.get(c.id())));
 
         return new PagingResponse<>(
                 catesList,
-                cateIds.getTotalPages(),
-                cateIds.getTotalElements(),
-                cateIds.getSize(),
-                cateIds.getNumber(),
-                cateIds.isEmpty());
+                pagedIds.getTotalPages(),
+                pagedIds.getTotalElements(),
+                pagedIds.getSize(),
+                pagedIds.getNumber(),
+                pagedIds.isEmpty());
     }
 
     @Cacheable(cacheNames = AppConstants.CATEGORY_PREVIEWS)
@@ -147,7 +147,7 @@ public class CategoryServiceImpl implements CategoryService {
             Category cate = cateRepo.findCateWithChildren(id, slug)
                     .orElseThrow(() -> {
                         var errorMsg = messageService.getMessage("exception.not.found",
-                                new Object[]{ new DefaultMessageSourceResolvable("label.cate.children") });
+                                new Object[] { new DefaultMessageSourceResolvable("label.cate.children") });
                         return new ResourceNotFoundException(errorMsg);
                     });
             result = cateMapper.cateToDetailDTO(cate, AppConstants.CHILDREN);
@@ -155,7 +155,7 @@ public class CategoryServiceImpl implements CategoryService {
             Category cate = cateRepo.findCateWithParent(id, slug)
                     .orElseThrow(() -> {
                         var errorMsg = messageService.getMessage("exception.not.found",
-                                new Object[]{ new DefaultMessageSourceResolvable("label.cate.parent") });
+                                new Object[] { new DefaultMessageSourceResolvable("label.cate.parent") });
                         return new ResourceNotFoundException(errorMsg);
                     });
             result = cateMapper.cateToDetailDTO(cate, AppConstants.PARENT);
@@ -163,7 +163,7 @@ public class CategoryServiceImpl implements CategoryService {
             Category cate = cateRepo.findCate(id, slug)
                     .orElseThrow(() -> {
                         var errorMsg = messageService.getMessage("exception.not.found",
-                                new Object[]{ new DefaultMessageSourceResolvable("label.cate") });
+                                new Object[] { new DefaultMessageSourceResolvable("label.cate") });
                         return new ResourceNotFoundException(errorMsg);
                     });
             result = cateMapper.cateToDetailDTO(cate);
@@ -192,14 +192,14 @@ public class CategoryServiceImpl implements CategoryService {
             Category parent = cateRepo.findById(request.getParentId())
                     .orElseThrow(() -> {
                         var errorMsg = messageService.getMessage("exception.not.found",
-                                new Object[]{ new DefaultMessageSourceResolvable("label.cate") });
+                                new Object[] { new DefaultMessageSourceResolvable("label.cate") });
                         return new ResourceNotFoundException(errorMsg);
                     });
 
             if (parent.getParent() != null) {
 
                 var errorMsg = messageService.getMessage("exception.invalid",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.cate.parent") });
+                        new Object[] { new DefaultMessageSourceResolvable("label.cate.parent") });
                 throw new HttpResponseException(HttpStatus.BAD_REQUEST,
                         AppConstants.INVALID_ARGUMENT,
                         errorMsg);
@@ -213,7 +213,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Caching(evict = {
             @CacheEvict(cacheNames = { AppConstants.CATEGORIES,
-            AppConstants.CATEGORY_PREVIEWS }, allEntries = true),
+                    AppConstants.CATEGORY_PREVIEWS }, allEntries = true),
             @CacheEvict(cacheNames = AppConstants.CATEGORY_DETAIL, key = "#id") })
     @Transactional
     public Category updateCategory(Integer id, CategoryRequest request) {
@@ -222,7 +222,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = cateRepo.findById(id)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.cate") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.cate") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
@@ -242,7 +242,7 @@ public class CategoryServiceImpl implements CategoryService {
             if (!category.getSubCates().isEmpty()) {
 
                 var errorMsg = messageService.getMessage("exception.invalid",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.cate.child") });
+                        new Object[] { new DefaultMessageSourceResolvable("label.cate.child") });
                 throw new HttpResponseException(HttpStatus.BAD_REQUEST,
                         AppConstants.INVALID_ARGUMENT,
                         errorMsg);
@@ -251,7 +251,7 @@ public class CategoryServiceImpl implements CategoryService {
             Category parent = cateRepo.findById(request.getParentId())
                     .orElseThrow(() -> {
                         var errorMsg = messageService.getMessage("exception.not.found",
-                                new Object[]{ new DefaultMessageSourceResolvable("label.cate.parent") });
+                                new Object[] { new DefaultMessageSourceResolvable("label.cate.parent") });
                         return new ResourceNotFoundException(errorMsg);
                     });
 
@@ -259,7 +259,7 @@ public class CategoryServiceImpl implements CategoryService {
             if (parent.getParent() != null) {
 
                 var errorMsg = messageService.getMessage("exception.invalid",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.cate.parent") });
+                        new Object[] { new DefaultMessageSourceResolvable("label.cate.parent") });
                 throw new HttpResponseException(HttpStatus.BAD_REQUEST,
                         AppConstants.INVALID_ARGUMENT,
                         errorMsg);
@@ -274,7 +274,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Caching(evict = {
             @CacheEvict(cacheNames = { AppConstants.CATEGORIES,
-                AppConstants.CATEGORY_PREVIEWS }, allEntries = true),
+                    AppConstants.CATEGORY_PREVIEWS }, allEntries = true),
             @CacheEvict(cacheNames = AppConstants.CATEGORY_DETAIL, key = "#id") })
     @Transactional
     public void deleteCategory(Integer id) {

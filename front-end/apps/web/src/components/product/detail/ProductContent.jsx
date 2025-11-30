@@ -5,6 +5,7 @@ import { currencyFormat, numFormat } from "@ring/shared/utils/convert";
 import { getBookType } from "@ring/shared/enums/book";
 import { useTranslation } from "react-i18next";
 import { useGetMyAddressQuery } from "../../../features/addresses/addressesApiSlice";
+import { capitalize } from "lodash-es";
 import useAuth from "../../../hooks/useAuth";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
@@ -270,8 +271,6 @@ const policiesPlaceholder = (
 );
 //#endregion
 
-const BookType = getBookType();
-
 const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
   const { username } = useAuth();
   const { t } = useTranslation();
@@ -309,11 +308,14 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
 
   // Images
   const srcSetList = book?.previewsSrcSet ? [].concat(book?.srcSet, book?.previewsSrcSet) : [].concat(book?.srcSet);
+  const typeMeta = getBookType(book?.type);
 
   return (
     <Grid container size="grow" spacing={{ xs: 0, md: 1, lg: 2 }} position="relative">
       <Grid size={{ xs: 12, md: 5.5, lg: 5 }} position="relative">
-        <ImageContainer>{!book ? <ProductImages /> : <ProductImages srcSetList={srcSetList} />}</ImageContainer>
+        <ImageContainer>
+          {!book ? <ProductImages loadingLabel={t("loading")} /> : <ProductImages srcSetList={srcSetList} />}
+        </ImageContainer>
       </Grid>
       <Grid size={{ xs: 12, md: 6.5, lg: 7 }}>
         <InfoContainer>
@@ -362,8 +364,8 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
                 <Detail>
                   {book ? (
                     <>
-                      {t("product.type")}: &nbsp;
-                      <Link to={`/store?types=${book?.type}`}>{BookType[book?.type]?.label}</Link>
+                      {t("product.type.label")}: &nbsp;
+                      <Link to={`/store?types=${book?.type}`}>{t(typeMeta?.label)}</Link>
                     </>
                   ) : (
                     <Skeleton variant="text" sx={{ fontSize: "14px" }} width="90%" />
@@ -396,7 +398,7 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
                       <UserInfoText className="rate">
                         {book?.reviewsInfo?.total > 0
                           ? `(${numFormat.format(book?.reviewsInfo?.total)}) ${t("review.label")}`
-                          : t("review.empty")}
+                          : capitalize(t("message.empty", { item: t("review.label") }))}
                       </UserInfoText>
                     </UserInfoContainer>
                     <Divider orientation="vertical" sx={{ mx: 1, display: { xs: "none", md: "block" } }} flexItem />

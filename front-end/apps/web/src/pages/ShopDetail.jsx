@@ -4,11 +4,11 @@ import { useGetShopQuery } from "../features/shops/shopsApiSlice";
 import { booksAmount, pageSizes, sortBooksBy } from "../utils/filters";
 import { useGetBooksQuery } from "../features/books/booksApiSlice";
 import { debounce, isEqual } from "lodash-es";
+import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Grid from "@mui/material/Grid";
-import useTitle from "@ring/shared/useTitle";
 import CustomBreadcrumbs from "../components/custom/CustomBreadcrumbs";
 import ShopDetailComponent from "../components/shop/ShopDetailComponent";
 import FilterDrawer from "../components/product/filter/FilterDrawer";
@@ -37,7 +37,7 @@ const DEFAULT_PAGINATION = {
 const Pagination = memo(AppPagination);
 
 const HeaderComponent = ({ id }) => {
-  //Fetch data
+  // Fetch data
   const { data, isError, error } = useGetShopQuery(id, {
     skip: !id,
   });
@@ -47,14 +47,15 @@ const HeaderComponent = ({ id }) => {
 
 const ShopDetail = () => {
   const { id } = useParams(); //Shop id
+  const { t } = useTranslation();
 
-  //Scroll ref
+  // Scroll ref
   const scrollRef = useRef(null);
   const valueRef = useRef(null);
   const typesRef = useRef(null);
   const rateRef = useRef(null);
 
-  //Responsive stuff
+  // Responsive stuff
   const mobileMode = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md_lg"));
 
@@ -63,7 +64,7 @@ const ShopDetail = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  //Filter & pagination
+  // Filter & pagination
   const [filters, setFilters] = useState({
     keyword: searchParams.get("q") ?? DEFAULT_FILTERS.keyword,
     cate: {
@@ -82,9 +83,9 @@ const ShopDetail = () => {
     amount: searchParams.get("amount") ?? DEFAULT_PAGINATION.amount,
   });
 
-  //Fetch data
+  // Fetch data
   const { data, isLoading, isFetching, isUninitialized, isError, error } = useGetBooksQuery({
-    //Books
+    // Books
     page: pagination.number,
     size: pagination.size,
     sortBy: pagination.sortBy,
@@ -98,6 +99,9 @@ const ShopDetail = () => {
     shopId: filters.shopId,
   });
 
+  /**
+   * Update filters
+   */
   const updateFilters = () => {
     setFilters((prev) => ({
       ...prev,
@@ -124,10 +128,9 @@ const ShopDetail = () => {
     updateFilters();
   }, [searchParams]);
 
-  // Set title
-  //useTitle(`${data?.name ?? "RING - Bookstore!"}`);
-
-  // Handle change
+  /**
+   * Scroll to top of page
+   */
   const scrollToTop = useCallback(() => {
     scrollRef?.current?.scrollIntoView({
       behavior: "smooth",
@@ -135,7 +138,9 @@ const ShopDetail = () => {
     });
   }, []);
 
-  // Filter change
+  /**
+   * Handle change search keyword
+   */
   const handleChangeKeyword = (newValue) => {
     setFilters((prev) => ({
       ...prev,
@@ -145,6 +150,10 @@ const ShopDetail = () => {
     setSearchParams(searchParams);
     handleResetPage();
   };
+
+  /**
+   * Handle change category
+   */
   const handleChangeCate = (newValue) => {
     newValue = filters?.cate.id == newValue?.id ? { id: "", slug: "" } : newValue;
     setFilters((prev) => ({
@@ -155,24 +164,40 @@ const ShopDetail = () => {
     setSearchParams(searchParams);
     handleResetPage();
   };
+
+  /**
+   * Handle change input range
+   */
   const handleChangeInputRange = (newValue) => {
     setFilters((prev) => ({ ...prev, value: newValue }));
     isEqual(newValue, DEFAULT_FILTERS.value) ? searchParams.delete("value") : searchParams.set("value", newValue);
     setSearchParams(searchParams);
     handleResetPage();
   };
+
+  /**
+   * Handle change range
+   */
   const handleChangeRange = debounce((newValue) => {
     setFilters((prev) => ({ ...prev, value: newValue }));
     isEqual(newValue, DEFAULT_FILTERS.value) ? searchParams.delete("value") : searchParams.set("value", newValue);
     setSearchParams(searchParams);
     handleResetPage();
   }, 1000);
+
+  /**
+   * Handle change types
+   */
   const handleChangeTypes = debounce((newValue) => {
     setFilters((prev) => ({ ...prev, types: newValue }));
     isEqual(newValue, DEFAULT_FILTERS.types) ? searchParams.delete("types") : searchParams.set("types", newValue);
     setSearchParams(searchParams);
     handleResetPage();
   }, 500);
+
+  /**
+   * Handle change rating
+   */
   const handleChangeRating = (newValue) => {
     setFilters((prev) => ({
       ...prev,
@@ -182,6 +207,10 @@ const ShopDetail = () => {
     setSearchParams(searchParams);
     handleResetPage();
   };
+
+  /**
+   * Handle apply filters
+   */
   const handleApplyFilters = (newFilters) => {
     setFilters({ ...newFilters, shopId: id });
     newFilters.cate.id == DEFAULT_FILTERS.cate.id
@@ -206,31 +235,49 @@ const ShopDetail = () => {
     handleResetPage();
   };
 
-  //Pagination change
+  /**
+   * Handle change page
+   */
   const handleChangePage = (page) => {
     setPagination((prev) => ({ ...prev, number: page - 1 }));
     page - 1 == DEFAULT_PAGINATION.number ? searchParams.delete("pNo") : searchParams.set("pNo", page);
     setSearchParams(searchParams);
     scrollToTop();
   };
+
+  /**
+   * Handle change order
+   */
   const handleChangeOrder = (newValue) => {
     setPagination((prev) => ({ ...prev, sortBy: newValue }));
     newValue == DEFAULT_PAGINATION.sortBy ? searchParams.delete("sort") : searchParams.set("sort", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
+
+  /**
+   * Handle change direction
+   */
   const handleChangeDir = (newValue) => {
     setPagination((prev) => ({ ...prev, sortDir: newValue }));
     newValue == DEFAULT_PAGINATION.sortDir ? searchParams.delete("dir") : searchParams.set("dir", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
+
+  /**
+   * Handle change size
+   */
   const handleChangeSize = (newValue) => {
     setPagination((prev) => ({ ...prev, size: newValue }));
     newValue == DEFAULT_PAGINATION.size ? searchParams.delete("pSize") : searchParams.set("pSize", newValue);
     setSearchParams(searchParams, { replace: true });
     handleResetPage();
   };
+
+  /**
+   * Handle change amount
+   */
   const handleChangeAmount = (newValue) => {
     setPagination((prev) => ({ ...prev, amount: newValue }));
     newValue == DEFAULT_PAGINATION.amount ? searchParams.delete("amount") : searchParams.set("amount", newValue);
@@ -238,15 +285,23 @@ const ShopDetail = () => {
     handleResetPage();
   };
 
-  //Pagination jump
+  /**
+   * Handle open pagination
+   */
   const handleOpenPagination = () => {
     setOpenPagination(true);
   };
+
+  /**
+   * Handle close pagination
+   */
   const handleClosePagination = () => {
     setOpenPagination(false);
   };
 
-  //Reset page
+  /**
+   * Handle reset page
+   */
   const handleResetPage = () => {
     setPagination((prev) => ({
       ...prev,
@@ -257,7 +312,9 @@ const ShopDetail = () => {
     scrollToTop();
   };
 
-  //Reset
+  /**
+   * Handle reset filters
+   */
   const handleResetFilters = () => {
     setFilters({ ...DEFAULT_FILTERS, shopId: id });
     searchParams.delete("q");
@@ -270,10 +327,16 @@ const ShopDetail = () => {
     handleResetPage();
   };
 
-  //Stuff
+  /**
+   * Handle open filter drawer
+   */
   const handleOpen = () => {
     setOpen(true);
   };
+
+  /**
+   * Handle close filter drawer
+   */
   const handleClose = () => {
     setOpen(false);
   };
@@ -289,7 +352,7 @@ const ShopDetail = () => {
           {data ? (
             [
               <NavLink to={"/shop"} key="shop">
-                Danh sách cửa hàng
+                {t("shop.title")}
               </NavLink>,
               <NavLink to="#" key="shop-name">
                 {data?.name}
