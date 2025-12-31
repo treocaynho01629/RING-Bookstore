@@ -282,7 +282,7 @@ export const ActionButtons = ({ book, outlined = false }) => {
                 </Box>
               </ProductDetailContainer>
               <Box display="flex" alignItems="center" justifyContent={"space-between"} px={1.5} pt={2} pb={1}>
-                <DetailTitle>{t("quantity")}:</DetailTitle>
+                <DetailTitle>{t("quantity.label")}:</DetailTitle>
                 <AmountInput
                   disabled={!book || book?.amount == 0}
                   size="small"
@@ -321,7 +321,7 @@ export const ActionButtons = ({ book, outlined = false }) => {
   ) : (
     <>
       <Box display="flex" alignItems="center" flexWrap="wrap">
-        <DetailTitle style={{ marginRight: 20 }}>{t("quantity")}:</DetailTitle>
+        <DetailTitle style={{ marginRight: 20 }}>{t("quantity.label")}:</DetailTitle>
         <Box display="flex" alignItems="center" my={1}>
           <AmountInput
             disabled={!book || book?.amount == 0}

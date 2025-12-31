@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 import useConfirm from "@ring/shared/useConfirm";
 import AddressItem from "./AddressItem";
 import useAddress from "../../hooks/useAddress";
-import ConfirmDiaog from "@ring/ui/ConfirmDialog";
+import ConfirmDialog from "@ring/ui/ConfirmDialog";
 
 const AddressForm = lazy(() => import("./AddressForm"));
 
@@ -156,7 +156,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
             console.error(err);
             setErr(err);
             if (!err?.status) {
-              setErrMsg(t("error.server.not.response"));
+              setErrMsg(t("error.server.response"));
             } else {
               setErrMsg(err?.data?.message);
             }
@@ -207,7 +207,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
         console.error(err);
         setErr(err);
         if (!err?.status) {
-          setErrMsg(t("error.server.not.response"));
+          setErrMsg(t("error.server.response"));
         } else {
           setErrMsg(err?.data?.message);
         }
@@ -312,7 +312,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
             console.error(err);
             setErr(err);
             if (!err?.status) {
-              setErrMsg(t("error.server.not.response"));
+              setErrMsg(t("error.server.response"));
             } else {
               setErrMsg(err?.data?.message);
             }
@@ -417,6 +417,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
    * @param {Object} address
    */
   const handleClickRemove = async (address) => {
+    handleCloseContext();
     const confirmation = await confirm(
       t("address.delete.title", { ns: "authenticated" }),
       t("address.delete.description", { ns: "authenticated" }),
@@ -542,7 +543,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
           <ListItemIcon>
             <Delete sx={{ color: "error.main" }} fontSize="small" />
           </ListItemIcon>
-          <ListItemText sx={{ color: "error.main" }}>{t("address.delete", { ns: "authenticated" })}</ListItemText>
+          <ListItemText sx={{ color: "error.main" }}>{t("address.delete.label", { ns: "authenticated" })}</ListItemText>
         </MenuItem>
         <MenuItem disabled={isSelectedDefault} onClick={() => handleSetDefault(contextAddress)}>
           <ListItemIcon>

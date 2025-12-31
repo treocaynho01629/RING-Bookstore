@@ -310,15 +310,12 @@ const PreviewDetailRow = ({
       ? // Have coupon
         discount
         ? // Discount applied
-          isGroupSelected
-          ? // Group selected
-            coupon?.isUsable
-            ? // Coupon is usable
-              t("cart.coupon.saved", {
-                discount: currencyFormat.format(discount),
-              })
-            : t("cart.coupon.criteria", { criteria: coupon?.summary }) // Coupon is not usable
-          : t("cart.coupon.change") // Group not selected
+          coupon?.isUsable
+          ? // Coupon is usable
+            t("cart.coupon.saved", {
+              discount: currencyFormat.format(discount),
+            })
+          : t("cart.coupon.criteria", { criteria: coupon?.summary }) // Coupon is not usable
         : // Discount not applied
           coupon?.isUsed
           ? t("cart.coupon.change") // Coupon is used

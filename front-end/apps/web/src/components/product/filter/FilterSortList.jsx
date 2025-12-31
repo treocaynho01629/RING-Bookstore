@@ -133,7 +133,7 @@ const FilterSortList = ({
               </Badge>
             }
           >
-            {t("search.filtering")}
+            {t("search.filter.filtering")}
           </StyledSortButton>
         </MainContainer>
         <AltContainer>

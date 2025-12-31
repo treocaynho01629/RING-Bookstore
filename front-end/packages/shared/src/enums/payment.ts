@@ -49,7 +49,7 @@ export const getPaymentStatus = (paymentStatus: PaymentStatus): PaymentStatusMet
     case PaymentStatus.PENDING:
       return {
         value: PaymentStatus.PENDING,
-        label: "payment.status.pending",
+        label: "payment.status.pending.payment",
         color: "warning",
       };
     case PaymentStatus.PAID:

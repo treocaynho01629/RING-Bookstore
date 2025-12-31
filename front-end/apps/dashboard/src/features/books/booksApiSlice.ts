@@ -9,13 +9,11 @@ export const booksApiSlice = initialsApiSlice.injectEndpoints({
           return response.status === 200 && !result?.isError;
         },
       }),
-      providesTags: (result, error) => [
-        { type: "Book", id: result ? result.id : "LIST" },
-      ],
+      providesTags: (result, error) => [{ type: "Book", id: result ? result.id : "LIST" }],
     }),
     getBookAnalytics: builder.query({
       query: ({ shopId, userId }) => {
-        //Params
+        // Params
         const params = new URLSearchParams();
         if (shopId) params.append("shopId", shopId);
         if (userId) params.append("userId", userId);
@@ -66,17 +64,7 @@ export const booksApiSlice = initialsApiSlice.injectEndpoints({
     }),
     deleteBooksInverse: builder.mutation({
       query: (args) => {
-        const {
-          keyword,
-          cateId,
-          rating,
-          amount,
-          pubIds,
-          types,
-          shopId,
-          value,
-          ids,
-        } = args || {};
+        const { keyword, cateId, rating, amount, pubIds, types, shopId, value, ids } = args || {};
 
         //Params
         const params = new URLSearchParams();

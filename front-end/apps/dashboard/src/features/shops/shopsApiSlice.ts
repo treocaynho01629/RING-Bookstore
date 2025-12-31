@@ -1,10 +1,10 @@
 import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
+import { ShopPreviewDTO } from "@ring/shared/models/shopPreviewDTO";
+import { ShopDTO } from "@ring/shared/models/shopDTO";
 import apiSlice from "@ring/redux/apiSlice";
 
-export interface PreviewResponse {
+export interface PreviewResponse extends ShopPreviewDTO {
   id: number;
-  name: string;
-  image: string;
 }
 
 type PreviewsResponse = PreviewResponse[];
@@ -20,10 +20,8 @@ interface ShopQueryArgs {
   userId?: number;
 }
 
-interface ShopResponse {
+export interface ShopResponse extends ShopDTO {
   id: number;
-  name: string;
-  image: string;
 }
 
 interface ShopsResponse {
@@ -66,9 +64,7 @@ export const shopsApiSlice = apiWithEnum.injectEndpoints({
           return response.status === 200 && !result?.isError;
         },
       }),
-      providesTags: (result, error) => [
-        { type: "Shop", id: result ? result.id : "LIST" },
-      ],
+      providesTags: (result, error) => [{ type: "Shop", id: result ? result.id : "LIST" }],
     }),
     getShops: builder.query<ShopsState, ShopQueryArgs>({
       query: (args) => {
@@ -91,8 +87,7 @@ export const shopsApiSlice = apiWithEnum.injectEndpoints({
         };
       },
       transformResponse: (response: ShopsResponse) => {
-        const { content, empty, page, size, totalElements, totalPages } =
-          response;
+        const { content, empty, page, size, totalElements, totalPages } = response;
         return shopsAdapter.setAll(
           {
             ...initialState,
@@ -107,10 +102,7 @@ export const shopsApiSlice = apiWithEnum.injectEndpoints({
       },
       providesTags: (result) =>
         result
-          ? [
-              ...result.ids.map((id) => ({ type: "Shop" as const, id })),
-              { type: "Shop", id: "LIST" },
-            ]
+          ? [...result.ids.map((id) => ({ type: "Shop" as const, id })), { type: "Shop", id: "LIST" }]
           : [{ type: "Shop", id: "LIST" }],
     }),
     getPreviewShops: builder.query<PreviewsState, void>({
@@ -127,15 +119,12 @@ export const shopsApiSlice = apiWithEnum.injectEndpoints({
       },
       providesTags: (result) =>
         result
-          ? [
-              ...result.ids.map((id) => ({ type: "Shop" as const, id })),
-              { type: "Shop", id: "LIST" },
-            ]
+          ? [...result.ids.map((id) => ({ type: "Shop" as const, id })), { type: "Shop", id: "LIST" }]
           : [{ type: "Shop", id: "LIST" }],
     }),
     getShopAnalytics: builder.query({
-      query: (userId) => {
-        //Params
+      query: (userId?: string | null) => {
+        // Params
         const params = new URLSearchParams();
         if (userId) params.append("userId", userId);
 

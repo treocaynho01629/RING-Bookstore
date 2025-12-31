@@ -4,6 +4,8 @@ import ProductSimple from "./ProductSimple";
 import { trackWindowScroll } from "react-lazy-load-image-component";
 import { Message } from "@ring/ui/Components";
 import { Fragment } from "react";
+import { capitalize } from "lodash-es";
+import { useTranslation } from "react-i18next";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import Progress from "@ring/ui/Progress";
@@ -126,6 +128,7 @@ const ProductsSlider = ({
   isUninitialized = false,
   scrollPosition,
 }) => {
+  const { t } = useTranslation();
   let productsCarousel;
   const loading = isLoading || isFetching || isError || isUninitialized;
 
@@ -170,7 +173,7 @@ const ProductsSlider = ({
       </Carousel>
       {isSuccess && !data?.ids?.length && (
         <MessageContainer>
-          <Message color="warning">Không có sản phẩm nào</Message>
+          <Message color="warning">{capitalize(t("message.no", { item: t("product.label") }))}</Message>
         </MessageContainer>
       )}
     </Container>

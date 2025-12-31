@@ -1,6 +1,8 @@
 import apiSlice from "@ring/redux/apiSlice";
 
-export const usersApiSlice = apiSlice.injectEndpoints({
+const apiWithEnum = apiSlice.enhanceEndpoints({ addTagTypes: ["Profile"] });
+
+export const usersApiSlice = apiWithEnum.injectEndpoints({
   endpoints: (builder) => ({
     getProfile: builder.query({
       query: () => ({
@@ -35,8 +37,4 @@ export const usersApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const {
-  useGetProfileQuery,
-  useUpdateProfileMutation,
-  useChangePasswordMutation,
-} = usersApiSlice;
+export const { useGetProfileQuery, useUpdateProfileMutation, useChangePasswordMutation } = usersApiSlice;

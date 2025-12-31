@@ -1,8 +1,10 @@
 import { useLocation, Navigate, Outlet } from "react-router";
+import { useTranslation } from "react-i18next";
 import useAuth from "../../hooks/useAuth";
 
 const RequireAuth = ({ allowedRoles }) => {
   const location = useLocation();
+  const { t } = useTranslation();
   const { token, roles } = useAuth();
 
   return (
@@ -16,7 +18,7 @@ const RequireAuth = ({ allowedRoles }) => {
           to="/auth/login"
           state={{
             from: location,
-            errorMsg: "Vui lòng đăng nhập để tiếp tục.",
+            errorMsg: t("login.required"),
           }}
           replace
         />

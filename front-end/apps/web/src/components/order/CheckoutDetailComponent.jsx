@@ -233,7 +233,7 @@ function getStepContent(receipt) {
   switch (receipt?.paymentStatus) {
     case PaymentStatus.PENDING:
       return {
-        summary: "checkout.pending",
+        summary: "checkout.pending.label",
         date: expiredDate,
       };
     case PaymentStatus.PAID:

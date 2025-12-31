@@ -5,7 +5,6 @@ import { MobileExtendButton } from "@ring/ui/Components";
 import { numFormat } from "@ring/shared/utils/convert";
 import { OrderStatus } from "@ring/shared/models/orderStatus";
 import { getUserRole } from "@ring/shared/enums/user";
-import { UserRole } from "@ring/shared/models/userRole";
 import { useTranslation } from "react-i18next";
 import useAuth from "../../hooks/useAuth";
 import List from "@mui/material/List";
@@ -284,11 +283,10 @@ const items = [
 ];
 
 const ProfileTabsList = ({ profile, loading, tabletMode }) => {
-  const { username, image, roles } = useAuth();
+  const { username, image, role } = useAuth();
   const { t } = useTranslation();
   const [open, setOpen] = useState(true);
-  const roleIndexes = roles?.map((r) => Object.keys(UserRole).indexOf(r));
-  const currRole = getUserRole(UserRole[Object.keys(UserRole)[Math.max(...roleIndexes)]]);
+  const roleMeta = getUserRole(role);
 
   const toggleOpen = (e) => {
     e.preventDefault();
@@ -324,7 +322,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
                     <Name>{profile?.name || t("profile.edit")}</Name>
                   )}
                 </Username>
-                <Role color={currRole?.color}>{t(currRole?.label)}</Role>
+                <Role color={roleMeta?.color}>{t(roleMeta?.label)}</Role>
               </UserContainer>
             </InfoContainer>
           </MainProfile>
@@ -401,7 +399,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
               <NavLink to={"/profile/detail/password"} end>
                 {({ isActive }) => (
                   <StyledListItemButton selected={isActive} className="secondary">
-                    <ItemText>{t("password.change.label")}</ItemText>
+                    <ItemText>{t("change.label")}</ItemText>
                   </StyledListItemButton>
                 )}
               </NavLink>
@@ -481,7 +479,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
                 <StyledListItemButton selected={isActive} tabIndex={-1}>
                   <ItemText>
                     <LockOutlined />
-                    &nbsp;{t("password.change.label")}
+                    &nbsp;{t("change.label")}
                     <MobileExtendButton className="transparent">
                       <KeyboardArrowRight fontSize="small" />
                     </MobileExtendButton>

@@ -2,7 +2,6 @@ import Dialog from "@mui/material/Dialog";
 import { TabContentContainer } from "../components/custom/ProfileComponents";
 import { useNavigate, useOutletContext } from "react-router";
 import { forwardRef, useState } from "react";
-import useTitle from "@ring/shared/useTitle";
 import ReviewsList from "../components/review/ReviewsList";
 import Slide from "@mui/material/Slide";
 
@@ -14,9 +13,6 @@ const Reviews = () => {
   const { tabletMode, mobileMode, pending, setPending } = useOutletContext();
   const [open, setOpen] = useState(true);
   const navigate = useNavigate();
-
-  // Set title
-  //useTitle("Đánh giá");
 
   const handleClose = (e) => {
     e.preventDefault();

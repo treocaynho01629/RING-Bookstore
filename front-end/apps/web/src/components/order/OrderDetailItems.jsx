@@ -108,7 +108,7 @@ const OrderDetailItems = ({ order, tabletMode }) => {
                   {order?.status == OrderStatus.COMPLETED ? (
                     <div>
                       <Amount>
-                        {t("quantity")}: <b>{item?.quantity}</b>
+                        {t("quantity.label")}: <b>{item?.quantity}</b>
                       </Amount>
                       <Link to={`/product/${item?.bookSlug}?review=true`}>
                         <Button variant="outlined" color="info" size="small" sx={{ mt: 0.5, minWidth: 100 }}>
@@ -118,7 +118,7 @@ const OrderDetailItems = ({ order, tabletMode }) => {
                     </div>
                   ) : (
                     <Amount>
-                      {t("quantity")}: <b>{item?.quantity}</b>
+                      {t("quantity.label")}: <b>{item?.quantity}</b>
                     </Amount>
                   )}
                   <div>

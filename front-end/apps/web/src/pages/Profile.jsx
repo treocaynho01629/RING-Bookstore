@@ -5,7 +5,6 @@ import { lazy, Suspense, forwardRef, useState, useEffect } from "react";
 import { StyledDialogTitle, TabContentContainer } from "../components/custom/ProfileComponents";
 import { useNavigate, useOutletContext, useParams } from "react-router";
 import { useRefreshMutation, useSignOutMutation } from "@ring/redux/authApiSlice";
-import useTitle from "@ring/shared/useTitle";
 import Placeholder from "@ring/ui/Placeholder";
 import Slide from "@mui/material/Slide";
 
@@ -56,9 +55,6 @@ const Profile = () => {
   const [currTab, setCurrTab] = useState("info");
   const navigate = useNavigate();
 
-  // Set title
-  //useTitle("Hồ sơ");
-
   useEffect(() => {
     setOpen(!!tab);
     if (tab) setCurrTab(tab);
@@ -73,9 +69,9 @@ const Profile = () => {
       let errorMsg;
       // Log user out if fail to refresh
       if (error?.status === 500) {
-        errorMsg = "Đã xảy ra lỗi xác thực, vui lòng đăng nhập lại!";
+        errorMsg = t("error.auth.validate");
       } else if (error?.status === 400 || error?.status === 403) {
-        errorMsg = "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!";
+        errorMsg = t("error.auth.expired");
       }
       await logout().unwrap();
     }

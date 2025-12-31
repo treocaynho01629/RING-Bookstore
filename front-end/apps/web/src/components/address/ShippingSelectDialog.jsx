@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { currencyFormat } from "@ring/shared/utils/convert";
 import { ShippingType } from "@ring/shared/models/shippingType";
 import { getShippingType } from "@ring/shared/enums/shipping";
+import { useTranslation } from "react-i18next";
 import { iconList } from "@ring/shared/utils/icon";
 import { Suspense, useEffect, useState, forwardRef } from "react";
 import Button from "@mui/material/Button";
@@ -91,6 +92,7 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 const ShippingSelectDialog = ({ open, handleClose, selectedShipping, shippingFee, shippingDiscount, onSubmit }) => {
+  const { t } = useTranslation();
   const fullScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const [value, setValue] = useState(selectedShipping);
 
@@ -125,38 +127,39 @@ const ShippingSelectDialog = ({ open, handleClose, selectedShipping, shippingFee
     >
       <DialogTitle sx={{ display: "flex", alignItems: "center" }}>
         <AllInbox />
-        &nbsp;Chọn hình thức giao hàng
+        &nbsp;{t("checkout.shipping.select", { ns: "authenticated" })}
       </DialogTitle>
       <DialogContent sx={{ padding: { xs: 1, sm: "20px 24px" } }}>
         <RadioGroup value={value} onChange={handleChange}>
           {Object.values(ShippingType).map((item, index) => {
-            const Icon = iconList[item?.icon];
+            const itemMeta = getShippingType(item);
+            const Icon = iconList[itemMeta?.icon];
             return (
               <StyledForm
                 key={index}
-                value={item?.value}
+                value={item}
                 control={<Radio />}
                 label={
                   <FormContent>
                     <ItemContent>
                       <ItemTitle>
-                        <Suspense fallback={null}>
-                          <Icon color={item.color} />
-                        </Suspense>
-                        {item.label}
+                        <Suspense fallback={null}>{Icon && <Icon color={itemMeta?.color} />}</Suspense>
+                        {t(itemMeta?.label, { ns: "authenticated" })}
                       </ItemTitle>
                       <PriceTag>
-                        {item?.value == selectedShipping ? (
+                        {item === selectedShipping ? (
                           <>
                             {shippingDiscount > 0 && <Discount>{shippingDiscount}</Discount>}
                             {currencyFormat.format(shippingFee - (shippingDiscount || 0))}
                           </>
                         ) : (
-                          currencyFormat.format(baseShippingFee * item?.multiplier)
+                          currencyFormat.format(baseShippingFee * itemMeta?.multiplier)
                         )}
                       </PriceTag>
                     </ItemContent>
-                    <Estimate>Đảm bảo nhận hàng từ {item.description}</Estimate>
+                    <Estimate>
+                      {t("checkout.shipping.estimate", { ns: "authenticated", date: itemMeta?.estimate })}
+                    </Estimate>
                   </FormContent>
                 }
               />
@@ -166,10 +169,10 @@ const ShippingSelectDialog = ({ open, handleClose, selectedShipping, shippingFee
       </DialogContent>
       <DialogActions>
         <Button variant="outlined" color="error" size="large" onClick={handleClose} startIcon={<Close />}>
-          Huỷ
+          {t("cancel")}
         </Button>
         <Button variant="contained" color="primary" size="large" onClick={() => onSubmit(value)} startIcon={<Check />}>
-          Chọn
+          {t("select")}
         </Button>
       </DialogActions>
     </Dialog>

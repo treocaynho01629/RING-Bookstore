@@ -19,106 +19,103 @@
     "male": "Nam",
     "female": "Nữ"
   },
+  "login": {
+    "label": "Đăng nhập",
+    "title": "Đăng nhập tài khoản",
+    "suggestions": "Chưa có tài khoản?",
+    "required": "Vui lòng đăng nhập để tiếp tục.",
+    "persist": "Lưu đăng nhập"
+  },
+  "forgot": {
+    "label": "Quên mật khẩu?",
+    "title": "Khôi phục mật khẩu",
+    "email": "Nhập email tài khoản cần khôi phục",
+    "suggestions": "Vui lòng kiểm tra email của bạn",
+    "submit": "Khôi phục"
+  },
+  "signup": {
+    "label": "Đăng ký",
+    "title": "Đăng ký tài khoản",
+    "suggestions": "Đã có tài khoản?"
+  },
+  "restore": {
+    "label": "Đặt lại mật khẩu",
+    "title": "Đặt lại mật khẩu"
+  },
+  "reset": "Đặt lại",
   "welcome": "Chào mừng",
   "hello": "Xin chào",
-  "login": "Đăng nhập",
-  "login.title": "Đăng nhập tài khoản",
-  "email": "Email",
-  "email.placeholder": "Địa chỉ email",
+  "email": {
+    "label": "Email",
+    "placeholder": "Địa chỉ email"
+  },
   "username": "Tên đăng nhập",
-  "password": "Mật khẩu",
-  "password.confirm": "Nhập lại mật khẩu",
-  "fullname": "Họ và tên",
-  "fullname.placeholder": "Nhập họ và tên",
+  "password": {
+    "label": "Mật khẩu",
+    "confirm": "Nhập lại mật khẩu"
+  },
+  "fullname": {
+    "label": "Họ và tên",
+    "placeholder": "Nhập họ và tên"
+  },
   "phone": "Số điện thoại",
   "dob": "Ngày sinh",
   "from": "Từ",
   "recaptcha": "Được bảo vệ bởi reCAPTCHA và Google thông qua",
   "terms": "Điều khoản dịch vụ",
   "policy": "Chính sách bảo mật",
-  "persist": "Lưu đăng nhập",
-  "forgot": "Quên mật khẩu?",
-  "signup": "Đăng ký",
-  "signup.title": "Đăng ký tài khoản mới",
-  "signup.suggestions": "Chưa có tài khoản?",
   "help": "Trợ giúp",
-  "login.suggestions": "Đã có tài khoản?",
   "notification": "Thông báo",
-  "store": "Cửa hàng",
-  "home": "Trang chủ",
-  "items": "sản phẩm",
   "ring": "RING!",
+  "home": "Trang chủ",
+  "store": "Cửa hàng",
   "saved": "Đã lưu",
-  "unknown": "Không xác định",
+  "items": "sản phẩm",
+  "image": "Ảnh",
   "loading": "Đang tải...",
   "pending": "Đang gửi yêu cầu...",
+  "validating": "Đang xác thực đăng nhập...",
   "updating": "Đang cập nhật...",
-  "select.all": "Chọn tất cả",
-  "all": "Tất cả",
+  "all": {
+    "label": "Tất cả",
+    "select": "Chọn tất cả"
+  },
   "price": "Đơn giá",
-  "quantity": "Số lượng",
-  "quantity.short": "SL",
+  "quantity": {
+    "label": "Số lượng",
+    "short": "SL"
+  },
   "total": "Tổng",
   "delete": "Xoá",
-  "reset": "Đặt lại",
+  "other": "Khác",
+  "unknown": "Không xác định",
   "partner": "Đối tác",
   "official": "Đối tác RING!",
   "back": "Quay lại",
   "apply": "Áp dụng",
   "confirm": "Xác nhận",
+  "send": "Gửi",
   "refresh": "Làm mới",
   "reload": "Tải lại",
   "close": "Đóng",
   "cancel": "Huỷ",
   "none": "Không",
   "continue": "Tiếp tục",
-  "not.yet": "Chưa có",
+  "yet": "Chưa có",
   "edit": "Thay đổi",
   "update": "Chỉnh sửa",
   "select": "Chọn",
-  "image": "Ảnh",
-  "show.more": "Xem thêm",
-  "show.less": "Ẩn bớt",
-  "show.all": "Xem tất cả",
+  "show": {
+    "more": "Xem thêm",
+    "less": "Ẩn bớt",
+    "all": "Xem tất cả"
+  },
   "unselect": "Bỏ chọn",
   "report": "Báo cáo",
-  "other": "Khác",
   "remove": "Gỡ",
   "save": "Lưu",
   "scroll": "Về đầu trang",
   "above": "trở lên",
-  "logout": "Đăng xuất",
-  "logout.end": "Kết thúc phiên đăng nhập?",
-  "search": {
-    "label": "Tìm kiếm",
-    "results": "Kết quả tìm kiếm: \"{{keyword}}\"",
-    "shop": "Tìm kiếm 'Cửa hàng' với từ khoá",
-    "filter": "Bộ lọc",
-    "filter.clear": "Xoá bộ lọc",
-    "filter.by": "Lọc theo",
-    "filtering": "Lọc",
-    "keyword": "Từ khoá",
-    "keyword.results": "Kết quả từ khoá",
-    "price": {
-      "range": "Khoảng giá",
-      "slider": "Bộ lọc giá"
-    },
-    "sort": {
-      "toggle": "Thay đổi chiều sắp xếp",
-      "label": "Xếp theo",
-      "newest": "Mới nhất",
-      "best-selling": "Bán chạy",
-      "favorite": "Yêu thích",
-      "price": "Giá bán",
-      "in-stock": "Còn hàng",
-      "featured": "Nổi bật",
-      "joined": "Mới tham gia"
-    }
-  },
-  "pagination": {
-    "display": "Hiển thị {{count}}",
-    "jump": "Đi đến trang?"
-  },
   "role": {
     "admin": "Quản trị viên",
     "user": "Người dùng",
@@ -128,7 +125,9 @@
   "signout": {
     "confirmation": "Đăng xuất?",
     "message": "Đăng xuất khỏi tài khoản của bạn?",
-    "success": "Đã đăng xuất"
+    "success": "Đã đăng xuất",
+    "end": "Kết thúc phiên đăng nhập?",
+    "label": "Đăng xuất"
   },
   "coupon": {
     "shipping": {
@@ -154,67 +153,6 @@
       },
       "default": "Cho đơn từ: {{min}} {{unit}}",
       "all": "Cho tất cả đơn hàng"
-    }
-  },
-  "review": {
-    "label": "Đánh giá",
-    "star": "Sao",
-    "stars": "Sao"
-  },
-  "order": {
-    "label": "Đơn hàng",
-    "receipt": "Đơn hàng",
-    "detail": "Chi tiết đơn hàng",
-    "checkout": "Chi tiết thanh toán",
-    "item": "Đơn hàng sản phẩm",
-    "tabs": {
-      "pending": "Đang xử lý",
-      "shipping": "Đang vận chuyển",
-      "completed": "Đã giao",
-      "refunded": "Đổi trả"
-    },
-    "status": {
-      "completed": "Đã giao",
-      "pending": "Đang chờ hàng",
-      "pending.payment": "Chờ thanh toán",
-      "pending.return": "Chờ trả hàng",
-      "pending.refund": "Chờ hoàn tiền",
-      "shipping": "Đang giao",
-      "refunded": "Đã hoàn tiền",
-      "canceled": "Đã huỷ"
-    }
-  },
-  "profile": {
-    "navigation": "Thông tin tài khoản",
-    "dropdown": "Tài khoản của tôi",
-    "label": "Hồ sơ",
-    "title": "Hồ sơ của bạn",
-    "media": "Chỉnh sửa ảnh đại diện",
-    "save": "Lưu thông tin",
-    "media.add": "Thêm ảnh đại diện",
-    "media.reset": "Đặt lại ảnh đại diện",
-    "media.edit": "Cập nhật ảnh đại diện",
-    "media.remove": "Gỡ ảnh đại diện",
-    "media.remove.message": "Gỡ bỏ ảnh đại diện hiện tại?",
-    "update": "Cập nhật hồ sơ"
-  },
-  "payment": {
-    "label": "Hình thức thanh toán",
-    "cash": {
-      "label": "Thanh toán bằng tiền mặt",
-      "summary": "Tiền mặt: Phí thu hộ: 0đ. Ưu đãi về phí vận chuyển (nếu có) áp dụng cả với phí thu hộ."
-    },
-    "online": {
-      "label": "Ví online/chuyển khoản",
-      "description": "Quét Mã QR từ ứng dụng hoặc chuyển khoản",
-      "summary": "Quét Mã QR từ ví điện tử Online hoặc chuyển khoản theo hướng dẫn để thanh toán."
-    },
-    "status": {
-      "pending": "Chờ thanh toán",
-      "paid": "Đã thanh toán",
-      "canceled": "Đã huỷ",
-      "pending.refund": "Chờ hoàn tiền",
-      "refunded": "Đã hoàn tiền"
     }
   },
   "product": {
@@ -246,6 +184,107 @@
     "label": "Nhà xuất bản",
     "title": "Nhà xuất bản"
   },
+  "profile": {
+    "navigation": "Thông tin tài khoản",
+    "dropdown": "Tài khoản của tôi",
+    "label": "Hồ sơ",
+    "title": "Hồ sơ của bạn",
+    "update": "Cập nhật hồ sơ",
+    "media": {
+      "label": "Chỉnh sửa ảnh đại diện",
+      "add": "Thêm ảnh đại diện",
+      "reset": "Đặt lại ảnh đại diện",
+      "edit": "Cập nhật ảnh đại diện",
+      "remove": "Gỡ ảnh đại diện",
+      "message": "Gỡ bỏ ảnh đại diện hiện tại?"
+    }
+  },
+  "order": {
+    "label": "Đơn hàng",
+    "receipt": "Đơn hàng",
+    "detail": "Chi tiết đơn hàng",
+    "checkout": "Chi tiết thanh toán",
+    "item": "Đơn hàng sản phẩm",
+    "tabs": {
+      "pending": "Đang xử lý",
+      "shipping": "Đang vận chuyển",
+      "completed": "Đã giao",
+      "refunded": "Đổi trả"
+    },
+    "status": {
+      "shipping": "Đang giao",
+      "completed": "Đã giao",
+      "refunded": "Đã hoàn tiền",
+      "canceled": "Đã huỷ",
+      "pending": {
+        "label": "Đang chờ hàng",
+        "payment": "Chờ thanh toán",
+        "return": "Chờ trả hàng",
+        "refund": "Chờ hoàn tiền"
+      }
+    }
+  },
+  "review": {
+    "label": "Đánh giá",
+    "star": "Sao",
+    "stars": "Sao"
+  },
+  "search": {
+    "label": "Tìm kiếm",
+    "results": "Kết quả tìm kiếm: \"{{keyword}}\"",
+    "shop": "Tìm kiếm 'Cửa hàng' với từ khoá",
+    "filter": {
+      "label": "Bộ lọc",
+      "clear": "Xoá bộ lọc",
+      "by": "Lọc theo",
+      "filtering": "Lọc"
+    },
+    "keyword": {
+      "label": "Từ khoá",
+      "results": "Kết quả từ khoá"
+    },
+    "price": {
+      "range": "Khoảng giá",
+      "slider": "Bộ lọc giá"
+    },
+    "sort": {
+      "toggle": "Thay đổi chiều sắp xếp",
+      "label": "Xếp theo",
+      "latest": "Mới nhất",
+      "best-selling": "Bán chạy",
+      "favorite": "Yêu thích",
+      "price": "Giá bán",
+      "in-stock": "Còn hàng",
+      "featured": "Nổi bật",
+      "joined": "Mới tham gia"
+    }
+  },
+  "pagination": {
+    "display": "Hiển thị {{count}}",
+    "jump": "Đi đến trang?"
+  },
+  "payment": {
+    "label": "Hình thức thanh toán",
+    "processed": "Thanh toán",
+    "cash": {
+      "label": "Thanh toán bằng tiền mặt",
+      "summary": "Tiền mặt: Phí thu hộ: 0đ. Ưu đãi về phí vận chuyển (nếu có) áp dụng cả với phí thu hộ."
+    },
+    "online": {
+      "label": "Ví online/chuyển khoản",
+      "description": "Quét Mã QR từ ứng dụng hoặc chuyển khoản",
+      "summary": "Quét Mã QR từ ví điện tử Online hoặc chuyển khoản theo hướng dẫn để thanh toán."
+    },
+    "status": {
+      "paid": "Đã thanh toán",
+      "canceled": "Đã huỷ",
+      "refunded": "Đã hoàn tiền",
+      "pending": {
+        "payment": "Chờ thanh toán",
+        "refund": "Chờ hoàn tiền"
+      }
+    }
+  },
   "shipping": {
     "label": "Vận chuyển",
     "estimate": "{{date}} ngày giao hàng",
@@ -253,7 +292,7 @@
     "standard": "Tiêu chuẩn",
     "express": "Hoả tốc"
   },
-  "password.change": {
+  "change": {
     "label": "Đổi mật khẩu",
     "title": "Thay đổi mật khẩu",
     "old": "Nhập mật khẩu hiện tại",
@@ -266,10 +305,17 @@
     "empty": "Chưa có {{item}} nào!",
     "out": "Không còn {{item}} nào!",
     "no": "Không có {{item}} nào!",
-    "none": "Không tìm thấy {{item}} nào!"
+    "none": "Không tìm thấy {{item}} nào!",
+    "sent": "Đã gửi yêu cầu về email!"
   },
   "error": {
-    "server.not.response": "Server không phản hồi",
+    "server": {
+      "response": "Server không phản hồi"
+    },
+    "auth": {
+      "expired": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!",
+      "validate": "Đã xảy ra lỗi xác thực, vui lòng đăng nhập lại!"
+    },
     "general": "Đã xảy ra lỗi"
   }
 }

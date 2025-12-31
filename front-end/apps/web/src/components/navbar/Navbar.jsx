@@ -3,7 +3,9 @@ import { Link, matchRoutes, useLocation, useMatch } from "react-router";
 import { LogoImage } from "@ring/ui/Components";
 import { debounce } from "lodash-es";
 import { useColorScheme } from "@mui/material/styles";
+import { keyframes } from "@emotion/react";
 import { useTranslation } from "react-i18next";
+import Badge, { badgeClasses } from "@mui/material/Badge";
 import useAuth from "../../hooks/useAuth";
 import useLogout from "../../hooks/useLogout";
 import Mail from "@mui/icons-material/Mail";
@@ -22,7 +24,6 @@ import SearchOff from "@mui/icons-material/SearchOff";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import HomeOutlined from "@mui/icons-material/HomeOutlined";
 import Stack from "@mui/material/Stack";
-import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -159,6 +160,26 @@ const NavItem = styled.div`
   margin-left: 15px;
 `;
 
+const expand = keyframes`
+    0% { 
+        transform: scale(.9) translate(50%, -50%) translateZ(0); 
+    }
+    80% { 
+        transform: scale(1.1) translate(50%, -50%) translateZ(0); 
+    }
+    100% { 
+        transform: scale(1) translate(50%, -50%) translateZ(0); 
+    }
+`;
+
+const StyledBadge = styled(Badge)`
+  &.bounce {
+    ${`.${badgeClasses.badge}`} {
+      animation: ${expand} 0.25s ease-in-out;
+    }
+  }
+`;
+
 const StyledIconButton = styled(IconButton)`
   border-radius: 0;
 
@@ -284,16 +305,18 @@ const SearchComponent = ({ tabletMode, show, toggle, setToggle, isSearch, isShop
         {tabletMode && isSearch ? (
           <Link to={"/cart"} title={t("cart.label")}>
             <StyledIconButton aria-label={t("cart.label")} sx={{ mr: { xs: 0.3, md: 0 } }}>
-              <Badge
+              <StyledBadge
                 color="primary"
                 badgeContent={products?.length}
+                className={cartProducts?.length > 0 ? "bounce" : ""}
+                key={cartProducts?.length > 1 ? cartProducts?.length : "0"}
                 anchorOrigin={{
                   vertical: "top",
                   horizontal: "right",
                 }}
               >
                 <ShoppingCartOutlined />
-              </Badge>
+              </StyledBadge>
             </StyledIconButton>
           </Link>
         ) : (
@@ -363,7 +386,7 @@ const PopoverComponents = ({ mode, setMode, cartProducts, username, image, handl
       <NavItem>
         <Stack direction="row" sx={{ color: "action.active" }} alignItems="center">
           <StyledIconButton className="nav" aria-label={t("notification")}>
-            <Badge
+            <StyledBadge
               badgeContent={0}
               anchorOrigin={{
                 vertical: "top",
@@ -371,7 +394,7 @@ const PopoverComponents = ({ mode, setMode, cartProducts, username, image, handl
               }}
             >
               <NotificationsOutlined />
-            </Badge>
+            </StyledBadge>
             <IconText>{t("notification")}</IconText>
           </StyledIconButton>
           <Box
@@ -382,16 +405,18 @@ const PopoverComponents = ({ mode, setMode, cartProducts, username, image, handl
           >
             <Link to={"/cart"} title={t("cart.label")}>
               <StyledIconButton className="nav" aria-label={t("cart.label")}>
-                <Badge
+                <StyledBadge
                   color="primary"
                   badgeContent={cartProducts?.length}
+                  className={cartProducts?.length > 0 ? "bounce" : ""}
+                  key={cartProducts?.length > 1 ? cartProducts?.length : "0"}
                   anchorOrigin={{
                     vertical: "top",
                     horizontal: "right",
                   }}
                 >
                   <ShoppingCartOutlined />
-                </Badge>
+                </StyledBadge>
                 <IconText>{t("cart.label")}</IconText>
               </StyledIconButton>
             </Link>
@@ -421,10 +446,10 @@ const PopoverComponents = ({ mode, setMode, cartProducts, username, image, handl
                 </StyledIconButton>
               </Link>
             ) : (
-              <Link to={"/auth/login"} state={{ from: location }} title={t("login")}>
-                <StyledIconButton className="nav" aria-label={t("login")}>
+              <Link to={"/auth/login"} state={{ from: location }} title={t("login.label")}>
+                <StyledIconButton className="nav" aria-label={t("login.label")}>
                   <LockOutlined />
-                  <IconText className="username">{t("login")}</IconText>
+                  <IconText className="username">{t("login.label")}</IconText>
                 </StyledIconButton>
               </Link>
             )}

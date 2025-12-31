@@ -1,5 +1,5 @@
 import { defineRouting } from "next-intl/routing";
-import { locales, defaultLocale } from "@ring/i18n/locales";
+import { locales, defaultLocale } from "@ring/shared/enums/locales";
 
 export const routing = defineRouting({
   locales: locales,

@@ -240,7 +240,7 @@ const ProfileDetail = ({
       if (!IMAGE_EXTENSIONS.includes(fileExtension)) {
         setErrMsg(t("validation.constraints.invalid", { field: "image", ns: "validation" }));
       } else if (fileSize > IMAGE_SIZE_LIMIT) {
-        setErrMsg(t("validation.constraints.image.size", { max: IMAGE_SIZE_LIMIT_MB, ns: "validation" }));
+        setErrMsg(t("validation.constraints.size.image", { max: IMAGE_SIZE_LIMIT_MB, ns: "validation" }));
       }
 
       let imageDataUrl = await readFile(file);
@@ -264,7 +264,7 @@ const ProfileDetail = ({
   const handleRemovePic = async () => {
     const confirmation = await confirm(
       t("profile.media.remove"),
-      t("profile.media.remove.message"),
+      t("profile.media.message"),
       t("cancel"),
       t("confirm")
     );
@@ -335,7 +335,7 @@ const ProfileDetail = ({
         console.error(err);
         setErr(err);
         if (!err?.status) {
-          setErrMsg(t("error.server.not.response"));
+          setErrMsg(t("error.server.response"));
         } else {
           setErrMsg(err?.data?.message);
         }
@@ -456,7 +456,7 @@ const ProfileDetail = ({
             </InfoRow>
             <InfoRow>
               <InfoTitle>
-                <InfoText>{t("email")} </InfoText>
+                <InfoText>{t("email.label")} </InfoText>
               </InfoTitle>
               <InfoStack>
                 <InfoStackContainer>
@@ -470,7 +470,7 @@ const ProfileDetail = ({
             </InfoRow>
             <InfoRow>
               <InfoTitle>
-                <InfoText>{t("fullname")} </InfoText>
+                <InfoText>{t("fullname.label")} </InfoText>
               </InfoTitle>
               <InfoStack>
                 <InfoStackContainer>
@@ -522,7 +522,7 @@ const ProfileDetail = ({
                       {loading ? (
                         <Skeleton variant="text" sx={{ fontSize: "16px" }} width="25%" />
                       ) : (
-                        <InfoText>{phone ? phone.replace(/\d(?=\d{2})/g, "*") : t("not.yet")}</InfoText>
+                        <InfoText>{phone ? phone.replace(/\d(?=\d{2})/g, "*") : t("yet")}</InfoText>
                       )}
                       <InfoText className={`edit ${loading ? "disabled" : ""}`} onClick={() => setEditPhone(true)}>
                         {t("edit")}

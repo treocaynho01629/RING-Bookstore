@@ -15,6 +15,7 @@ interface CouponQueryArgs {
   userId?: number;
   byShop?: boolean;
   showExpired?: boolean;
+  showUsed?: boolean;
   codes?: string[];
   code?: string;
   cValue?: number;

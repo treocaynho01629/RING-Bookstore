@@ -21,10 +21,7 @@ export const categoriesApiSlice = initialsApiSlice.injectEndpoints({
       },
       providesTags: (result, error, arg) => {
         if (result?.ids) {
-          return [
-            { type: "Category", id: "LIST" },
-            ...result.ids.map((id) => ({ type: "Category", id })),
-          ];
+          return [{ type: "Category", id: "LIST" }, ...result.ids.map((id) => ({ type: "Category", id }))];
         } else return [{ type: "Category", id: "LIST" }];
       },
     }),
@@ -45,8 +42,7 @@ export const categoriesApiSlice = initialsApiSlice.injectEndpoints({
         };
       },
       transformResponse: (responseData) => {
-        const { content, empty, page, size, totalElements, totalPages } =
-          responseData;
+        const { content, empty, page, size, totalElements, totalPages } = responseData;
         return catesAdapter.setAll(
           {
             ...initialState,
@@ -88,24 +84,16 @@ export const categoriesApiSlice = initialsApiSlice.injectEndpoints({
       merge: (currentCache, newItems, { arg: currentArg }) => {
         currentCache.page = newItems.page;
         if (!currentArg?.loadMore) catesAdapter.removeAll(currentCache);
-        catesAdapter.upsertMany(
-          currentCache,
-          catesSelector.selectAll(newItems)
-        );
+        catesAdapter.upsertMany(currentCache, catesSelector.selectAll(newItems));
       },
       forceRefetch: ({ currentArg, previousArg }) => {
         const isForceRefetch =
-          currentArg?.loadMore &&
-          !isEqual(currentArg, previousArg) &&
-          currentArg?.page > previousArg?.page;
+          currentArg?.loadMore && !isEqual(currentArg, previousArg) && currentArg?.page > previousArg?.page;
         return isForceRefetch;
       },
       providesTags: (result, error, arg) => {
         if (result?.ids) {
-          return [
-            { type: "Category", id: "LIST" },
-            ...result.ids.map((id) => ({ type: "Category", id })),
-          ];
+          return [{ type: "Category", id: "LIST" }, ...result.ids.map((id) => ({ type: "Category", id }))];
         } else return [{ type: "Category", id: "LIST" }];
       },
     }),

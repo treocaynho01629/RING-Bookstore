@@ -16,14 +16,14 @@ const staticReducer: ReducersMapObject = {
 
 export default function StoreProvider({
   children,
-  reducers,
-  baseUrl,
   devTools,
+  reducers = undefined,
+  baseUrl = null,
 }: {
   children: React.ReactNode;
-  reducers?: ReducersMapObject | undefined;
-  baseUrl?: string;
   devTools?: boolean;
+  reducers?: ReducersMapObject | undefined;
+  baseUrl?: string | null;
 }) {
   const storeRef = useRef<AppStore | null>(null);
   if (!storeRef.current) {

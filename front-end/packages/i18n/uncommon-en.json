@@ -1,0 +1,14 @@
+{
+  "missing": {
+    "title": "Oops!",
+    "description": "We cannot find the page you are looking for",
+    "suggestion": "The link may be outdated, misspelled, or no longer exists.",
+    "back": "Go to home"
+  },
+  "unauthorized": {
+    "title": "Hold on!!!",
+    "description": "You do not have permission to access this page",
+    "suggestion": "Contact us at ringbookstore@ring.com or login with a different account.",
+    "login": "Login again"
+  }
+}

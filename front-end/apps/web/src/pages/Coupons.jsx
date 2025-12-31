@@ -1,4 +1,3 @@
-import useTitle from "@ring/shared/useTitle";
 import Dialog from "@mui/material/Dialog";
 import { useNavigate, useOutletContext } from "react-router";
 import { TabContentContainer } from "../components/custom/ProfileComponents";
@@ -14,9 +13,6 @@ const Coupons = () => {
   const { tabletMode, mobileMode } = useOutletContext();
   const navigate = useNavigate();
   const [open, setOpen] = useState(true);
-
-  // Set title
-  //useTitle("Mã giảm giá");
 
   const handleClose = (e) => {
     e.preventDefault();

@@ -13,7 +13,9 @@ const initialState = ordersAdapter.getInitialState({
   totalPages: 0,
 });
 
-export const ordersApiSlice = apiSlice.injectEndpoints({
+const apiWithEnum = apiSlice.enhanceEndpoints({ addTagTypes: ["Order", "Receipt"] });
+
+export const ordersApiSlice = apiWithEnum.injectEndpoints({
   endpoints: (builder) => ({
     getReceiptDetail: builder.query({
       query: (id) => ({
@@ -53,8 +55,7 @@ export const ordersApiSlice = apiSlice.injectEndpoints({
         };
       },
       transformResponse: (responseData) => {
-        const { content, empty, page, size, totalElements, totalPages } =
-          responseData;
+        const { content, empty, page, size, totalElements, totalPages } = responseData;
         return ordersAdapter.setAll(
           {
             ...initialState,
@@ -96,24 +97,16 @@ export const ordersApiSlice = apiSlice.injectEndpoints({
       merge: (currentCache, newItems, { arg: currentArg }) => {
         currentCache.page = newItems.page;
         if (!currentArg?.loadMore) ordersAdapter.removeAll(currentCache);
-        ordersAdapter.upsertMany(
-          currentCache,
-          ordersSelector.selectAll(newItems)
-        );
+        ordersAdapter.upsertMany(currentCache, ordersSelector.selectAll(newItems));
       },
       forceRefetch: ({ currentArg, previousArg }) => {
         const isForceRefetch =
-          currentArg?.loadMore &&
-          !isEqual(currentArg, previousArg) &&
-          currentArg?.page > previousArg?.page;
+          currentArg?.loadMore && !isEqual(currentArg, previousArg) && currentArg?.page > previousArg?.page;
         return isForceRefetch;
       },
       providesTags: (result, error, arg) => {
         if (result?.ids) {
-          return [
-            { type: "Order", id: "LIST" },
-            ...result.ids.map((id) => ({ type: "Order", id })),
-          ];
+          return [{ type: "Order", id: "LIST" }, ...result.ids.map((id) => ({ type: "Order", id }))];
         } else return [{ type: "Order", id: "LIST" }];
       },
     }),

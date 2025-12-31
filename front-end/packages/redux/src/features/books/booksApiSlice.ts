@@ -25,7 +25,7 @@ export interface BookQueryArgs {
   keyword?: string;
   cateId?: number;
   rating?: string;
-  amount?: string;
+  amount?: number;
   pubIds?: number[];
   types?: string[];
   shopId?: number;
@@ -100,8 +100,7 @@ export const booksApiSlice = apiWithEnum.injectEndpoints({
         if (pubIds?.length) params.append("pubIds", pubIds.join(","));
         if (value) {
           if (value[0] != 0) params.append("fromRange", value[0].toString());
-          if (value[1] != 10000000)
-            params.append("toRange", value[1].toString());
+          if (value[1] != 10000000) params.append("toRange", value[1].toString());
         }
 
         return {
@@ -112,8 +111,7 @@ export const booksApiSlice = apiWithEnum.injectEndpoints({
         };
       },
       transformResponse: (response: BooksResponse) => {
-        const { content, empty, page, size, totalElements, totalPages } =
-          response;
+        const { content, empty, page, size, totalElements, totalPages } = response;
         const state = booksAdapter.setAll(booksInitialState, content);
         return {
           ...state,
@@ -153,10 +151,7 @@ export const booksApiSlice = apiWithEnum.injectEndpoints({
       merge: (currentCache, newItems, { arg: currentArg }) => {
         currentCache.page = newItems.page;
         if (!currentArg?.loadMore) booksAdapter.removeAll(currentCache);
-        booksAdapter.upsertMany(
-          currentCache,
-          booksSelector.selectAll(newItems)
-        );
+        booksAdapter.upsertMany(currentCache, booksSelector.selectAll(newItems));
       },
       forceRefetch: ({ currentArg, previousArg }) => {
         return !!(
@@ -167,10 +162,7 @@ export const booksApiSlice = apiWithEnum.injectEndpoints({
       },
       providesTags: (result) =>
         result
-          ? [
-              ...result.ids.map((id) => ({ type: "Book" as const, id })),
-              { type: "Book", id: "LIST" },
-            ]
+          ? [...result.ids.map((id) => ({ type: "Book" as const, id })), { type: "Book", id: "LIST" }]
           : [{ type: "Book", id: "LIST" }],
     }),
   }),

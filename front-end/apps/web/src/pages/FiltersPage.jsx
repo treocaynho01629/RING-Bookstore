@@ -420,7 +420,7 @@ const FiltersPage = () => {
           </Suspense>
         ) : (
           <Grid size={{ xs: 12, md_lg: 2.8 }} position="relative">
-            <CustomDivider sx={{ mr: 2 }}>{t("search.filter")}</CustomDivider>
+            <CustomDivider sx={{ mr: 2 }}>{t("search.filter.label")}</CustomDivider>
             <Suspense fallback={null}>
               <FilterList
                 {...{

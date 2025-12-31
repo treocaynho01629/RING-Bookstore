@@ -1,0 +1,14 @@
+{
+  "missing": {
+    "title": "Ôi khônggggg!",
+    "description": "Không thể tìm thấy trang bạn yêu cầu",
+    "suggestion": "Có thể đường dẫn này đã cũ, sai chính tả hoặc không còn tồn tại.",
+    "back": "Về trang chủ"
+  },
+  "unauthorized": {
+    "title": "Chờ đã!!!",
+    "description": "Bạn không có quyền truy cập vào trang này",
+    "suggestion": "Liên hệ ringbookstore@ring.com hoặc đăng nhập tài khoản khác.",
+    "login": "Đăng nhập lại"
+  }
+}

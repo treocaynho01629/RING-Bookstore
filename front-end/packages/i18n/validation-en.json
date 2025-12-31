@@ -1,22 +1,36 @@
 {
   "validation": {
     "constraints": {
-      "required.suggest": "Please enter {{field}}!",
-      "not.blank": "{{field}} cannot be blank!",
+      "required": "Please enter {{field}}!",
+      "blank": "{{field}} cannot be blank!",
       "pattern": "{{field}} format is invalid!",
-      "size.range": "{{field}} must be between {{min}} and {{max}} characters!",
-      "size.max": "{{field}} cannot exceed {{max}} characters!",
-      "size.min": "{{field}} must be greater than {{min}} characters!",
-      "image.size": "Image size cannot exceed {{max}} MB!",
-      "date.past": "{{field}} must be before today!",
       "range": "{{field}} must be between {{min}} and {{max}}!",
-      "password.match": "Passwords do not match!",
-      "password.evaluate": {
-        "helper": "Password length must be between {{min}}-{{max}} characters including lowercase letters and a number.",
-        "length": "Invalid length",
-        "chars": "Password must contain lowercase letters and a number or a special character",
-        "common": "Common password",
-        "strong": "Strong password"
+      "date": {
+        "past": "{{field}} must be before today!"
+      },
+      "size": {
+        "range": "{{field}} must be between {{min}} and {{max}} characters!",
+        "max": "{{field}} cannot exceed {{max}} characters!",
+        "min": "{{field}} must be greater than {{min}} characters!",
+        "image": "Image size cannot exceed {{max}} MB!"
+      },
+      "password": {
+        "match": "Passwords do not match!",
+        "evaluate": {
+          "helper": "Password length must be between {{min}}-{{max}} characters including lowercase letters and a number.",
+          "length": "Invalid length",
+          "chars": "Password must contain lowercase letters and a number or a special character",
+          "common": "Common password",
+          "strong": "Strong password"
+        }
+      }
+    },
+    "error": {
+      "invalid": {
+        "argument": "Invalid argument!"
+      },
+      "form": {
+        "required": "Please enter all fields!"
       }
     }
   }

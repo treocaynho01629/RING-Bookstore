@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 
+// TODO: Remove this
 const useReachable = (baseUrl) => {
   //Fire a snack notification if it take too long to reach the server
   const connect = async () => {

@@ -86,16 +86,16 @@
   },
   "dependencies": {
     "@ring/shared": "*",
-    "@mui/x-date-pickers": "^8.15.0",
-    "yet-another-react-lightbox": "^3.25.0",
+    "@mui/x-date-pickers": "^8.23.0",
+    "yet-another-react-lightbox": "^3.28.0",
     "react-lazy-load-image-component": "^1.6.3",
-    "dayjs": "^1.11.18"
+    "dayjs": "^1.11.19"
   },
   "devDependencies": {
     "@ring/eslint-config": "*",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
-    "tsup": "^8.5.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },
   "peerDependencies": {

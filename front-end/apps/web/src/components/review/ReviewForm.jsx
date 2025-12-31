@@ -125,7 +125,9 @@ const ReviewForm = ({
       })
         .unwrap()
         .then((data) => {
-          enqueueSnackbar(capitalize(t("message.success", { action: t("update") })), { variant: "success" });
+          enqueueSnackbar(t("message.success", { action: t("review.update", { ns: "authenticated" }) }), {
+            variant: "success",
+          });
           setErr([]);
           setErrMsg("");
           handleClose();
@@ -134,11 +136,13 @@ const ReviewForm = ({
           console.error(err);
           setErr(err);
           if (!err?.status) {
-            setErrMsg(t("error.server.not.response"));
+            setErrMsg(t("error.server.response"));
           } else {
             setErrMsg(err.data.message);
           }
-          enqueueSnackbar(capitalize(t("message.error", { action: t("update") })), { variant: "error" });
+          enqueueSnackbar(t("message.error", { action: t("review.update", { ns: "authenticated" }) }), {
+            variant: "error",
+          });
         });
     } else {
       //New review
@@ -151,7 +155,7 @@ const ReviewForm = ({
       })
         .unwrap()
         .then((data) => {
-          enqueueSnackbar(capitalize(t("message.success", { action: t("review.label") })), { variant: "success" });
+          enqueueSnackbar(t("message.success", { action: t("review.label") }), { variant: "success" });
           setContent("");
           setErr([]);
           setErrMsg("");
@@ -163,11 +167,11 @@ const ReviewForm = ({
           console.error(err);
           setErr(err);
           if (!err?.status) {
-            setErrMsg(t("error.server.not.response"));
+            setErrMsg(t("error.server.response"));
           } else {
             setErrMsg(err?.data?.message);
           }
-          enqueueSnackbar(capitalize(t("message.error", { action: t("review.label") })), { variant: "error" });
+          enqueueSnackbar(t("message.error", { action: t("review.label") }), { variant: "error" });
         });
     }
 
@@ -222,7 +226,7 @@ const ReviewForm = ({
               </RatingSelect>
               <SuggestText className={`${errMsg ? "error" : ""}`}>
                 {errMsg
-                  ? capitalize(t("message.error", { action: t("review.label") }))
+                  ? t("message.error", { action: t("review.label") })
                   : t("review.thought", { ns: "authenticated" })}
               </SuggestText>
               <TextField
@@ -258,11 +262,16 @@ const ReviewForm = ({
         </Button>
         {username ? (
           err?.data?.code === 208 ? (
-            <Link to={"/profile"} title="Xem đánh giá">
-              <Button variant="contained" color="primary" size="large" sx={{ marginY: "10px" }}>
-                {t("review.view", { ns: "authenticated" })}
-              </Button>
-            </Link>
+            <Button
+              component={Link}
+              to={"/profile"}
+              variant="contained"
+              color="primary"
+              size="large"
+              sx={{ marginY: "10px" }}
+            >
+              {t("review.view", { ns: "authenticated" })}
+            </Button>
           ) : err?.data?.code === 204 ? (
             <Button
               variant="contained"
@@ -281,11 +290,18 @@ const ReviewForm = ({
             </Button>
           )
         ) : (
-          <Link to={"/auth/login"} state={{ from: location }} title={t("login")}>
-            <Button variant="contained" color="primary" size="large" sx={{ marginY: "10px" }}>
-              {t("login.now")}
-            </Button>
-          </Link>
+          <Button
+            component={Link}
+            to="/auth/login"
+            state={{ from: location }}
+            title={t("login.label")}
+            variant="contained"
+            color="primary"
+            size="large"
+            sx={{ marginY: "10px" }}
+          >
+            {t("login.now")}
+          </Button>
         )}
       </DialogActions>
     </Dialog>

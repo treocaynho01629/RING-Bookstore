@@ -4,52 +4,66 @@
     "title": "Địa chỉ của bạn",
     "empty": "Chưa có địa chỉ nào",
     "recipient": "Địa chỉ người nhận",
-    "to.place": "Vận chuyển đến địa chỉ này",
+    "place": "Vận chuyển đến địa chỉ này",
     "from": "Giao từ",
     "to": "Giao tới",
     "add": "Thêm địa chỉ",
     "edit": "Sửa địa chỉ",
-    "delete": "Xóa địa chỉ",
-    "delete.title": "Xóa địa chỉ?",
-    "delete.description": "Xoá địa chỉ khỏi sổ địa chỉ của bạn?",
     "temp": "Tạm thời",
-    "default": "Mặc định",
-    "default.empty": "Chưa có địa chỉ mặc định",
-    "default.set": "Đặt làm địa chỉ mặc định",
     "suggestion": "Tạo địa chỉ tạm thời?",
     "name": "Họ và tên",
     "phone": "Số điện thoại",
     "company": "Tên công ty",
-    "type": "Loại địa chỉ",
     "city": "Tỉnh/Thành phố",
     "ward": "Phường/Xã",
     "detail": "Địa chỉ nhận hàng",
     "settings": "Cài đặt khác",
-    "type.home": "Nhà riêng",
-    "type.office": "Văn phòng"
+    "type": {
+      "label": "Loại địa chỉ",
+      "home": "Nhà riêng",
+      "office": "Văn phòng"
+    },
+    "default": {
+      "label": "Mặc định",
+      "set": "Đặt làm địa chỉ mặc định",
+      "empty": "Chưa có địa chỉ mặc định"
+    },
+    "delete": {
+      "label": "Xóa địa chỉ",
+      "title": "Xóa địa chỉ?",
+      "description": "Xoá địa chỉ khỏi sổ địa chỉ của bạn?"
+    }
   },
   "checkout": {
-    "pending": "Đang chờ thanh toán đơn hàng trước {{date}} {{time}}.",
     "paid": "Đã thanh toán ngày {{date}} {{time}}.",
-    "pending.refund": "Đang chờ hoàn tiền",
     "refunded": "Đã hoàn tiền ngày {{date}} {{time}}.",
     "canceled": "Đã huỷ đơn ngày {{date}} {{time}}.",
     "order": "Đặt hàng",
     "review": "Kiểm tra lại sản phẩm",
-    "payment": "Chọn hình thức thanh toán",
     "summary": "Tổng quan",
-    "shipping": "Giao hàng",
-    "note.placeholder": "Lời nhắn cho người bán...",
-    "vat.description": "Giá này đã bao gồm thuế GTGT, phí đóng gói, phí vận chuyển và các chi phí phát sinh khác",
     "total": "Tổng số tiền ({{quantity}} sản phẩm):",
-    "cancel.label": "Huỷ toàn bộ đơn",
-    "payment.update": "Thay đổi hình thức thanh toán",
-    "payment.status": {
-      "pending": "Đang chờ thanh toán đơn hàng.",
-      "paid": "Đã thanh toán đơn hàng.",
-      "pending.refund": "Đang chờ hoàn tiền.",
-      "refunded": "Đã hoàn tiền đơn hàng.",
-      "canceled": "Đã huỷ đơn hàng."
+    "pending": {
+      "label": "Đang chờ thanh toán đơn hàng trước {{date}} {{time}}.",
+      "refund": "Đang chờ hoàn tiền"
+    },
+    "note": {
+      "placeholder": "Lời nhắn cho người bán..."
+    },
+    "vat": {
+      "description": "Giá này đã bao gồm thuế GTGT, phí đóng gói, phí vận chuyển và các chi phí phát sinh khác"
+    },
+    "cancel": {
+      "label": "Huỷ toàn bộ đơn"
+    },
+    "payment": {
+      "select": "Chọn hình thức thanh toán",
+      "update": "Thay đổi hình thức thanh toán",
+      "invalid": "Hình thức thanh toán không hợp lệ!"
+    },
+    "shipping": {
+      "label": "Giao hàng",
+      "select": "Chọn hình thức giao hàng",
+      "estimate": "Đảm bảo nhận hàng từ {{date}} ngày"
     }
   },
   "review": {
@@ -61,6 +75,9 @@
     "view": "Xem đánh giá"
   },
   "order": {
+    "view": "Xem đơn hàng",
+    "title": "Thanh toán đơn hàng",
+    "message": "Sau khi thực hiện thanh toán thành công, vui lòng đợi từ 5 - 10 giây để hệ thống tự động cập nhật.",
     "your": "Đơn hàng của bạn",
     "total": "Thành tiền",
     "id": "Mã vận đơn",
@@ -69,14 +86,16 @@
     "receive": "Nhận hàng",
     "completed": "Hoàn tất",
     "cancelled": "Đã huỷ đơn",
-    "pending.return": "Chờ trả hàng",
-    "pending.check": "Chờ kiểm hàng",
     "refunded": "Hoàn tiền",
-    "buy.again": "Mua lại",
+    "again": "Mua lại",
     "note": "Ghi chú",
+    "shipping": "Hình thức giao hàng",
     "package": "Kiện hàng",
-    "shipping.type": "Hình thức giao hàng",
     "processing": "Đang xử lý đơn hàng...",
+    "pending": {
+      "return": "Chờ trả hàng",
+      "check": "Chờ kiểm hàng"
+    },
     "cancel": {
       "label": "Huỷ đơn hàng",
       "title": "Chọn lý do huỷ đơn hàng",
@@ -93,14 +112,16 @@
       "message": "Xác nhận đã nhận đơn hàng {{id}}?"
     },
     "status": {
-      "pending.payment": "Đang chờ thanh toán đơn hàng.",
-      "pending": "Đang chờ nhận hàng từ shop.",
       "shipping": "Đang giao hàng cho đơn vị vận chuyển.",
-      "pending.return": "Đang chờ hoàn trả hàng.",
-      "pending.refund": "Đang chờ hoàn trả tiền.",
       "completed": "Cảm ơn bạn vì đã mua hàng!",
       "cancelled": "Đã huỷ đơn hàng vào {{date}} {{time}}.",
-      "refunded": "Đã hoàn trả {{amount}} vào ví của bạn vào {{date}} {{time}}."
+      "refunded": "Đã hoàn trả {{amount}} vào ví của bạn vào {{date}} {{time}}.",
+      "pending": {
+        "seller": "Đang chờ giao hàng từ shop.",
+        "payment": "Đang chờ thanh toán.",
+        "return": "Đang chờ hoàn trả hàng.",
+        "refund": "Đang chờ hoàn trả tiền."
+      }
     },
     "reason": {
       "label": "Lý do",

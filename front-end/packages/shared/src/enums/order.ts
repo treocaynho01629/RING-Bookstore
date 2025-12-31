@@ -13,7 +13,7 @@ export const getOrderStatus = (orderStatus: OrderStatus): OrderStatusMeta => {
     case OrderStatus.PENDING_PAYMENT:
       return { value: OrderStatus.PENDING_PAYMENT, label: "order.status.pending.payment", color: "warning" };
     case OrderStatus.PENDING:
-      return { value: OrderStatus.PENDING, label: "order.status.pending", color: "warning" };
+      return { value: OrderStatus.PENDING, label: "order.status.pending.seller", color: "warning" };
     case OrderStatus.SHIPPING:
       return { value: OrderStatus.SHIPPING, label: "order.status.shipping", color: "info" };
     case OrderStatus.CANCELED:

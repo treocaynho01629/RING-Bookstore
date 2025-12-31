@@ -2,13 +2,13 @@
 
 import { ReactNode, useState } from "react";
 import { useMediaQuery } from "@mui/material";
+import { styled } from "@mui/material/styles";
 // import ScrollToTop from "@ring/ui/ScrollToTop";
 import Navbar from "./Navbar";
-// import NavDrawer from "./NavDrawer";
-import styled from "@emotion/styled";
+import NavDrawer from "./NavDrawer";
 
 //#region styled
-const LayoutWrapper = styled.div`
+const LayoutWrapper = styled("div")`
   display: flex;
 
   ${({ theme }) => theme.breakpoints.down("md")} {
@@ -16,7 +16,7 @@ const LayoutWrapper = styled.div`
   }
 `;
 
-const MainContainer = styled.div`
+const MainContainer = styled("div")`
   flex-grow: 1;
   position: relative;
 
@@ -25,7 +25,7 @@ const MainContainer = styled.div`
   }
 `;
 
-const LayoutContainer = styled.div`
+const LayoutContainer = styled("div")`
   position: relative;
   min-height: 60dvh;
   padding-bottom: ${({ theme }) => theme.spacing(4)};
@@ -51,7 +51,7 @@ export default function PageLayout({ children }: PageLayoutProps) {
   return (
     <LayoutWrapper>
       {/* <ScrollToTop /> */}
-      {/* <NavDrawer {...{ open, setOpen, tabletMode }} /> */}
+      <NavDrawer {...{ open, setOpen, tabletMode }} />
       <MainContainer>
         <Navbar open={open} setOpen={setOpen} />
         <LayoutContainer>{children}</LayoutContainer>

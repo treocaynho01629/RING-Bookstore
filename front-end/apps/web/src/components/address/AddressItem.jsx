@@ -166,7 +166,7 @@ const AddressItem = ({ onCheck, addressInfo, handleOpen, handleClick, selectedVa
       >
         {addressInfo?.isDefault && (
           <AddressTag className={`${isNotValid ? "error" : ""}`}>
-            {t("address.default", { ns: "authenticated" })}
+            {t("address.default.label", { ns: "authenticated" })}
           </AddressTag>
         )}
         {isTemp && (

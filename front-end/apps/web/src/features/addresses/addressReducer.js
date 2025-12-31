@@ -6,13 +6,11 @@ export const addressSlice = createSlice({
   name: "address",
   initialState,
   reducers: {
-    //Add address
+    // Add address
     addAddress: (state, action) => {
-      const item = state.addresses.find(
-        (item) => item.id === action.payload.id
-      );
+      const item = state.addresses.find((item) => item.id === action.payload.id);
       if (item) {
-        //Update old address
+        // Update old address
         item.name = action.payload.name;
         item.company = action.payload.company;
         item.phone = action.payload.phone;
@@ -20,20 +18,16 @@ export const addressSlice = createSlice({
         item.address = action.payload.address;
         item.type = action.payload.type;
       } else {
-        //Add if not exists
+        // Add if not exists
         const address = action.payload;
-        //Id increament
-        const id = state.addresses.length
-          ? state.addresses[state.addresses.length - 1].id.substring(2) + 1
-          : 0;
+        // Id increament
+        const id = state.addresses.length ? state.addresses[state.addresses.length - 1].id.substring(2) + 1 : 0;
         address.id = `s-${id}`;
         state.addresses.push(address);
       }
     },
     removeStateAddress: (state, action) => {
-      state.addresses = state.addresses.filter(
-        (item) => item.id !== action.payload
-      );
+      state.addresses = state.addresses.filter((item) => item.id !== action.payload);
     },
   },
 });

@@ -1,8 +1,10 @@
 import { useSignOutMutation } from "@ring/redux/authApiSlice";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 
 const useLogout = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [logout] = useSignOutMutation();
 
   const signOut = async (message) => {
@@ -11,7 +13,7 @@ const useLogout = () => {
 
       navigate("/");
       const { enqueueSnackbar } = await import("notistack");
-      enqueueSnackbar(message || "Đã đăng xuất!", { variant: "error" });
+      enqueueSnackbar(message || t("signout.success"), { variant: "error" });
     } catch (err) {
       console.error(err);
     }

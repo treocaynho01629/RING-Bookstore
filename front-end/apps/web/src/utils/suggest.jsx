@@ -79,7 +79,7 @@ export const orderTabs = [
   },
   {
     filters: { sortBy: "createdDate" },
-    label: "search.sort.newest",
+    label: "search.sort.latest",
   },
   {
     filters: { sortBy: "rating" },

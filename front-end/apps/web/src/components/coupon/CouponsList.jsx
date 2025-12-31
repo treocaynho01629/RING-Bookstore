@@ -268,7 +268,7 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) =>
       </StyledDialogTitle>
       <ToggleGroupContainer>
         <CustomTabs value={tab} onChange={handleChangeTab} variant="scrollable" scrollButtons="auto">
-          <CustomTab label={t("all")} value="" />
+          <CustomTab label={t("all.label")} value="" />
           {couponItems.map((tab, index) => (
             <CustomTab key={`tab-${index}`} label={t(tab?.label)} value={index} />
           ))}

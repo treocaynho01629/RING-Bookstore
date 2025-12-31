@@ -15,7 +15,7 @@ i18n
     supportedLngs: locales,
     defaultNS: "client",
     fallbackNS: "common",
-    ns: ["common", "validation", "client", "authenticated"],
+    ns: ["common", "validation", "client", "authenticated", "uncommon"],
     interpolation: {
       escapeValue: false,
     },

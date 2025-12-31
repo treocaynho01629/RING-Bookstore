@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { useState, lazy, Suspense } from "react";
 import { useParams } from "react-router";
+import { useTranslation } from "react-i18next";
 import useReCaptcha from "@ring/auth/useReCaptcha";
 import SimpleNavbar from "../components/navbar/SimpleNavbar";
 
@@ -41,6 +42,7 @@ const ContentContainer = styled.div`
 
 function ResetPage() {
   const { token } = useParams();
+  const { t } = useTranslation();
   const [pending, setPending] = useState(false);
 
   // Recaptcha
@@ -51,7 +53,7 @@ function ResetPage() {
     <Wrapper>
       {pending && (
         <Suspense fallBack={null}>
-          <PendingModal open={pending} message="Đang gửi yêu cầu..." />
+          <PendingModal open={pending} message={t("pending")} />
         </Suspense>
       )}
       <SimpleNavbar />

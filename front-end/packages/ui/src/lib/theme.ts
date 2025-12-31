@@ -34,7 +34,7 @@ export const myPalette = {
     contrastText: "#ffffffb3",
   },
   background: {
-    default: "#f9f9fb",
+    default: "#fbfbfb",
   },
 };
 
@@ -164,7 +164,7 @@ export const theme = createTheme({
       defaultProps: {
         PaperProps: {
           elevation: 1,
-        }
+        },
       },
       styleOverrides: {
         paperFullScreen: ({ theme }) => ({

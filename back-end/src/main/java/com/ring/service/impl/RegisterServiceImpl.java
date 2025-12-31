@@ -71,7 +71,7 @@ public class RegisterServiceImpl implements RegisterService {
 			roles.add(roleRepo.findByRoleName(UserRole.ROLE_USER)
 					.orElseThrow(() -> {
 						var errorMsg = messageService.getMessage("exception.not.found",
-								new Object[]{ new DefaultMessageSourceResolvable("label.user.role") });
+								new Object[] { new DefaultMessageSourceResolvable("label.user.role") });
 						return new ResourceNotFoundException(errorMsg);
 					}));
 
@@ -111,8 +111,7 @@ public class RegisterServiceImpl implements RegisterService {
 		// Get all accounts with this email
 		Account user = accountRepo.findByEmail(email)
 				.orElseThrow(() -> {
-					var errorMsg = messageService.getMessage("exception.not.found",
-							new Object[]{ new DefaultMessageSourceResolvable("label.user") });
+					var errorMsg = messageService.getMessage("exception.email.invalid");
 					return new ResourceNotFoundException(errorMsg);
 				});
 
@@ -148,7 +147,7 @@ public class RegisterServiceImpl implements RegisterService {
 		Account user = accountRepo.findByResetToken(token)
 				.orElseThrow(() -> {
 					var errorMsg = messageService.getMessage("exception.not.found",
-							new Object[]{ new DefaultMessageSourceResolvable("label.token.reset") });
+							new Object[] { new DefaultMessageSourceResolvable("label.token.reset") });
 					return new ResourceNotFoundException(errorMsg);
 				});
 

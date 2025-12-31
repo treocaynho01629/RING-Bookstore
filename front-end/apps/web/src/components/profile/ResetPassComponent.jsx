@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { StyledDialogTitle } from "../custom/ProfileComponents";
 import { Instruction } from "@ring/ui/Components";
 import { useTranslation } from "react-i18next";
+import { capitalize } from "lodash-es";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
@@ -36,19 +37,19 @@ const ResetPassComponent = ({ pending, setPending, verifyRefreshToken, refreshin
     if (pending || changing || refreshing) return;
 
     if (!validNewPass) {
-      setErrMsg("Sai định dạng thông tin!");
+      setErrMsg(t("validation.error.invalid.argument"));
       return;
     }
 
     if (!newPass || !newPassRe) {
-      setErrMsg("Không được bỏ trống mật khẩu mới!");
+      setErrMsg(capitalize(t("validation.constraints.blank", { ns: "validation", field: t("password.label") })));
       setValidNewPass(false);
       setValidNewPassRe(false);
       return;
     }
 
     if (newPass !== newPassRe) {
-      setErrMsg("Không trùng mật khẩu!");
+      setErrMsg(t("validation.constraints.password.match", { ns: "validation" }));
       setValidNewPass(false);
       setValidNewPassRe(false);
       return;
@@ -71,20 +72,16 @@ const ResetPassComponent = ({ pending, setPending, verifyRefreshToken, refreshin
         setNewPassRe("");
 
         // Queue snack
-        enqueueSnackbar("Đổi mật khẩu thành công!", { variant: "success" });
+        enqueueSnackbar(t("message.success", { action: t("change.change.label") }), { variant: "success" });
         setPending(false);
       })
       .catch((err) => {
         console.error(err);
         setErr(err);
         if (!err?.status) {
-          setErrMsg("Server không phản hồi");
-        } else if (err?.status === 409) {
-          setErrMsg(err?.data?.message);
-        } else if (err?.status === 400) {
-          setErrMsg("Sai định dạng thông tin!");
+          setErrMsg(t("error.server.response"));
         } else {
-          setErrMsg("Cập nhật hồ sơ thất bại");
+          setErrMsg(err?.data?.message);
         }
         setPending(false);
       });
@@ -111,7 +108,7 @@ const ResetPassComponent = ({ pending, setPending, verifyRefreshToken, refreshin
     <div>
       {refreshing && (
         <Suspense fallBack={null}>
-          <PendingModal open={refreshing} message="Đang xác thực đăng nhập ..." />
+          <PendingModal open={refreshing} message={t("validating")} />
         </Suspense>
       )}
       <StyledDialogTitle>
@@ -119,7 +116,7 @@ const ResetPassComponent = ({ pending, setPending, verifyRefreshToken, refreshin
           <KeyboardArrowLeft />
         </Link>
         <Password />
-        &nbsp;{t("password.change.title")}
+        &nbsp;{t("change.title")}
       </StyledDialogTitle>
       <DialogContent sx={{ p: { xs: 1, sm: 2, md: 0 }, mt: { xs: 1, md: 0 }, height: { xs: "100dvh", md: "auto" } }}>
         <Instruction aria-live="assertive" style={{ marginTop: -10 }}>
@@ -128,14 +125,14 @@ const ResetPassComponent = ({ pending, setPending, verifyRefreshToken, refreshin
         <form onSubmit={handleChangePassword}>
           <Stack mt={2} spacing={1.5} direction="column" minHeight={"70dvh"} maxWidth={{ xs: "100%", md: 380 }}>
             <PasswordInput
-              label={err?.data?.errors?.password ?? t("password.change.old")}
+              label={err?.data?.errors?.password ?? t("change.old")}
               onChange={(e) => setPass(e.target.value)}
               value={pass}
               error={err?.data?.errors?.password}
               size="small"
             />
             <PasswordInput
-              label={err?.data?.errors?.newPass ?? t("password.change.new")}
+              label={err?.data?.errors?.newPass ?? t("change.new")}
               onChange={(e) => setNewPass(e.target.value)}
               value={newPass}
               aria-invalid={validNewPass ? "false" : "true"}
@@ -146,7 +143,7 @@ const ResetPassComponent = ({ pending, setPending, verifyRefreshToken, refreshin
               label={
                 newPassRe && !validNewPassRe
                   ? t("validation.constraints.password.match", { ns: "validation" })
-                  : (err?.data?.errors?.newPassRe ?? t("password.change.confirm"))
+                  : (err?.data?.errors?.newPassRe ?? t("change.confirm"))
               }
               onChange={(e) => setNewPassRe(e.target.value)}
               value={newPassRe}

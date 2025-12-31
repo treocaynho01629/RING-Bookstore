@@ -191,7 +191,7 @@ StyledStepIcon.propTypes = {
 const steps = [
   { label: "checkout.order", icon: <ReceiptOutlined /> },
   { label: "order.pay", icon: <PaymentsOutlined /> },
-  { label: "checkout.shipping", icon: <LocalShippingOutlined /> },
+  { label: "checkout.shipping.label", icon: <LocalShippingOutlined /> },
   { label: "order.receive", icon: <SaveAltOutlined /> },
   { label: "order.completed", icon: <StarBorder /> },
 ];

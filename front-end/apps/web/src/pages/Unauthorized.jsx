@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import Button from "@mui/material/Button";
 import Block from "@mui/icons-material/Block";
 import SimpleNavbar from "../components/navbar/SimpleNavbar";
@@ -22,11 +23,7 @@ const Wrapper = styled.div`
     z-index: -1;
     mask-image: linear-gradient(200deg, transparent, transparent 75%, #000000);
     background:
-      radial-gradient(
-        circle,
-        transparent 25%,
-        ${({ theme }) => theme.vars.palette.background.default} 26%
-      ),
+      radial-gradient(circle, transparent 25%, ${({ theme }) => theme.vars.palette.background.default} 26%),
       linear-gradient(
         45deg,
         transparent 46%,
@@ -114,21 +111,22 @@ const ErrorContainer = styled("div")(({ theme }) => ({
 //#endregion
 
 const Unauthorized = () => {
+  const { t } = useTranslation();
   return (
     <Wrapper>
       <SimpleNavbar />
       <Content>
-        <h2>Chờ đã!!!</h2>
+        <h2>{t("unauthorized.title", { ns: "uncommon" })}</h2>
         <ErrorContainer>
           <ErrorCode>
             4<Block />1
           </ErrorCode>
         </ErrorContainer>
-        <h3>Bạn không có quyền truy cập vào trang này</h3>
-        <p>Liên hệ ringbookstore@ring.com hoặc đăng nhập tài khoản khác.</p>
+        <h3>{t("unauthorized.description", { ns: "uncommon" })}</h3>
+        <p>{t("unauthorized.suggestion", { ns: "uncommon" })}</p>
         <Link to={"/auth/login"}>
           <Button sx={{ marginTop: 2 }} variant="outlined" color="primary">
-            Đăng nhập lại
+            {t("unauthorized.login", { ns: "uncommon" })}
           </Button>
         </Link>
       </Content>

@@ -2,7 +2,6 @@
 export { default as useConfirm } from "./src/hooks/useConfirm";
 export { default as useDeepEffect } from "./src/hooks/useDeepEffect";
 export { default as useReachable } from "./src/hooks/useReachable";
-export { default as useGetEnums } from "./src/hooks/useGetEnums";
 export { default as useTitle } from "./src/hooks/useTitle";
 
 // Enums

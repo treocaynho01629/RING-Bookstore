@@ -106,7 +106,7 @@ function EnhancedTableHead({ onSelectAllClick, numSelected, rowCount, handleDele
             onChange={onSelectAllClick}
             slotProps={{
               input: {
-                "aria-label": t("select.all"),
+                "aria-label": t("all.select"),
                 "id": "select-all-checkbox",
               },
             }}
@@ -114,7 +114,7 @@ function EnhancedTableHead({ onSelectAllClick, numSelected, rowCount, handleDele
         </StyledTableCell>
         <StyledTableCell align="left">
           <label htmlFor="select-all-checkbox" style={{ cursor: "pointer" }}>
-            {t("select.all")} ({rowCount} {t("items")})
+            {t("all.select")} ({rowCount} {t("items")})
           </label>
         </StyledTableCell>
         <StyledTableCell
@@ -140,7 +140,7 @@ function EnhancedTableHead({ onSelectAllClick, numSelected, rowCount, handleDele
             display: { xs: "none", sm: "table-cell" },
           }}
         >
-          {t("quantity")}
+          {t("quantity.label")}
         </StyledTableCell>
         <StyledTableCell
           align="left"
@@ -656,11 +656,9 @@ const CartContent = () => {
           </TableBody>
         </Table>
         <Box mt={1} display="flex">
-          <Link to={"/"}>
-            <Button variant="outlined" color="secondary" startIcon={<ChevronLeft />}>
-              {t("cart.continue")}
-            </Button>
-          </Link>
+          <Button component={Link} to="/" variant="outlined" color="secondary" startIcon={<ChevronLeft />}>
+            {t("cart.continue")}
+          </Button>
         </Box>
       </Grid>
       <Grid size={{ xs: 12, md_lg: 4 }} position={{ xs: "sticky", md_lg: "relative" }} bottom={0}>

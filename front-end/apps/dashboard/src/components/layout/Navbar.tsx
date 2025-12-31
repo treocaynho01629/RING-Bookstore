@@ -1,30 +1,27 @@
 "use client";
 
 import { Suspense, lazy, useCallback, useState } from "react";
-import {
-  Toolbar,
-  IconButton,
-  Stack,
-  Avatar,
-  Box,
-  Chip,
-  Typography,
-  Button,
-  Skeleton,
-  styled,
-} from "@mui/material";
-import {
-  Menu as MenuIcon,
-  Store,
-  UnfoldMore,
-  WarningAmber,
-} from "@mui/icons-material";
 import { useGetPreviewShopsQuery } from "../../features/shops/shopsApiSlice";
 import { getUserRole } from "@ring/shared/enums/user";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
+import { styled } from "@mui/material/styles";
+import MenuIcon from "@mui/icons-material/Menu";
+import Store from "@mui/icons-material/Store";
+import UnfoldMore from "@mui/icons-material/UnfoldMore";
+import WarningAmber from "@mui/icons-material/WarningAmber";
+import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
+import Chip from "@mui/material/Chip";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Skeleton from "@mui/material/Skeleton";
 import MuiAppBar, { AppBarProps } from "@mui/material/AppBar";
-// import NavSetting from "./NavSetting";
 import useShop from "../../hooks/useShop";
+import NavSetting from "./NavSetting";
 
 const ShopSelect = lazy(() => import("./ShopSelect"));
 
@@ -54,30 +51,24 @@ const StyledAvatar = styled(Avatar)`
 `;
 //#endregion
 
-const UserRole = getUserRole();
-
 interface NavBarProps {
   open: boolean;
   setOpen: (open: boolean) => void;
 }
 
 export default function NavBar({ open, setOpen }: NavBarProps) {
-  const { data: session } = useSession();
+  const t = useTranslations();
   const { shop, setShop } = useShop();
+  const { data: session } = useSession();
+  const { role, image, username } = session?.user ?? { role: null, image: null, username: null };
+  const roleMeta = role ? getUserRole(role) : null;
 
   const [openSetting, setOpenSetting] = useState(false);
   const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>(undefined);
   const openShop = Boolean(anchorEl);
-  const roleIndexes = session?.user?.roles?.map((r) =>
-    Object.keys(UserRole).indexOf(r)
-  ) || [0];
-  const currRole = UserRole[Object.keys(UserRole)[Math.max(...roleIndexes)]];
 
-  //Shop select
-  const { data, isLoading, isSuccess, isError } = useGetPreviewShopsQuery(
-    undefined,
-    { skip: !shop && !openShop }
-  );
+  // Shop select
+  const { data, isLoading, isSuccess, isError } = useGetPreviewShopsQuery(undefined, { skip: !shop && !openShop });
 
   const handleOpenShop = (e: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(e.currentTarget);
@@ -105,7 +96,7 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
 
     shopBadgeContent = (
       <>
-        <StyledAvatar src={shopInfo?.image ?? null}>
+        <StyledAvatar src={shopInfo?.image ?? ""}>
           <Store fontSize="small" />
         </StyledAvatar>
         <Typography variant="body2" color="text.primary" mx={1}>
@@ -116,13 +107,7 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
   } else if (isError) {
     shopBadgeContent = (
       <>
-        <StyledAvatar>
-          {!shop ? (
-            <Store fontSize="small" />
-          ) : (
-            <WarningAmber fontSize="small" />
-          )}
-        </StyledAvatar>
+        <StyledAvatar>{!shop ? <Store fontSize="small" /> : <WarningAmber fontSize="small" />}</StyledAvatar>
         <Typography variant="body2" color="text.primary" mx={1}>
           {!shop ? "Tổng thể" : "Đã xảy ra lỗi"}
         </Typography>
@@ -143,10 +128,7 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
 
   return (
     <AppBar position="sticky" elevation={0}>
-      <Toolbar
-        disableGutters
-        sx={{ justifyContent: "space-between", padding: "5px 10px" }}
-      >
+      <Toolbar disableGutters sx={{ justifyContent: "space-between", padding: "5px 10px" }}>
         <Box display="flex" alignItems="center">
           <IconButton aria-label="open drawer" onClick={handleToggleDrawer}>
             <MenuIcon />
@@ -154,8 +136,8 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
           <ShopButton onClick={handleOpenShop} disabled={isLoading}>
             {shopBadgeContent}
             <Chip
-              label={currRole?.label ?? "Đang tải"}
-              color={currRole?.color ?? "default"}
+              label={t(roleMeta?.label ?? "loading")}
+              color={(roleMeta?.color as any) ?? "default"}
               size="small"
               sx={{ fontWeight: 450, mr: 1 }}
             />
@@ -186,15 +168,17 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
             aria-controls={openSetting ? "account-menu" : undefined}
             aria-expanded={openSetting ? "true" : undefined}
           >
-            <Avatar
-              sx={{ width: 32, height: 32 }}
-              src={session?.user?.image ?? undefined}
-            />
+            <Avatar sx={{ width: 32, height: 32 }} src={image ?? undefined} />
           </IconButton>
         </Stack>
-        {/* <NavSetting
-          {...{ open: openSetting, setOpen: setOpenSetting, image, username }}
-        /> */}
+        <NavSetting
+          {...{
+            open: openSetting,
+            setOpen: setOpenSetting,
+            image: image,
+            username: username,
+          }}
+        />
       </Toolbar>
     </AppBar>
   );

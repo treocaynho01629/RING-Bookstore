@@ -21,15 +21,7 @@ import {
   Toolbar,
   Button,
 } from "@mui/material";
-import {
-  Search,
-  MoreHoriz,
-  Edit,
-  Delete,
-  Visibility,
-  FilterAltOff,
-  Add,
-} from "@mui/icons-material";
+import { Search, MoreHoriz, Edit, Delete, Visibility, FilterAltOff, Add } from "@mui/icons-material";
 import { Link } from "react-router";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import {
@@ -39,19 +31,8 @@ import {
   useDeleteBooksMutation,
   useGetBooksQuery,
 } from "../../features/books/booksApiSlice";
-import {
-  ItemTitle,
-  FooterContainer,
-  FooterLabel,
-  StyledStockBar,
-} from "../custom/Components";
-import {
-  currencyFormat,
-  idFormatter,
-  useDeepEffect,
-  getBookType,
-  getImageSize,
-} from "@ring/shared";
+import { ItemTitle, FooterContainer, FooterLabel, StyledStockBar } from "../custom/Components";
+import { currencyFormat, idFormatter, useDeepEffect, getBookType, getImageSize } from "@ring/shared";
 import { publishersApiSlice } from "../../features/publishers/publishersApiSlice";
 import { categoriesApiSlice } from "../../features/categories/categoriesApiSlice";
 import { Progress } from "@ring/ui";
@@ -126,10 +107,8 @@ function ProductFilters({ filters, setFilters }) {
     totalElements: 0,
   });
 
-  const [getPublishers, { data: pubs }] =
-    publishersApiSlice.useLazyGetPublishersQuery();
-  const [getCategories, { data: cates }] =
-    categoriesApiSlice.useLazyGetCategoriesQuery();
+  const [getPublishers, { data: pubs }] = publishersApiSlice.useLazyGetPublishersQuery();
+  const [getCategories, { data: cates }] = categoriesApiSlice.useLazyGetCategoriesQuery();
 
   const handleOpenPubs = () => {
     if (!pubs) {
@@ -223,8 +202,7 @@ function ProductFilters({ filters, setFilters }) {
 
   const handleChangeKeyword = useCallback((e) => {
     e.preventDefault();
-    if (inputRef)
-      setFilters((prev) => ({ ...prev, keyword: inputRef.current.value }));
+    if (inputRef) setFilters((prev) => ({ ...prev, keyword: inputRef.current.value }));
   }, []);
 
   const handleApplyPubs = () => {
@@ -248,12 +226,7 @@ function ProductFilters({ filters, setFilters }) {
   }, []);
 
   return (
-    <Stack
-      width="100%"
-      spacing={1}
-      my={2}
-      direction={{ xs: "column", md: "row" }}
-    >
+    <Stack width="100%" spacing={1} my={2} direction={{ xs: "column", md: "row" }}>
       <TextField
         label="Nhà xuất bản"
         select
@@ -267,9 +240,7 @@ function ProductFilters({ filters, setFilters }) {
             onOpen: handleOpenPubs,
             onClose: handleApplyPubs,
             renderValue: (selected) => {
-              const filteredName = selected?.map(
-                (id) => pubs?.entities[id]?.name
-              );
+              const filteredName = selected?.map((id) => pubs?.entities[id]?.name);
               return filteredName.join(", ");
             },
             MenuProps: {
@@ -289,11 +260,7 @@ function ProductFilters({ filters, setFilters }) {
 
           return (
             <MenuItem key={`pub-${id}-${index}`} value={id}>
-              <Checkbox
-                sx={{ py: 0.5, pr: 1, pl: 0 }}
-                disableRipple
-                checked={pubIds?.includes(id)}
-              />
+              <Checkbox sx={{ py: 0.5, pr: 1, pl: 0 }} disableRipple checked={pubIds?.includes(id)} />
               <ListItemText primary={pub?.name} />
             </MenuItem>
           );
@@ -344,11 +311,7 @@ function ProductFilters({ filters, setFilters }) {
           {
             cate?.children?.map((child, childIndex) => {
               cateList.push(
-                <MenuItem
-                  sx={{ pl: 3, fontSize: 15 }}
-                  key={`child-cate-${child?.id}-${childIndex}`}
-                  value={child?.id}
-                >
+                <MenuItem sx={{ pl: 3, fontSize: 15 }} key={`child-cate-${child?.id}-${childIndex}`} value={child?.id}>
                   {child?.name}
                 </MenuItem>
               );
@@ -377,9 +340,7 @@ function ProductFilters({ filters, setFilters }) {
             onChange: (e) => handleChangeTypes(e),
             onClose: handleApplyTypes,
             renderValue: (selected) => {
-              const filteredLabel = selected?.map(
-                (value) => BookType[value].label
-              );
+              const filteredLabel = selected?.map((value) => BookType[value].label);
               return filteredLabel.join(", ");
             },
             MenuProps: {
@@ -396,11 +357,7 @@ function ProductFilters({ filters, setFilters }) {
       >
         {Object.values(BookType).map((type, index) => (
           <MenuItem key={`type-${type.value}-${index}`} value={type.value}>
-            <Checkbox
-              sx={{ py: 0.5, pr: 1, pl: 0 }}
-              disableRipple
-              checked={types?.includes(type.value)}
-            />
+            <Checkbox sx={{ py: 0.5, pr: 1, pl: 0 }} disableRipple checked={types?.includes(type.value)} />
             <ListItemText primary={type.label} />
           </MenuItem>
         ))}
@@ -421,12 +378,7 @@ function ProductFilters({ filters, setFilters }) {
         />
       </form>
       <Box display="flex" justifyContent="center">
-        <Button
-          sx={{ width: 125 }}
-          color="error"
-          onClick={resetFilter}
-          startIcon={<FilterAltOff />}
-        >
+        <Button sx={{ width: 125 }} color="error" onClick={resetFilter} startIcon={<FilterAltOff />}>
           Xoá bộ lọc
         </Button>
       </Box>
@@ -434,14 +386,7 @@ function ProductFilters({ filters, setFilters }) {
   );
 }
 
-export default function TableProducts({
-  shop,
-  isAdmin,
-  userId,
-  handleOpenEdit,
-  pending,
-  setPending,
-}) {
+export default function TableProducts({ shop, isAdmin, userId, handleOpenEdit, pending, setPending }) {
   //#region construct
   const [selected, setSelected] = useState([]);
   const [deselected, setDeseletected] = useState([]);
@@ -473,23 +418,22 @@ export default function TableProducts({
   const [deleteAll] = useDeleteAllBooksMutation();
 
   //Fetch books
-  const { data, isLoading, isSuccess, isError, error, refetch } =
-    useGetBooksQuery(
-      {
-        page: pagination?.number,
-        size: pagination?.size,
-        sortBy: pagination?.sortBy,
-        sortDir: pagination?.sortDir,
-        shopId: shop ?? "",
-        userId: isAdmin ? null : userId,
-        keyword: filters.keyword,
-        cateId: filters.cate,
-        types: filters.types,
-        pubIds: filters.pubIds,
-        amount: 0,
-      },
-      { skip: !userId }
-    );
+  const { data, isLoading, isSuccess, isError, error, refetch } = useGetBooksQuery(
+    {
+      page: pagination?.number,
+      size: pagination?.size,
+      sortBy: pagination?.sortBy,
+      sortDir: pagination?.sortDir,
+      shopId: shop ?? "",
+      userId: isAdmin ? null : userId,
+      keyword: filters.keyword,
+      cateId: filters.cate,
+      types: filters.types,
+      pubIds: filters.pubIds,
+      amount: 0,
+    },
+    { skip: !userId }
+  );
 
   //Set pagination after fetch
   useEffect(() => {
@@ -508,8 +452,7 @@ export default function TableProducts({
   }, [filters]);
 
   const handleRequestSort = (e, property) => {
-    const isAsc =
-      pagination.sortBy === property && pagination.sortDir === "asc";
+    const isAsc = pagination.sortBy === property && pagination.sortDir === "asc";
     const sortDir = isAsc ? "desc" : "asc";
     setPagination({ ...pagination, sortBy: property, sortDir: sortDir });
   };
@@ -564,10 +507,7 @@ export default function TableProducts({
       } else if (selectedIndex === selected?.length - 1) {
         newSelected = newSelected.concat(selected.slice(0, -1));
       } else if (selectedIndex > 0) {
-        newSelected = newSelected.concat(
-          selected.slice(0, selectedIndex),
-          selected.slice(selectedIndex + 1)
-        );
+        newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
       }
 
       setSelected(newSelected);
@@ -739,11 +679,8 @@ export default function TableProducts({
   };
 
   const isSelected = (id) =>
-    (!selectedAll && selected?.indexOf(id) !== -1) ||
-    (selectedAll && deselected?.indexOf(id) === -1);
-  const numSelected = selectedAll
-    ? data?.totalElements - deselected?.length
-    : selected?.length;
+    (!selectedAll && selected?.indexOf(id) !== -1) || (selectedAll && deselected?.indexOf(id) === -1);
+  const numSelected = selectedAll ? data?.totalElements - deselected?.length : selected?.length;
   const colSpan = headCells.length + 1;
   //#endregion
 
@@ -773,13 +710,7 @@ export default function TableProducts({
         const labelId = `enhanced-table-checkbox-${index}`;
         const stockProgress = Math.min((book.amount / maxStocks) * 100, 100);
         const stockStatus =
-          stockProgress == 0
-            ? "error"
-            : stockProgress < 20
-              ? "warning"
-              : stockProgress < 80
-                ? "primary"
-                : "info";
+          stockProgress == 0 ? "error" : stockProgress < 20 ? "warning" : stockProgress < 80 ? "primary" : "info";
 
         return (
           <TableRow hover aria-checked={isItemSelected} tabIndex={-1} key={id}>
@@ -793,43 +724,23 @@ export default function TableProducts({
                 }}
               />
             </TableCell>
-            <TableCell
-              component="th"
-              id={labelId}
-              scope="row"
-              padding="none"
-              align="center"
-            >
+            <TableCell component="th" id={labelId} scope="row" padding="none" align="center">
               <Link to={`/product/${id}`}>{idFormatter(id)}</Link>
             </TableCell>
             <TableCell align="left">
-              <Link
-                to={`/product/${id}`}
-                style={{ display: "flex", alignItems: "center" }}
-              >
+              <Link to={`/product/${id}`} style={{ display: "flex", alignItems: "center" }}>
                 <LazyLoadImage
                   src={book?.image?.srcSet[ImageSize?.TINY?.value]}
                   height={45}
                   width={45}
                   style={{ marginRight: "10px" }}
-                  placeholder={
-                    <Skeleton
-                      width={45}
-                      height={45}
-                      animation={false}
-                      variant="rectangular"
-                    />
-                  }
+                  placeholder={<Skeleton width={45} height={45} animation={false} variant="rectangular" />}
                 />
                 <Box>
                   <ItemTitle>{book.title}</ItemTitle>
                   <Box display="flex">
-                    <ItemTitle className="secondary">
-                      Đã bán: {book.totalOrders}
-                    </ItemTitle>
-                    <ItemTitle className="secondary">
-                      &emsp;Đánh giá: {book.rating.toFixed(1)}
-                    </ItemTitle>
+                    <ItemTitle className="secondary">Đã bán: {book.totalOrders}</ItemTitle>
+                    <ItemTitle className="secondary">&emsp;Đánh giá: {book.rating.toFixed(1)}</ItemTitle>
                   </Box>
                 </Box>
               </Link>
@@ -838,25 +749,13 @@ export default function TableProducts({
               <ItemTitle>{book.shopName}</ItemTitle>
             </TableCell>
             <TableCell align="left">
-              <ItemTitle>
-                {currencyFormat.format(book.price * (1 - book.discount))}
-              </ItemTitle>
-              {book.discount > 0 && (
-                <ItemTitle className="secondary">
-                  -{book.discount * 100}%
-                </ItemTitle>
-              )}
+              <ItemTitle>{currencyFormat.format(book.price * (1 - book.discount))}</ItemTitle>
+              {book.discount > 0 && <ItemTitle className="secondary">-{book.discount * 100}%</ItemTitle>}
             </TableCell>
             <TableCell align="left">
               <Box>
-                <StyledStockBar
-                  color={stockStatus}
-                  variant="determinate"
-                  value={stockProgress}
-                />
-                <ItemTitle className="secondary">
-                  {book.amount} trong kho
-                </ItemTitle>
+                <StyledStockBar color={stockStatus} variant="determinate" value={stockProgress} />
+                <ItemTitle className="secondary">{book.amount} trong kho</ItemTitle>
               </Box>
             </TableCell>
             <TableCell align="right">
@@ -869,13 +768,7 @@ export default function TableProducts({
       })
     ) : (
       <TableRow>
-        <TableCell
-          scope="row"
-          padding="none"
-          align="center"
-          colSpan={colSpan}
-          sx={{ height: 300 }}
-        >
+        <TableCell scope="row" padding="none" align="center" colSpan={colSpan} sx={{ height: 300 }}>
           <Box>Không tìm thấy sản phẩm nào!</Box>
         </TableCell>
       </TableRow>
@@ -883,13 +776,7 @@ export default function TableProducts({
   } else if (isError) {
     bookRows = (
       <TableRow>
-        <TableCell
-          scope="row"
-          padding="none"
-          align="center"
-          colSpan={colSpan}
-          sx={{ height: 300 }}
-        >
+        <TableCell scope="row" padding="none" align="center" colSpan={colSpan} sx={{ height: 300 }}>
           <Box>{error?.error || "Đã xảy ra lỗi"}</Box>
         </TableCell>
       </TableRow>

@@ -5,6 +5,8 @@ import { getImageSrc } from "@ring/shared/enums/image";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Message } from "@ring/ui/Components";
+import { capitalize } from "lodash-es";
+import { useTranslation } from "react-i18next";
 import Star from "@mui/icons-material/Star";
 import StarBorder from "@mui/icons-material/StarBorder";
 import StarRounded from "@mui/icons-material/StarRounded";
@@ -269,6 +271,7 @@ const ProductShop = styled.span`
 //#endregion
 
 const TopItem = ({ book, scrollPosition }) => {
+  const { t } = useTranslation();
   return (
     <ItemContainer>
       {book ? (
@@ -304,7 +307,9 @@ const TopItem = ({ book, scrollPosition }) => {
               emptyIcon={<StarBorder style={{ fontSize: 14 }} />}
               readOnly
             />
-            <TextMore>Đã bán {numFormat.format(book?.totalOrders)}</TextMore>
+            <TextMore>
+              {t("sold")} {numFormat.format(book?.totalOrders)}
+            </TextMore>
           </MoreInfo>
         ) : (
           <Skeleton variant="text" width="40%" />
@@ -352,6 +357,7 @@ const ProductsTop = ({
   size = 5,
   scrollPosition,
 }) => {
+  const { t } = useTranslation();
   const loading = isLoading || isFetching || isError || isUninitialized;
   const [selected, setSelected] = useState(data?.ids[0] ?? -1);
 
@@ -396,7 +402,7 @@ const ProductsTop = ({
       })
     ) : (
       <MessageContainer>
-        <Message color="warning">Không có sản phẩmn nào</Message>
+        <Message color="warning">{capitalize(t("message.no", { item: t("product.label") }))}</Message>
       </MessageContainer>
     );
 

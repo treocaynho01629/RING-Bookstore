@@ -147,7 +147,7 @@ const Checkout = () => {
 
   // Coupon
   const [contextShop, setContextShop] = useState(null);
-  const [openCoupon, setOpenCoupon] = useState(false);
+  const [openCoupon, setOpenCoupon] = useState(undefined);
   const [contextState, setContextState] = useState(null);
   const [contextCoupon, setContextCoupon] = useState(null);
   const [coupon, setCoupon] = useState(checkoutState?.coupon || "");
@@ -156,7 +156,7 @@ const Checkout = () => {
   const [shopDiscount, setShopDiscount] = useState([]);
 
   // Shipping
-  const [openShipping, setOpenShipping] = useState(false);
+  const [openShipping, setOpenShipping] = useState(undefined);
   const [shopShipping, setShopShipping] = useState([]);
   const [shopNote, setShopNote] = useState([]);
   const [checkState, setCheckState] = useState(null);
@@ -313,7 +313,7 @@ const Checkout = () => {
           console.error(err);
           setErr(err);
           if (!err?.status) {
-            setErrMsg(t("error.server.not.response"));
+            setErrMsg(t("error.server.response"));
           } else {
             setErrMsg(err?.data?.message);
           }
@@ -504,7 +504,7 @@ const Checkout = () => {
       setErrMsg(capitalize("validation.constraints.pattern", { ns: "validation", field: t("phone") }));
       return;
     } else if (!addressInfo?.name || !addressInfo?.phone || !addressInfo?.city || !addressInfo?.address) {
-      setErrMsg(capitalize("validation.constraints.required.suggest", { ns: "validation", field: t("address") }));
+      setErrMsg(capitalize("validation.constraints.required", { ns: "validation", field: t("address") }));
       return;
     }
 
@@ -533,7 +533,7 @@ const Checkout = () => {
         enqueueSnackbar(t("message.error", { action: t("order") }), { variant: "error" });
         setErr(err);
         if (!err?.status) {
-          setErrMsg(t("error.server.not.response"));
+          setErrMsg(t("error.server.response"));
         } else {
           setErrMsg(err?.data?.message);
           if (err?.status === 412) setChallenge(true);
@@ -614,7 +614,7 @@ const Checkout = () => {
                       sx={{ my: 1, display: { xs: "none", sm: "flex" } }}
                       endIcon={<KeyboardDoubleArrowDown />}
                     >
-                      {t("address.to.place", { ns: "authenticated" })}
+                      {t("address.place", { ns: "authenticated" })}
                     </Button>
                   </StyledStepContent>
                 </Step>
@@ -681,7 +681,7 @@ const Checkout = () => {
                       {t("continue")}
                     </Button>
                     <Suspense fallback={null}>
-                      {openCoupon !== undefined && (
+                      {openShipping !== undefined && (
                         <ShippingSelectDialog
                           {...{
                             open: openShipping,
@@ -710,7 +710,7 @@ const Checkout = () => {
                   >
                     <SemiTitle>
                       <CreditCard />
-                      &nbsp;{t("checkout.payment", { ns: "authenticated" })}
+                      &nbsp;{t("checkout.payment.select", { ns: "authenticated" })}
                     </SemiTitle>
                   </StepLabel>
                   <StyledStepContent>

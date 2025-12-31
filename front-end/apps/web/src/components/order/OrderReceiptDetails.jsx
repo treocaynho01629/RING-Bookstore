@@ -124,7 +124,7 @@ const OrderReceiptDetails = ({ receipt, tabletMode }) => {
                         <ItemTitle>{item?.bookTitle}</ItemTitle>
                         <StuffContainer>
                           <Amount>
-                            {t("quantity")}: <b>{item?.quantity}</b>
+                            {t("quantity.label")}: <b>{item?.quantity}</b>
                           </Amount>
                           <div>
                             <Amount className="mobile">

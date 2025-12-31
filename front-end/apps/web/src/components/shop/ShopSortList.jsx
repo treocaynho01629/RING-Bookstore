@@ -127,7 +127,7 @@ const ShopSortList = ({
             onClick={handleClearKeyword}
             endIcon={<TipsAndUpdatesOutlined color={keyword && "warning"} />}
           >
-            {t("search.keyword")}
+            {t("search.keyword.label")}
           </StyledSortButton>
         </MainContainer>
         <AltContainer>

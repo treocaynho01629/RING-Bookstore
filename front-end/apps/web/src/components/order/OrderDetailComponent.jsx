@@ -232,7 +232,7 @@ function getStepContent(detail) {
     case OrderStatus.PENDING:
       return {
         step: 1,
-        summary: "order.status.pending",
+        summary: "order.status.pending.seller",
       };
     case OrderStatus.SHIPPING:
       return {
@@ -499,7 +499,7 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
                 ) : (
                   <>
                     <MainButton variant="contained" color="primary" size="large" fullWidth onClick={handleAddToCart}>
-                      {t("order.buy.again", { ns: "authenticated" })}
+                      {t("order.again", { ns: "authenticated" })}
                     </MainButton>
                     {order?.status == OrderStatus.COMPLETED && isRefundable && (
                       <MainButton
@@ -555,7 +555,7 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
                       <Skeleton variant="text" width="30%" />
                     </Box>
                   ) : (
-                    (order?.address ?? "Không xác định") // TODO: Do something with this
+                    (order?.address ?? t("unknown")) // TODO: Do something with this
                   )}
                 </InfoText>
               </InfoContainer>
@@ -563,17 +563,17 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
             <Grid size={{ xs: 12, md_lg: 6 }}>
               <InfoContainer>
                 <Box mb={1}>
-                  <Name>{t("order.shipping.type", { ns: "authenticated" })}:</Name>
+                  <Name>{t("order.shipping", { ns: "authenticated" })}:</Name>
                   <InfoText>
                     {!order ? (
                       <Skeleton variant="text" width={200} />
                     ) : (
                       <Suspense fallback={null}>
                         <ShippingTag color={shippingMeta?.color}>
-                          <Icon />
+                          {Icon && <Icon color={shippingMeta?.color} />}
                           {t(shippingMeta?.label)}:
                         </ShippingTag>
-                        &nbsp;{shippingMeta?.description}
+                        &nbsp;{t("shipping.estimate", { date: shippingMeta?.estimate })}
                       </Suspense>
                     )}
                   </InfoText>
@@ -653,7 +653,7 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
               </MainButton>
             ) : (
               <MainButton variant="contained" color="primary" size="large" fullWidth onClick={handleAddToCart}>
-                {t("order.buy.again", { ns: "authenticated" })}
+                {t("order.again", { ns: "authenticated" })}
               </MainButton>
             )}
           </MainButtonContainer>

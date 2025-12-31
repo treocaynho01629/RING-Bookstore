@@ -158,7 +158,7 @@ const CheckoutDialog = ({
                   })
                 }
               >
-                {loggedIn ? `${t("cart.checkout")} (${numSelected})` : t("login")}
+                {loggedIn ? `${t("cart.checkout")} (${numSelected})` : t("login.label")}
               </CheckoutButton>
             </CheckoutStack>
           </div>
@@ -217,7 +217,7 @@ const CheckoutDialog = ({
                 }
                 startIcon={<ShoppingCartCheckout />}
               >
-                {loggedIn ? t("cart.checkout") : t("login")}
+                {loggedIn ? t("cart.checkout") : t("login.label")}
               </CheckoutButton>
             </CheckoutStack>
           </CheckoutBox>

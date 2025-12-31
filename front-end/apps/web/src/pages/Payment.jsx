@@ -8,6 +8,7 @@ import { Link, useNavigate, useSearchParams, useParams } from "react-router";
 import { useCreatePaymentLinkMutation } from "../features/orders/ordersApiSlice";
 import { AuthTitle, ConfirmButton } from "@ring/ui/AuthComponents";
 import { Instruction } from "@ring/ui/Components";
+import { useTranslation } from "react-i18next";
 import HighlightOff from "@mui/icons-material/HighlightOff";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import TaskAlt from "@mui/icons-material/TaskAlt";
@@ -112,6 +113,8 @@ const PaymentContainer = styled.div`
 
 function Payment() {
   const { id } = useParams();
+  const { t } = useTranslation();
+
   const initRef = useRef(false);
   const navigate = useNavigate();
   const [pending, setPending] = useState(false);
@@ -121,28 +124,27 @@ function Payment() {
   const [err, setErr] = useState(null);
   const [createPaymentLink] = useCreatePaymentLinkMutation();
   const [payOSConfig, setPayOSConfig] = useState({
-    RETURN_URL: window.location.origin + "/payment?state=success", // required
-    ELEMENT_ID: "embedded-payment-container", // required
-    CHECKOUT_URL: null, // required
+    RETURN_URL: window.location.origin + "/payment?state=success",
+    ELEMENT_ID: "embedded-payment-container",
+    CHECKOUT_URL: null,
     embedded: true,
     onSuccess: (event) => {
       setIsOpen(false);
       navigate("/payment?state=success", { replace: true });
-      enqueueSnackbar("Thanh toán thành công!", { variant: "success" });
+      enqueueSnackbar(t("message.success", { action: t("payment.processed") }), { variant: "success" });
     },
     onCancel: (event) => {
       setIsOpen(false);
       navigate("/payment?state=cancel", { replace: true });
-      enqueueSnackbar("Thanh toán thất bại!", { variant: "error" });
+      enqueueSnackbar(t("message.error", { action: t("payment.processed") }), { variant: "error" });
     },
   });
   const { open, exit } = usePayOS(payOSConfig);
 
-  //Recaptcha
+  // Recaptcha
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
   const recaptchaV3SiteKey = import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY;
-  const { reCaptchaLoaded, generateReCaptchaToken } =
-    useReCaptcha(recaptchaV3SiteKey);
+  const { reCaptchaLoaded, generateReCaptchaToken } = useReCaptcha(recaptchaV3SiteKey);
   const [challenge, setChallenge] = useState(false); //Toggle if marked suspicious by v3
   const [token, setToken] = useState("");
 
@@ -151,9 +153,7 @@ function Payment() {
     setPending(true);
     exit();
 
-    const recaptchaToken = challenge
-      ? token
-      : await generateReCaptchaToken("payment");
+    const recaptchaToken = challenge ? token : await generateReCaptchaToken("payment");
 
     createPaymentLink({
       token: recaptchaToken,
@@ -162,7 +162,6 @@ function Payment() {
     })
       .unwrap()
       .then((data) => {
-        // Stuff
         setPayOSConfig((oldConfig) => ({
           ...oldConfig,
           CHECKOUT_URL: data?.checkoutUrl,
@@ -175,16 +174,12 @@ function Payment() {
 
         setErr(err);
         if (!err?.status) {
-          setErrMsg("Server không phản hồi");
+          setErrMsg(t("error.server.response"));
         } else if (err?.status === 404) {
           navigate("/error", { replace: true });
-        } else if (err?.status === 403) {
-          setErrMsg("Bạn không có quyền làm điều này!");
-        } else if (err?.status === 412) {
-          setChallenge(true);
-          setErrMsg("Yêu cầu của bạn cần xác thực lại!");
         } else {
-          setErrMsg("Tạo đường dẫn liên kết thanh toán thất bại!");
+          setErrMsg(err?.data?.message);
+          if (err?.status === 412) setChallenge(true);
         }
 
         setPending(false);
@@ -210,7 +205,7 @@ function Payment() {
     <Wrapper>
       {pending && (
         <Suspense fallBack={null}>
-          <PendingModal open={pending} message="Đang gửi yêu cầu..." />
+          <PendingModal open={pending} message={t("pending")} />
         </Suspense>
       )}
       <SimpleNavbar />
@@ -220,8 +215,8 @@ function Payment() {
             <div className="main-box">
               <AuthTitle>
                 {state == "success"
-                  ? "Thanh toán thành công!"
-                  : "Thanh toán thất bại!"}
+                  ? t("message.success", { action: t("payment.processed") })
+                  : t("message.error", { action: t("payment.processed") })}
               </AuthTitle>
               <Content>
                 <IconContainer key={state}>
@@ -232,17 +227,14 @@ function Payment() {
                   )}
                 </IconContainer>
                 <ButtonContainer>
-                  <Link
-                    to={id ? `/profile/order/checkout/${id}` : "/profile/order"}
-                    style={{ width: "100%" }}
-                  >
+                  <Link to={id ? `/profile/order/checkout/${id}` : "/profile/order"} style={{ width: "100%" }}>
                     <ConfirmButton
                       variant="contained"
                       color="primary"
                       size="large"
                       sx={{ width: { xs: "100%", sm: "auto" } }}
                     >
-                      Xem đơn hàng
+                      {t("order.view", { ns: "authenticated" })}
                     </ConfirmButton>
                   </Link>
                 </ButtonContainer>
@@ -257,29 +249,18 @@ function Payment() {
                 >
                   <KeyboardArrowLeft />
                 </Link>
-                <AuthTitle>Thanh toán đơn hàng</AuthTitle>
+                <AuthTitle>{t("payment.title", { ns: "authenticated" })}</AuthTitle>
               </TitleContainer>
-              <Instruction
-                display={errMsg ? "block" : "none"}
-                aria-live="assertive"
-              >
+              <Instruction display={errMsg ? "block" : "none"} aria-live="assertive">
                 {errMsg}
               </Instruction>
               {reCaptchaLoaded && challenge && (
                 <Suspense fallback={null}>
-                  <ReCaptcha
-                    onVerify={(token) => setToken(token)}
-                    recaptchaSiteKey={recaptchaSiteKey}
-                  />
+                  <ReCaptcha onVerify={(token) => setToken(token)} recaptchaSiteKey={recaptchaSiteKey} />
                 </Suspense>
               )}
               <Content>
-                {isOpen && (
-                  <Message>
-                    Sau khi thực hiện thanh toán thành công, vui lòng đợi từ 5 -
-                    10s để hệ thống tự động cập nhật.
-                  </Message>
-                )}
+                {isOpen && <Message>{t("order.message", { ns: "authenticated" })}</Message>}
                 <PaymentContainer id="embedded-payment-container"></PaymentContainer>
               </Content>
             </div>

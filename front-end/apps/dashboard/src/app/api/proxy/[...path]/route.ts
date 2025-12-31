@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { options } from "../../auth/[...nextauth]/options";
+import { options } from "../../auth/[...nextauth]/authOptions";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -21,11 +21,7 @@ function handleAuthError(error: any) {
   );
 }
 
-async function proxyRequest(
-  request: NextRequest,
-  pathSegments: string[],
-  method: string
-) {
+async function proxyRequest(request: NextRequest, pathSegments: string[], method: string) {
   try {
     // Get access token from session so it auto refresh
     const session = await getServerSession(options);
@@ -34,25 +30,13 @@ async function proxyRequest(
 
     // Error handling
     if (!accessToken) {
-      return NextResponse.json(
-        { error: "No access token found" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "No access token found" }, { status: 403 });
     } else if (isTokenExpired(valid_until ?? 0)) {
-      return NextResponse.json(
-        { error: "Access token expired" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Access token expired" }, { status: 403 });
     } else if (session?.error === "RefreshTokenExpired") {
-      return NextResponse.json(
-        { error: "Refresh token expired" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Refresh token expired" }, { status: 403 });
     } else if (session?.error === "RefreshAccessTokenError") {
-      return NextResponse.json(
-        { error: "Refresh access token error" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Refresh access token error" }, { status: 403 });
     }
 
     // Build target URL
@@ -68,19 +52,14 @@ async function proxyRequest(
     const headers: HeadersInit = {
       "Content-Type": "application/json",
       // "Accept-Language": request.nextUrl.locale ?? defaultLocale,
-      Authorization: `Bearer ${accessToken}`,
+      "Authorization": `Bearer ${accessToken}`,
     };
 
     const locale = request.cookies.get("NEXT_LOCALE")?.value;
     if (locale) headers["Accept-Language"] = locale;
 
     // Copy relevant headers from the original request
-    const headersToCopy = [
-      "Accept",
-      "User-Agent",
-      "X-Forwarded-For",
-      "X-Real-IP",
-    ];
+    const headersToCopy = ["Accept", "User-Agent", "X-Forwarded-For", "X-Real-IP"];
 
     headersToCopy.forEach((headerName) => {
       const headerValue = request.headers.get(headerName);
@@ -132,10 +111,7 @@ async function proxyRequest(
       }
     } catch (error) {
       console.error("Failed to parse response:", error);
-      return NextResponse.json(
-        { error: "Failed to parse backend response" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Failed to parse backend response" }, { status: 500 });
     }
 
     // Create response
@@ -163,50 +139,32 @@ async function proxyRequest(
     return nextResponse;
   } catch (error) {
     console.error("Proxy request error:", error);
-    return NextResponse.json(
-      { error: "Internal server error", details: "Failed to process request" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error", details: "Failed to process request" }, { status: 500 });
   }
 }
 
 // Export handlers for all HTTP methods
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { path: string[] } }) {
   const { path } = await params;
   return proxyRequest(request, path, "GET");
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { path: string[] } }) {
   const { path } = await params;
   return proxyRequest(request, path, "POST");
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { path: string[] } }) {
   const { path } = await params;
   return proxyRequest(request, path, "PUT");
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { path: string[] } }) {
   const { path } = await params;
   return proxyRequest(request, path, "DELETE");
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { path: string[] } }) {
   const { path } = await params;
   return proxyRequest(request, path, "PATCH");
 }

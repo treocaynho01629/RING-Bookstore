@@ -755,7 +755,7 @@ const FilterDrawer = ({ filters, onApplyFilters, onResetFilters, open, handleClo
       disableSwipeToOpen={false}
     >
       <DrawerContainer>
-        <DialogTitle sx={{ textTransform: "uppercase" }}>{t("search.filter")}</DialogTitle>
+        <DialogTitle sx={{ textTransform: "uppercase" }}>{t("search.filter.label")}</DialogTitle>
         <DialogContent dividers sx={{ px: 2, py: 1, flex: "1 1 auto", overflowY: "auto" }}>
           <CateFilter
             {...{

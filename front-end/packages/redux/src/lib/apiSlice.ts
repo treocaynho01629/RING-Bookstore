@@ -20,13 +20,11 @@ export function setBaseUrl(newBaseUrl: string) {
 // Mutex for preventing multiple requests
 const mutex = new Mutex();
 
-const baseQuery: BaseQueryFn<
-  string | FetchArgs,
-  unknown,
-  FetchBaseQueryError,
-  {},
-  FetchBaseQueryMeta
-> = async (args, api, extraOptions) => {
+const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta> = async (
+  args,
+  api,
+  extraOptions
+) => {
   let baseQueryParams: FetchBaseQueryArgs = {};
 
   // Get base url
@@ -34,7 +32,7 @@ const baseQuery: BaseQueryFn<
 
   baseQueryParams.prepareHeaders = (headers) => {
     // Accept-Language header with current language
-    const language = (api.getState() as RootState).app.lang;
+    const language = (api.getState() as RootState).app?.lang;
     if (language) headers.set("Accept-Language", language);
 
     // Common headers
@@ -50,11 +48,7 @@ const baseQuery: BaseQueryFn<
   return fetchBaseQuery(baseQueryParams)(args, api, extraOptions);
 };
 
-const baseQueryWithRefresh = async (
-  args: FetchArgs,
-  api: BaseQueryApi,
-  extraOptions: {}
-) => {
+const baseQueryWithRefresh = async (args: FetchArgs, api: BaseQueryApi, extraOptions: {}) => {
   // Wait until the mutex is available without locking it
   await mutex.waitForUnlock();
 

@@ -1,23 +1,37 @@
 {
   "validation": {
     "constraints": {
-      "required.suggest": "Vui lòng nhập {{field}}!",
-      "not.blank": "{{field}} không được để trống!",
+      "required": "Vui lòng nhập {{field}}!",
+      "blank": "{{field}} không được để trống!",
       "pattern": "Sai định dạng {{field}}!",
-      "size.range": "{{field}} phải từ {{min}} đến {{max}} kí tự!",
-      "size.max": "{{field}} không được vượt quá {{max}} kí tự!",
-      "size.min": "{{field}} phải lớn hơn {{min}} kí tự!",
-      "image.size": "Kích thước ảnh không được vượt quá {{max}} MB!",
-      "date.past": "{{field}} phải trước ngày hôm nay!",
       "range": "{{field}} phải từ {{min}} đến {{max}}!",
-      "password.match": "Mật khẩu không trùng khớp!",
-      "password.evaluate": {
-        "helper": "Độ dài mật khẩu từ {{min}}-{{max}} kí tự bao gồm cả chữ cái thường và chữ số.",
-        "length": "Độ dài không hợp lệ",
-        "chars": "Mật khẩu cần kí tự thường và chữ số hoặc kí tự đặc biệt",
-        "common": "Mật khẩu thông dụng",
-        "strong": "Mật khẩu hợp lệ"
-      } 
+      "date": {
+        "past": "{{field}} phải trước ngày hôm nay!"
+      },
+      "size": {
+        "range": "{{field}} phải từ {{min}} đến {{max}} kí tự!",
+        "max": "{{field}} không được vượt quá {{max}} kí tự!",
+        "min": "{{field}} phải lớn hơn {{min}} kí tự!",
+        "image": "Kích thước ảnh không được vượt quá {{max}} MB!"
+      },
+      "password": {
+        "match": "Mật khẩu không trùng khớp!",
+        "evaluate": {
+          "helper": "Độ dài mật khẩu từ {{min}}-{{max}} kí tự bao gồm cả chữ cái thường và chữ số.",
+          "length": "Độ dài không hợp lệ",
+          "chars": "Mật khẩu cần kí tự thường và chữ số hoặc kí tự đặc biệt",
+          "common": "Mật khẩu thông dụng",
+          "strong": "Mật khẩu hợp lệ"
+        }
+      }
+    },
+    "error": {
+      "invalid": {
+        "argument": "Sai định dạng thông tin!"
+      },
+      "form": {
+        "required": "Vui lòng nhập đầy đủ thông tin!"
+      }
     }
   }
 }

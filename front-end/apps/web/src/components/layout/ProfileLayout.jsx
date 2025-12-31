@@ -3,10 +3,12 @@ import { Outlet } from "react-router";
 import { useGetProfileQuery } from "../../features/users/usersApiSlice";
 import { useMediaQuery, Grid } from "@mui/material";
 import { Suspense, lazy, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
 
 export default function ProfileLayout() {
+  const { t } = useTranslation();
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md"));
   const mobileMode = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const [pending, setPending] = useState(false);
@@ -22,7 +24,7 @@ export default function ProfileLayout() {
       <Grid size="grow">
         {pending && (
           <Suspense fallBack={null}>
-            <PendingModal open={pending} message="Đang gửi yêu cầu..." />
+            <PendingModal open={pending} message={t("pending")} />
           </Suspense>
         )}
         <Outlet

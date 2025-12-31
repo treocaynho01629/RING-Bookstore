@@ -5,7 +5,6 @@ import { keyframes } from "@emotion/react";
 import { Grow } from "@mui/material";
 import { TransitionGroup } from "react-transition-group";
 import { useTranslation } from "react-i18next";
-import useTitle from "@ring/shared/useTitle";
 import useReCaptcha from "@ring/auth/useReCaptcha";
 import SimpleNavbar from "../components/navbar/SimpleNavbar";
 
@@ -133,9 +132,6 @@ function AuthPage() {
   // Recaptcha
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY;
   const { reCaptchaLoaded, generateReCaptchaToken } = useReCaptcha(recaptchaSiteKey);
-
-  // Set title
-  //useTitle(t("welcome"));
 
   return (
     <Wrapper>

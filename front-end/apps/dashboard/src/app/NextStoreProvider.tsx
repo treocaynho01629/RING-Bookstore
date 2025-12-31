@@ -2,13 +2,13 @@
 
 import { persistReducer } from "redux-persist";
 import authReducer from "../features/auth/authReducer";
-import enumReducer from "@ring/redux/enumReducer";
 import shopsReducer from "../features/shops/shopReducer";
+import appReducer from "../features/app/appReducer";
 import StoreProvider from "@ring/redux/provider";
 import storage from "redux-persist/lib/storage";
 
-const enumPersistConfig = {
-  key: "enum",
+const appPersistConfig = {
+  key: "app",
   version: 1,
   storage,
 };
@@ -27,9 +27,9 @@ const shopsPersistConfig = {
 
 // Web reducers
 const reducers = {
-  enum: persistReducer(enumPersistConfig, enumReducer), //ENUM
-  auth: persistReducer(authPersistConfig, authReducer), //AUTH
-  shops: persistReducer(shopsPersistConfig, shopsReducer), //SHOPS
+  app: persistReducer(appPersistConfig, appReducer),
+  auth: persistReducer(authPersistConfig, authReducer),
+  shops: persistReducer(shopsPersistConfig, shopsReducer),
 };
 
 const devTools = process.env.NEXT_PUBLIC_NODE_ENV === "development";

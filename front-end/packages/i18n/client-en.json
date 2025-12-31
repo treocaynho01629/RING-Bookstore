@@ -39,7 +39,7 @@
     "new": "New",
     "event": "Event",
     "featured": "Featured",
-    "newest": "Newest products",
+    "latest": "Latest products",
     "trending": "Trending",
     "top": {
       "label": "Top promotions",
@@ -76,7 +76,7 @@
       "excellent": "Very good"
     },
     "sort": {
-      "newest": "Sort by newest",
+      "latest": "Sort by latest",
       "favorite": "Sort by rating",
       "all": "All reviews"
     }

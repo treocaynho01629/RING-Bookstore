@@ -28,7 +28,6 @@ import LanguageIcon from "@mui/icons-material/Language";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
 import NotificationsOutlined from "@mui/icons-material/NotificationsOutlined";
 import LockOutlined from "@mui/icons-material/LockOutlined";
-import SensorOccupied from "@mui/icons-material/SensorOccupied";
 import Badge from "@mui/material/Badge";
 
 //#region styled
@@ -226,13 +225,13 @@ const NavDrawer = ({
               </ListItem>
             </NavLink>
           ) : (
-            <NavLink to={"/auth/register"} state={{ from: location }} title={t("signup")}>
+            <NavLink to={"/auth/register"} state={{ from: location }} title={t("signup.label")}>
               <ListItem disablePadding onClick={handleClose}>
                 <StyledItemButton onClick={handleClose}>
                   <ListItemIcon>
                     <Avatar sx={{ width: 45, height: 45, mr: 2 }} />
                   </ListItemIcon>
-                  <ListItemText primary={t("signup")} secondary={t("signup.title")} />
+                  <ListItemText primary={t("signup.label")} secondary={t("signup.title")} />
                 </StyledItemButton>
               </ListItem>
             </NavLink>
@@ -243,17 +242,17 @@ const NavDrawer = ({
                 <ListItemIcon>
                   <Logout />
                 </ListItemIcon>
-                <ListItemText primary={t("logout")} />
+                <ListItemText primary={t("signout.label")} />
               </StyledItemButton>
             </ListItem>
           ) : (
-            <NavLink to={"/auth/login"} state={{ from: location }} title={t("login")}>
+            <NavLink to={"/auth/login"} state={{ from: location }} title={t("login.label")}>
               <ListItem disablePadding onClick={handleClose}>
                 <StyledItemButton>
                   <ListItemIcon>
                     <LockOutlined />
                   </ListItemIcon>
-                  <ListItemText primary={t("login")} />
+                  <ListItemText primary={t("login.label")} />
                 </StyledItemButton>
               </ListItem>
             </NavLink>

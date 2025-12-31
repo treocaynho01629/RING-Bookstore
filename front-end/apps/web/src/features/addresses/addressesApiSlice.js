@@ -4,7 +4,9 @@ import apiSlice from "@ring/redux/apiSlice";
 const addressesAdapter = createEntityAdapter({});
 const initialState = addressesAdapter.getInitialState();
 
-export const addressesApiSlice = apiSlice.injectEndpoints({
+const apiWithEnum = apiSlice.enhanceEndpoints({ addTagTypes: ["Address"] });
+
+export const addressesApiSlice = apiWithEnum.injectEndpoints({
   endpoints: (builder) => ({
     getAddress: builder.query({
       query: (id) => ({
@@ -36,10 +38,7 @@ export const addressesApiSlice = apiSlice.injectEndpoints({
       },
       providesTags: (result, error, arg) => {
         if (result?.ids) {
-          return [
-            { type: "Address", id: "LIST" },
-            ...result.ids.map((id) => ({ type: "Address", id })),
-          ];
+          return [{ type: "Address", id: "LIST" }, ...result.ids.map((id) => ({ type: "Address", id }))];
         } else return [{ type: "Address", id: "LIST" }];
       },
     }),
@@ -81,19 +80,13 @@ export const {
   useDeleteAddressMutation,
 } = addressesApiSlice;
 
-export const selectAddressesResult =
-  addressesApiSlice.endpoints.getMyAddresses.select();
+export const selectAddressesResult = addressesApiSlice.endpoints.getMyAddresses.select();
 
-const selectAddressesData = createSelector(
-  selectAddressesResult,
-  (addressesResult) => addressesResult.data
-);
+const selectAddressesData = createSelector(selectAddressesResult, (addressesResult) => addressesResult.data);
 
 export const {
   selectAll: selectAllAddresses,
   selectById: selectAddressById,
   selectIds: selectAddressIds,
   selectEntities: selectAddressEntities,
-} = addressesAdapter.getSelectors(
-  (state) => selectAddressesData(state) ?? initialState
-);
+} = addressesAdapter.getSelectors((state) => selectAddressesData(state) ?? initialState);

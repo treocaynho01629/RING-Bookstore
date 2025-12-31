@@ -85,7 +85,7 @@ const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaTo
     const v2 = EMAIL_REGEX.test(email);
 
     if (!v1 || !v2) {
-      setErrMsg("Sai định dạng thông tin!");
+      setErrMsg(t("validation.error.invalid.argument", { ns: "validation" }));
       return;
     }
     setPending(true);
@@ -114,15 +114,15 @@ const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaTo
         setChallenge(false);
 
         // Queue snack
-        enqueueSnackbar(t("message.success", { action: t("signup") }), { variant: "success" });
+        enqueueSnackbar(t("message.success", { action: t("signup.label") }), { variant: "success" });
         setPending(false);
       })
       .catch((err) => {
         console.error(err);
-        enqueueSnackbar(t("message.error", { action: t("signup") }), { variant: "error" });
+        enqueueSnackbar(t("message.error", { action: t("signup.label") }), { variant: "error" });
         setErr(err);
         if (!err?.status) {
-          setErrMsg(t("error.server.not.response"));
+          setErrMsg(t("error.server.response"));
         } else {
           setErrMsg(err?.data?.message);
           if (err?.status === 412) setChallenge(true);
@@ -162,7 +162,7 @@ const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaTo
         <TextField
           label={
             email && !validEmail
-              ? capitalize(t("validation.constraints.pattern", { ns: "validation", field: t("email") }))
+              ? capitalize(t("validation.constraints.pattern", { ns: "validation", field: t("email.label") }))
               : (err?.data?.errors?.email ?? t("email.placeholder"))
           }
           type="email"
@@ -179,7 +179,7 @@ const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaTo
         <Stack spacing={{ xs: 0.8, md: 1.5 }} direction={challenge ? "row" : "column"} position="relative">
           <div style={{ width: "100%s" }}>
             <PasswordInput
-              label={err?.data?.errors?.pass ?? t("password")}
+              label={err?.data?.errors?.pass ?? t("password.label")}
               size="small"
               onChange={(e) => setPassword(e.target.value)}
               value={password}
@@ -244,16 +244,15 @@ const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaTo
           variant="contained"
           color="primary"
           type="submit"
-          aria-label="submit register"
           disabled={!validRegister || isLoading || !reCaptchaLoaded}
         >
-          {t("signup")}
+          {t("signup.label")}
         </ConfirmButton>
       </Stack>
       <AuthText>
         {t("login.suggestions")}&nbsp;
         <Link to={"/auth/login"}>
-          <AuthHighlight>{t("login")}</AuthHighlight>
+          <AuthHighlight>{t("login.label")}</AuthHighlight>
         </Link>
       </AuthText>
     </form>

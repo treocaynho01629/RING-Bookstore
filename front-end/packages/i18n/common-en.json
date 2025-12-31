@@ -19,29 +19,51 @@
     "male": "Male",
     "female": "Female"
   },
+  "login": {
+    "label": "Login",
+    "title": "Login to your account",
+    "suggestions": "Already have an account?",
+    "required": "Please login to continue.",
+    "persist": "Remember me"
+  },
+  "forgot": {
+    "label": "Forgot password?",
+    "title": "Reset your password",
+    "email": "Enter your account's email",
+    "suggestions": "Please check your email",
+    "submit": "Restore"
+  },
+  "signup": {
+    "label": "Sign up",
+    "title": "Create a new account",
+    "suggestions": "Don't have an account?"
+  },
+  "restore": {
+    "label": "Restore password",
+    "title": "Restore your password"
+  },
+  "reset": "Reset",
   "welcome": "Welcome",
   "hello": "Hello",
-  "login": "Login",
-  "login.title": "Login to your account",
-  "email": "Email",
-  "email.placeholder": "Email address",
+  "email": {
+    "label": "Email",
+    "placeholder": "Email address"
+  },
   "username": "Username",
-  "password": "Password",
-  "password.confirm": "Confirm password",
-  "fullname": "Full name",
-  "fullname.placeholder": "Enter full name",
+  "password": {
+    "label": "Password",
+    "confirm": "Enter password"
+  },
+  "fullname": {
+    "label": "Full name",
+    "placeholder": "Enter full name"
+  },
   "phone": "Phone",
   "dob": "Date of birth",
   "from": "From",
   "recaptcha": "Protected by reCAPTCHA and Google through",
   "terms": "Terms of service",
   "policy": "Privacy policy",
-  "persist": "Remember me",
-  "forgot": "Forgot password?",
-  "signup": "Sign up",
-  "signup.title": "Create a new account",
-  "signup.suggestions": "Don't have an account?",
-  "login.suggestions": "Already have an account?",
   "help": "Help",
   "notification": "Notification",
   "ring": "RING!",
@@ -52,15 +74,19 @@
   "image": "Image",
   "loading": "Loading...",
   "pending": "Pending request...",
+  "validating": "Validating credentials...",
   "updating": "Updating...",
-  "select.all": "Select all",
-  "all": "All",
+  "all": {
+    "label": "All",
+    "select": "Select all"
+  },
   "price": "Price",
-  "quantity": "Quantity",
-  "quantity.short": "QTY",
+  "quantity": {
+    "label": "Quantity",
+    "short": "QTY"
+  },
   "total": "Total",
   "delete": "Delete",
-  "reset": "Reset",
   "other": "Other",
   "unknown": "Unknown",
   "partner": "Partner",
@@ -68,27 +94,28 @@
   "back": "Back",
   "apply": "Apply",
   "confirm": "Confirm",
+  "send": "Send",
   "refresh": "Refresh",
   "reload": "Reload",
   "close": "Close",
   "cancel": "Cancel",
   "none": "None",
   "continue": "Continue",
-  "not.yet": "None",
+  "yet": "None",
   "edit": "Edit",
   "update": "Update",
   "select": "Select",
-  "show.more": "Show more",
-  "show.less": "Show less",
-  "show.all": "View all",
+  "show": {
+    "more": "Show more",
+    "less": "Show less",
+    "all": "View all"
+  },
   "unselect": "Unselect",
   "report": "Report",
   "remove": "Remove",
   "save": "Save",
   "scroll": "Scroll back to top",
   "above": "and above",
-  "logout": "Log out",
-  "logout.end": "Log out of this session?",
   "role": {
     "admin": "Admin",
     "user": "User",
@@ -98,7 +125,9 @@
   "signout": {
     "confirmation": "Sign out?",
     "message": "You will be signed out of your account.",
-    "success": "Signed out successfully"
+    "success": "Signed out successfully",
+    "end": "End this login session?",
+    "label": "Log out"
   },
   "coupon": {
     "shipping": {
@@ -160,14 +189,15 @@
     "dropdown": "My account",
     "label": "Profile",
     "title": "Your profile",
-    "media": "Edit media",
-    "save": "Save changes",
-    "media.add": "Add profile picture",
-    "media.reset": "Reset profile picture",
-    "media.edit": "Edit profile picture",
-    "media.remove": "Remove profile picture",
-    "media.remove.message": "Remove the current profile picture?",
-    "update": "Update profile"
+    "update": "Update profile",
+    "media": {
+      "label": "Edit media",
+      "add": "Add profile picture",
+      "reset": "Reset profile picture",
+      "edit": "Edit profile picture",
+      "remove": "Remove profile picture",
+      "message": "Remove the current profile picture?"
+    }
   },
   "order": {
     "label": "Orders",
@@ -182,14 +212,16 @@
       "refunded": "Refunded"
     },
     "status": {
-      "pending": "Pending",
-      "pending.payment": "Pending payment",
-      "pending.return": "Pending return",
-      "pending.refund": "Pending refund",
       "shipping": "Shipping",
       "completed": "Completed",
       "refunded": "Refunded",
-      "canceled": "Canceled"
+      "canceled": "Canceled",
+      "pending": {
+        "label": "Pending",
+        "payment": "Pending payment",
+        "return": "Pending return",
+        "refund": "Pending refund"
+      }
     }
   },
   "review": {
@@ -201,12 +233,16 @@
     "label": "Search",
     "results": "Search results: \"{{keyword}}\"",
     "shop": "Search 'Store' with keyword",
-    "filter": "Filters",
-    "filter.clear": "Clear filters",
-    "filter.by": "Filter by",
-    "filtering": "Filter",
-    "keyword": "Keyword",
-    "keyword.results": "Results related to",
+    "filter": {
+      "label": "Filters",
+      "clear": "Clear filters",
+      "by": "Filter by",
+      "filtering": "Filter"
+    },
+    "keyword": {
+      "label": "Keyword",
+      "results": "Results related to"
+    },
     "price": {
       "range": "Price range",
       "slider": "Price filter"
@@ -214,7 +250,7 @@
     "sort": {
       "toggle": "Change sort direction",
       "label": "Sort by",
-      "newest": "Newest",
+      "latest": "Latest",
       "best-selling": "Best selling",
       "favorite": "Favorite",
       "price": "Price",
@@ -229,6 +265,7 @@
   },
   "payment": {
     "label": "Payment method",
+    "processed": "Payment processed",
     "cash": {
       "label": "Cash on delivery",
       "summary": "Cash on delivery. Shipping fee: 0đ. Discount on shipping fee (if any) applies to cash on delivery."
@@ -239,11 +276,13 @@
       "summary": "Scan the QR code from the online wallet or bank transfer to pay."
     },
     "status": {
-      "pending": "Pending payment",
       "paid": "Paid",
       "canceled": "Canceled",
-      "pending.refund": "Pending refund",
-      "refunded": "Refunded"
+      "refunded": "Refunded",
+      "pending": {
+        "payment": "Pending payment",
+        "refund": "Pending refund"
+      }
     }
   },
   "shipping": {
@@ -253,7 +292,7 @@
     "standard": "Standard",
     "express": "Express"
   },
-  "password.change": {
+  "change": {
     "label": "Change password",
     "title": "Change account password",
     "old": "Enter current password",
@@ -266,10 +305,17 @@
     "empty": "No {{item}} yet!",
     "out": "No {{item}} left!",
     "no": "No {{item}} available!",
-    "none": "No {{item}} found!"
+    "none": "No {{item}} found!",
+    "sent": "Email request sent!"
   },
   "error": {
-    "server.not.response": "Server did not respond",
+    "server": {
+      "response": "Server did not respond"
+    },
+    "auth": {
+      "expired": "Authentication session expired, please login again!",
+      "validate": "An error occurred during validation, please login again!"
+    },
     "general": "An error occurred"
   }
 }

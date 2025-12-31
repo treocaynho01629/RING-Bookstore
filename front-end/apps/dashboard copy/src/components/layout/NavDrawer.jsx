@@ -87,15 +87,15 @@ const StyledListSubheader = styled(ListSubheader)(({ theme }) => ({
 }));
 
 const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
-  minHeight: 48,
-  justifyContent: "center",
-  transition: theme.transitions.create("margin", {
+  "minHeight": 48,
+  "justifyContent": "center",
+  "transition": theme.transitions.create("margin", {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
 
   "&.Mui-selected": {
-    color: theme.vars.palette.primary.main,
+    "color": theme.vars.palette.primary.main,
 
     ".MuiListItemIcon-root": {
       color: theme.vars.palette.primary.main,
@@ -109,8 +109,8 @@ const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
 }));
 
 const StyledListItemIcon = styled(ListItemIcon)(({ theme }) => ({
-  minWidth: 0,
-  justifyContent: "center",
+  "minWidth": 0,
+  "justifyContent": "center",
 
   "&.open": { marginRight: theme.spacing(3) },
 }));
@@ -119,9 +119,7 @@ const StyledListItemIcon = styled(ListItemIcon)(({ theme }) => ({
 const NavDrawer = ({ open, setOpen, tabletMode }) => {
   const { roles } = useAuth();
   const [openList, setOpenList] = useState(true);
-  const isAdmin = roles?.find((role) =>
-    ["ROLE_ADMIN", "ROLE_GUEST"].includes(role)
-  );
+  const isAdmin = roles?.find((role) => ["ROLE_ADMIN", "ROLE_GUEST"].includes(role));
 
   const handleClick = (e, id) => {
     setOpenList((prevState) => ({ ...prevState, [id]: !prevState[id] }));
@@ -138,11 +136,7 @@ const NavDrawer = ({ open, setOpen, tabletMode }) => {
     <>
       <DrawerHeader>
         <NavLink to={"/"}>
-          <ImageLogo
-            src="/logo.svg"
-            className={open ? "open" : ""}
-            alt="RING! logo"
-          />
+          <ImageLogo src="/logo.svg" className={open ? "open" : ""} alt="RING! logo" />
         </NavLink>
       </DrawerHeader>
       <List
@@ -158,17 +152,11 @@ const NavDrawer = ({ open, setOpen, tabletMode }) => {
         <ListItem key={0} disablePadding sx={{ display: "block" }}>
           <NavLink to={"/"} end>
             {({ isActive }) => (
-              <StyledListItemButton
-                className={open ? "open" : ""}
-                selected={isActive}
-              >
+              <StyledListItemButton className={open ? "open" : ""} selected={isActive}>
                 <StyledListItemIcon className={open ? "open" : ""}>
                   <Speed />
                 </StyledListItemIcon>
-                <ListItemText
-                  primary={"Dashboard"}
-                  sx={{ opacity: open ? 1 : 0 }}
-                />
+                <ListItemText primary={"Dashboard"} sx={{ opacity: open ? 1 : 0 }} />
               </StyledListItemButton>
             )}
           </NavLink>
@@ -190,22 +178,10 @@ const NavDrawer = ({ open, setOpen, tabletMode }) => {
               <NavLink key={`link-${index}`} to={item.url} end>
                 {({ isActive }) => (
                   <>
-                    <ListItem
-                      key={`item-${index}`}
-                      disablePadding
-                      sx={{ display: "block" }}
-                    >
-                      <StyledListItemButton
-                        className={open ? "open" : ""}
-                        selected={isActive}
-                      >
-                        <StyledListItemIcon className={open ? "open" : ""}>
-                          {item.icon}
-                        </StyledListItemIcon>
-                        <ListItemText
-                          primary={item.label}
-                          sx={{ opacity: open ? 1 : 0 }}
-                        />
+                    <ListItem key={`item-${index}`} disablePadding sx={{ display: "block" }}>
+                      <StyledListItemButton className={open ? "open" : ""} selected={isActive}>
+                        <StyledListItemIcon className={open ? "open" : ""}>{item.icon}</StyledListItemIcon>
+                        <ListItemText primary={item.label} sx={{ opacity: open ? 1 : 0 }} />
                         {item.subItems &&
                           (openList[index] ? (
                             <ExpandLess
@@ -230,10 +206,7 @@ const NavDrawer = ({ open, setOpen, tabletMode }) => {
                       >
                         <List sx={{ mx: 1.5 }} component="div" disablePadding>
                           {item.subItems?.map((sub, subIndex) => (
-                            <NavLink
-                              key={`sub-${index}-${subIndex}`}
-                              to={sub.url}
-                            >
+                            <NavLink key={`sub-${index}-${subIndex}`} to={sub.url}>
                               <ListItemButton sx={{ pl: 4 }}>
                                 <ListItemText primary={sub.label} />
                               </ListItemButton>
@@ -254,12 +227,7 @@ const NavDrawer = ({ open, setOpen, tabletMode }) => {
   return (
     <>
       {tabletMode ? (
-        <Drawer
-          variant="temporary"
-          open={open}
-          onClose={handleDrawerClose}
-          ModalProps={{ keepMounted: true }}
-        >
+        <Drawer variant="temporary" open={open} onClose={handleDrawerClose} ModalProps={{ keepMounted: true }}>
           <DrawerContainer>{drawerContent}</DrawerContainer>
         </Drawer>
       ) : (

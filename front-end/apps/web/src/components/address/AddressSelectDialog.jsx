@@ -183,7 +183,7 @@ const AddressSelectDialog = ({
             console.error(err);
             setErr(err);
             if (!err?.status) {
-              setErrMsg(t("error.server.not.response"));
+              setErrMsg(t("error.server.response"));
             } else {
               setErrMsg(err?.data?.message);
             }
@@ -229,7 +229,7 @@ const AddressSelectDialog = ({
         console.error(err);
         setErr(err);
         if (!err?.status) {
-          setErrMsg(t("error.server.not.response", { ns: "common" }));
+          setErrMsg(t("error.server.response", { ns: "common" }));
         } else {
           setErrMsg(err?.data?.message);
         }
@@ -334,7 +334,7 @@ const AddressSelectDialog = ({
             console.error(err);
             setErr(err);
             if (!err?.status) {
-              setErrMsg(t("error.server.not.response", { ns: "common" }));
+              setErrMsg(t("error.server.response", { ns: "common" }));
             } else {
               setErrMsg(err?.data?.message);
             }
@@ -615,7 +615,9 @@ const AddressSelectDialog = ({
               <ListItemIcon>
                 <Delete sx={{ color: "error.main" }} fontSize="small" />
               </ListItemIcon>
-              <ListItemText sx={{ color: "error.main" }}>{t("address.delete", { ns: "authenticated" })}</ListItemText>
+              <ListItemText sx={{ color: "error.main" }}>
+                {t("address.delete.label", { ns: "authenticated" })}
+              </ListItemText>
             </MenuItem>
             <MenuItem disabled={isSelectedDefault} onClick={() => handleSetDefault(contextAddress)}>
               <ListItemIcon>

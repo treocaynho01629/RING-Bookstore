@@ -47,11 +47,16 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
   const [errMsg, setErrMsg] = useState(location.state?.errorMsg || "");
   const [err, setErr] = useState([]);
 
-  // Toggle persist
+  /**
+   * Toggle persist login
+   */
   const togglePersist = () => {
     setCurrPersist((prev) => !prev);
   };
 
+  /**
+   * Reset login form
+   */
   const reset = () => {
     setValidName(true);
     setValidPass(true);
@@ -60,7 +65,9 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
     setErr([]);
   };
 
-  // Login
+  /**
+   * Submit login form
+   */
   const handleSubmitLogin = async (e) => {
     e.preventDefault();
     if (pending || !reCaptchaLoaded) return;
@@ -86,7 +93,7 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
         if (currPersist) setPersist(true);
 
         // Queue snack
-        enqueueSnackbar(t("message.success", { action: t("login") }), { variant: "success" });
+        enqueueSnackbar(t("message.success", { action: t("login.label") }), { variant: "success" });
         navigate(from, { replace: true, state: fromState }); // Redirect to previous page
         reset();
       })
@@ -94,7 +101,7 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
         console.error(err);
         setErr(err);
         if (!err?.status) {
-          setErrMsg(t("error.server.not.response"));
+          setErrMsg(t("error.server.response"));
         } else if (err?.status === 412) {
           setChallenge(true);
           setErrMsg(err?.data?.message);
@@ -112,7 +119,7 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
         {t("hello")} {loginedUser}
       </AuthTitle>
       <Button color="error" size="large" onClick={() => signOut()} startIcon={<Logout />}>
-        {t("logout.end")}
+        {t("signout.end")}
       </Button>
     </>
   ) : (
@@ -122,12 +129,12 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
         {err?.data?.errors?.username ? (
           <span>{err?.data?.errors?.username}</span>
         ) : !validName ? (
-          <span>{t("validation.constraints.not.blank", { ns: "validation", field: t("username") })}</span>
+          <span>{t("validation.constraints.blank", { ns: "validation", field: t("username") })}</span>
         ) : null}
         {err?.data?.errors?.pass ? (
           <span>{err?.data?.errors?.pass}</span>
         ) : !validPass ? (
-          <span>{t("validation.constraints.not.blank", { ns: "validation", field: t("password") })}</span>
+          <span>{t("validation.constraints.blank", { ns: "validation", field: t("password.label") })}</span>
         ) : null}
         <span>{errMsg != "" ? errMsg : " "}&nbsp;</span>
       </Instruction>
@@ -142,7 +149,7 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
           value={username}
         />
         <PasswordInput
-          label={t("password")}
+          label={t("password.label")}
           autoComplete="password"
           size="small"
           onChange={(e) => setPassword(e.target.value)}
@@ -158,10 +165,10 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
             control={
               <Checkbox checked={currPersist} onChange={togglePersist} disableRipple name="persist" color="primary" />
             }
-            label={t("persist")}
+            label={t("login.persist")}
           />
           <Link to={"/reset"}>
-            <AuthHighlight color="warning">{t("forgot")}</AuthHighlight>
+            <AuthHighlight color="warning">{t("forgot.label")}</AuthHighlight>
           </Link>
         </AuthActionContainer>
         <ConfirmButton
@@ -171,13 +178,13 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
           type="submit"
           aria-label="submit login"
         >
-          {t("login")}
+          {t("login.label")}
         </ConfirmButton>
       </Stack>
       <AuthText>
         {t("signup.suggestions")}&nbsp;
         <Link to={"/auth/register"}>
-          <AuthHighlight>{t("signup")}</AuthHighlight>
+          <AuthHighlight>{t("signup.label")}</AuthHighlight>
         </Link>
       </AuthText>
     </form>

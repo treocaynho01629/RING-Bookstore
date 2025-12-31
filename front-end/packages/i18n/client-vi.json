@@ -39,7 +39,7 @@
     "new": "Sản phẩm mới",
     "event": "Sự kiện",
     "featured": "Tiêu điểm",
-    "newest": "Sản phẩm mới nhất",
+    "latest": "Sản phẩm mới nhất",
     "trending": "Phổ biến",
     "top": {
       "label": "Top Khuyến Mãi",
@@ -76,7 +76,7 @@
       "excellent": "Cực hài lòng"
     },
     "sort": {
-      "newest": "Xếp theo mới nhất",
+      "latest": "Xếp theo mới nhất",
       "favorite": "Xếp theo đánh giá",
       "all": "Tất cả đánh giá"
     }

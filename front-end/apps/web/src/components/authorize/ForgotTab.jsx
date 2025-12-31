@@ -5,6 +5,8 @@ import { Instruction } from "@ring/ui/Components";
 import { AuthTitle, ConfirmButton } from "@ring/ui/AuthComponents";
 import { keyframes } from "@emotion/react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
+import { capitalize } from "lodash-es";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import MarkEmailReadOutlined from "@mui/icons-material/MarkEmailReadOutlined";
@@ -58,18 +60,14 @@ const ButtonContainer = styled.div`
 `;
 //#endregion
 
-const ForgotTab = ({
-  pending,
-  setPending,
-  reCaptchaLoaded,
-  generateReCaptchaToken,
-}) => {
+const ForgotTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken }) => {
+  const { t } = useTranslation();
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
   // Initial value
   const [email, setEmail] = useState("");
   const [validEmail, setValidEmail] = useState(false);
-  const [sended, setSended] = useState(false);
+  const [sent, setSent] = useState(false);
 
   // Error
   const [err, setErr] = useState([]);
@@ -87,7 +85,9 @@ const ForgotTab = ({
     setValidEmail(result);
   }, [email]);
 
-  // Forgot pass
+  /**
+   * Handle submit forgot password
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (sending || pending) return;
@@ -96,16 +96,14 @@ const ForgotTab = ({
 
     // Validation
     if (!validEmail) {
-      setErrMsg("Sai định dạng email!");
+      setErrMsg(capitalize(t("validation.constraints.pattern", { ns: "validation", field: t("email.label") })));
       return;
     }
 
     const { enqueueSnackbar } = await import("notistack");
 
     // Send mutation
-    const recaptchaToken = challenge
-      ? token
-      : await generateReCaptchaToken("forgot");
+    const recaptchaToken = challenge ? token : await generateReCaptchaToken("forgot");
     sendForgot({
       token: recaptchaToken,
       source: challenge ? "v2" : "v3",
@@ -117,31 +115,21 @@ const ForgotTab = ({
         setEmail("");
         setErr([]);
         setErrMsg("");
-        setSended(true);
+        setSent(true);
         setChallenge(false);
 
         // Queue snack
-        enqueueSnackbar("Đã gửi yêu cầu về email!", { variant: "success" });
+        enqueueSnackbar(t("message.sent"), { variant: "success" });
         setPending(false);
       })
       .catch((err) => {
         console.error(err);
         setErr(err);
         if (!err?.status) {
-          setErrMsg("Server không phản hồi");
-        } else if (err?.status === 404) {
-          setErrMsg("Tài khoản với email này không tồn tại!");
-        } else if (err?.status === 409) {
-          setErrMsg(err?.data?.message);
-        } else if (err?.status === 400) {
-          setErrMsg(err?.data?.message ?? "Sai định dạng thông tin!");
-        } else if (err?.status === 403) {
-          setErrMsg("Lỗi xác thực!");
-        } else if (err?.status === 412) {
-          setChallenge(true);
-          setErrMsg("Yêu cầu của bạn cần xác thực lại!");
+          setErrMsg(t("error.server.response"));
         } else {
-          setErrMsg("Gửi yêu cầu thất bại");
+          setErrMsg(err?.data?.message);
+          if (err?.status === 412) setChallenge(true);
         }
         setPending(false);
       });
@@ -149,56 +137,49 @@ const ForgotTab = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <AuthTitle>Khôi phục mật khẩu</AuthTitle>
-      <Instruction aria-live="assertive">
-        {errMsg != "" ? errMsg : " "}&nbsp;
-      </Instruction>
+      <AuthTitle>{t("forgot.title")}</AuthTitle>
+      <Instruction aria-live="assertive">{errMsg != "" ? errMsg : " "}&nbsp;</Instruction>
       <Stack spacing={1} direction="column">
-        {sended && (
+        {sent && (
           <NotificationContent>
             <MarkEmailReadOutlined />
-            <b>Email khôi phục đã được gửi</b>
-            <p>Vui lòng kiểm tra email của bạn</p>
+            <b>{t("message.sent")}</b>
+            <p>{t("forgot.suggestions")}</p>
           </NotificationContent>
         )}
         <TextField
-          placeholder="Nhập email tài khoản cần khôi phục"
+          placeholder={t("forgot.email")}
           id="email"
           autoComplete="email"
+          label={
+            email && !validEmail
+              ? capitalize(t("validation.constraints.pattern", { ns: "validation", field: t("email.label") }))
+              : err?.data?.errors?.email
+          }
           onChange={(e) => setEmail(e.target.value)}
           value={email}
           fullWidth
           size="small"
-          style={{ margin: "8px 0" }}
+          sx={{ my: 1 }}
           error={(email && !validEmail) || err?.data?.errors?.email}
-          helperText={
-            email && !validEmail
-              ? "Email không hợp lệ!"
-              : err?.data?.errors?.email
-          }
         />
         {reCaptchaLoaded && challenge && (
           <Suspense fallback={null}>
-            <ReCaptcha
-              onVerify={(token) => setToken(token)}
-              recaptchaSiteKey={recaptchaSiteKey}
-            />
+            <ReCaptcha onVerify={(token) => setToken(token)} recaptchaSiteKey={recaptchaSiteKey} />
           </Suspense>
         )}
         <ButtonContainer>
-          <Link
-            to={"/auth/login"}
-            style={{ width: "100%", marginRight: "8px" }}
+          <ConfirmButton
+            sx={{ mr: 4 }}
+            component={Link}
+            to="/auth/login"
+            variant="outlined"
+            color="error"
+            size="large"
+            fullWidth
           >
-            <ConfirmButton
-              variant="outlined"
-              color="error"
-              size="large"
-              fullWidth
-            >
-              Quay lại
-            </ConfirmButton>
-          </Link>
+            {t("back")}
+          </ConfirmButton>
           <ConfirmButton
             variant="contained"
             color="primary"
@@ -207,7 +188,7 @@ const ForgotTab = ({
             fullWidth
             disabled={!email || !validEmail || sending || !reCaptchaLoaded}
           >
-            Gửi email
+            {t("send")}
           </ConfirmButton>
         </ButtonContainer>
       </Stack>

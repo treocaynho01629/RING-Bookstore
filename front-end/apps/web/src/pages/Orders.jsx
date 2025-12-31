@@ -1,4 +1,3 @@
-import useTitle from "@ring/shared/useTitle";
 import Dialog from "@mui/material/Dialog";
 import { useNavigate, useOutletContext } from "react-router";
 import { TabContentContainer } from "../components/custom/ProfileComponents";
@@ -14,9 +13,6 @@ const Orders = () => {
   const { tabletMode, mobileMode, pending, setPending } = useOutletContext();
   const navigate = useNavigate();
   const [open, setOpen] = useState(true);
-
-  // Set title
-  //useTitle("Đơn hàng");
 
   const handleClose = (e) => {
     e.preventDefault();

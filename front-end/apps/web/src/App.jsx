@@ -2,7 +2,6 @@ import "./App.css";
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import useReachable from "@ring/shared/useReachable";
-import useGetEnums from "@ring/shared/useGetEnums";
 import FallbackLogo from "@ring/ui/FallbackLogo";
 import RequireAuth from "./components/authorize/RequireAuth";
 import PersistLogin from "./components/authorize/PersistLogin";
@@ -13,7 +12,6 @@ import "simplebar-react/dist/simplebar.min.css";
 
 function App() {
   useReachable(import.meta.env.VITE_API_URL); // Test connection to server
-  useGetEnums(); // TODO: Remove this
 
   const router = createBrowserRouter(
     [
@@ -24,7 +22,7 @@ function App() {
         children: [
           {
             path: "reset/:token?",
-            handle: { title: "password.reset" },
+            handle: { title: "forgot.title" },
             lazy: async () => {
               let ResetPage = await import("./pages/ResetPage");
               return { Component: ResetPage.default };
@@ -32,7 +30,6 @@ function App() {
           },
           {
             path: "unauthorized",
-            handle: { title: "unauthorized" },
             lazy: async () => {
               let Unauthorized = await import("./pages/Unauthorized");
               return { Component: Unauthorized.default };
@@ -40,7 +37,6 @@ function App() {
           },
           {
             path: "*",
-            handle: { title: "page.not.found" },
             lazy: async () => {
               let Missing = await import("./pages/Missing");
               return { Component: Missing.default };

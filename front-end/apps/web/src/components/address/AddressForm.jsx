@@ -103,7 +103,7 @@ const AddressForm = ({
       !currAddress?.ward ||
       !validPhone;
     if (isNotValid) {
-      setErrMsg("Vui lòng nhập đầy đủ thông tin!");
+      setErrMsg(t("validation.error.form.required", { ns: "validation" }));
       return;
     }
 
@@ -314,7 +314,7 @@ const AddressForm = ({
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
-                label={err?.data?.errors?.type ?? t("address.type", { ns: "authenticated" })}
+                label={err?.data?.errors?.type ?? t("address.type.label", { ns: "authenticated" })}
                 onChange={(e) => setCurrAddress({ ...currAddress, type: e.target.value })}
                 select
                 value={currAddress?.type || ""}
@@ -429,7 +429,7 @@ const AddressForm = ({
                   value="default"
                   disabled={setting.includes("temp") || addressInfo?.isDefault || isSelected}
                 >
-                  {t("address.default", { ns: "authenticated" })}
+                  {t("address.default.label", { ns: "authenticated" })}
                 </ToggleButton>
                 <ToggleButton
                   sx={{ px: 2, textTransform: "none", fontSize: 15 }}

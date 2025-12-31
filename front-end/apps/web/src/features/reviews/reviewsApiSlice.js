@@ -12,7 +12,9 @@ const initialState = reviewsAdapter.getInitialState({
   totalPages: 0,
 });
 
-export const reviewsApiSlice = apiSlice.injectEndpoints({
+const apiWithEnum = apiSlice.enhanceEndpoints({ addTagTypes: ["Review"] });
+
+export const reviewsApiSlice = apiWithEnum.injectEndpoints({
   endpoints: (builder) => ({
     getReviewByBookId: builder.query({
       query: (id) => ({
@@ -21,9 +23,7 @@ export const reviewsApiSlice = apiSlice.injectEndpoints({
           return response.status === 200 && !result?.isError;
         },
       }),
-      providesTags: (result, error) => [
-        { type: "Review", id: result ? result.id : "LIST" },
-      ],
+      providesTags: (result, error) => [{ type: "Review", id: result ? result.id : "LIST" }],
     }),
     getReviewsByBookId: builder.query({
       query: (args) => {
@@ -45,8 +45,7 @@ export const reviewsApiSlice = apiSlice.injectEndpoints({
         };
       },
       transformResponse: (responseData) => {
-        const { content, empty, page, size, totalElements, totalPages } =
-          responseData;
+        const { content, empty, page, size, totalElements, totalPages } = responseData;
         return reviewsAdapter.setAll(
           {
             ...initialState,
@@ -61,10 +60,7 @@ export const reviewsApiSlice = apiSlice.injectEndpoints({
       },
       providesTags: (result, error, arg) => {
         if (result?.ids) {
-          return [
-            { type: "Review", id: "LIST" },
-            ...result.ids.map((id) => ({ type: "Review", id })),
-          ];
+          return [{ type: "Review", id: "LIST" }, ...result.ids.map((id) => ({ type: "Review", id }))];
         } else return [{ type: "Review", id: "LIST" }];
       },
     }),
@@ -88,8 +84,7 @@ export const reviewsApiSlice = apiSlice.injectEndpoints({
         };
       },
       transformResponse: (responseData) => {
-        const { content, empty, page, size, totalElements, totalPages } =
-          responseData;
+        const { content, empty, page, size, totalElements, totalPages } = responseData;
         return reviewsAdapter.setAll(
           {
             ...initialState,
@@ -131,24 +126,16 @@ export const reviewsApiSlice = apiSlice.injectEndpoints({
       merge: (currentCache, newItems, { arg: currentArg }) => {
         currentCache.page = newItems.page;
         if (!currentArg?.loadMore) reviewsAdapter.removeAll(currentCache);
-        reviewsAdapter.upsertMany(
-          currentCache,
-          reviewsSelector.selectAll(newItems)
-        );
+        reviewsAdapter.upsertMany(currentCache, reviewsSelector.selectAll(newItems));
       },
       forceRefetch: ({ currentArg, previousArg }) => {
         const isForceRefetch =
-          currentArg?.loadMore &&
-          !isEqual(currentArg, previousArg) &&
-          currentArg?.page > previousArg?.page;
+          currentArg?.loadMore && !isEqual(currentArg, previousArg) && currentArg?.page > previousArg?.page;
         return isForceRefetch;
       },
       providesTags: (result, error, arg) => {
         if (result?.ids) {
-          return [
-            { type: "Review", id: "LIST" },
-            ...result.ids.map((id) => ({ type: "Review", id })),
-          ];
+          return [{ type: "Review", id: "LIST" }, ...result.ids.map((id) => ({ type: "Review", id }))];
         } else return [{ type: "Review", id: "LIST" }];
       },
     }),
@@ -159,9 +146,7 @@ export const reviewsApiSlice = apiSlice.injectEndpoints({
         credentials: "include",
         body: { ...newReview },
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "Review", id: "LIST" },
-      ],
+      invalidatesTags: (result, error, { id }) => [{ type: "Review", id: "LIST" }],
     }),
     updateReview: builder.mutation({
       query: ({ id, updateReview }) => ({

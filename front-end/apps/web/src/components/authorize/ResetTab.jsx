@@ -4,18 +4,14 @@ import { Stack } from "@mui/material";
 import { useResetMutation } from "../../features/auth/authApiSlice";
 import { AuthTitle, ConfirmButton } from "@ring/ui/AuthComponents";
 import { Instruction } from "@ring/ui/Components";
+import { useTranslation } from "react-i18next";
 import PasswordInput from "@ring/ui/PasswordInput";
 import PasswordEvaluate from "../custom/PasswordEvaluate";
 
 const ReCaptcha = lazy(() => import("@ring/auth/ReCaptcha"));
 
-const ResetTab = ({
-  resetToken,
-  pending,
-  setPending,
-  reCaptchaLoaded,
-  generateReCaptchaToken,
-}) => {
+const ResetTab = ({ resetToken, pending, setPending, reCaptchaLoaded, generateReCaptchaToken }) => {
+  const { t } = useTranslation();
   const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
   // Password validation
@@ -49,7 +45,9 @@ const ResetTab = ({
     setErrMsg("");
   }, [password, matchPass]);
 
-  // Reset passowrd
+  /**
+   * Reset password submit
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (reseting || pending) return;
@@ -57,9 +55,7 @@ const ResetTab = ({
     setPending(true);
     const { enqueueSnackbar } = await import("notistack");
 
-    const recaptchaToken = challenge
-      ? token
-      : await generateReCaptchaToken("reset");
+    const recaptchaToken = challenge ? token : await generateReCaptchaToken("reset");
     reset({
       token: recaptchaToken,
       source: challenge ? "v2" : "v3",
@@ -79,7 +75,7 @@ const ResetTab = ({
         setChallenge(false);
 
         // Queue snack
-        enqueueSnackbar("Đổi mật khẩu thành công!", { variant: "success" });
+        enqueueSnackbar(t("message.success", { action: t("change.change.label") }), { variant: "success" });
         navigate("/auth/login");
         setPending(false);
       })
@@ -87,20 +83,10 @@ const ResetTab = ({
         console.error(err);
         setErr(err);
         if (!err?.status) {
-          setErrMsg("Server không phản hồi");
-        } else if (err?.status === 409) {
-          setErrMsg(err?.data?.message);
-        } else if (err?.status === 400) {
-          setErrMsg(err?.data?.message ?? "Sai định dạng thông tin!");
-        } else if (err?.status === 404) {
-          setErrMsg("Link không hợp lệ!");
-        } else if (err?.status === 403) {
-          setErrMsg("Bạn không có quyền làm điều này!");
-        } else if (err?.status === 412) {
-          setChallenge(true);
-          setErrMsg("Yêu cầu của bạn cần xác thực lại!");
+          setErrMsg(t("error.server.response"));
         } else {
-          setErrMsg("Khôi phục thất bại!");
+          setErrMsg(err?.data?.message);
+          if (err?.status === 412) setChallenge(true);
         }
         errRef.current.focus();
         setPending(false);
@@ -109,13 +95,22 @@ const ResetTab = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <AuthTitle>Khôi phục mật khẩu</AuthTitle>
+      <AuthTitle>{t("forgot.title")}</AuthTitle>
       <Instruction ref={errRef} aria-live="assertive">
         {errMsg != "" ? errMsg : " "}&nbsp;
       </Instruction>
       <Stack spacing={2.5} direction="column">
         <PasswordInput
-          label="Mật khẩu mới"
+          label={
+            passFocus && password && !validPass
+              ? t("validation.constraints.size.range", {
+                  ns: "validation",
+                  min: 8,
+                  max: 24,
+                  field: t("password.label"),
+                })
+              : (err?.data?.errors?.newPass ?? t("change.new"))
+          }
           size="small"
           onChange={(e) => setPassword(e.target.value)}
           value={password}
@@ -123,34 +118,23 @@ const ResetTab = ({
           onFocus={() => setPassFocus(true)}
           onBlur={() => setPassFocus(false)}
           error={(password && !validPass) || err?.data?.errors?.newPass}
-          helperText={
-            passFocus && password && !validPass
-              ? "8 đến 24 kí tự."
-              : err?.data?.errors?.newPass
-          }
         />
         <PasswordInput
-          label="Nhập lại mật khẩu mới"
+          label={
+            matchPass && !validMatch
+              ? t("validation.constraints.password.match", { ns: "validation" })
+              : (err?.data?.errors?.newPassRe ?? t("change.confirm"))
+          }
           size="small"
           onChange={(e) => setMatchPass(e.target.value)}
           value={matchPass}
           aria-invalid={validMatch ? "false" : "true"}
           error={(matchPass && !validMatch) || err?.data?.errors?.newPassRe}
-          helperText={
-            matchPass && !validMatch
-              ? "Không trùng mật khẩu."
-              : err?.data?.errors?.newPassRe
-          }
         />
-        <PasswordEvaluate
-          {...{ password, onValid: (value) => setValidPass(value) }}
-        />
+        <PasswordEvaluate {...{ password, onValid: (value) => setValidPass(value) }} />
         {reCaptchaLoaded && challenge && (
           <Suspense fallback={null}>
-            <ReCaptcha
-              onVerify={(token) => setToken(token)}
-              recaptchaSiteKey={recaptchaSiteKey}
-            />
+            <ReCaptcha onVerify={(token) => setToken(token)} recaptchaSiteKey={recaptchaSiteKey} />
           </Suspense>
         )}
         <div style={{ width: "100%" }}>
@@ -160,10 +144,10 @@ const ResetTab = ({
             size="large"
             type="submit"
             fullWidth
-            sx={{ marginTop: 2 }}
+            sx={{ mt: 2 }}
             disabled={!validPass || !validMatch || !reCaptchaLoaded}
           >
-            Khôi phục
+            {t("forgot.submit")}
           </ConfirmButton>
         </div>
       </Stack>

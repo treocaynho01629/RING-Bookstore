@@ -15,7 +15,7 @@ export const getShippingType = (shippingType: ShippingType): ShippingTypeMeta =>
       return {
         value: ShippingType.ECONOMY,
         label: "shipping.economy",
-        color: "warning",
+        color: "info",
         multiplier: 1,
         icon: "LocalShippingOutlined",
         estimate: "2-4",

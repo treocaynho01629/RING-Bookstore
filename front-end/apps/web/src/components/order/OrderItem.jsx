@@ -136,7 +136,7 @@ const OrderItem = ({ order, handleAddToCart, handleCancelOrder }) => {
               <ItemTitle>{item?.bookTitle}</ItemTitle>
               <StuffContainer>
                 <Amount>
-                  {t("quantity")}: <b>{item?.quantity}</b>
+                  {t("quantity.label")}: <b>{item?.quantity}</b>
                 </Amount>
                 <PriceContainer>
                   <Price>{currencyFormat.format(item.price * (1 - (item?.discount || 0)))}</Price>
@@ -197,7 +197,7 @@ const OrderItem = ({ order, handleAddToCart, handleCancelOrder }) => {
               </Link>
             ) : (
               <MainButton variant="contained" color="primary" onClick={() => handleAddToCart(order)}>
-                {t("order.buy.again", { ns: "authenticated" })}
+                {t("order.again", { ns: "authenticated" })}
               </MainButton>
             )}
           </Box>

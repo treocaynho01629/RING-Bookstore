@@ -11,10 +11,10 @@
   "devDependencies": {
     "vitest": "latest",
     "vitest-fetch-mock": "^0.4.5",
-    "@vitest/ui": "^4.0.2",
-    "@testing-library/react": "^16.3.0",
+    "@vitest/ui": "^4.0.16",
+    "@testing-library/react": "^16.3.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@ring/eslint-config": "*",
-    "jsdom": "^27.0.1"
+    "jsdom": "^27.3.0"
   }
 }

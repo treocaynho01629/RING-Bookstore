@@ -14,15 +14,15 @@
     "update-dependencies": "turbo update-dependencies && npx npm-check-updates -u"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^4.6.0"
+    "@vitejs/plugin-react": "^5.1.2"
   },
   "devDependencies": {
     "@ring/vitest-config": "*",
-    "prettier": "^3.6.2",
+    "prettier": "^3.7.4",
     "prettier-plugin-pkg": "^0.21.2",
-    "turbo": "^2.5.4"
+    "turbo": "^2.7.2"
   },
-  "packageManager": "npm@10.4.0",
+  "packageManager": "npm@11.7.0",
   "workspaces": [
     "apps/*",
     "packages/*"

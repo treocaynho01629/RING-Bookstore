@@ -277,7 +277,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
       </StyledDialogTitle>
       <ToggleGroupContainer>
         <CustomTabs value={filters.status} onChange={handleChangeStatus} variant="scrollable" scrollButtons="auto">
-          <CustomTab label={t("all")} value="" />
+          <CustomTab label={t("all.label")} value="" />
           {Object.values(OrderStatus).map((status, index) => {
             const itemMeta = getOrderStatus(status);
             return <CustomTab key={`tab-${index}`} label={t(itemMeta?.label)} value={status} />;

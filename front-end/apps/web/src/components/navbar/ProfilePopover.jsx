@@ -50,10 +50,10 @@ const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, handleSignO
         </MenuItem>
       </Link>
     ) : (
-      <Link to={"/auth/register"} key="auth-register" title={t("signup")}>
+      <Link to={"/auth/register"} key="auth-register" title={t("signup.label")}>
         <MenuItem>
           <Avatar sx={{ width: 30, height: 30, ml: -0.5, mr: 1.5 }} />
-          {t("signup")}
+          {t("signup.label")}
         </MenuItem>
       </Link>
     ),
@@ -67,12 +67,12 @@ const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, handleSignO
         </MenuItem>
       </Link>
     ) : (
-      <Link to={"/auth/login"} key="auth-login" title={t("login")}>
+      <Link to={"/auth/login"} key="auth-login" title={t("login.label")}>
         <MenuItem>
           <ListItemIcon>
             <LockOutlined fontSize="small" />
           </ListItemIcon>
-          {t("login")}
+          {t("login.label")}
         </MenuItem>
       </Link>
     ),
@@ -102,7 +102,7 @@ const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, handleSignO
         <ListItemIcon>
           <Logout fontSize="small" />
         </ListItemIcon>
-        {t("logout")}
+        {t("signout.label")}
       </MenuItem>
     ),
   ];

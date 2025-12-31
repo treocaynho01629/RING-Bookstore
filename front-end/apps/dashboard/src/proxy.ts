@@ -41,5 +41,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/", "/(en|vi)/:path*", "/((?!api|_next|_vercel|.*\\..*).*)"],
+  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
 };

@@ -1,4 +1,4 @@
-export const locales = ["en", "vi"] as const;
+export const locales = ["en", "vi"];
 
 export const LocaleType = Object.freeze({
   EN: { value: "en", label: "English" },

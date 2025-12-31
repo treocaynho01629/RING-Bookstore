@@ -69,7 +69,7 @@ const ProfileImageComponent = ({ image, mobileMode, handleCropComplete, handleCl
 
   return (
     <Dialog open={image != null} maxWidth="sm" fullScreen={mobileMode} fullWidth onClose={handleClose}>
-      <DialogTitle>{t("profile.media")}</DialogTitle>
+      <DialogTitle>{t("profile.media.label")}</DialogTitle>
       <StyledContent dividers>
         <CropperContainer>
           <Cropper

@@ -565,7 +565,7 @@ const Home = () => {
           <Categories />
         </Loadable>
       </Container>
-      <CustomDivider>{t("landing.newest")}</CustomDivider>
+      <CustomDivider>{t("landing.latest")}</CustomDivider>
       <Container>
         <Loadable height={1140} key={"hot"}>
           <Products {...{ isLoading, data, isSuccess, isError }} />

@@ -48,7 +48,7 @@ export const suggestPrices = [
 export const sortBooksBy = [
   {
     value: "createdDate",
-    label: "search.sort.newest",
+    label: "search.sort.latest",
   },
   {
     value: "totalOrders",
@@ -95,7 +95,7 @@ export const sortShopsBy = [
 export const sortReviewsBy = [
   {
     value: "createdDate",
-    label: "review.sort.newest",
+    label: "review.sort.latest",
   },
   {
     value: "rating",

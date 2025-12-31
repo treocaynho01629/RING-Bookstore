@@ -4,9 +4,9 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { ThemeContextProvider } from "@ring/ui";
 import { theme } from "../../lib/theme";
 import { getServerSession, Session } from "next-auth";
-import { NextIntlClientProvider } from "next-intl";
-import { locales } from "@ring/i18n/locales";
+import { locales } from "@ring/shared/enums/locales";
 import { getMessages, setRequestLocale } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
 import localFont from "next/font/local";
 import NextStoreProvider from "../NextStoreProvider";
 import PageLayout from "../../components/layout/PageLayout";
@@ -35,10 +35,7 @@ interface RootLayoutProps {
   params: Promise<{ locale: string }>;
 }
 
-export default async function RootLayout({
-  children,
-  params,
-}: Readonly<RootLayoutProps>) {
+export default async function RootLayout({ children, params }: Readonly<RootLayoutProps>) {
   const { locale } = await params;
   const session = (await getServerSession()) as Session;
   const messages = await getMessages();
