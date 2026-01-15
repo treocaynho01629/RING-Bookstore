@@ -1,12 +1,11 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
-import { ThemeContextProvider } from "@ring/ui";
-import { theme } from "../../lib/theme";
 import { getServerSession, Session } from "next-auth";
 import { locales } from "@ring/shared/enums/locales";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
+import ThemeContextProvider from "@ring/ui/ThemeContextProvider";
 import localFont from "next/font/local";
 import NextStoreProvider from "../NextStoreProvider";
 import PageLayout from "../../components/layout/PageLayout";
@@ -49,7 +48,7 @@ export default async function RootLayout({ children, params }: Readonly<RootLayo
           <NextStoreProvider>
             <AuthProvider session={session}>
               <AppRouterCacheProvider>
-                <ThemeContextProvider theme={theme}>
+                <ThemeContextProvider>
                   <PageLayout>{children}</PageLayout>
                 </ThemeContextProvider>
               </AppRouterCacheProvider>

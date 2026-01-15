@@ -4,11 +4,11 @@ import { isEqual } from "lodash-es";
 import { CouponDTO } from "@ring/shared/models/couponDTO";
 import apiSlice from "../../lib/apiSlice";
 
-interface CouponResponse extends CouponDTO {
+export interface CouponResponse extends CouponDTO {
   id: number;
 }
 
-interface CouponQueryArgs {
+export interface CouponQueryArgs {
   types?: string[];
   criterias?: string[];
   shopId?: number;
@@ -27,7 +27,7 @@ interface CouponQueryArgs {
   loadMore?: boolean;
 }
 
-interface CouponsResponse {
+export interface CouponsResponse {
   content: CouponResponse[];
   empty: boolean;
   page: number;
@@ -36,7 +36,7 @@ interface CouponsResponse {
   totalPages: number;
 }
 
-interface CouponsState extends EntityState<CouponResponse, number> {
+export interface CouponsState extends EntityState<CouponResponse, number> {
   empty: boolean;
   page: number;
   size: number;

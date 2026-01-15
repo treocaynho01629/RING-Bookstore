@@ -55,7 +55,7 @@ const headCells = [
 ];
 
 export default function SummaryTableShops() {
-  //Fetch books
+  // Fetch shops
   const { data, isLoading, isSuccess, isError, error } = useGetShopsQuery({
     size: 5,
     sortBy: "sales",

@@ -1,13 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { RootState } from "@ring/redux";
-import { setShop } from "./shopActions";
+import { clearShop, setShop } from "./shopActions";
+import { Shop } from "../../hooks/useShop";
+import type { RootState } from "@ring/redux";
 
 export interface ShopState {
-  shop: number | undefined;
+  shop: Shop;
 }
 
 const initialState: ShopState = {
-  shop: undefined,
+  shop: { id: null, name: null },
 };
 
 const shopsSlice = createSlice({
@@ -16,13 +17,15 @@ const shopsSlice = createSlice({
   reducers: {},
   extraReducers(builder) {
     builder.addCase(setShop, (state, action) => {
-      const shop = action.payload;
-      state.shop = shop;
+      const { id, name } = action.payload;
+      state.shop = { id: id ?? null, name: name ?? null };
+    });
+    builder.addCase(clearShop, (state) => {
+      state.shop = { id: null, name: null };
     });
   },
 });
 
-export const selectShop = (state: RootState): number | undefined =>
-  state.shops.shop;
+export const selectShop = (state: RootState): Shop => state.shops.shop;
 
 export default shopsSlice.reducer;

@@ -58,7 +58,7 @@ interface NavBarProps {
 
 export default function NavBar({ open, setOpen }: NavBarProps) {
   const t = useTranslations();
-  const { shop, setShop } = useShop();
+  const { shop, setShop, clearShop } = useShop();
   const { data: session } = useSession();
   const { role, image, username } = session?.user ?? { role: null, image: null, username: null };
   const roleMeta = role ? getUserRole(role) : null;
@@ -82,17 +82,17 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
 
   let shopBadgeContent;
 
-  if (isLoading && !shop) {
+  if (isLoading) {
     shopBadgeContent = (
       <>
         <Skeleton variant="circular" width={22} height={22} />
         <Typography variant="body2" color="text.primary" mx={1}>
-          <Skeleton variant="text" width={100} />
+          {shop?.name ?? "Tổng thể"}
         </Typography>
       </>
     );
   } else if (isSuccess) {
-    const shopInfo = data?.entities[shop as number] ?? null;
+    const shopInfo = shop?.id ? data?.entities[shop.id] : null;
 
     shopBadgeContent = (
       <>
@@ -152,6 +152,7 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
                   handleClose: handleCloseShop,
                   shop,
                   setShop,
+                  clearShop,
                   data,
                 }}
               />

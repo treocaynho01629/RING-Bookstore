@@ -82,6 +82,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "lint": "eslint \"**/*.{ts,tsx,js,jsx}\"",
+    "check-types": "tsc --noEmit",
     "update-dependencies": "npx npm-check-updates -u"
   },
   "devDependencies": {

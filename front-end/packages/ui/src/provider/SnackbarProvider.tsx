@@ -1,7 +1,11 @@
 import { SnackbarProvider as NotistackProvider } from "notistack";
 import Snackbar from "../components/Snackbar";
 
-const SnackbarProvider = ({ children }) => {
+interface SnackbarProviderProps {
+  children: React.ReactNode;
+}
+
+export default function SnackbarProvider({ children }: SnackbarProviderProps) {
   return (
     <NotistackProvider
       maxSnack={3}
@@ -18,6 +22,4 @@ const SnackbarProvider = ({ children }) => {
       {children}
     </NotistackProvider>
   );
-};
-
-export default SnackbarProvider;
+}

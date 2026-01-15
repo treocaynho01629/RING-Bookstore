@@ -9,7 +9,7 @@ export interface CateResponse {
   name: string;
 }
 
-interface CateQueryArgs {
+export interface CateQueryArgs {
   page?: number;
   size?: number;
   sortBy?: string;
@@ -28,7 +28,7 @@ interface CatesResponse {
   totalPages: number;
 }
 
-interface CatesState extends EntityState<CateResponse, number> {
+export interface CatesState extends EntityState<CateResponse, number> {
   empty: boolean;
   page: number;
   size: number;
@@ -49,10 +49,7 @@ const apiWithEnum = apiSlice.enhanceEndpoints({ addTagTypes: ["Category"] });
 
 export const categoriesApiSlice = apiWithEnum.injectEndpoints({
   endpoints: (builder) => ({
-    getCategory: builder.query<
-      CateResponse,
-      { id?: number; slug?: string; include?: string }
-    >({
+    getCategory: builder.query<CateResponse, { id?: number; slug?: string; include?: string }>({
       query: ({ id, slug, include }) => ({
         url: `/api/categories/${slug ? "slug/" + slug : id ? id : ""}${include ? `?include=${include}` : ""}`,
         validateStatus: (response, result) => {
@@ -82,8 +79,7 @@ export const categoriesApiSlice = apiWithEnum.injectEndpoints({
         };
       },
       transformResponse: (response: CatesResponse) => {
-        const { content, empty, page, size, totalElements, totalPages } =
-          response;
+        const { content, empty, page, size, totalElements, totalPages } = response;
         return catesAdapter.setAll(
           {
             ...catesInitialState,
@@ -125,10 +121,7 @@ export const categoriesApiSlice = apiWithEnum.injectEndpoints({
       merge: (currentCache, newItems, { arg: currentArg }) => {
         currentCache.page = newItems.page;
         if (!currentArg?.loadMore) catesAdapter.removeAll(currentCache);
-        catesAdapter.upsertMany(
-          currentCache,
-          catesSelector.selectAll(newItems)
-        );
+        catesAdapter.upsertMany(currentCache, catesSelector.selectAll(newItems));
       },
       forceRefetch: ({ currentArg, previousArg }) => {
         return !!(
@@ -139,10 +132,7 @@ export const categoriesApiSlice = apiWithEnum.injectEndpoints({
       },
       providesTags: (result) =>
         result
-          ? [
-              ...result.ids.map((id) => ({ type: "Category" as const, id })),
-              { type: "Category", id: "LIST" },
-            ]
+          ? [...result.ids.map((id) => ({ type: "Category" as const, id })), { type: "Category", id: "LIST" }]
           : [{ type: "Category", id: "LIST" }],
     }),
   }),

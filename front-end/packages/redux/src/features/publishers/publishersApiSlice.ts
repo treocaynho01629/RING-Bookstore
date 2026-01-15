@@ -9,7 +9,7 @@ export interface PubResponse {
   image: string;
 }
 
-interface PubQueryArgs {
+export interface PubQueryArgs {
   page?: number;
   size?: number;
   sortBy?: string;
@@ -17,7 +17,7 @@ interface PubQueryArgs {
   loadMore?: boolean;
 }
 
-interface PubsResponse {
+export interface PubsResponse {
   content: PubResponse[];
   empty: boolean;
   page: number;
@@ -26,7 +26,7 @@ interface PubsResponse {
   totalPages: number;
 }
 
-interface PubsState extends EntityState<PubResponse, number> {
+export interface PubsState extends EntityState<PubResponse, number> {
   empty: boolean;
   page: number;
   size: number;
@@ -75,8 +75,7 @@ export const publishersApiSlice = apiWithEnum.injectEndpoints({
         };
       },
       transformResponse: (response: PubsResponse) => {
-        const { content, empty, page, size, totalElements, totalPages } =
-          response;
+        const { content, empty, page, size, totalElements, totalPages } = response;
         return pubsAdapter.setAll(
           {
             ...pubsInitialState,
@@ -129,10 +128,7 @@ export const publishersApiSlice = apiWithEnum.injectEndpoints({
       },
       providesTags: (result) =>
         result
-          ? [
-              ...result.ids.map((id) => ({ type: "Publisher" as const, id })),
-              { type: "Publisher", id: "LIST" },
-            ]
+          ? [...result.ids.map((id) => ({ type: "Publisher" as const, id })), { type: "Publisher", id: "LIST" }]
           : [{ type: "Publisher", id: "LIST" }],
     }),
   }),

@@ -12,6 +12,7 @@ import {
   Collapse,
   ListSubheader,
   Drawer,
+  Theme,
 } from "@mui/material";
 import { navigationList } from "../../utils/navigate";
 import { useSession } from "next-auth/react";
@@ -21,22 +22,22 @@ import MuiDrawer from "@mui/material/Drawer";
 //#region styled
 const drawerWidth = 250;
 
-const openedMixin = (theme) => ({
+const openedMixin = (theme: Theme) => ({
   width: drawerWidth,
   transition: theme.transitions.create("all", {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.enteringScreen,
   }),
-  backgroundColor: theme.vars.palette.background.default,
+  backgroundColor: theme?.vars?.palette?.background?.default,
   overflowX: "hidden",
 });
 
-const closedMixin = (theme) => ({
+const closedMixin = (theme: Theme) => ({
   transition: theme.transitions.create("width", {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  backgroundColor: theme.vars.palette.background.default,
+  backgroundColor: theme?.vars?.palette?.background?.default,
   overflowX: "hidden",
   width: `calc(${theme.spacing(7)} + 1px)`,
 });
@@ -61,22 +62,27 @@ const DrawerHeader = styled("div")`
   ${({ theme }) => theme.mixins.toolbar};
 `;
 
-const StyledDrawer = styled(MuiDrawer, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
+const StyledDrawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== "open" })(({ theme }) => ({
   width: drawerWidth,
   flexShrink: 0,
   whiteSpace: "nowrap",
   boxSizing: "border-box",
-
-  ...(open && {
-    ...openedMixin(theme),
-    "& .MuiDrawer-paper": openedMixin(theme),
-  }),
-  ...(!open && {
-    ...closedMixin(theme),
-    "& .MuiDrawer-paper": closedMixin(theme),
-  }),
+  variants: [
+    {
+      props: ({ open }) => open,
+      style: {
+        ...openedMixin(theme),
+        "& .MuiDrawer-paper": openedMixin(theme),
+      },
+    },
+    {
+      props: ({ open }) => !open,
+      style: {
+        ...closedMixin(theme),
+        "& .MuiDrawer-paper": closedMixin(theme),
+      },
+    },
+  ],
 }));
 
 const DrawerContainer = styled("div")`
@@ -98,10 +104,10 @@ const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
   }),
 
   "&.Mui-selected": {
-    "color": theme.vars.palette.primary.main,
+    "color": theme?.vars?.palette?.primary?.main,
 
     ".MuiListItemIcon-root": {
-      color: theme.vars.palette.primary.main,
+      color: theme?.vars?.palette?.primary?.main,
     },
   },
 

@@ -396,7 +396,7 @@ const ProductFormDialog = ({ product = null, open, handleClose, shop, pending, s
   return (
     <Dialog
       open={open}
-      scroll={"paper"}
+      scroll={"body"}
       maxWidth={"md"}
       fullWidth
       onClose={handleCloseDialog}

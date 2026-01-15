@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, Suspense, lazy } from "react";
-import { Box, Button, Grid } from "@mui/material";
-import { Add, AutoStories, LocalFireDepartment } from "@mui/icons-material";
-import { booksApiSlice, useGetBookAnalyticsQuery, useGetBooksQuery } from "@/features/books/booksApiSlice";
+import { useState, Suspense, lazy, useMemo } from "react";
+import { Box, Button, Typography } from "@mui/material";
+import { Add } from "@mui/icons-material";
+import { useGetBooksQuery } from "@/features/books/booksApiSlice";
+import { MRT_ColumnDef, MRT_PaginationState, MRT_SortingState } from "material-react-table";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import useShop from "@/hooks/useShop";
-import TableProducts from "@/components/table/TableProducts";
-import InfoCard from "@/components/custom/InfoCard";
 import CustomBreadcrumbs from "@/components/custom/CustomBreadcrumbs";
-import ProductsShowcase from "@/components/product/ProductsShowcase";
+import CustomReactTable from "@/components/table/CustomReactTable";
+import type { BookResponse } from "@ring/redux/booksApiSlice";
 
 const ProductFormDialog = lazy(() => import("@/components/dialog/ProductFormDialog"));
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
@@ -18,97 +18,134 @@ const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
 const ManageProducts = () => {
   const { data: session } = useSession();
   const { shop } = useShop();
-  const { id, isAdmin } = session?.user;
+  const { id, isAdmin } = session?.user ?? { id: null, isAdmin: false };
   const [contextProduct, setContextProduct] = useState(null);
-  const [open, setOpen] = useState(undefined);
+  const [open, setOpen] = useState<boolean | undefined>(undefined);
   const [pending, setPending] = useState(false);
-  const { data: bookAnalytics } = useGetBookAnalyticsQuery(
-    { shopId: shop ?? null, userId: isAdmin ? null : id },
-    { skip: !id }
-  );
-  const {
-    data: bestSeller,
-    isLoading: loadBest,
-    isSuccess: doneBest,
-    isError: errorBest,
-  } = useGetBooksQuery(
+  const [filters, setFilters] = useState({
+    keyword: "",
+    cate: "",
+    pubIds: [],
+    types: [],
+  });
+  const [sorting, setSorting] = useState<MRT_SortingState>([]);
+  const [pagination, setPagination] = useState<MRT_PaginationState>({
+    pageIndex: 0,
+    pageSize: 25,
+  });
+  const { data, isLoading, isSuccess, isError, error, isFetching } = useGetBooksQuery(
     {
-      size: 6,
-      sortBy: "totalOrders",
-      sortDir: "desc",
+      page: pagination?.pageIndex,
+      size: pagination?.pageSize,
+      // sortBy: sorting?.map((sort) => sort.id),
+      // sortDir: sorting?.map((sort) => sort.desc ? "desc" : "asc"),
+      shopId: shop?.id ?? undefined,
+      userId: isAdmin ? undefined : id ? Number(id) : undefined,
+      keyword: filters.keyword,
+      cateId: filters.cate ? Number(filters.cate) : undefined,
+      types: filters.types,
+      pubIds: filters.pubIds,
       amount: 0,
-      shopId: shop ?? "",
-      userId: isAdmin ? null : id,
     },
     { skip: !id }
   );
-  const [getBook, { isLoading }] = booksApiSlice.useLazyGetBookQuery();
-
-  //Set title
-  //useTitle("Sản phẩm");
 
   const handleOpen = () => {
     setContextProduct(null);
     setOpen(true);
   };
 
-  const handleOpenEdit = (productId) => {
-    getBook(productId)
-      .unwrap()
-      .then((book) => {
-        setContextProduct(book);
-        setOpen(true);
-      })
-      .catch((rejected) => console.error(rejected));
+  const handleOpenEdit = (productId: number) => {
+    // getBook(productId)
+    //   .unwrap()
+    //   .then((book) => {
+    //     setContextProduct(book);
+    //     setOpen(true);
+    //   })
+    //   .catch((rejected) => console.error(rejected));
   };
 
   const handleClose = () => {
     setOpen(false);
   };
 
+  const columns = useMemo<MRT_ColumnDef<BookResponse>[]>(
+    () => [
+      {
+        accessorKey: "id",
+        header: "ID",
+      },
+      {
+        accessorKey: "title",
+        header: "Title",
+      },
+      {
+        accessorKey: "price",
+        header: "Price",
+      },
+      {
+        accessorKey: "amount",
+        header: "Amount",
+      },
+      {
+        accessorKey: "shopName",
+        header: "Shop Name",
+      },
+      {
+        accessorKey: "rating",
+        header: "Rating",
+      },
+    ],
+    []
+  );
+
   return (
-    <>
+    <Box display="flex" flexDirection="column" height="100%">
       {(isLoading || pending) && (
-        <Suspense fallBack={null}>
+        <Suspense fallback={<></>}>
           <PendingModal open={isLoading || pending} message="Đang gửi yêu cầu..." />
         </Suspense>
       )}
-      <div>
-        <div>
-          <h2>Quản lý sản phẩm</h2>
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box>
+          <Typography variant="h5" sx={{ mb: 1 }}>
+            Quản lý sản phẩm
+          </Typography>
           <CustomBreadcrumbs separator="." maxItems={4} aria-label="breadcrumb">
             <Link href={"/product"}>Quản lý sản phẩm</Link>
           </CustomBreadcrumbs>
-        </div>
-        <Button variant="outlined" startIcon={<Add />} onClick={handleOpen}>
-          Thêm
-        </Button>
-      </div>
-      <Box mb={3}>
-        <InfoCard icon={<AutoStories color="primary" />} info={bookAnalytics} color="primary" />
+        </Box>
+        <Box sx={{ my: 3 }}>
+          <Button variant="outlined" startIcon={<Add />} onClick={handleOpen}>
+            Thêm
+          </Button>
+        </Box>
       </Box>
-      <Grid container spacing={3} sx={{ marginBottom: "20px" }}>
-        {loadBest ? null : (
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <ProductsShowcase
-              {...{
-                title: (
-                  <>
-                    <LocalFireDepartment />
-                    Top sản phẩm bán chạy
-                  </>
-                ),
-                size: 6,
-                data: bestSeller,
-                isLoading: loadBest,
-                isSuccess: doneBest,
-                isError: errorBest,
-              }}
-            />
-          </Grid>
-        )}
-      </Grid>
-      <TableProducts {...{ shop, isAdmin, userId: id, handleOpenEdit, pending, setPending }} />
+      <Box flex={1} position="relative">
+        <Box position="absolute" top={0} left={0} height="100%" width="100%">
+          <CustomReactTable
+            columns={columns}
+            data={Object.values(data?.entities ?? {})}
+            tableOptions={{
+              enableRowSelection: true,
+              manualPagination: true,
+              manualSorting: true,
+              rowCount: data?.totalElements ?? 0,
+              onPaginationChange: setPagination,
+              onSortingChange: setSorting,
+              state: {
+                pagination,
+                sorting,
+                isLoading,
+                showProgressBars: isFetching,
+              },
+              enableStickyHeader: true,
+              initialState: { density: "compact" },
+              layoutMode: "grid",
+            }}
+          />
+        </Box>
+      </Box>
       <Suspense fallback={null}>
         {open !== undefined && (
           <ProductFormDialog
@@ -123,7 +160,7 @@ const ManageProducts = () => {
           />
         )}
       </Suspense>
-    </>
+    </Box>
   );
 };
 

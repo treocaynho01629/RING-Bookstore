@@ -144,27 +144,27 @@ async function proxyRequest(request: NextRequest, pathSegments: string[], method
 }
 
 // Export handlers for all HTTP methods
-export async function GET(request: NextRequest, { params }: { params: { path: string[] } }) {
-  const { path } = await params;
+export async function GET(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
+  const { path } = await context.params;
   return proxyRequest(request, path, "GET");
 }
 
-export async function POST(request: NextRequest, { params }: { params: { path: string[] } }) {
-  const { path } = await params;
+export async function POST(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
+  const { path } = await context.params;
   return proxyRequest(request, path, "POST");
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { path: string[] } }) {
-  const { path } = await params;
+export async function PUT(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
+  const { path } = await context.params;
   return proxyRequest(request, path, "PUT");
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { path: string[] } }) {
-  const { path } = await params;
+export async function DELETE(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
+  const { path } = await context.params;
   return proxyRequest(request, path, "DELETE");
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { path: string[] } }) {
-  const { path } = await params;
+export async function PATCH(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
+  const { path } = await context.params;
   return proxyRequest(request, path, "PATCH");
 }

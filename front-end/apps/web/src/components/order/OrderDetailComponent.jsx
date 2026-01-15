@@ -323,7 +323,7 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
   const handleConfirmOrder = async () => {
     const confirmation = await confirm(
       t("order.confirm.label", { ns: "authenticated" }),
-      t("order.confirm.message", { ns: "authenticated", id: idFormatter(order?.id) })
+      t("order.confirm.message", { ns: "authenticated", id: idFormatter(order?.id) }),
       t("cancel"),
       t("confirm")
     );

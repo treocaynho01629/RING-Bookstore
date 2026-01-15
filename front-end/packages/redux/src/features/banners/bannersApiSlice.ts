@@ -8,7 +8,7 @@ export interface BannerResponse {
   url: string;
 }
 
-interface BannerQueryArgs {
+export interface BannerQueryArgs {
   shop?: string;
   byShop?: string;
   page?: number;
@@ -17,7 +17,7 @@ interface BannerQueryArgs {
   sortDir?: string;
 }
 
-interface BannersResponse {
+export interface BannersResponse {
   content: BannerResponse[];
   empty: boolean;
   page: number;
@@ -26,7 +26,7 @@ interface BannersResponse {
   totalPages: number;
 }
 
-interface BannersState extends EntityState<BannerResponse, number> {
+export interface BannersState extends EntityState<BannerResponse, number> {
   empty: boolean;
   page: number;
   size: number;
@@ -35,15 +35,13 @@ interface BannersState extends EntityState<BannerResponse, number> {
 }
 
 export const bannersAdapter = createEntityAdapter<BannerResponse>();
-export const bannersInitialState: BannersState = bannersAdapter.getInitialState(
-  {
-    empty: false,
-    page: 0,
-    size: 0,
-    totalElements: 0,
-    totalPages: 0,
-  }
-);
+export const bannersInitialState: BannersState = bannersAdapter.getInitialState({
+  empty: false,
+  page: 0,
+  size: 0,
+  totalElements: 0,
+  totalPages: 0,
+});
 const apiWithEnum = apiSlice.enhanceEndpoints({ addTagTypes: ["Banner"] });
 
 export const bannersApiSlice = apiWithEnum.injectEndpoints({
@@ -69,8 +67,7 @@ export const bannersApiSlice = apiWithEnum.injectEndpoints({
         };
       },
       transformResponse: (response: BannersResponse) => {
-        const { content, empty, page, size, totalElements, totalPages } =
-          response;
+        const { content, empty, page, size, totalElements, totalPages } = response;
         return bannersAdapter.setAll(
           {
             ...bannersInitialState,
@@ -85,10 +82,7 @@ export const bannersApiSlice = apiWithEnum.injectEndpoints({
       },
       providesTags: (result) =>
         result
-          ? [
-              ...result.ids.map((id) => ({ type: "Banner" as const, id })),
-              { type: "Banner", id: "LIST" },
-            ]
+          ? [...result.ids.map((id) => ({ type: "Banner" as const, id })), { type: "Banner", id: "LIST" }]
           : [{ type: "Banner", id: "LIST" }],
     }),
   }),

@@ -19,6 +19,9 @@ const LayoutWrapper = styled("div")`
 const MainContainer = styled("div")`
   flex-grow: 1;
   position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
 
   ${({ theme }) => theme.breakpoints.down("md")} {
     flex-grow: auto;
@@ -27,8 +30,9 @@ const MainContainer = styled("div")`
 
 const LayoutContainer = styled("div")`
   position: relative;
-  min-height: 60dvh;
   padding-bottom: ${({ theme }) => theme.spacing(4)};
+  flex: 1;
+  width: 100%;
 
   ${({ theme }) => theme.breakpoints.up("sm_md")} {
     padding-right: ${({ theme }) => theme.spacing(2)};

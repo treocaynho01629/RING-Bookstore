@@ -34,7 +34,7 @@ export interface BookQueryArgs {
   withDesc?: boolean;
 }
 
-interface BooksResponse {
+export interface BooksResponse {
   content: BookResponse[];
   empty: boolean;
   page: number;
@@ -92,7 +92,7 @@ export const booksApiSlice = apiWithEnum.injectEndpoints({
         if (keyword) params.append("keyword", keyword);
         if (cateId) params.append("cateId", cateId.toString());
         if (rating) params.append("rating", rating);
-        if (amount != null) params.append("amount", amount);
+        if (amount != null) params.append("amount", amount.toString());
         if (types?.length) params.append("types", types.join(","));
         if (shopId) params.append("shopId", shopId.toString());
         if (userId) params.append("userId", userId.toString());
