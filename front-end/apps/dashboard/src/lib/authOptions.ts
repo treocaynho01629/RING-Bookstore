@@ -8,7 +8,7 @@ import type {
   NextAuthOptions,
 } from "next-auth";
 import type { JWT } from "next-auth/jwt";
-import { login, logout, refresh } from "../../../actions/auth";
+import { login, logout, refresh } from "@/app/actions/auth";
 import { jwtDecode } from "jwt-decode";
 import { UserRole } from "@ring/shared/models/userRole";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -40,6 +40,18 @@ async function refreshAccessToken(nextAuthJWT: JWT): Promise<JWT> {
 
 export const options: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
+  debug: true,
+  logger: {
+    error(code, metadata) {
+      console.error("NEXTAUTH ERROR:", code, metadata);
+    },
+    warn(code) {
+      console.warn("NEXTAUTH WARN:", code);
+    },
+    debug(code, metadata) {
+      console.log("NEXTAUTH DEBUG:", code, metadata);
+    },
+  },
   session: { strategy: "jwt" },
   cookies: {
     sessionToken: {

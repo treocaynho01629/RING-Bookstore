@@ -14,8 +14,9 @@ import {
   Drawer,
   Theme,
 } from "@mui/material";
-import { navigationList } from "../../utils/navigate";
+import { navigationList } from "@/utils/navigate";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import MuiDrawer from "@mui/material/Drawer";
 
@@ -91,6 +92,7 @@ const DrawerContainer = styled("div")`
 
 const StyledListSubheader = styled(ListSubheader)(({ theme }) => ({
   backgroundColor: "transparent",
+  textTransform: "uppercase",
   fontSize: 14,
   fontWeight: 450,
 }));
@@ -125,15 +127,14 @@ const StyledListItemIcon = styled(ListItemIcon)(({ theme }) => ({
 }));
 //#endregion
 
-const NavDrawer = ({
-  open,
-  setOpen,
-  tabletMode,
-}: {
+interface NavDrawerProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   tabletMode: boolean;
-}) => {
+}
+
+const NavDrawer = ({ open, setOpen, tabletMode }: NavDrawerProps) => {
+  const t = useTranslations();
   const [openList, setOpenList] = useState<Record<number, boolean>>({ 0: true });
   const { data: session } = useSession();
   const { isAdmin } = session?.user ?? { isAdmin: false };
@@ -158,13 +159,15 @@ const NavDrawer = ({
   const drawerContent = (
     <>
       <DrawerHeader>
-        <Link href={"/"}>
+        <Link href={"/"} title={t("dashboard.label")}>
           <ImageLogo src="/logo.svg" className={open ? "open" : ""} alt="RING! logo" />
         </Link>
       </DrawerHeader>
       <List
         disablePadding
-        subheader={open && <StyledListSubheader id="management-list-subheader">TỔNG QUAN</StyledListSubheader>}
+        subheader={
+          open && <StyledListSubheader id="management-list-subheader">{t("dashboard.overview")}</StyledListSubheader>
+        }
       >
         <ListItem key={0} disablePadding sx={{ display: "block" }}>
           <Link href={"/"}>
@@ -172,14 +175,16 @@ const NavDrawer = ({
               <StyledListItemIcon className={open ? "open" : ""}>
                 <Speed />
               </StyledListItemIcon>
-              <ListItemText primary={"Dashboard"} sx={{ opacity: open ? 1 : 0 }} />
+              <ListItemText primary={t("dashboard.label")} sx={{ opacity: open ? 1 : 0 }} />
             </StyledListItemButton>
           </Link>
         </ListItem>
       </List>
       <List
         disablePadding
-        subheader={open && <StyledListSubheader id="management-list-subheader">QUẢN LÝ</StyledListSubheader>}
+        subheader={
+          open && <StyledListSubheader id="management-list-subheader">{t("dashboard.management")}</StyledListSubheader>
+        }
       >
         {navigationList.map(
           (item, index) =>
@@ -189,7 +194,7 @@ const NavDrawer = ({
                   <ListItem key={`item-${index}`} disablePadding sx={{ display: "block" }}>
                     <StyledListItemButton className={open ? "open" : ""}>
                       <StyledListItemIcon className={open ? "open" : ""}>{item.icon}</StyledListItemIcon>
-                      <ListItemText primary={item.label} sx={{ opacity: open ? 1 : 0 }} />
+                      <ListItemText primary={t(item.label)} sx={{ opacity: open ? 1 : 0 }} />
                       {item.subItems &&
                         (openList[index as keyof typeof openList] ? (
                           <ExpandLess
@@ -216,7 +221,7 @@ const NavDrawer = ({
                         {item.subItems?.map((sub, subIndex) => (
                           <Link key={`sub-${index}-${subIndex}`} href={sub.url}>
                             <ListItemButton sx={{ pl: 4 }}>
-                              <ListItemText primary={sub.label} />
+                              <ListItemText primary={t(sub.label)} />
                             </ListItemButton>
                           </Link>
                         ))}

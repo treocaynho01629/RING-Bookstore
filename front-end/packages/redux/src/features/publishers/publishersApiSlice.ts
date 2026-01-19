@@ -1,12 +1,11 @@
 import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
 import { isEqual } from "lodash-es";
 import { defaultSerializeQueryArgs } from "@reduxjs/toolkit/query";
+import { PublisherDTO } from "@ring/shared/models/publisherDTO";
 import apiSlice from "../../lib/apiSlice";
 
-export interface PubResponse {
+export interface PubResponse extends PublisherDTO {
   id: number;
-  name: string;
-  image: string;
 }
 
 export interface PubQueryArgs {
@@ -50,7 +49,7 @@ export const publishersApiSlice = apiWithEnum.injectEndpoints({
     getPublisher: builder.query<PubResponse, { id: number }>({
       query: (id) => ({
         url: `/api/publishers/${id}`,
-        validateStatus: (response, result) => {
+        validateStatus: (response: Response, result: any) => {
           return response.status === 200 && !result?.isError;
         },
       }),
@@ -69,7 +68,7 @@ export const publishersApiSlice = apiWithEnum.injectEndpoints({
 
         return {
           url: `/api/publishers?${params.toString()}`,
-          validateStatus: (response, result) => {
+          validateStatus: (response: Response, result: any) => {
             return response.status === 200 && !result?.isError;
           },
         };

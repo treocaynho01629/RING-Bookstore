@@ -130,6 +130,7 @@
     "label": "Đăng xuất"
   },
   "coupon": {
+    "label": "Mã giảm giá",
     "shipping": {
       "label": "Giảm phí ship",
       "summary": {

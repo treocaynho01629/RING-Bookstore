@@ -1,11 +1,9 @@
 import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
+import { BannerDTO } from "@ring/shared/models/bannerDTO";
 import apiSlice from "../../lib/apiSlice";
 
-export interface BannerResponse {
+export interface BannerResponse extends BannerDTO {
   id: number;
-  name: string;
-  description: string;
-  url: string;
 }
 
 export interface BannerQueryArgs {

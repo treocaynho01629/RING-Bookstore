@@ -1,0 +1,24 @@
+{
+  "dashboard": {
+    "label": "Dashboard",
+    "overview": "Tổng quan",
+    "management": "Quản lý"
+  },
+  "all": {
+    "shop": "Tổng thể"
+  },
+  "shop": {
+    "add": "Thêm cửa hàng"
+  },
+  "user": {
+    "member": "Thành viên",
+    "privilege": "Quyền"
+  },
+  "statistics": {
+    "label": "Thống kê"
+  },
+  "event": {
+    "label": "Sự kiện"
+  },
+  "misc": "Khác"
+}

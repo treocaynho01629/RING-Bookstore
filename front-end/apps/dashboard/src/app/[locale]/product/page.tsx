@@ -1,15 +1,22 @@
 "use client";
 
 import { useState, Suspense, lazy, useMemo } from "react";
-import { Box, Button, Typography } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import { useGetBooksQuery } from "@/features/books/booksApiSlice";
 import { MRT_ColumnDef, MRT_PaginationState, MRT_SortingState } from "material-react-table";
 import { useSession } from "next-auth/react";
+import { getImageSrc } from "@ring/shared/enums/image";
+import { LazyLoadImage } from "react-lazy-load-image-component";
+import { currencyFormat, idFormatter } from "@ring/shared";
+import Skeleton from "@mui/material/Skeleton";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 import Link from "next/link";
 import useShop from "@/hooks/useShop";
 import CustomBreadcrumbs from "@/components/custom/CustomBreadcrumbs";
 import CustomReactTable from "@/components/table/CustomReactTable";
+
 import type { BookResponse } from "@ring/redux/booksApiSlice";
 
 const ProductFormDialog = lazy(() => import("@/components/dialog/ProductFormDialog"));
@@ -37,8 +44,8 @@ const ManageProducts = () => {
     {
       page: pagination?.pageIndex,
       size: pagination?.pageSize,
-      // sortBy: sorting?.map((sort) => sort.id),
-      // sortDir: sorting?.map((sort) => sort.desc ? "desc" : "asc"),
+      sortBy: sorting?.[0]?.id,
+      sortDir: sorting?.[0]?.desc ? "desc" : "asc",
       shopId: shop?.id ?? undefined,
       userId: isAdmin ? undefined : id ? Number(id) : undefined,
       keyword: filters.keyword,
@@ -56,6 +63,7 @@ const ManageProducts = () => {
   };
 
   const handleOpenEdit = (productId: number) => {
+    console.log("test");
     // getBook(productId)
     //   .unwrap()
     //   .then((book) => {
@@ -74,26 +82,94 @@ const ManageProducts = () => {
       {
         accessorKey: "id",
         header: "ID",
+        size: 100,
+        Cell: ({ renderedCellValue }) => idFormatter(Number(renderedCellValue)),
       },
       {
         accessorKey: "title",
         header: "Title",
+        size: 400,
+        Cell: ({ renderedCellValue, row }) => (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: "1rem",
+            }}
+          >
+            <LazyLoadImage
+              src={row.original?.srcSet ? getImageSrc(row.original?.srcSet, 30) : undefined}
+              height={30}
+              width={30}
+              placeholder={<Skeleton width={30} height={30} animation={false} variant="rectangular" />}
+            />
+            <span>{renderedCellValue}</span>
+          </Box>
+        ),
       },
       {
         accessorKey: "price",
         header: "Price",
+        filterVariant: "range",
+        size: 125,
+        muiTableBodyCellProps: {
+          align: "right",
+        },
+        Cell: ({ renderedCellValue }) => currencyFormat.format(Number(renderedCellValue)),
+      },
+      {
+        accessorKey: "discount",
+        header: "Discount",
+        filterVariant: "range",
+        size: 150,
+        Cell: ({ row }) => (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "1rem",
+              width: "100%",
+            }}
+          >
+            <span>{currencyFormat.format(-(row.original?.price ?? 0) * (row.original?.discount ?? 0))}</span>
+            <Typography variant="caption" color="secondary">
+              -{(row.original?.discount ?? 0) * 100}%
+            </Typography>
+          </Box>
+        ),
       },
       {
         accessorKey: "amount",
         header: "Amount",
+        filterVariant: "range",
+        size: 150,
+        muiTableBodyCellProps: {
+          align: "right",
+        },
       },
       {
         accessorKey: "shopName",
         header: "Shop Name",
+        size: 200,
       },
       {
         accessorKey: "rating",
         header: "Rating",
+        filterVariant: "range",
+        size: 150,
+        muiTableBodyCellProps: {
+          align: "right",
+        },
+      },
+      {
+        accessorKey: "totalOrders",
+        header: "Orders",
+        filterVariant: "range",
+        size: 150,
+        muiTableBodyCellProps: {
+          align: "right",
+        },
       },
     ],
     []
@@ -133,6 +209,7 @@ const ManageProducts = () => {
               rowCount: data?.totalElements ?? 0,
               onPaginationChange: setPagination,
               onSortingChange: setSorting,
+              columnFilterDisplayMode: "popover",
               state: {
                 pagination,
                 sorting,
@@ -140,7 +217,10 @@ const ManageProducts = () => {
                 showProgressBars: isFetching,
               },
               enableStickyHeader: true,
-              initialState: { density: "compact" },
+              initialState: {
+                density: "compact",
+                columnVisibility: { amount: false, rating: false, shopName: false },
+              },
               layoutMode: "grid",
             }}
           />

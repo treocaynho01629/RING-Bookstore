@@ -1,3 +1,24 @@
 {
- 
+  "dashboard": {
+    "label": "Dashboard",
+    "overview": "Overview",
+    "management": "Management"
+  },
+  "all": {
+    "shop": "All shops"
+  },
+  "shop": {
+    "add": "Add new shop"
+  },
+  "user": {
+    "member": "Members",
+    "privilege": "Privilege"
+  },
+  "statistics": {
+    "label": "Statistics"
+  },
+  "event": {
+    "label": "Events"
+  },
+  "misc": "Misc"
 }

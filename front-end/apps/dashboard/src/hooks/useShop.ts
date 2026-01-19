@@ -9,8 +9,8 @@ export interface Shop {
 
 interface ShopState {
   shop: Shop | null;
-  setShop: Function | null;
-  clearShop: Function | null;
+  setShop: (shop: Shop) => void;
+  clearShop: () => void;
 }
 
 const useShop = (): ShopState => {

@@ -49,7 +49,6 @@
     }
   },
   "coupon": {
-    "label": "Coupons",
     "title": "Coupon listing",
     "discount": "Discount coupons",
     "shipping": "Shipping coupons",
@@ -114,7 +113,7 @@
       "terms": "Terms of use"
     },
     "services": {
-      "title": "Services", 
+      "title": "Services",
       "privacy": "Privacy policy",
       "warehouse": "Warehouse system"
     },

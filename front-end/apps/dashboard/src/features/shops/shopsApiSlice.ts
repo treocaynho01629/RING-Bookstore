@@ -9,7 +9,7 @@ export interface PreviewResponse extends ShopPreviewDTO {
 
 type PreviewsResponse = PreviewResponse[];
 
-interface PreviewsState extends EntityState<PreviewResponse, number> {}
+export interface PreviewsState extends EntityState<PreviewResponse, number> {}
 
 interface ShopQueryArgs {
   page?: number;

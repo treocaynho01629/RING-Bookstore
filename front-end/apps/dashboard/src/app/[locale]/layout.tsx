@@ -5,6 +5,7 @@ import { getServerSession, Session } from "next-auth";
 import { locales } from "@ring/shared/enums/locales";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
+import { options } from "@/lib/authOptions";
 import ThemeContextProvider from "@ring/ui/ThemeContextProvider";
 import localFont from "next/font/local";
 import NextStoreProvider from "../NextStoreProvider";
@@ -36,7 +37,7 @@ interface RootLayoutProps {
 
 export default async function RootLayout({ children, params }: Readonly<RootLayoutProps>) {
   const { locale } = await params;
-  const session = (await getServerSession()) as Session;
+  const session = (await getServerSession(options)) as Session;
   const messages = await getMessages();
 
   setRequestLocale(locale);

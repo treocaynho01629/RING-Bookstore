@@ -1,7 +1,7 @@
 import _minBy from "lodash-es/minBy";
 
-export const getImageSrc = (srcSet: Record<number, string>, width: number) => {
-  if (!srcSet) return null;
+export const getImageSrc = (srcSet: Record<number, string>, width: number): string | undefined => {
+  if (!srcSet) return undefined;
   const entries = Object.entries(srcSet).map(([key, value]) => ({
     size: Number(key),
     src: value,

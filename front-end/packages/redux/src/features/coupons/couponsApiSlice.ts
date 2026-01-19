@@ -97,7 +97,7 @@ export const couponsApiSlice = apiWithEnum.injectEndpoints({
 
         return {
           url: `/api/coupons?${params.toString()}`,
-          validateStatus: (response, result) => {
+          validateStatus: (response: Response, result: any) => {
             return response.status === 200 && !result?.isError;
           },
         };

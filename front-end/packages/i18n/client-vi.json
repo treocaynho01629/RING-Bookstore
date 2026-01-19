@@ -49,7 +49,6 @@
     }
   },
   "coupon": {
-    "label": "Mã giảm giá",
     "title": "Thông tin ưu đãi",
     "discount": "Mã giảm giá",
     "shipping": "Mã vận chuyển",
@@ -114,7 +113,7 @@
       "terms": "Điều khoản sử dụng"
     },
     "services": {
-      "title": "Dịch vụ", 
+      "title": "Dịch vụ",
       "privacy": "Chính sách bảo mật",
       "warehouse": "Hệ thống hàng"
     },

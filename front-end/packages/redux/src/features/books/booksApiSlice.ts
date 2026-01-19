@@ -1,19 +1,11 @@
 import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
 import { defaultSerializeQueryArgs } from "@reduxjs/toolkit/query";
 import { isEqual } from "lodash-es";
+import { BookDisplayDTO } from "@ring/shared/models/bookDisplayDTO";
 import apiSlice from "../../lib/apiSlice";
 
-export interface BookResponse {
+export interface BookResponse extends BookDisplayDTO {
   id: number;
-  slug: string;
-  title: string;
-  price: number;
-  discount: number;
-  amount: number;
-  shopId: number;
-  shopName: string;
-  rating: number;
-  totalOrders: number;
 }
 
 export interface BookQueryArgs {
@@ -83,7 +75,7 @@ export const booksApiSlice = apiWithEnum.injectEndpoints({
           withDesc,
         } = args || {};
 
-        //Params
+        // Params
         const params = new URLSearchParams();
         if (page) params.append("pageNo", page.toString());
         if (size) params.append("pSize", size.toString());
@@ -105,7 +97,7 @@ export const booksApiSlice = apiWithEnum.injectEndpoints({
 
         return {
           url: `/api/books?${params.toString()}`,
-          validateStatus: (response, result) => {
+          validateStatus: (response: Response, result: any) => {
             return response.status === 200 && !result?.isError;
           },
         };

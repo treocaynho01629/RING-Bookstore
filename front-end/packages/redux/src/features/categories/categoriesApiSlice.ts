@@ -1,15 +1,20 @@
 import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
 import { defaultSerializeQueryArgs } from "@reduxjs/toolkit/query";
 import { isEqual } from "lodash-es";
+import { CategoryDTO } from "@ring/shared/models/categoryDTO";
 import apiSlice from "../../lib/apiSlice";
 
-export interface CateResponse {
+export interface CateResponse extends CategoryDTO {
   id: number;
-  slug: string;
-  name: string;
 }
 
 export interface CateQueryArgs {
+  id?: number;
+  slug?: string;
+  include?: string;
+}
+
+export interface CategoriesQueryArgs {
   page?: number;
   size?: number;
   sortBy?: string;
@@ -49,7 +54,7 @@ const apiWithEnum = apiSlice.enhanceEndpoints({ addTagTypes: ["Category"] });
 
 export const categoriesApiSlice = apiWithEnum.injectEndpoints({
   endpoints: (builder) => ({
-    getCategory: builder.query<CateResponse, { id?: number; slug?: string; include?: string }>({
+    getCategory: builder.query<CateResponse, CateQueryArgs>({
       query: ({ id, slug, include }) => ({
         url: `/api/categories/${slug ? "slug/" + slug : id ? id : ""}${include ? `?include=${include}` : ""}`,
         validateStatus: (response, result) => {
@@ -58,7 +63,7 @@ export const categoriesApiSlice = apiWithEnum.injectEndpoints({
       }),
       providesTags: (result, error) => [{ type: "Category", id: result?.id }],
     }),
-    getCategories: builder.query<CatesState, CateQueryArgs>({
+    getCategories: builder.query<CatesState, CategoriesQueryArgs>({
       query: (args) => {
         const { page, size, sortBy, sortDir, include, parentId } = args || {};
 

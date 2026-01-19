@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { options } from "../../auth/[...nextauth]/authOptions";
+import { options } from "@/lib/authOptions";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 

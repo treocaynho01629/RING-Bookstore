@@ -37,14 +37,6 @@
       "import": "./dist/src/features/auth/authActions.js",
       "require": "./dist/src/features/auth/authActions.cjs"
     },
-    "./enumReducer": {
-      "import": "./dist/src/features/enums/enumReducer.js",
-      "require": "./dist/src/features/enums/enumReducer.cjs"
-    },
-    "./enumsApiSlice": {
-      "import": "./dist/src/features/enums/enumsApiSlice.js",
-      "require": "./dist/src/features/enums/enumsApiSlice.cjs"
-    },
     "./booksApiSlice": {
       "import": "./dist/src/features/books/booksApiSlice.js",
       "require": "./dist/src/features/books/booksApiSlice.cjs"
@@ -72,10 +64,6 @@
     "./storeRef": {
       "import": "./dist/src/app/storeRef.js",
       "require": "./dist/src/app/storeRef.cjs"
-    },
-    "./useEnums": {
-      "import": "./dist/src/hooks/useEnums.js",
-      "require": "./dist/src/hooks/useEnums.cjs"
     }
   },
   "scripts": {

@@ -77,7 +77,7 @@ const NavSetting = ({
               </ListItemButton>
             </ListItem>
           </Link>
-          <Link href={"/profile"}>
+          <Link href={"/"}>
             <ListItem disablePadding onClick={handleDrawerClose}>
               <ListItemButton>
                 <ListItemIcon>

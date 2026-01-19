@@ -1,6 +1,6 @@
 import { Paper } from "@mui/material";
 
-const WelcomeCard = ({ username }: { username: string }) => {
+const WelcomeCard = ({ username }: { username?: string }) => {
   return (
     <Paper elevation={3} sx={{ padding: 3, height: "100%" }}>
       <h3>Chào mừng {username}</h3>

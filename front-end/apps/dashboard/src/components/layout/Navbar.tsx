@@ -1,10 +1,12 @@
 "use client";
 
 import { Suspense, lazy, useCallback, useState } from "react";
-import { useGetPreviewShopsQuery } from "../../features/shops/shopsApiSlice";
+import { useGetPreviewShopsQuery } from "@/features/shops/shopsApiSlice";
 import { getUserRole } from "@ring/shared/enums/user";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useTranslations } from "next-intl";
+import { LocaleType } from "@ring/shared/enums/locales";
+import { useLocale, useTranslations } from "next-intl";
 import { styled } from "@mui/material/styles";
 import MenuIcon from "@mui/icons-material/Menu";
 import Store from "@mui/icons-material/Store";
@@ -19,9 +21,12 @@ import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import MuiAppBar, { AppBarProps } from "@mui/material/AppBar";
-import useShop from "../../hooks/useShop";
 import NavSetting from "./NavSetting";
+import Language from "@mui/icons-material/Language";
+import useShop from "@/hooks/useShop";
 
 const ShopSelect = lazy(() => import("./ShopSelect"));
 
@@ -62,12 +67,17 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
   const { data: session } = useSession();
   const { role, image, username } = session?.user ?? { role: null, image: null, username: null };
   const roleMeta = role ? getUserRole(role) : null;
+  const currLocale = useLocale();
+  const pathname = usePathname();
+  const router = useRouter();
 
   const [openSetting, setOpenSetting] = useState(false);
   const [anchorEl, setAnchorEl] = useState<undefined | HTMLElement>(undefined);
+  const [anchorElLanguage, setAnchorElLanguage] = useState<undefined | HTMLElement>(undefined);
   const openShop = Boolean(anchorEl);
+  const openLanguage = Boolean(anchorElLanguage);
 
-  // Shop select
+  // Shop selection
   const { data, isLoading, isSuccess, isError } = useGetPreviewShopsQuery(undefined, { skip: !shop && !openShop });
 
   const handleOpenShop = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -81,13 +91,12 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
   };
 
   let shopBadgeContent;
-
   if (isLoading) {
     shopBadgeContent = (
       <>
         <Skeleton variant="circular" width={22} height={22} />
         <Typography variant="body2" color="text.primary" mx={1}>
-          {shop?.name ?? "Tổng thể"}
+          {shop?.name ?? t("all.shop")}
         </Typography>
       </>
     );
@@ -100,7 +109,7 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
           <Store fontSize="small" />
         </StyledAvatar>
         <Typography variant="body2" color="text.primary" mx={1}>
-          {shopInfo?.name ?? "Tổng thể"}
+          {shopInfo?.name ?? t("all.shop")}
         </Typography>
       </>
     );
@@ -109,7 +118,7 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
       <>
         <StyledAvatar>{!shop ? <Store fontSize="small" /> : <WarningAmber fontSize="small" />}</StyledAvatar>
         <Typography variant="body2" color="text.primary" mx={1}>
-          {!shop ? "Tổng thể" : "Đã xảy ra lỗi"}
+          {!shop ? t("all.shop") : t("error.general")}
         </Typography>
       </>
     );
@@ -120,11 +129,29 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
           <Store fontSize="small" />
         </StyledAvatar>
         <Typography variant="body2" color="text.primary" mx={1}>
-          Tổng thể
+          {t("all.shop")}
         </Typography>
       </>
     );
   }
+
+  /**
+   * Lanaguage selection
+   * @param newLocale - The new locale to set
+   */
+  const handleChangeLanguage = (newLocale: string) => {
+    const segments = pathname.split("/");
+    segments[1] = newLocale;
+    router.push(segments.join("/"));
+  };
+
+  const handleOpenLanguage = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorElLanguage(event.currentTarget);
+  };
+
+  const handleCloseLanguage = () => {
+    setAnchorElLanguage(undefined);
+  };
 
   return (
     <AppBar position="sticky" elevation={0}>
@@ -161,8 +188,19 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
         </Box>
         <Stack spacing={1} direction="row" sx={{ color: "action.active" }}>
           <IconButton
+            id="language-button"
+            aria-label="Toggle language menu"
+            aria-haspopup="true"
+            aria-controls={openLanguage ? "language-menu" : undefined}
+            aria-expanded={openLanguage ? "true" : undefined}
+            onClick={handleOpenLanguage}
+          >
+            <Language />
+          </IconButton>
+          <IconButton
             disableRipple
             disableFocusRipple
+            aria-label="Toggle setting drawer"
             onClick={() => setOpenSetting(true)}
             size="small"
             sx={{ ml: 2 }}
@@ -172,6 +210,38 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
             <Avatar sx={{ width: 32, height: 32 }} src={image ?? undefined} />
           </IconButton>
         </Stack>
+        <Menu
+          id="language-menu"
+          anchorEl={anchorElLanguage}
+          open={openLanguage}
+          onClose={handleCloseLanguage}
+          slotProps={{
+            list: {
+              "aria-labelledby": "language-buttons",
+            },
+            paper: {
+              elevation: 0,
+            },
+          }}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          {Object.values(LocaleType).map((locale, index) => (
+            <MenuItem
+              key={index}
+              selected={currLocale == locale.value}
+              onClick={() => handleChangeLanguage(locale.value)}
+            >
+              {locale.label}
+            </MenuItem>
+          ))}
+        </Menu>
         <NavSetting
           {...{
             open: openSetting,
@@ -181,6 +251,10 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
           }}
         />
       </Toolbar>
+      {/* <Menu open={true}>
+        <MenuItem selected={true}>English</MenuItem>
+        <MenuItem selected={true}>English</MenuItem>
+      </Menu> */}
     </AppBar>
   );
 }

@@ -130,6 +130,7 @@
     "label": "Log out"
   },
   "coupon": {
+    "label": "Coupons",
     "shipping": {
       "label": "Shipping discount",
       "summary": {

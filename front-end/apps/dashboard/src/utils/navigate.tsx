@@ -18,50 +18,50 @@ interface NavigationItem {
 
 export const navigationList: NavigationItem[] = [
   {
-    label: "Sản phẩm",
+    label: "product.label",
     icon: <AutoStoriesOutlined />,
     url: "/product",
   },
   {
-    label: "Cửa hàng",
+    label: "store",
     icon: <Storefront />,
     url: "/shop",
   },
   {
     isAdmin: true,
-    label: "Thành viên",
+    label: "user.member",
     icon: <GroupOutlined />,
     url: "/user",
   },
   {
-    label: "Đánh giá",
+    label: "review.label",
     icon: <StarBorder />,
     url: "/review",
   },
   {
-    label: "Mã giảm giá",
+    label: "coupon.label",
     icon: <LocalActivityOutlined />,
     url: "/coupon",
   },
   {
-    label: "Doanh thu",
+    label: "statistics.label",
     icon: <TrendingUpOutlined />,
     url: "/order",
   },
   {
-    label: "Sự kiện",
+    label: "event.label",
     icon: <EventOutlined />,
     url: "/event",
   },
   {
     isAdmin: true,
-    label: "Quyền",
+    label: "user.privilege",
     icon: <ShieldOutlined />,
     url: "/auth",
   },
   {
     isAdmin: true,
-    label: "Khác",
+    label: "misc",
     icon: <CategoryOutlined />,
     url: "/misc",
   },

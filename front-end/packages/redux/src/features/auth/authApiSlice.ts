@@ -1,11 +1,34 @@
 import { setAuth, clearAuth } from "./authActions";
+import { AuthenticationResponse } from "@ring/shared/models/authenticationResponse";
 import apiSlice from "../../lib/apiSlice";
 
-// FIX: Add type
+export interface AuthResponse extends AuthenticationResponse {
+  token: string;
+}
+
+export interface Credentials {
+  username: string;
+  password: string;
+}
+
+export interface AuthenticateArgs {
+  token: string;
+  source: string;
+  credentials: Credentials;
+  persist: boolean;
+}
+
+export interface RefreshArgs {
+  token: string;
+}
+
+export interface SignOutArgs {
+  token: string;
+}
 
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    authenticate: builder.mutation({
+    authenticate: builder.mutation<AuthResponse, AuthenticateArgs>({
       query: ({ token, source, credentials, persist }) => ({
         url: `/api/auth/authenticate?persist=${persist}`,
         method: "POST",
@@ -14,7 +37,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          //Set new auth token after login
+          // Set new auth token after login
           const { data } = await queryFulfilled;
           const { token } = data;
 
@@ -26,7 +49,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
         }
       },
     }),
-    refresh: builder.mutation({
+    refresh: builder.mutation<AuthResponse, RefreshArgs>({
       query: () => ({
         url: "/api/auth/refresh-token",
         method: "GET",
@@ -46,7 +69,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
         }
       },
     }),
-    signOut: builder.mutation({
+    signOut: builder.mutation<void, SignOutArgs>({
       query: () => ({
         url: "/api/auth/logout",
         method: "DELETE",
@@ -68,8 +91,4 @@ export const authApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const {
-  useAuthenticateMutation,
-  useSignOutMutation,
-  useRefreshMutation,
-} = authApiSlice;
+export const { useAuthenticateMutation, useSignOutMutation, useRefreshMutation } = authApiSlice;

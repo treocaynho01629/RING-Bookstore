@@ -1,10 +1,31 @@
-import { Store } from "@mui/icons-material";
-import { Avatar, Menu, MenuItem, Paper } from "@mui/material";
-import { Link } from "react-router";
+import { useTranslations } from "next-intl";
+import { Shop } from "@/hooks/useShop";
+import { PreviewResponse, PreviewsState } from "@/features/shops/shopsApiSlice";
+import Avatar from "@mui/material/Avatar";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Paper from "@mui/material/Paper";
+import Store from "@mui/icons-material/Store";
+import Link from "next/link";
 
-const ShopSelect = ({ open, anchorEl, handleClose, shop, setShop, data }) => {
+interface ShopSelectProps {
+  open: boolean;
+  anchorEl: HTMLElement | null;
+  handleClose: () => void;
+  shop: Shop | null;
+  setShop: (shop: Shop) => void;
+  clearShop: () => void;
+  data?: PreviewsState;
+}
+
+const ShopSelect = ({ open, anchorEl, handleClose, shop, setShop, clearShop, data }: ShopSelectProps) => {
+  const t = useTranslations();
+
+  const handleSetShop = (shop: PreviewResponse): void => {
+    setShop({ id: shop?.id ?? null, name: shop?.name ?? null });
+  };
+
   let shopsContent;
-
   if (data) {
     const { ids, entities } = data;
 
@@ -16,14 +37,11 @@ const ShopSelect = ({ open, anchorEl, handleClose, shop, setShop, data }) => {
           <MenuItem
             key={`${id}-${index}`}
             value={id}
-            selected={id == shop}
-            onClick={() => setShop(id)}
+            selected={id == shop?.id}
+            onClick={() => handleSetShop(shopEntity)}
             sx={{ px: 1, fontSize: 14 }}
           >
-            <Avatar
-              src={shopEntity?.image ?? null}
-              sx={{ width: 22, height: 22, mr: 1 }}
-            >
+            <Avatar src={shopEntity?.image ?? undefined} sx={{ width: 22, height: 22, mr: 1 }}>
               <Store fontSize="small" />
             </Avatar>
             {shopEntity?.name}
@@ -31,8 +49,8 @@ const ShopSelect = ({ open, anchorEl, handleClose, shop, setShop, data }) => {
         );
       })
     ) : (
-      <Link to={"/shop"}>
-        <MenuItem sx={{ px: 1, fontSize: 14 }}>Thêm cửa hàng</MenuItem>
+      <Link href={"/shop"}>
+        <MenuItem sx={{ px: 1, fontSize: 14 }}>{t("shop.add")}</MenuItem>
       </Link>
     );
   }
@@ -41,7 +59,6 @@ const ShopSelect = ({ open, anchorEl, handleClose, shop, setShop, data }) => {
     <Menu
       id="shop-menu"
       open={open}
-      value={shop}
       anchorEl={anchorEl}
       onClose={handleClose}
       onClick={handleClose}
@@ -77,15 +94,11 @@ const ShopSelect = ({ open, anchorEl, handleClose, shop, setShop, data }) => {
           zIndex: 0,
         }}
       />
-      <MenuItem
-        selected={!shop}
-        onClick={() => setShop("")}
-        sx={{ px: 1, fontSize: 14 }}
-      >
+      <MenuItem selected={!shop} onClick={clearShop} sx={{ px: 1, fontSize: 14 }}>
         <Avatar sx={{ width: 22, height: 22, mr: 1 }}>
           <Store fontSize="small" />
         </Avatar>
-        Tổng thể
+        {t("all.shop")}
       </MenuItem>
       {shopsContent}
     </Menu>
