@@ -444,8 +444,8 @@ const CouponItem = ({ coupon, selectMode, onClickApply, className, scrollPositio
             ${className}`}
         >
           <CouponTag>{coupon?.isUsed ? t("coupon.used") : t("coupon.not.usable")}</CouponTag>
-          <CouponEdge elevation={className == "display" ? 0 : 24} className="left" />
-          <CouponEdge elevation={className == "display" ? 0 : 24} className="right" />
+          <CouponEdge elevation={className == "display" ? 0 : 1} className="left" />
+          <CouponEdge elevation={className == "display" ? 0 : 1} className="right" />
           <CouponContent>
             <Suspense fallback={null}>
               {coupon?.shopId ? <Link to={`/shop/${coupon?.shopId}`}>{shopIcon}</Link> : shopIcon}

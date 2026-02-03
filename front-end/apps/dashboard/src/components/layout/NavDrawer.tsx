@@ -13,10 +13,12 @@ import {
   ListSubheader,
   Drawer,
   Theme,
+  Link as MuiLink,
 } from "@mui/material";
 import { navigationList } from "@/utils/navigate";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import MuiDrawer from "@mui/material/Drawer";
 
@@ -29,7 +31,7 @@ const openedMixin = (theme: Theme) => ({
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.enteringScreen,
   }),
-  backgroundColor: theme?.vars?.palette?.background?.default,
+  backgroundColor: theme?.vars?.palette?.background?.paper,
   overflowX: "hidden",
 });
 
@@ -38,7 +40,7 @@ const closedMixin = (theme: Theme) => ({
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  backgroundColor: theme?.vars?.palette?.background?.default,
+  backgroundColor: theme?.vars?.palette?.background?.paper,
   overflowX: "hidden",
   width: `calc(${theme.spacing(7)} + 1px)`,
 });
@@ -90,41 +92,68 @@ const DrawerContainer = styled("div")`
   width: 300px;
 `;
 
-const StyledListSubheader = styled(ListSubheader)(({ theme }) => ({
-  backgroundColor: "transparent",
-  textTransform: "uppercase",
-  fontSize: 14,
-  fontWeight: 450,
-}));
+const StyledListSubheader = styled(ListSubheader)`
+  background-color: transparent;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 2rem;
+  padding-top: ${({ theme }) => theme.spacing(1)};
+`;
 
-const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
-  "minHeight": 48,
-  "justifyContent": "center",
-  "transition": theme.transitions.create("margin", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
+const StyledListItemButton = styled(ListItemButton)`
+  padding: ${({ theme }) => theme.spacing(0.75, 1.5)};
+  font-weight: 500;
+  transition: ${({ theme }) =>
+    theme.transitions.create("margin", {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    })};
 
-  "&.Mui-selected": {
-    "color": theme?.vars?.palette?.primary?.main,
+  &.Mui-selected {
+    text-decoration: underline;
+    color: ${({ theme }) => theme?.vars?.palette?.primary?.main};
 
-    ".MuiListItemIcon-root": {
-      color: theme?.vars?.palette?.primary?.main,
-    },
-  },
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 4px;
+      height: 100%;
+      background-color: ${({ theme }) => theme?.vars?.palette?.primary?.main};
+    }
 
-  "&.open": {
-    justifyContent: "initial",
-    margin: theme.spacing(0, 1.5),
-  },
-}));
+    .MuiListItemIcon-root {
+      color: ${({ theme }) => theme?.vars?.palette?.primary?.main};
+    }
+  }
 
-const StyledListItemIcon = styled(ListItemIcon)(({ theme }) => ({
-  "minWidth": 0,
-  "justifyContent": "center",
+  ${({ theme }) => theme.breakpoints.up("md")} {
+    .MuiListItemIcon-root {
+      min-width: 0;
+      margin-left: ${({ theme }) => theme.spacing(0.4)};
+      justify-content: center;
+    }
 
-  "&.open": { marginRight: theme.spacing(3) },
-}));
+    .MuiListItemText-root {
+      visibility: hidden;
+    }
+
+    &.open {
+      justify-content: initial;
+      padding: ${({ theme }) => theme.spacing(0.75, 3)};
+
+      .MuiListItemIcon-root {
+        margin-right: ${({ theme }) => theme.spacing(3)};
+      }
+
+      .MuiListItemText-root {
+        visibility: visible;
+      }
+    }
+  }
+`;
 //#endregion
 
 interface NavDrawerProps {
@@ -135,16 +164,10 @@ interface NavDrawerProps {
 
 const NavDrawer = ({ open, setOpen, tabletMode }: NavDrawerProps) => {
   const t = useTranslations();
+  const pathname = usePathname();
   const [openList, setOpenList] = useState<Record<number, boolean>>({ 0: true });
   const { data: session } = useSession();
   const { isAdmin } = session?.user ?? { isAdmin: false };
-
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>, id: number) => {
-    setOpenList((prevState) => ({ ...prevState, [id]: !prevState[id] }));
-    setOpen(true);
-    e.stopPropagation();
-    e.preventDefault();
-  };
 
   const handleDrawerClose = () => {
     setOpen(false);
@@ -159,9 +182,14 @@ const NavDrawer = ({ open, setOpen, tabletMode }: NavDrawerProps) => {
   const drawerContent = (
     <>
       <DrawerHeader>
-        <Link href={"/"} title={t("dashboard.label")}>
+        <MuiLink
+          component={Link}
+          href={"/"}
+          title={t("dashboard.label")}
+          sx={{ display: "flex", alignItems: "center" }}
+        >
           <ImageLogo src="/logo.svg" className={open ? "open" : ""} alt="RING! logo" />
-        </Link>
+        </MuiLink>
       </DrawerHeader>
       <List
         disablePadding
@@ -169,16 +197,16 @@ const NavDrawer = ({ open, setOpen, tabletMode }: NavDrawerProps) => {
           open && <StyledListSubheader id="management-list-subheader">{t("dashboard.overview")}</StyledListSubheader>
         }
       >
-        <ListItem key={0} disablePadding sx={{ display: "block" }}>
-          <Link href={"/"}>
-            <StyledListItemButton className={open ? "open" : ""}>
-              <StyledListItemIcon className={open ? "open" : ""}>
+        <Link href={"/"}>
+          <ListItem key={0} disablePadding>
+            <StyledListItemButton className={open ? "open" : ""} selected={pathname === "/"}>
+              <ListItemIcon>
                 <Speed />
-              </StyledListItemIcon>
+              </ListItemIcon>
               <ListItemText primary={t("dashboard.label")} sx={{ opacity: open ? 1 : 0 }} />
             </StyledListItemButton>
-          </Link>
-        </ListItem>
+          </ListItem>
+        </Link>
       </List>
       <List
         disablePadding
@@ -190,45 +218,43 @@ const NavDrawer = ({ open, setOpen, tabletMode }: NavDrawerProps) => {
           (item, index) =>
             (!item.isAdmin || isAdmin) && (
               <Link key={`link-${index}`} href={item.url}>
-                <>
-                  <ListItem key={`item-${index}`} disablePadding sx={{ display: "block" }}>
-                    <StyledListItemButton className={open ? "open" : ""}>
-                      <StyledListItemIcon className={open ? "open" : ""}>{item.icon}</StyledListItemIcon>
-                      <ListItemText primary={t(item.label)} sx={{ opacity: open ? 1 : 0 }} />
-                      {item.subItems &&
-                        (openList[index as keyof typeof openList] ? (
-                          <ExpandLess
-                            sx={{ display: open ? "block" : "none" }}
-                            onClick={(e) => handleClickItem(e, index)}
-                          />
-                        ) : (
-                          <ExpandMore
-                            sx={{ display: open ? "block" : "none" }}
-                            onClick={(e) => handleClickItem(e, index)}
-                          />
-                        ))}
-                    </StyledListItemButton>
-                  </ListItem>
-                  {item.subItems && (
-                    <Collapse
-                      key={index}
-                      in={openList[index as keyof typeof openList]}
-                      timeout={250}
-                      unmountOnExit
-                      sx={{ display: open ? "block" : "none" }}
-                    >
-                      <List sx={{ mx: 1.5 }} component="div" disablePadding>
-                        {item.subItems?.map((sub, subIndex) => (
-                          <Link key={`sub-${index}-${subIndex}`} href={sub.url}>
-                            <ListItemButton sx={{ pl: 4 }}>
-                              <ListItemText primary={t(sub.label)} />
-                            </ListItemButton>
-                          </Link>
-                        ))}
-                      </List>
-                    </Collapse>
-                  )}
-                </>
+                <ListItem key={`item-${index}`} disablePadding>
+                  <StyledListItemButton className={open ? "open" : ""} selected={pathname === item.url}>
+                    <ListItemIcon>{item.icon}</ListItemIcon>
+                    <ListItemText primary={t(item.label)} />
+                    {item.subItems &&
+                      (openList[index as keyof typeof openList] ? (
+                        <ExpandLess
+                          sx={{ display: open ? "block" : "none" }}
+                          onClick={(e) => handleClickItem(e, index)}
+                        />
+                      ) : (
+                        <ExpandMore
+                          sx={{ display: open ? "block" : "none" }}
+                          onClick={(e) => handleClickItem(e, index)}
+                        />
+                      ))}
+                  </StyledListItemButton>
+                </ListItem>
+                {item.subItems && (
+                  <Collapse
+                    key={index}
+                    in={openList[index as keyof typeof openList]}
+                    timeout={250}
+                    unmountOnExit
+                    sx={{ display: open ? "block" : "none" }}
+                  >
+                    <List sx={{ mx: 1.5 }} component="div" disablePadding>
+                      {item.subItems?.map((sub, subIndex) => (
+                        <Link key={`sub-${index}-${subIndex}`} href={sub.url}>
+                          <StyledListItemButton sx={{ pl: 4 }}>
+                            <ListItemText primary={t(sub.label)} />
+                          </StyledListItemButton>
+                        </Link>
+                      ))}
+                    </List>
+                  </Collapse>
+                )}
               </Link>
             )
         )}

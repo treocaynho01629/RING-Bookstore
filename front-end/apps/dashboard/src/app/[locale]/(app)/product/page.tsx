@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, Suspense, lazy, useMemo } from "react";
-import { Add } from "@mui/icons-material";
+import { Add, Delete, Edit, Star } from "@mui/icons-material";
+import { Visibility } from "@mui/icons-material";
 import { useGetBooksQuery } from "@/features/books/booksApiSlice";
-import { MRT_ColumnDef, MRT_PaginationState, MRT_SortingState } from "material-react-table";
+import { MRT_ColumnDef, MRT_PaginationState, MRT_Row, MRT_SortingState, MRT_TableInstance } from "material-react-table";
 import { useSession } from "next-auth/react";
 import { getImageSrc } from "@ring/shared/enums/image";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { currencyFormat, idFormatter } from "@ring/shared";
+import { useTranslations } from "next-intl";
+import type { BookResponse } from "@ring/redux/booksApiSlice";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -16,13 +19,14 @@ import Link from "next/link";
 import useShop from "@/hooks/useShop";
 import CustomBreadcrumbs from "@/components/custom/CustomBreadcrumbs";
 import CustomReactTable from "@/components/table/CustomReactTable";
-
-import type { BookResponse } from "@ring/redux/booksApiSlice";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
 
 const ProductFormDialog = lazy(() => import("@/components/dialog/ProductFormDialog"));
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
 
 const ManageProducts = () => {
+  const t = useTranslations();
   const { data: session } = useSession();
   const { shop } = useShop();
   const { id, isAdmin } = session?.user ?? { id: null, isAdmin: false };
@@ -81,13 +85,13 @@ const ManageProducts = () => {
     () => [
       {
         accessorKey: "id",
-        header: "ID",
-        size: 100,
+        header: t("general.id"),
+        size: 80,
         Cell: ({ renderedCellValue }) => idFormatter(Number(renderedCellValue)),
       },
       {
         accessorKey: "title",
-        header: "Title",
+        header: t("product.title"),
         size: 400,
         Cell: ({ renderedCellValue, row }) => (
           <Box
@@ -109,19 +113,19 @@ const ManageProducts = () => {
       },
       {
         accessorKey: "price",
-        header: "Price",
+        header: t("product.price"),
         filterVariant: "range",
         size: 125,
         muiTableBodyCellProps: {
-          align: "right",
+          align: "left",
         },
         Cell: ({ renderedCellValue }) => currencyFormat.format(Number(renderedCellValue)),
       },
       {
         accessorKey: "discount",
-        header: "Discount",
+        header: t("product.discount"),
         filterVariant: "range",
-        size: 150,
+        size: 140,
         Cell: ({ row }) => (
           <Box
             sx={{
@@ -141,34 +145,47 @@ const ManageProducts = () => {
       },
       {
         accessorKey: "amount",
-        header: "Amount",
+        header: t("quantity.label"),
         filterVariant: "range",
-        size: 150,
+        size: 125,
         muiTableBodyCellProps: {
-          align: "right",
+          align: "center",
         },
       },
       {
         accessorKey: "shopName",
-        header: "Shop Name",
+        header: t("product.shop"),
         size: 200,
       },
       {
         accessorKey: "rating",
-        header: "Rating",
+        header: t("review.label"),
         filterVariant: "range",
-        size: 150,
+        size: 125,
         muiTableBodyCellProps: {
-          align: "right",
+          align: "center",
         },
+        Cell: ({ row }) => (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.5rem",
+            }}
+          >
+            <span>{(row.original?.rating ?? 0).toFixed(1)}</span>
+            <Star color="warning" sx={{ fontSize: 16 }} />
+          </Box>
+        ),
       },
       {
         accessorKey: "totalOrders",
-        header: "Orders",
+        header: t("product.orders"),
         filterVariant: "range",
-        size: 150,
+        size: 125,
         muiTableBodyCellProps: {
-          align: "right",
+          align: "left",
         },
       },
     ],
@@ -177,23 +194,23 @@ const ManageProducts = () => {
 
   return (
     <Box display="flex" flexDirection="column" height="100%">
-      {(isLoading || pending) && (
+      {pending && (
         <Suspense fallback={<></>}>
-          <PendingModal open={isLoading || pending} message="Đang gửi yêu cầu..." />
+          <PendingModal open={pending} message="Đang gửi yêu cầu..." />
         </Suspense>
       )}
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box>
           <Typography variant="h5" sx={{ mb: 1 }}>
-            Quản lý sản phẩm
+            {t("product.management")}
           </Typography>
           <CustomBreadcrumbs separator="." maxItems={4} aria-label="breadcrumb">
-            <Link href={"/product"}>Quản lý sản phẩm</Link>
+            <Link href={"/product"}>{t("product.management")}</Link>
           </CustomBreadcrumbs>
         </Box>
         <Box sx={{ my: 3 }}>
           <Button variant="outlined" startIcon={<Add />} onClick={handleOpen}>
-            Thêm
+            {t("general.add")}
           </Button>
         </Box>
       </Box>
@@ -209,19 +226,91 @@ const ManageProducts = () => {
               rowCount: data?.totalElements ?? 0,
               onPaginationChange: setPagination,
               onSortingChange: setSorting,
-              columnFilterDisplayMode: "popover",
               state: {
                 pagination,
                 sorting,
                 isLoading,
                 showProgressBars: isFetching,
+                showAlertBanner: isError,
               },
               enableStickyHeader: true,
               initialState: {
                 density: "compact",
-                columnVisibility: { amount: false, rating: false, shopName: false },
+                columnVisibility: { amount: false, shopName: false },
+                columnPinning: { right: ["mrt-row-actions"] },
               },
-              layoutMode: "grid",
+              layoutMode: "semantic",
+              enableRowActions: true,
+              enableColumnPinning: true,
+              enableColumnFilterModes: true,
+              positionActionsColumn: "last",
+              enableColumnResizing: true,
+              renderRowActionMenuItems: ({ closeMenu }: { closeMenu: () => void }) => [
+                <MenuItem
+                  key={0}
+                  onClick={() => {
+                    closeMenu();
+                  }}
+                  sx={{ m: 0 }}
+                >
+                  <ListItemIcon>
+                    <Visibility />
+                  </ListItemIcon>
+                  {t("general.view")}
+                </MenuItem>,
+                <MenuItem
+                  key={1}
+                  onClick={() => {
+                    closeMenu();
+                  }}
+                  sx={{ m: 0 }}
+                >
+                  <ListItemIcon>
+                    <Edit />
+                  </ListItemIcon>
+                  {t("update")}
+                </MenuItem>,
+                <MenuItem
+                  key={2}
+                  onClick={() => {
+                    closeMenu();
+                  }}
+                  sx={{ m: 0 }}
+                >
+                  <ListItemIcon>
+                    <Delete />
+                  </ListItemIcon>
+                  {t("delete")}
+                </MenuItem>,
+              ],
+              renderBottomToolbarCustomActions: ({ table }: { table: MRT_TableInstance<BookResponse> }) => {
+                const handleDeleleMultiple = () => {
+                  table.getSelectedRowModel().flatRows.map((row: MRT_Row<BookResponse>) => {
+                    alert("deactivating " + row.original.title);
+                  });
+                };
+
+                return (
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <Button
+                      color="error"
+                      disabled={table.getSelectedRowModel().flatRows.length === 0}
+                      onClick={handleDeleleMultiple}
+                      variant="outlined"
+                      startIcon={<Delete />}
+                      sx={{ ml: 2 }}
+                    >
+                      {t("delete")}
+                    </Button>
+                  </div>
+                );
+              },
+              muiToolbarAlertBannerProps: isError
+                ? {
+                    color: "error",
+                    children: t("error.network"),
+                  }
+                : { color: "success" },
             }}
           />
         </Box>

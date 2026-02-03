@@ -10,5 +10,10 @@
     "description": "Bạn không có quyền truy cập vào trang này",
     "suggestion": "Liên hệ ringbookstore@ring.com hoặc đăng nhập tài khoản khác.",
     "login": "Đăng nhập lại"
+  },
+  "maintainance": {
+    "title": "Hệ thống đang được bảo trì",
+    "description": "Xin lỗi vì sự bất tiện này. RING! hiện đang trong giai đoạn bảo trì hệ thống. Vui lòng quay lại sau.",
+    "suggestion": "Trong khi đó, bạn có thể xem các trang khác của RING! hoặc liên hệ ringbookstore@ring.com."
   }
 }

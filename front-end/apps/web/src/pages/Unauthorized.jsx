@@ -27,15 +27,15 @@ const Wrapper = styled.div`
       linear-gradient(
         45deg,
         transparent 46%,
-        ${({ theme }) => theme.vars.palette.primary.light} 47%,
-        ${({ theme }) => theme.vars.palette.primary.light} 52%,
+        ${({ theme }) => theme.vars.palette.warning.light} 47%,
+        ${({ theme }) => theme.vars.palette.warning.light} 52%,
         transparent 53%
       ),
       linear-gradient(
         135deg,
         transparent 46%,
-        ${({ theme }) => theme.vars.palette.primary.light} 47%,
-        ${({ theme }) => theme.vars.palette.primary.light} 52%,
+        ${({ theme }) => theme.vars.palette.warning.light} 47%,
+        ${({ theme }) => theme.vars.palette.warning.light} 52%,
         transparent 53%
       );
     background-size: 4em 4em;
@@ -50,6 +50,7 @@ const Content = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  text-align: center;
   padding: ${({ theme }) => theme.spacing(1)};
 
   h2 {
@@ -125,7 +126,7 @@ const Unauthorized = () => {
         <h3>{t("unauthorized.description", { ns: "uncommon" })}</h3>
         <p>{t("unauthorized.suggestion", { ns: "uncommon" })}</p>
         <Link to={"/auth/login"}>
-          <Button sx={{ marginTop: 2 }} variant="outlined" color="primary">
+          <Button sx={{ marginTop: 2 }} variant="outlined" color="error">
             {t("unauthorized.login", { ns: "uncommon" })}
           </Button>
         </Link>

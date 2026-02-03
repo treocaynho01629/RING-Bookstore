@@ -21,6 +21,10 @@ interface ShopSelectProps {
 const ShopSelect = ({ open, anchorEl, handleClose, shop, setShop, clearShop, data }: ShopSelectProps) => {
   const t = useTranslations();
 
+  /**
+   * Set main shop
+   * @param shop
+   */
   const handleSetShop = (shop: PreviewResponse): void => {
     setShop({ id: shop?.id ?? null, name: shop?.name ?? null });
   };

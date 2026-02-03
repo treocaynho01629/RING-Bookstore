@@ -14,7 +14,7 @@ import Progress from "@ring/ui/Progress";
 const Container = styled.div`
   position: relative;
   max-height: 380px;
-  padding: ${({ theme }) => `${theme.spacing(0.25)} 0`};
+  padding: ${({ theme }) => theme.spacing(0.25, 0)};
 
   .react-multi-carousel-list {
     position: unset !important;

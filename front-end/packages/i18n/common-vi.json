@@ -191,6 +191,7 @@
     "label": "Hồ sơ",
     "title": "Hồ sơ của bạn",
     "update": "Cập nhật hồ sơ",
+    "save": "Lưu thông tin",
     "media": {
       "label": "Chỉnh sửa ảnh đại diện",
       "add": "Thêm ảnh đại diện",
@@ -218,7 +219,7 @@
       "refunded": "Đã hoàn tiền",
       "canceled": "Đã huỷ",
       "pending": {
-        "label": "Đang chờ hàng",
+        "seller": "Đang chờ hàng",
         "payment": "Chờ thanh toán",
         "return": "Chờ trả hàng",
         "refund": "Chờ hoàn tiền"
@@ -311,7 +312,8 @@
   },
   "error": {
     "server": {
-      "response": "Server không phản hồi"
+      "response": "Server không phản hồi",
+      "unreachable": "Mất kết nối với server!"
     },
     "auth": {
       "expired": "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!",

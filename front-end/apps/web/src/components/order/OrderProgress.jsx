@@ -54,7 +54,7 @@ const StepperContainer = styled.div`
     background-color: transparent;
     border-top: none;
     border-color: ${({ theme }) => theme.vars.palette.divider};
-    padding: ${({ theme }) => `${theme.spacing(1.5)} ${theme.spacing(2.5)}`};
+    padding: ${({ theme }) => theme.spacing(1.5, 2.5)};
     margin: 0;
   }
 `;

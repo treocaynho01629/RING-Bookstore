@@ -63,7 +63,7 @@ const StyledIconButton = styled(IconButton)`
 `;
 
 const StyledItemButton = styled(ListItemButton)`
-  padding: ${({ theme }) => `${theme.spacing(0.5)} ${theme.spacing(1)}`};
+  padding: ${({ theme }) => theme.spacing(0.5, 1)};
 
   &.Mui-selected {
     text-decoration: underline;

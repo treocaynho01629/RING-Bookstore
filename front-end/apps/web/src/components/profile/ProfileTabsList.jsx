@@ -163,7 +163,7 @@ const ItemText = styled.h3`
 
 const StyledListItemButton = styled(ListItemButton)`
   justify-content: space-between;
-  padding: ${({ theme }) => `${theme.spacing(0.5)} ${theme.spacing(2)}`};
+  padding: ${({ theme }) => theme.spacing(0.5, 2)};
 
   &.secondary {
     padding: 0;

@@ -4,11 +4,24 @@
     "overview": "Overview",
     "management": "Management"
   },
+  "general": {
+    "add": "Add",
+    "view": "View",
+    "id": "ID"
+  },
   "all": {
     "shop": "All shops"
   },
   "shop": {
     "add": "Add new shop"
+  },
+  "product": {
+    "management": "Manage products",
+    "title": "Title",
+    "orders": "Orders",
+    "shop": "Shop Name",
+    "price": "Price",
+    "discount": "Discount"
   },
   "user": {
     "member": "Members",

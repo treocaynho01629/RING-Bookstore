@@ -4,11 +4,24 @@
     "overview": "Tổng quan",
     "management": "Quản lý"
   },
+  "general": {
+    "add": "Thêm",
+    "view": "Xem chi tiết",
+    "id": "ID"
+  },
   "all": {
     "shop": "Tổng thể"
   },
   "shop": {
     "add": "Thêm cửa hàng"
+  },
+  "product": {
+    "management": "Quản lý sản phẩm",
+    "title": "Tiêu đề",
+    "orders": "Lượt mua",
+    "shop": "Tên Shop",
+    "price": "Giá",
+    "discount": "Giảm giá"
   },
   "user": {
     "member": "Thành viên",

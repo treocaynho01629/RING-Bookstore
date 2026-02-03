@@ -10,5 +10,10 @@
     "description": "You do not have permission to access this page",
     "suggestion": "Contact us at ringbookstore@ring.com or login with a different account.",
     "login": "Login again"
+  },
+  "maintainance": {
+    "title": "We'll be back soon",
+    "description": "Apologies for the inconvenience. We are currently performing maintenance on the system. Please check back later.",
+    "suggestion": "Meanwhile, you can check out our other pages or contact us at ringbookstore@ring.com."
   }
 }

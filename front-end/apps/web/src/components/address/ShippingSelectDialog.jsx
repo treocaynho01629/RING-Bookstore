@@ -25,7 +25,7 @@ const FormContent = styled.div`
 `;
 
 const StyledForm = styled(FormControlLabel)`
-  padding: ${({ theme }) => `${theme.spacing(1.5)} ${theme.spacing(2)}`};
+  padding: ${({ theme }) => theme.spacing(1.5, 2)};
   padding-left: 0;
   border: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
   min-width: 50%;
@@ -95,6 +95,8 @@ const ShippingSelectDialog = ({ open, handleClose, selectedShipping, shippingFee
   const { t } = useTranslation();
   const fullScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const [value, setValue] = useState(selectedShipping);
+
+  console.log(shippingFee, shippingDiscount);
 
   useEffect(() => {
     setValue(selectedShipping);

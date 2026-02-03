@@ -15,7 +15,7 @@ const MessageContainer = styled("div")`
 `;
 
 const TitleContainer = styled("div")`
-  padding: 0 ${({ theme }) => `${theme.spacing(1)} ${theme.spacing(1)}`};
+  padding: 0 ${({ theme }) => theme.spacing(1, 1)};
 `;
 
 const Rank = styled("span")`

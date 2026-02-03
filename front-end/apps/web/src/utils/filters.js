@@ -71,7 +71,7 @@ export const booksAmount = [
   },
   {
     value: 0,
-    label: "all",
+    label: "all.label",
   },
 ];
 

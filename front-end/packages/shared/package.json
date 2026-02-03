@@ -1,122 +1,122 @@
 {
-    "name": "@ring/shared",
-    "version": "0.0.0",
-    "type": "module",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "exports": {
-      ".": {
-        "import": "./dist/index.js",
-        "require": "./dist/index.cjs"
-      },
-      "./enums/locales": {
-        "import": "./dist/src/enums/locales.js",
-        "require": "./dist/src/enums/locales.cjs"
-      },
-      "./enums/address": {
-        "import": "./dist/src/enums/address.js",
-        "require": "./dist/src/enums/address.cjs"
-      },
-      "./enums/book": {
-        "import": "./dist/src/enums/book.js",
-        "require": "./dist/src/enums/book.cjs"
-      },
-      "./enums/coupon": {
-        "import": "./dist/src/enums/coupon.js",
-        "require": "./dist/src/enums/coupon.cjs"
-      },
-      "./enums/order": {
-        "import": "./dist/src/enums/order.js",
-        "require": "./dist/src/enums/order.cjs"
-      },
-      "./enums/payment": {
-        "import": "./dist/src/enums/payment.js",
-        "require": "./dist/src/enums/payment.cjs"
-      },
-      "./enums/shipping": {
-        "import": "./dist/src/enums/shipping.js",
-        "require": "./dist/src/enums/shipping.cjs"
-      },
-      "./enums/image": {
-        "import": "./dist/src/enums/image.js",
-        "require": "./dist/src/enums/image.cjs"
-      },
-      "./enums/user": {
-        "import": "./dist/src/enums/user.js",
-        "require": "./dist/src/enums/user.cjs"
-      },
-      "./utils/icon": {
-        "import": "./dist/src/utils/icon.js",
-        "require": "./dist/src/utils/icon.cjs"
-      },
-      "./utils/convert": {
-        "import": "./dist/src/utils/convert.js",
-        "require": "./dist/src/utils/convert.cjs"
-      },
-      "./utils/location": {
-        "import": "./dist/src/utils/location.js",
-        "require": "./dist/src/utils/location.cjs"
-      },
-      "./utils/regex": {
-        "import": "./dist/src/utils/regex.js",
-        "require": "./dist/src/utils/regex.cjs"
-      },
-      "./useConfirm": {
-        "import": "./dist/src/hooks/useConfirm.js",
-        "require": "./dist/src/hooks/useConfirm.cjs"
-      },
-      "./useDeepEffect": {
-        "import": "./dist/src/hooks/useDeepEffect.js",
-        "require": "./dist/src/hooks/useDeepEffect.cjs"
-      },
-      "./useReachable": {
-        "import": "./dist/src/hooks/useReachable.js",
-        "require": "./dist/src/hooks/useReachable.cjs"
-      },
-      "./useGetEnums": {
-        "import": "./dist/src/hooks/useGetEnums.js",
-        "require": "./dist/src/hooks/useGetEnums.cjs"
-      },
-      "./useTitle": {
-        "import": "./dist/src/hooks/useTitle.js",
-        "require": "./dist/src/hooks/useTitle.cjs"
-      },
-      "./models": {
-        "import": "./dist/src/models/index.js",
-        "require": "./dist/src/models/index.cjs"
-      },
-      "./models/*": {
-        "import": "./dist/src/models/*.js",
-        "require": "./dist/src/models/*.cjs"
-      },
-      "./assets/empty": "./assets/empty.svg"
+  "name": "@ring/shared",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
-    "files": [
-      "assets/**",
-      "dist/**"
-    ],
-    "scripts": {
-      "build": "tsup",
-      "dev": "tsup --watch",
-      "gen:types": "orval --config ./orval.config.ts",
-      "lint": "eslint \"**/*.{ts,tsx,js,jsx}\"",
-      "update-dependencies": "npx npm-check-updates -u"
+    "./enums/locales": {
+      "import": "./dist/src/enums/locales.js",
+      "require": "./dist/src/enums/locales.cjs"
     },
-    "peerDependencies": {
-      "@mui/icons-material": "^7.2.0",
-      "@ring/redux": "*",
-      "lodash-es": "^4.17.21",
-      "notistack": "^3.0.2",
-      "react": "^18.0.0 || ^19.0.0"
+    "./enums/address": {
+      "import": "./dist/src/enums/address.js",
+      "require": "./dist/src/enums/address.cjs"
     },
-    "devDependencies": {
-      "@ring/eslint-config": "*",
-      "@types/react": "^19.2.7",
-      "@types/react-dom": "^19.2.3",
-      "orval": "^7.17.2",
-      "tsup": "^8.5.1",
-      "typescript": "^5.9.3"
+    "./enums/book": {
+      "import": "./dist/src/enums/book.js",
+      "require": "./dist/src/enums/book.cjs"
     },
-    "sideEffects": false
-  }
-  
+    "./enums/coupon": {
+      "import": "./dist/src/enums/coupon.js",
+      "require": "./dist/src/enums/coupon.cjs"
+    },
+    "./enums/order": {
+      "import": "./dist/src/enums/order.js",
+      "require": "./dist/src/enums/order.cjs"
+    },
+    "./enums/payment": {
+      "import": "./dist/src/enums/payment.js",
+      "require": "./dist/src/enums/payment.cjs"
+    },
+    "./enums/shipping": {
+      "import": "./dist/src/enums/shipping.js",
+      "require": "./dist/src/enums/shipping.cjs"
+    },
+    "./enums/image": {
+      "import": "./dist/src/enums/image.js",
+      "require": "./dist/src/enums/image.cjs"
+    },
+    "./enums/user": {
+      "import": "./dist/src/enums/user.js",
+      "require": "./dist/src/enums/user.cjs"
+    },
+    "./utils/icon": {
+      "import": "./dist/src/utils/icon.js",
+      "require": "./dist/src/utils/icon.cjs"
+    },
+    "./utils/convert": {
+      "import": "./dist/src/utils/convert.js",
+      "require": "./dist/src/utils/convert.cjs"
+    },
+    "./utils/location": {
+      "import": "./dist/src/utils/location.js",
+      "require": "./dist/src/utils/location.cjs"
+    },
+    "./utils/regex": {
+      "import": "./dist/src/utils/regex.js",
+      "require": "./dist/src/utils/regex.cjs"
+    },
+    "./useConfirm": {
+      "import": "./dist/src/hooks/useConfirm.js",
+      "require": "./dist/src/hooks/useConfirm.cjs"
+    },
+    "./useDeepEffect": {
+      "import": "./dist/src/hooks/useDeepEffect.js",
+      "require": "./dist/src/hooks/useDeepEffect.cjs"
+    },
+    "./useReachable": {
+      "import": "./dist/src/hooks/useReachable.js",
+      "require": "./dist/src/hooks/useReachable.cjs"
+    },
+    "./useGetEnums": {
+      "import": "./dist/src/hooks/useGetEnums.js",
+      "require": "./dist/src/hooks/useGetEnums.cjs"
+    },
+    "./useTitle": {
+      "import": "./dist/src/hooks/useTitle.js",
+      "require": "./dist/src/hooks/useTitle.cjs"
+    },
+    "./models": {
+      "import": "./dist/src/models/index.js",
+      "require": "./dist/src/models/index.cjs"
+    },
+    "./models/*": {
+      "import": "./dist/src/models/*.js",
+      "require": "./dist/src/models/*.cjs"
+    },
+    "./assets/empty": "./assets/empty.svg",
+    "./assets/maintainance": "./assets/maintainance.svg"
+  },
+  "files": [
+    "assets/**",
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "gen:types": "orval --config ./orval.config.ts",
+    "lint": "eslint \"**/*.{ts,tsx,js,jsx}\"",
+    "update-dependencies": "npx npm-check-updates -u"
+  },
+  "peerDependencies": {
+    "@mui/icons-material": "^7.2.0",
+    "@ring/redux": "*",
+    "lodash-es": "^4.17.21",
+    "notistack": "^3.0.2",
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@ring/eslint-config": "*",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "orval": "^7.17.2",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  },
+  "sideEffects": false
+}

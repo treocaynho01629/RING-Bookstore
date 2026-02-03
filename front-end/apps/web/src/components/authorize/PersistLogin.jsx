@@ -58,7 +58,7 @@ const PersistLogin = () => {
 
   return (
     <>
-      {isError && errorMsg && !pending ? ( //To login page if error
+      {isError && errorMsg && !pending ? ( // To login page if error
         <Navigate to="/auth/login" state={{ from: location, errorMsg }} replace />
       ) : !persist || token ? (
         <Outlet />

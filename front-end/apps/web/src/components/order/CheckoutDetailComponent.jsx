@@ -145,7 +145,7 @@ const StatusTag = styled(Typography)`
   font-weight: 450;
   border-radius: 20px;
   border: 0.5px solid currentColor;
-  padding: ${({ theme }) => `${theme.spacing(0.5)} ${theme.spacing(1)}`};
+  padding: ${({ theme }) => theme.spacing(0.5, 1)};
 
   ${({ theme }) => theme.breakpoints.down("md_lg")} {
     display: none;
@@ -162,7 +162,7 @@ const MainButton = styled(Button)`
 
 const ButtonContainer = styled.div`
   padding: 0 ${({ theme }) => theme.spacing(1)};
-  margin: ${({ theme }) => `${theme.spacing(1)} 0 ${theme.spacing(2)}`};
+  margin: ${({ theme }) => theme.spacing(1, 0, 2)};
   border: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
   display: none;
 
@@ -198,7 +198,7 @@ const MainButtonContainer = styled.div`
   position: sticky;
   bottom: ${({ theme }) => `calc(${theme.spacing(-2.5)} - 1px)`};
   border: 0.5px solid ${({ theme }) => theme.vars.palette.action.focus};
-  padding: ${({ theme }) => `${theme.spacing(2.5)} ${theme.spacing(2)}`};
+  padding: ${({ theme }) => theme.spacing(2.5, 2)};
   background-color: ${({ theme }) => theme.vars.palette.background.paper};
   display: flex;
   width: 100%;

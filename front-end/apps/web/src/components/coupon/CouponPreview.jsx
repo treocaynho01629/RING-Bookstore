@@ -305,7 +305,7 @@ const CouponPreview = ({ shopId, scrollPosition }) => {
                   sx={{ pointerEvents: "none" }}
                   slotProps={{
                     paper: {
-                      elevation: 24,
+                      elevation: 1,
                       sx: {
                         overflow: "visible",
                         filter: "drop-shadow(0px 2px 4px rgba(0,0,0,0.32))",

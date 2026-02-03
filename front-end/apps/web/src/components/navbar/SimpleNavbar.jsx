@@ -19,13 +19,13 @@ const Container = styled.div`
   top: 0;
   left: 0;
   width: 100%;
-  padding: ${({ theme }) => `${theme.spacing(1)} ${theme.spacing(3)}`};
+  padding: ${({ theme }) => theme.spacing(1, 3)};
   margin: auto;
   z-index: ${({ theme }) => theme.zIndex.appBar};
 
   ${({ theme }) => theme.breakpoints.down("md")} {
     text-align: center;
-    padding: ${({ theme }) => `${theme.spacing(1)} ${theme.spacing(1.5)}`};
+    padding: ${({ theme }) => theme.spacing(1, 1.5)};
   }
 `;
 
@@ -103,7 +103,7 @@ const StyledMenu = styled(Menu)`
 `;
 //#endregion
 
-const SimpleNavbar = () => {
+const SimpleNavbar = ({ noLink = false }) => {
   const { mode, setMode } = useColorScheme();
   const { t, i18n } = useTranslation();
 
@@ -144,9 +144,13 @@ const SimpleNavbar = () => {
 
   return (
     <Container>
-      <Link to="/" tabIndex={-1}>
+      {noLink ? (
         <Logo src="/full-logo.svg" alt="RING! Logo" />
-      </Link>
+      ) : (
+        <Link to="/" tabIndex={-1}>
+          <Logo src="/full-logo.svg" alt="RING! Logo" />
+        </Link>
+      )}
       <SimpleButton>
         <Link to="https://github.com/treocaynho01629/RING-Bookstore/issues">
           <ContactSupportOutlined />

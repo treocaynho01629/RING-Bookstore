@@ -1,8 +1,6 @@
 import styled from "@emotion/styled";
-import { Link } from "react-router";
-import Button from "@mui/material/Button";
 import { useTranslation } from "react-i18next";
-import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
+import { ReactComponent as MaintainanceIcon } from "@ring/shared/assets/maintainance";
 import SimpleNavbar from "../components/navbar/SimpleNavbar";
 
 //#region styled
@@ -12,44 +10,50 @@ const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   height: 100dvh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+  background: ${({ theme }) => theme.vars.palette.background.default};
 `;
 
 const RandomShape = styled.span`
   position: fixed;
   top: 0;
-  right: 0;
+  left: 0;
   height: 150dvh;
   width: 50%;
   opacity: 0.7;
-  background: hsl(from ${({ theme }) => theme.vars.palette.primary.main} h s l / 0.4);
+  background: hsl(from ${({ theme }) => theme.vars.palette.warning.main} h s l / 0.4);
   z-index: -1;
-  transform: translate(60%, 0%) rotate(25deg);
+  transform: translate(-60%, 0%) rotate(-25deg);
 
   &:after {
     content: "";
     position: absolute;
     top: 0;
-    left: 0;
-    height: 100dvh;
+    right: 0;
+    height: 120dvh;
     width: 100%;
-    background: hsl(from ${({ theme }) => theme.vars.palette.primary.main} calc(h + 30) s l / 0.3);
-    transform: translate(-80%, -60%) rotate(85deg);
+    background: hsl(from ${({ theme }) => theme.vars.palette.warning.main} calc(h + 30) s l / 0.3);
+    transform: translate(80%, -60%) rotate(-85deg);
   }
 
   &:before {
     content: "";
     position: absolute;
     top: 0;
-    left: 0;
+    right: 0;
     height: 100%;
     width: 200%;
-    background: hsl(from ${({ theme }) => theme.vars.palette.primary.main} calc(h - 30) s l / 0.2);
-    transform: rotate(-130deg) translate(-35%, -60%);
+    background: hsl(from ${({ theme }) => theme.vars.palette.warning.main} calc(h - 30) s l / 0.2);
+    transform: rotate(130deg) translate(35%, -60%);
     z-index: -5;
   }
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
-    transform: translate(75%, 5%) rotate(25deg);
+    transform: translate(-75%, 5%) rotate(-25deg);
   }
 `;
 
@@ -59,6 +63,8 @@ const Content = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  text-align: center;
+  width: 100%;
   padding: ${({ theme }) => theme.spacing(1)};
 
   h2 {
@@ -86,58 +92,40 @@ const Content = styled.div`
   }
 `;
 
-const StyledEmptyIcon = styled(EmptyIcon)`
-  height: 0.75em;
-  width: 0.75em;
+const Description = styled.h4`
+  font-size: 1.3em;
+  font-weight: 400;
+`;
+
+const StyledMaintainanceIcon = styled(MaintainanceIcon)`
+  height: 350px;
   fill: ${({ theme }) => theme.vars.palette.background.default};
-  stroke: ${({ theme }) => theme.vars.palette.error.main};
+  stroke: ${({ theme }) => theme.vars.palette.warning.main};
   stroke-width: 10px;
   overflow: visible;
-`;
+  transform: translateY(-25%) scale(0.35);
 
-const ErrorCode = styled.h1`
-  font-size: 13em;
-  color: ${({ theme }) => theme.vars.palette.background.default};
-  margin: 0;
-  text-shadow:
-    3px 3px 0 ${({ theme }) => theme.vars.palette.error.main},
-    -3px 3px 0 ${({ theme }) => theme.vars.palette.error.main},
-    -3px -3px 0 ${({ theme }) => theme.vars.palette.error.main},
-    3px -3px 0 ${({ theme }) => theme.vars.palette.error.main};
-  border-bottom: 0.02em solid ${({ theme }) => theme.vars.palette.primary.main};
+  ${({ theme }) => theme.breakpoints.down("sm")} {
+    height: 280px;
+    transform: translateY(-30%) scale(0.3);
+  }
 `;
-
-const ErrorContainer = styled("div")(({ theme }) => ({
-  mixBlendMode: "darken",
-  ...theme.applyStyles("dark", {
-    mixBlendMode: "lighten",
-  }),
-}));
 //#endregion
 
-const Missing = () => {
+const Maintainance = () => {
   const { t } = useTranslation();
   return (
     <Wrapper>
-      <SimpleNavbar />
+      <SimpleNavbar noLink />
       <RandomShape></RandomShape>
       <Content>
-        <h2>{t("missing.title", { ns: "uncommon" })}</h2>
-        <ErrorContainer>
-          <ErrorCode>
-            4<StyledEmptyIcon />4
-          </ErrorCode>
-        </ErrorContainer>
-        <h3>{t("missing.description", { ns: "uncommon" })}</h3>
-        <p>{t("missing.suggestion", { ns: "uncommon" })}</p>
-        <Link to="/">
-          <Button sx={{ marginTop: 2 }} variant="outlined" color="primary">
-            {t("missing.back", { ns: "uncommon" })}
-          </Button>
-        </Link>
+        <h2>{t("maintainance.title", { ns: "uncommon" })}</h2>
+        <StyledMaintainanceIcon />
+        <Description>{t("maintainance.description", { ns: "uncommon" })}</Description>
+        <p>{t("maintainance.suggestion", { ns: "uncommon" })}</p>
       </Content>
     </Wrapper>
   );
 };
 
-export default Missing;
+export default Maintainance;

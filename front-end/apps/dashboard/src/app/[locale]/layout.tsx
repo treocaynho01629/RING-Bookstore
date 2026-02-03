@@ -9,15 +9,14 @@ import { options } from "@/lib/authOptions";
 import ThemeContextProvider from "@ring/ui/ThemeContextProvider";
 import localFont from "next/font/local";
 import NextStoreProvider from "../NextStoreProvider";
-import PageLayout from "../../components/layout/PageLayout";
 import AuthProvider from "../context/AuthProvider";
 
 const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
+  src: "../fonts/GeistVF.woff",
   variable: "--font-geist-sans",
 });
 const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
+  src: "../fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
 });
 
@@ -49,9 +48,7 @@ export default async function RootLayout({ children, params }: Readonly<RootLayo
           <NextStoreProvider>
             <AuthProvider session={session}>
               <AppRouterCacheProvider>
-                <ThemeContextProvider>
-                  <PageLayout>{children}</PageLayout>
-                </ThemeContextProvider>
+                <ThemeContextProvider>{children}</ThemeContextProvider>
               </AppRouterCacheProvider>
             </AuthProvider>
           </NextStoreProvider>

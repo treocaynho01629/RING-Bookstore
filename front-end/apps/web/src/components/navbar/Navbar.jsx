@@ -308,8 +308,8 @@ const SearchComponent = ({ tabletMode, show, toggle, setToggle, isSearch, isShop
               <StyledBadge
                 color="primary"
                 badgeContent={products?.length}
-                className={cartProducts?.length > 0 ? "bounce" : ""}
-                key={cartProducts?.length > 1 ? cartProducts?.length : "0"}
+                className={products?.length > 0 ? "bounce" : ""}
+                key={products?.length > 1 ? products?.length : "0"}
                 anchorOrigin={{
                   vertical: "top",
                   horizontal: "right",

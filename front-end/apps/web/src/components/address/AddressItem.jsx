@@ -24,7 +24,7 @@ const AddressItemContainer = styled.div`
   border: 0.5px solid ${({ theme }) => theme.vars.palette.action.focus};
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
-    padding: ${({ theme }) => `${theme.spacing(2.5)} ${theme.spacing(1.5)}`};
+    padding: ${({ theme }) => theme.spacing(2.5, 1.5)};
   }
 
   &.active {

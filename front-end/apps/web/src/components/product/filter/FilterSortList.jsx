@@ -104,6 +104,7 @@ const FilterSortList = ({
               input: { endAdornment },
               select: { IconComponent: () => null },
             }}
+            sx={{ mr: 1 }}
           >
             {sortBooksBy.map((option, index) => (
               <MenuItem key={`sort-${option.label}-${index}`} value={option.value}>

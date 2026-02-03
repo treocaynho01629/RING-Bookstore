@@ -64,10 +64,10 @@ const DetailTitle = styled.h4`
 `;
 
 const CouponContainer = styled.div`
-  padding: ${({ theme }) => `${theme.spacing(1)} ${theme.spacing(3)} 0`};
+  padding: ${({ theme }) => theme.spacing(1, 3, 0)};
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
-    padding: ${({ theme }) => `${theme.spacing(0)} ${theme.spacing(1)} 0`};
+    padding: ${({ theme }) => theme.spacing(0, 1, 0)};
   }
 `;
 

@@ -10,10 +10,6 @@ import NavDrawer from "./NavDrawer";
 //#region styled
 const LayoutWrapper = styled("div")`
   display: flex;
-
-  ${({ theme }) => theme.breakpoints.down("md")} {
-    display: block;
-  }
 `;
 
 const MainContainer = styled("div")`

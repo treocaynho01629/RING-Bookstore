@@ -34,7 +34,7 @@ const ShopSelect = lazy(() => import("./ShopSelect"));
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
 })<AppBarProps>(({ theme }) => ({
-  backgroundColor: `color-mix(in srgb, ${theme.vars?.palette.background.default}, transparent 50%) !important`,
+  backgroundColor: `color-mix(in srgb, ${theme.vars?.palette.background.paper}, transparent 50%) !important`,
   backdropFilter: "blur(10px)",
 
   transition: theme.transitions.create(["width", "margin"], {
@@ -80,12 +80,24 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
   // Shop selection
   const { data, isLoading, isSuccess, isError } = useGetPreviewShopsQuery(undefined, { skip: !shop && !openShop });
 
-  const handleOpenShop = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(e.currentTarget);
+  /**
+   * Open shop selection
+   * @param event - The event object
+   */
+  const handleOpenShop = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
   };
+
+  /**
+   * Close shop selection
+   */
   const handleCloseShop = useCallback(() => {
     setAnchorEl(undefined);
-  }, [anchorEl]);
+  }, []);
+
+  /**
+   * Toggle drawer
+   */
   const handleToggleDrawer = () => {
     setOpen(!open);
   };
@@ -165,6 +177,7 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
             <Chip
               label={t(roleMeta?.label ?? "loading")}
               color={(roleMeta?.color as any) ?? "default"}
+              variant="outlined"
               size="small"
               sx={{ fontWeight: 450, mr: 1 }}
             />
@@ -246,15 +259,11 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
           {...{
             open: openSetting,
             setOpen: setOpenSetting,
-            image: image,
-            username: username,
+            image,
+            username,
           }}
         />
       </Toolbar>
-      {/* <Menu open={true}>
-        <MenuItem selected={true}>English</MenuItem>
-        <MenuItem selected={true}>English</MenuItem>
-      </Menu> */}
     </AppBar>
   );
 }

@@ -65,7 +65,7 @@ const SearchInputContainer = styled.div`
   ${({ theme }) => theme.breakpoints.down("md")} {
     display: flex;
     align-items: center;
-    padding: ${({ theme }) => `${theme.spacing(1.5)} ${theme.spacing(1.5)}`};
+    padding: ${({ theme }) => theme.spacing(1.5, 1.5)};
     border-bottom: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
   }
 
@@ -145,7 +145,7 @@ const GroupListBox = styled.ul`
 `;
 
 const ListItem = styled.li`
-  padding: ${({ theme }) => `${theme.spacing(0.65)} ${theme.spacing(1)}`};
+  padding: ${({ theme }) => theme.spacing(0.65, 1)};
   padding-right: 0;
   height: 36px;
 
@@ -165,7 +165,7 @@ const ListItem = styled.li`
   }
 
   ${({ theme }) => theme.breakpoints.down("md")} {
-    padding: ${({ theme }) => `${theme.spacing(2.75)} ${theme.spacing(1.5)}`};
+    padding: ${({ theme }) => theme.spacing(2.75, 1.5)};
     padding-right: ${({ theme }) => theme.spacing(0.5)};
     border-bottom: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
   }

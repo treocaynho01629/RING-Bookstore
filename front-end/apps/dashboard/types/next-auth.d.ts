@@ -37,6 +37,7 @@ declare module "next-auth" {
    */
   export interface DecodedJWT extends UserObject {
     token_type: "refresh" | "access";
+    sub: string;
     exp: number;
     iat: number;
   }

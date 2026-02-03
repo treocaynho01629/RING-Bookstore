@@ -191,6 +191,7 @@
     "label": "Profile",
     "title": "Your profile",
     "update": "Update profile",
+    "save": "Save profile",
     "media": {
       "label": "Edit media",
       "add": "Add profile picture",
@@ -218,7 +219,7 @@
       "refunded": "Refunded",
       "canceled": "Canceled",
       "pending": {
-        "label": "Pending",
+        "seller": "Pending",
         "payment": "Pending payment",
         "return": "Pending return",
         "refund": "Pending refund"
@@ -311,7 +312,8 @@
   },
   "error": {
     "server": {
-      "response": "Server did not respond"
+      "response": "Server did not respond",
+      "unreachable": "Lost connection to the server!"
     },
     "auth": {
       "expired": "Authentication session expired, please login again!",

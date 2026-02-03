@@ -27,7 +27,7 @@ const Wrapper = styled.div`
 
 const IconWrapper = styled.div`
   position: relative;
-  margin-bottom: 25px;
+  margin-bottom: 40px;
 
   svg {
     font-size: 220px;

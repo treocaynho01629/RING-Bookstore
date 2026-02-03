@@ -7,6 +7,10 @@ import ThemeContextProvider from "@ring/ui/ThemeContextProvider";
 import SnackbarProvider from "@ring/ui/SnackbarProvider";
 import i18n from "../i18n";
 import { I18nextProvider } from "react-i18next";
+import { reachableMonitor } from "./utils/reachable";
+
+// Start the reachable monitor
+reachableMonitor.ping();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

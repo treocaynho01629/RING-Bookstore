@@ -23,7 +23,7 @@ const Slidercontainer = styled.div`
   width: 80%;
   margin-left: auto;
   margin-right: auto;
-  padding: ${({ theme }) => `${theme.spacing(2)} ${theme.spacing(5)} 0`};
+  padding: ${({ theme }) => theme.spacing(2, 5, 0)};
   display: flex;
   align-items: center;
   justify-content: space-between;

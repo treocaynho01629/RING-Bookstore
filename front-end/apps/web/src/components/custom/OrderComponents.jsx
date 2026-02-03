@@ -302,7 +302,7 @@ export const StatusContent = styled.div`
   color: ${({ theme, color }) => theme.vars.palette[color]?.main ?? theme.vars.palette.primary.main};
   border: 0.5px solid;
   border-color: currentColor;
-  padding: ${({ theme }) => `${theme.spacing(1)} ${theme.spacing(2)}`};
+  padding: ${({ theme }) => theme.spacing(1, 2)};
   font-weight: 500;
   text-transform: uppercase;
   display: flex;

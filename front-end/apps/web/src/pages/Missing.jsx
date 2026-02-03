@@ -1,8 +1,8 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router";
-import Button from "@mui/material/Button";
 import { useTranslation } from "react-i18next";
-import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
+import HelpOutline from "@mui/icons-material/HelpOutline";
+import Button from "@mui/material/Button";
 import SimpleNavbar from "../components/navbar/SimpleNavbar";
 
 //#region styled
@@ -30,7 +30,7 @@ const RandomShape = styled.span`
     position: absolute;
     top: 0;
     left: 0;
-    height: 100dvh;
+    height: 120dvh;
     width: 100%;
     background: hsl(from ${({ theme }) => theme.vars.palette.primary.main} calc(h + 30) s l / 0.3);
     transform: translate(-80%, -60%) rotate(85deg);
@@ -86,16 +86,9 @@ const Content = styled.div`
   }
 `;
 
-const StyledEmptyIcon = styled(EmptyIcon)`
-  height: 0.75em;
-  width: 0.75em;
-  fill: ${({ theme }) => theme.vars.palette.background.default};
-  stroke: ${({ theme }) => theme.vars.palette.error.main};
-  stroke-width: 10px;
-  overflow: visible;
-`;
-
 const ErrorCode = styled.h1`
+  display: flex;
+  align-items: center;
   font-size: 13em;
   color: ${({ theme }) => theme.vars.palette.background.default};
   margin: 0;
@@ -105,6 +98,17 @@ const ErrorCode = styled.h1`
     -3px -3px 0 ${({ theme }) => theme.vars.palette.error.main},
     3px -3px 0 ${({ theme }) => theme.vars.palette.error.main};
   border-bottom: 0.02em solid ${({ theme }) => theme.vars.palette.primary.main};
+
+  svg {
+    font-size: 0.9em;
+
+    path {
+      fill: none;
+      stroke: ${({ theme }) => theme.vars.palette.error.main};
+      stroke-width: 0.4px;
+      stroke-linejoin: round;
+    }
+  }
 `;
 
 const ErrorContainer = styled("div")(({ theme }) => ({
@@ -125,7 +129,7 @@ const Missing = () => {
         <h2>{t("missing.title", { ns: "uncommon" })}</h2>
         <ErrorContainer>
           <ErrorCode>
-            4<StyledEmptyIcon />4
+            4<HelpOutline />4
           </ErrorCode>
         </ErrorContainer>
         <h3>{t("missing.description", { ns: "uncommon" })}</h3>

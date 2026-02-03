@@ -69,7 +69,7 @@ const AddressTag = styled.span`
   font-size: 12px;
   font-weight: bold;
   margin-right: ${({ theme }) => theme.spacing(0.5)};
-  padding: ${({ theme }) => `${theme.spacing(0.5)} ${theme.spacing(1)}`};
+  padding: ${({ theme }) => theme.spacing(0.5, 1)};
   border: 0.5px solid ${({ theme }) => theme.vars.palette.primary.main};
   color: ${({ theme }) => theme.vars.palette.primary.main};
 

@@ -33,7 +33,7 @@ const DialogContent = lazy(() => import("@mui/material/DialogContent"));
 //#region styled
 const ReviewsWrapper = styled.div`
   position: relative;
-  padding: ${({ theme }) => `${theme.spacing(1)} ${theme.spacing(2.5)}`};
+  padding: ${({ theme }) => theme.spacing(1, 2.5)};
   border: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
   background-color: ${({ theme }) => theme.vars.palette.background.paper};
 
@@ -320,7 +320,7 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
                 {...{
                   handleClick: handleOpenForm,
                   book,
-                  disabled: isReviewable,
+                  disabled: !isReviewable,
                   editable: isEditable,
                 }}
               />
@@ -382,7 +382,7 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
                     variant="outlined"
                     size="large"
                     fullWidth
-                    disabled={isReviewable}
+                    disabled={!isReviewable}
                     onClick={() => setOpenForm(true)}
                     startIcon={<EditOutlined />}
                   >

@@ -20,7 +20,7 @@ export const CheckoutContainer = styled.div`
 
 export const CheckoutBox = styled.div`
   border: 0.5px solid ${({ theme }) => theme.vars.palette.action.focus};
-  padding: ${({ theme }) => `${theme.spacing(2.5)} ${theme.spacing(2)}`};
+  padding: ${({ theme }) => theme.spacing(2.5, 2)};
   margin-bottom: ${({ theme }) => theme.spacing(2)};
   background-color: ${({ theme }) => theme.vars.palette.background.paper};
 
@@ -35,7 +35,7 @@ export const CheckoutBox = styled.div`
   &.drawer {
     border: none;
     border-top: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
-    padding: ${({ theme }) => `${theme.spacing(2.5)} ${theme.spacing(16)}`};
+    padding: ${({ theme }) => theme.spacing(2.5, 16)};
 
     &::before {
       content: "";
@@ -52,7 +52,7 @@ export const CheckoutBox = styled.div`
 
   ${({ theme }) => theme.breakpoints.down("md")} {
     &.drawer {
-      padding: ${({ theme }) => `${theme.spacing(2.5)} ${theme.spacing(2)}`};
+      padding: ${({ theme }) => theme.spacing(2.5, 2)};
     }
   }
 

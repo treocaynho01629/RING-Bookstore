@@ -125,7 +125,7 @@ const ButtonContainer = styled.div`
   display: flex;
   justify-content: space-between;
   width: 100%;
-  padding: ${({ theme }) => `${theme.spacing(1.5)} ${theme.spacing(1)} ${theme.spacing(1)}`};
+  padding: ${({ theme }) => theme.spacing(1.5, 1, 1)};
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
     width: auto;

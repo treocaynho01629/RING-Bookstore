@@ -45,7 +45,7 @@ const AltFilterContainer = styled.div`
   bottom: 0;
   border: 0.5px solid ${({ theme }) => theme.vars.palette.action.focus};
   border-bottom: none;
-  padding: ${({ theme }) => `${theme.spacing(2.5)} ${theme.spacing(2)}`};
+  padding: ${({ theme }) => theme.spacing(2.5, 2)};
   margin-left: ${({ theme }) => `calc(${theme.spacing(-1.5)} - 0.5px)`};
   background-color: ${({ theme }) => theme.vars.palette.background.paper};
   display: flex;

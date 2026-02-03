@@ -13,6 +13,8 @@ import { jwtDecode } from "jwt-decode";
 import { UserRole } from "@ring/shared/models/userRole";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+const adminRoles: UserRole[] = [UserRole.ROLE_ADMIN, UserRole.ROLE_GUEST];
+
 async function refreshAccessToken(nextAuthJWT: JWT): Promise<JWT> {
   try {
     // Get a new access token from backend using the refresh token
@@ -64,6 +66,9 @@ export const options: NextAuthOptions = {
       },
     },
   },
+  pages: {
+    signIn: "/login",
+  },
   providers: [
     CredentialsProvider({
       name: "Login",
@@ -108,14 +113,12 @@ export const options: NextAuthOptions = {
           const refresh: DecodedJWT = jwtDecode(tokens.refresh);
           const roleIndexes = access.roles?.map((r) => Object.keys(UserRole).indexOf(r)) || [0];
           const role = UserRole[Object.keys(UserRole)[Math.max(...roleIndexes)] as keyof typeof UserRole];
-          const isAdmin = access.roles?.some((r) =>
-            [UserRole.ROLE_ADMIN.valueOf(), UserRole.ROLE_GUEST.valueOf()].includes(r)
-          );
+          const isAdmin = access.roles?.some((r) => adminRoles.includes(r as UserRole));
 
           // Extract the user from the access token
           const user: UserObject = {
             id: access.id,
-            username: access.username,
+            username: access.sub,
             image: access.image,
             roles: access.roles,
             role: role,

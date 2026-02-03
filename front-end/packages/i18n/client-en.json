@@ -56,7 +56,7 @@
     "invalid": "Invalid coupon",
     "expired.date": "EXP:",
     "expired.usage": "Usage: {{count}} left",
-    "used": "Already used",
+    "used": "Out of usage",
     "not.usable": "Not applicable",
     "add": "Enter coupon code",
     "not.found": "No coupons found",

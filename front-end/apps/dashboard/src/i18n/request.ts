@@ -1,12 +1,17 @@
 import { getRequestConfig } from "next-intl/server";
-import { locales } from "@ring/shared/enums/locales";
+import { locales, defaultLocale } from "@ring/shared/enums/locales";
 import { hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { merge, mergeWith, isPlainObject } from "lodash";
 
 export default getRequestConfig(async ({ requestLocale }) => {
-  // Typically corresponds to the `[locale]` segment
-  const requested = await requestLocale;
+  let requested = await requestLocale;
+
+  // If no locale is provided, default to defaultLocale
+  if (!requested || !hasLocale(locales, requested)) {
+    requested = defaultLocale;
+  }
+
   if (!hasLocale(locales, requested)) notFound();
 
   // Load all locales as one object

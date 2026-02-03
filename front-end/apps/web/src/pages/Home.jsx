@@ -100,7 +100,7 @@ const TitleContainer = styled.div`
   align-items: center;
   justify-content: space-between;
   white-space: nowrap;
-  padding: ${({ theme }) => `${theme.spacing(1.25)} ${theme.spacing(2)}`};
+  padding: ${({ theme }) => theme.spacing(1.25, 2)};
   z-index: 3;
 
   ${({ theme }) => theme.breakpoints.down("sm")} {

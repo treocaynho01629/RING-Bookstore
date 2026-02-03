@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, lazy, Suspense, useCallback, useMemo } fro
 import { Navigate, NavLink, useLocation, useNavigate } from "react-router";
 import { useGetMyAddressQuery } from "../features/addresses/addressesApiSlice";
 import { useCalculateMutation, useCheckoutMutation } from "../features/orders/ordersApiSlice";
-import { isEqual } from "lodash-es";
+import { debounce, isEqual } from "lodash-es";
 import { PHONE_REGEX } from "@ring/shared/utils/regex";
 import { ShippingType } from "@ring/shared/models/shippingType";
 import { PaymentType } from "@ring/shared/models/paymentType";
@@ -83,7 +83,7 @@ const SemiTitle = styled.h4`
 `;
 
 const MiniTitle = styled.h4`
-  margin: ${({ theme }) => `${theme.spacing(1.5)} ${theme.spacing(1)}`};
+  margin: ${({ theme }) => theme.spacing(1.5, 1)};
   font-weight: 420;
 `;
 
@@ -132,6 +132,7 @@ const Checkout = () => {
 
   const scrollRef = useRef(null);
   const prevPayload = useRef();
+  const calCount = useRef(0);
 
   const [activeStep, setActiveStep] = useState(0);
   const [payment, setPayment] = useState(Object.keys(PaymentType)[0]);
@@ -196,6 +197,9 @@ const Checkout = () => {
   const navigate = useNavigate();
 
   useDeepEffect(() => {
+    if (calculating || !cartProducts?.length || cartProducts.length == 0) {
+      handleCalculate.cancel();
+    }
     handleCartChange();
   }, [cartProducts, shopCoupon, coupon, addressInfo, shopShipping]);
 
@@ -298,9 +302,17 @@ const Checkout = () => {
    * @param {Object} cart
    */
   const handleCalculate = useCallback(
-    async (cart) => {
-      if (isLoading || address == null || cart == null || cart.length == 0 || isEqual(prevPayload.current, cart))
-        return;
+    debounce(async (cart) => {
+      calCount.current++;
+
+      const skipCalculate =
+        calculating ||
+        cart == null ||
+        address == null ||
+        addressInfo == null ||
+        isEqual(prevPayload.current, cart) ||
+        calCount.current == 3;
+      if (skipCalculate) return;
 
       calculate(cart)
         .unwrap()
@@ -318,7 +330,7 @@ const Checkout = () => {
             setErrMsg(err?.data?.message);
           }
         });
-    },
+    }, 500),
     [addressInfo]
   );
 

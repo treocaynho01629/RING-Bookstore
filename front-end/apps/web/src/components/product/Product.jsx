@@ -237,7 +237,7 @@ const ProductTag = styled.span`
   position: absolute;
   top: ${({ theme }) => theme.spacing(1)};
   left: ${({ theme }) => theme.spacing(1)};
-  padding: ${({ theme }) => `${theme.spacing(0.25)} ${theme.spacing(1)}`};
+  padding: ${({ theme }) => theme.spacing(0.25, 1)};
   background-color: ${({ theme, color }) => theme.vars.palette[color]?.light || theme.vars.palette.info.light};
   color: ${({ theme, color }) => theme.vars.palette[color]?.contrastText || theme.vars.palette.info.contrastText};
   font-size: 12px;

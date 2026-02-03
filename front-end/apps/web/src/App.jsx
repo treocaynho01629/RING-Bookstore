@@ -1,7 +1,7 @@
 import "./App.css";
 import { createBrowserRouter } from "react-router";
-import { RouterProvider } from "react-router/dom";
-import useReachable from "@ring/shared/useReachable";
+import { RouterProvider } from "react-router";
+import { useReachable } from "./hooks/useReachable";
 import FallbackLogo from "@ring/ui/FallbackLogo";
 import RequireAuth from "./components/authorize/RequireAuth";
 import PersistLogin from "./components/authorize/PersistLogin";
@@ -11,7 +11,7 @@ import "react-multi-carousel/lib/styles.css";
 import "simplebar-react/dist/simplebar.min.css";
 
 function App() {
-  useReachable(import.meta.env.VITE_API_URL); // Test connection to server
+  const connected = useReachable();
 
   const router = createBrowserRouter(
     [
@@ -33,6 +33,13 @@ function App() {
             lazy: async () => {
               let Unauthorized = await import("./pages/Unauthorized");
               return { Component: Unauthorized.default };
+            },
+          },
+          {
+            path: "maintainance",
+            lazy: async () => {
+              let Maintainance = await import("./pages/Maintainance");
+              return { Component: Maintainance.default };
             },
           },
           {
@@ -206,6 +213,11 @@ function App() {
       },
     }
   );
+
+  // If the server is not reachable, redirect to the maintainance page
+  if (!connected) {
+    router.navigate("/maintainance");
+  }
 
   return (
     <RouterProvider
