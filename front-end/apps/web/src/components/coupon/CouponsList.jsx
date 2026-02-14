@@ -8,12 +8,12 @@ import {
   StyledEmptyIcon,
   ToggleGroupContainer,
 } from "../custom/ProfileComponents";
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { CustomTab, CustomTabs } from "../custom/CustomTabs";
 import { debounce } from "lodash-es";
 import { Message } from "@ring/ui/Components";
 import { getCouponCriteria, getCouponType } from "@ring/shared/enums/coupon";
-import { useGetCouponsQuery } from "../../features/coupons/couponsApiSlice";
+import { useGetCouponsScrollInfiniteQuery } from "../../features/coupons/couponsApiSlice";
 import { trackWindowScroll } from "react-lazy-load-image-component";
 import { CouponType } from "@ring/shared/models/couponType";
 import { capitalize } from "lodash-es";
@@ -28,7 +28,7 @@ import Loyalty from "@mui/icons-material/Loyalty";
 import CouponItem from "./CouponItem";
 import useCoupon from "../../hooks/useCoupon";
 
-const defaultSize = 10;
+const DEFAULT_SIZE = 10;
 const couponItems = [
   {
     label: "saved",
@@ -59,7 +59,7 @@ Object.values(CouponType).forEach((item) => {
   });
 });
 
-const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) => {
+const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
   const { t } = useTranslation();
   const { coupons: savedCoupons } = useCoupon();
   const scrollRef = useRef(null);
@@ -73,25 +73,18 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) =>
     ...couponItems[tab]?.filter,
     code: searchParams.get("k") ?? "",
   });
-  const [pagination, setPagination] = useState({
-    number: 0,
-    size: defaultSize,
-    totalPages: 0,
-    isMore: true,
-  });
 
   // Fetch coupons
-  const { data, isLoading, isFetching, isSuccess, isError, error } = useGetCouponsQuery({
-    byShop: filters.byShop,
-    code: filters.code,
-    types: filters.types ?? "",
-    codes: filters.saved ? (savedCoupons?.length > 0 ? savedCoupons : ["temp"]) : [],
-    page: pagination?.number,
-    size: pagination?.size,
-    showUsed: true,
-    showExpired: true,
-    loadMore: pagination?.isMore,
-  });
+  const { data, isLoading, isFetching, isFetchingNextPage, isSuccess, isError, error, fetchNextPage, hasNextPage } =
+    useGetCouponsScrollInfiniteQuery({
+      byShop: filters.byShop,
+      code: filters.code,
+      types: filters.types ?? "",
+      codes: filters.saved ? (savedCoupons?.length > 0 ? savedCoupons : ["temp"]) : [],
+      showUsed: true,
+      showExpired: true,
+      size: DEFAULT_SIZE,
+    });
 
   useEffect(() => {
     setFilters((prev) => ({
@@ -103,16 +96,6 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) =>
   useEffect(() => {
     setTab(searchParams.get("tab") ? +searchParams.get("tab") : "");
   }, [searchParams]);
-
-  useEffect(() => {
-    if (data && !isLoading && isSuccess) {
-      setPagination({
-        ...pagination,
-        number: data.page,
-        totalPages: data.totalPages,
-      });
-    }
-  }, [data]);
 
   /**
    * Scroll to top of list
@@ -141,8 +124,8 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) =>
     setFilters((prev) => ({ ...prev, keyword: "" }));
     newValue === "" ? searchParams.delete("tab") : searchParams.set("tab", newValue);
     searchParams.delete("k");
-    setSearchParams(searchParams);
-    handleResetPage();
+    setSearchParams(searchParams, { replace: true });
+    scrollToTop();
   };
 
   /**
@@ -155,14 +138,6 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) =>
     if (inputRef) setFilters((prev) => ({ ...prev, code: newValue }));
     newValue == "" ? searchParams.delete("k") : searchParams.set("k", newValue);
     setSearchParams(searchParams, { replace: true });
-    handleResetPage();
-  };
-
-  /**
-   * Reset page
-   */
-  const handleResetPage = () => {
-    setPagination((prev) => ({ ...prev, number: 0 }));
     scrollToTop();
   };
 
@@ -170,9 +145,8 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) =>
    * Show more coupons on scroll
    */
   const handleShowMore = () => {
-    if (isFetching || typeof data?.page !== "number" || data?.page < pagination?.number) return;
-    const nextPage = data?.page + 1;
-    if (nextPage < data?.totalPages) setPagination((prev) => ({ ...prev, number: nextPage }));
+    if (isFetchingNextPage || !hasNextPage) return;
+    fetchNextPage();
   };
 
   /**
@@ -207,7 +181,7 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) =>
 
   let couponsContent;
 
-  if (isLoading || (isFetching && pagination.number == 0)) {
+  if (isLoading) {
     couponsContent = (
       <PlaceholderContainer>
         <LoadContainer>
@@ -216,7 +190,9 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) =>
       </PlaceholderContainer>
     );
   } else if (isSuccess) {
-    const { ids, entities } = data;
+    const content = data?.pages?.flatMap((p) => p.content ?? []);
+    const ids = content.map((b) => b.id);
+    const entities = Object.fromEntries(content.map((b) => [b.id, b]));
 
     couponsContent = ids?.length ? (
       ids?.map((id, index) => {
@@ -260,9 +236,9 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) =>
   return (
     <>
       <StyledDialogTitle ref={scrollRef}>
-        <a onClick={handleClose}>
+        <Link to={-1}>
           <KeyboardArrowLeft />
-        </a>
+        </Link>
         <Loyalty />
         &nbsp;{t("coupon.label")}
       </StyledDialogTitle>
@@ -300,12 +276,12 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode, handleClose }) =>
           <Grid container spacing={1}>
             {couponsContent}
           </Grid>
-          {pagination.number > 0 && isFetching && (
+          {!isLoading && isFetching && (
             <LoadContainer>
               <CircularProgress size={30} color="primary" />
             </LoadContainer>
           )}
-          {data?.ids?.length > 0 && data?.ids?.length == data?.totalElements && (
+          {!isLoading && !isFetching && !hasNextPage && (
             <Message color="warning">{capitalize(t("message.out", { item: t("coupon.label") }))}</Message>
           )}
         </MainContainer>

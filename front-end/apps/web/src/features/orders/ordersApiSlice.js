@@ -1,6 +1,4 @@
 import { createEntityAdapter } from "@reduxjs/toolkit";
-import { defaultSerializeQueryArgs } from "@reduxjs/toolkit/query";
-import { isEqual } from "lodash-es";
 import apiSlice from "@ring/redux/apiSlice";
 
 const ordersAdapter = createEntityAdapter({});
@@ -35,7 +33,6 @@ export const ordersApiSlice = apiWithEnum.injectEndpoints({
       }),
       providesTags: (result, error, id) => [{ type: "Order", id }],
     }),
-
     getOrdersByUser: builder.query({
       query: (args) => {
         const { status, keyword, page, size } = args || {};
@@ -68,46 +65,51 @@ export const ordersApiSlice = apiWithEnum.injectEndpoints({
           content
         );
       },
-      serializeQueryArgs: ({ endpointName, queryArgs, endpointDefinition }) => {
-        if (queryArgs) {
-          const { loadMore, ...mainQuery } = queryArgs;
-
-          if (loadMore) {
-            //Load more >> serialize without <pagination>
-            const { page, size, ...rest } = mainQuery;
-            if (JSON.stringify(rest) === "{}") return endpointName + "Merge";
-            return defaultSerializeQueryArgs({
-              endpointName: endpointName + "Merge",
-              queryArgs: rest,
-              endpointDefinition,
-            });
-          }
-
-          //Serialize like normal
-          if (JSON.stringify(mainQuery) === "{}") return endpointName;
-          return defaultSerializeQueryArgs({
-            endpointName,
-            queryArgs: mainQuery,
-            endpointDefinition,
-          });
-        } else {
-          return endpointName;
-        }
-      },
-      merge: (currentCache, newItems, { arg: currentArg }) => {
-        currentCache.page = newItems.page;
-        if (!currentArg?.loadMore) ordersAdapter.removeAll(currentCache);
-        ordersAdapter.upsertMany(currentCache, ordersSelector.selectAll(newItems));
-      },
-      forceRefetch: ({ currentArg, previousArg }) => {
-        const isForceRefetch =
-          currentArg?.loadMore && !isEqual(currentArg, previousArg) && currentArg?.page > previousArg?.page;
-        return isForceRefetch;
-      },
       providesTags: (result, error, arg) => {
         if (result?.ids) {
           return [{ type: "Order", id: "LIST" }, ...result.ids.map((id) => ({ type: "Order", id }))];
         } else return [{ type: "Order", id: "LIST" }];
+      },
+    }),
+    getOrdersByUserScroll: builder.infiniteQuery({
+      query: ({ queryArg, pageParam }) => {
+        const args = queryArg ?? {};
+        const { status, keyword, size } = args;
+
+        const params = new URLSearchParams();
+        params.append("pageNo", String(pageParam));
+        if (status) params.append("status", status);
+        if (keyword) params.append("keyword", keyword);
+        if (size) params.append("pSize", size);
+
+        return {
+          url: `/api/orders/user?${params.toString()}`,
+          validateStatus: (response, result) => {
+            return response.status === 200 && !result?.isError;
+          },
+        };
+      },
+      infiniteQueryOptions: {
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages, lastPageParam) => {
+          const nextPage = lastPageParam + 1;
+          if (nextPage >= lastPage.totalPages) return undefined;
+          return nextPage;
+        },
+        getPreviousPageParam: (firstPage, allPages, firstPageParam) => {
+          const prevPage = firstPageParam - 1;
+          if (prevPage < 0) return undefined;
+          return prevPage;
+        },
+      },
+      providesTags: (result) => {
+        if (result?.pages) {
+          return [
+            { type: "Order", id: "LIST" },
+            ...result.pages.flatMap((p) => (p.content ?? []).map((o) => ({ type: "Order", id: o.id }))),
+          ];
+        }
+        return [{ type: "Order", id: "LIST" }];
       },
     }),
     calculate: builder.mutation({
@@ -193,6 +195,7 @@ export const ordersApiSlice = apiWithEnum.injectEndpoints({
 export const {
   useGetOrderDetailQuery,
   useGetOrdersByUserQuery,
+  useGetOrdersByUserScrollInfiniteQuery,
   useGetReceiptDetailQuery,
   useCalculateMutation,
   useCheckoutMutation,

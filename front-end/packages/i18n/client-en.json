@@ -56,7 +56,7 @@
     "invalid": "Invalid coupon",
     "expired.date": "EXP:",
     "expired.usage": "Usage: {{count}} left",
-    "used": "Out of usage",
+    "used": "Coupon used",
     "not.usable": "Not applicable",
     "add": "Enter coupon code",
     "not.found": "No coupons found",
@@ -144,6 +144,7 @@
   },
   "shop": {
     "title": "Shop list",
+    "detail": "Shop detail",
     "following": "Following",
     "follow": "Follow",
     "explore": "Explore",

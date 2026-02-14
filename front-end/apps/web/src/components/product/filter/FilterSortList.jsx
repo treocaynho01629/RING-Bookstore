@@ -28,6 +28,7 @@ const FilterSortList = ({
   onPageChange,
   onOpenFilters,
   isChanged,
+  onChangePaginationMode,
 }) => {
   const { t } = useTranslation();
 
@@ -118,6 +119,7 @@ const FilterSortList = ({
             fullWidth={mobileMode}
             value={pagination?.amount}
             onChange={handleChangeAmount}
+            sx={{ mr: 1 }}
           >
             {booksAmount.map((option, index) => (
               <MenuItem key={`amount-${option.label}-${index}`} value={option.value}>
@@ -137,16 +139,20 @@ const FilterSortList = ({
             {t("search.filter.filtering")}
           </StyledSortButton>
         </MainContainer>
-        <AltContainer>
-          <QuickPagination
-            {...{
-              page: pagination?.number,
-              count: totalPages,
-              onPageChange,
-              onOpenPagination,
-            }}
-          />
-        </AltContainer>
+        {!mobileMode && (
+          <AltContainer>
+            <QuickPagination
+              {...{
+                page: pagination?.number,
+                count: totalPages,
+                mode: pagination.mode,
+                onPageChange,
+                onOpenPagination,
+                onChangePaginationMode,
+              }}
+            />
+          </AltContainer>
+        )}
       </SortContainer>
     </SortWrapper>
   );

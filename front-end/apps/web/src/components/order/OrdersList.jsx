@@ -1,5 +1,5 @@
 import { Fragment, Suspense, useCallback, useEffect, useRef, useState, lazy } from "react";
-import { useGetOrdersByUserQuery } from "../../features/orders/ordersApiSlice";
+import { useGetOrdersByUserScrollInfiniteQuery } from "../../features/orders/ordersApiSlice";
 import {
   MainContainer,
   StyledDialogTitle,
@@ -9,15 +9,14 @@ import {
   LoadContainer,
   PlaceholderContainer,
 } from "../custom/ProfileComponents";
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { capitalize } from "lodash-es";
 import { booksApiSlice } from "../../features/books/booksApiSlice";
 import { CustomTab, CustomTabs } from "../custom/CustomTabs";
 import { debounce } from "lodash-es";
 import { Message } from "@ring/ui/Components";
 import { useTranslation } from "react-i18next";
-import { OrderStatus } from "@ring/shared/models/orderStatus";
-import { getOrderStatus } from "@ring/shared/enums/order";
+import { orderStatusOptions } from "@ring/shared/enums/order";
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -30,9 +29,9 @@ import OrderItem from "./OrderItem";
 
 const CancelAndRefundDetailForm = lazy(() => import("./CancelAndRefundDetailForm"));
 
-const defaultSize = 5;
+const DEFAULT_SIZE = 5;
 
-const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }) => {
+const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
   const { addProduct } = useCart();
   const { t } = useTranslation();
 
@@ -49,21 +48,13 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
     keyword: searchParams.get("k") ?? "",
   });
 
-  const [pagination, setPagination] = useState({
-    number: 0,
-    size: defaultSize,
-    totalPages: 0,
-    isMore: true,
-  });
-
   // Fetch orders
-  const { data, isLoading, isFetching, isSuccess, isError, error } = useGetOrdersByUserQuery({
-    status: filters.status,
-    keyword: filters.keyword,
-    page: pagination.number,
-    size: pagination.size,
-    loadMore: pagination.isMore,
-  });
+  const { data, isLoading, isSuccess, isError, error, isFetchingNextPage, hasNextPage, fetchNextPage } =
+    useGetOrdersByUserScrollInfiniteQuery({
+      status: filters.status,
+      keyword: filters.keyword,
+      size: DEFAULT_SIZE,
+    });
   const [getBought, { isLoading: fetching }] = booksApiSlice.useLazyGetBooksByIdsQuery();
 
   useEffect(() => {
@@ -72,16 +63,6 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
       status: searchParams.get("status") ?? "",
     }));
   }, [searchParams]);
-
-  useEffect(() => {
-    if (data && !isLoading && isSuccess) {
-      setPagination({
-        ...pagination,
-        number: data.page,
-        totalPages: data.totalPages,
-      });
-    }
-  }, [data]);
 
   /**
    * Scroll to top of the list
@@ -107,8 +88,8 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
     setFilters((prev) => ({ ...prev, status: newValue, keyword: "" }));
     newValue === "" ? searchParams.delete("status") : searchParams.set("status", newValue);
     searchParams.delete("k");
-    setSearchParams(searchParams);
-    handleResetPage();
+    setSearchParams(searchParams, { replace: true });
+    scrollToTop();
   };
 
   /**
@@ -120,14 +101,6 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
     if (inputRef) setFilters((prev) => ({ ...prev, keyword: newValue }));
     newValue == "" ? searchParams.delete("k") : searchParams.set("k", newValue);
     setSearchParams(searchParams, { replace: true });
-    handleResetPage();
-  };
-
-  /**
-   * Reset page to 0
-   */
-  const handleResetPage = () => {
-    setPagination((prev) => ({ ...prev, number: 0 }));
     scrollToTop();
   };
 
@@ -184,10 +157,8 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
    * Show more orders
    */
   const handleShowMore = () => {
-    const currentPage = data?.page;
-    if (isFetching || typeof currentPage?.number !== "number" || currentPage?.number < pagination?.number) return;
-    const nextPage = currentPage?.number + 1;
-    if (nextPage < currentPage?.totalPages) setPagination((prev) => ({ ...prev, number: nextPage }));
+    if (isFetchingNextPage || !hasNextPage) return;
+    fetchNextPage();
   };
 
   /**
@@ -223,7 +194,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
 
   let ordersContent;
 
-  if (isLoading || (isFetching && pagination.number == 0)) {
+  if (isLoading) {
     ordersContent = (
       <PlaceholderContainer>
         <LoadContainer>
@@ -232,7 +203,9 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
       </PlaceholderContainer>
     );
   } else if (isSuccess) {
-    const { ids, entities } = data;
+    const content = data?.pages?.flatMap((p) => p.content ?? []);
+    const ids = content.map((b) => b.id);
+    const entities = Object.fromEntries(content.map((b) => [b.id, b]));
 
     ordersContent = ids?.length ? (
       ids?.map((id, index) => {
@@ -269,19 +242,18 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
   return (
     <>
       <StyledDialogTitle ref={scrollRef}>
-        <a onClick={handleClose}>
+        <Link to={-1}>
           <KeyboardArrowLeft />
-        </a>
+        </Link>
         <Receipt />
         &nbsp;{t("order.your", { ns: "authenticated" })}
       </StyledDialogTitle>
       <ToggleGroupContainer>
         <CustomTabs value={filters.status} onChange={handleChangeStatus} variant="scrollable" scrollButtons="auto">
           <CustomTab label={t("all.label")} value="" />
-          {Object.values(OrderStatus).map((status, index) => {
-            const itemMeta = getOrderStatus(status);
-            return <CustomTab key={`tab-${index}`} label={t(itemMeta?.label)} value={status} />;
-          })}
+          {orderStatusOptions.map((status, index) => (
+            <CustomTab key={`tab-${index}`} label={t(status.label)} value={status.value} />
+          ))}
         </CustomTabs>
       </ToggleGroupContainer>
       <DialogContent
@@ -308,12 +280,12 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode, handleClose }
         </form>
         <MainContainer>
           {ordersContent}
-          {pagination.number > 0 && isFetching && (
+          {isFetchingNextPage && (
             <LoadContainer>
               <CircularProgress size={30} color="primary" />
             </LoadContainer>
           )}
-          {data?.ids?.length > 0 && data?.ids?.length == data?.totalElements && (
+          {data?.pages[0]?.totalElements > 0 && !hasNextPage && (
             <Message color="warning">{capitalize(t("message.out", { item: t("order.label") }))}</Message>
           )}
         </MainContainer>

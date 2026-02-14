@@ -19,6 +19,7 @@ import org.thymeleaf.context.Context;
 @RequiredArgsConstructor
 public class MyEventListener {
 
+    // TODO: Localize email templates
     private final EmailService emailService;
 
     /**

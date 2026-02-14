@@ -1,9 +1,14 @@
 import styled from "@emotion/styled";
 import { Fragment, useState, useEffect, memo, useRef } from "react";
-import { getBookType } from "@ring/shared/enums/book";
-import { BookType } from "@ring/shared/models/bookType";
-import { useGetCategoriesQuery, useGetRelevantCategoriesQuery } from "../../../features/categories/categoriesApiSlice";
-import { useGetPublishersQuery, useGetRelevantPublishersQuery } from "../../../features/publishers/publishersApiSlice";
+import { bookTypeOptions } from "@ring/shared/enums/book";
+import {
+  useGetCategoriesScrollInfiniteQuery,
+  useGetRelevantCategoriesScrollInfiniteQuery,
+} from "../../../features/categories/categoriesApiSlice";
+import {
+  useGetPublishersScrollInfiniteQuery,
+  useGetRelevantPublishersScrollInfiniteQuery,
+} from "../../../features/publishers/publishersApiSlice";
 import { suggestPrices } from "../../../utils/filters";
 import { useTranslation } from "react-i18next";
 import { capitalize } from "lodash-es";
@@ -159,35 +164,16 @@ const LIMIT_PUBS = 4;
 
 const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false); //Open sub cate
+  const [open, setOpen] = useState(false); // Open sub cate
   const [showmore, setShowmore] = useState(false);
   const childContainedRef = useRef(null);
-  const [pagination, setPagination] = useState({
-    isMore: true, //Merge new data
-    number: 0,
-    totalPages: 0,
-    totalElements: 0,
-  });
 
-  const { data, isLoading, isFetching, isSuccess, isError } = (
-    shopId ? useGetRelevantCategoriesQuery : useGetCategoriesQuery
+  const { data, isLoading, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage, isSuccess, isError } = (
+    shopId ? useGetRelevantCategoriesScrollInfiniteQuery : useGetCategoriesScrollInfiniteQuery
   )({
     include: "children",
-    page: pagination?.number,
-    loadMore: pagination?.isMore,
     id: shopId,
   });
-
-  useEffect(() => {
-    if (data && !isLoading && isSuccess) {
-      setPagination({
-        ...pagination,
-        number: data.page,
-        totalPages: data.totalPages,
-        totalElements: data.totalElements,
-      });
-    }
-  }, [data]);
 
   /**
    * Handle change cate
@@ -211,23 +197,28 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
    * Handle show more
    */
   const handleShowMore = () => {
-    let currPage = (pagination?.number || 0) + 1;
-    if (pagination?.totalPages <= currPage) {
+    const totalPages = data?.pages?.[0]?.totalPages;
+    const currentPage = data?.pageParams?.[data?.pageParams?.length - 1] || 0;
+    if (totalPages <= currentPage + 1) {
       setShowmore((prev) => !prev);
     } else {
-      setPagination({ ...pagination, number: currPage });
       setShowmore(true);
     }
+
+    if (isFetchingNextPage || !hasNextPage) return;
+    fetchNextPage();
   };
 
   /**
    * Handle contained selected
    */
-  let isMore = pagination?.totalPages > (pagination?.number || 0) + 1;
-  let isCollapsable = pagination?.totalElements > LIMIT_CATES;
-  let containedSelected = () => {
-    let checkId = childContainedRef.current || cateId;
-    let cateIndex = data?.ids.indexOf(+checkId);
+  const isCollapsable = data?.pages?.[0]?.totalElements > LIMIT_CATES;
+  const containedSelected = () => {
+    const checkId = childContainedRef.current || cateId;
+    const cateIndex = data?.pages
+      ?.flatMap((p) => p.content ?? [])
+      .map((b) => b.id)
+      .indexOf(+checkId);
     return checkId && (cateIndex < 0 || cateIndex >= LIMIT_CATES);
   };
   let catesContent;
@@ -239,7 +230,9 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
       </Fragment>
     ));
   } else if (isSuccess) {
-    const { ids, entities } = data;
+    const content = data?.pages?.flatMap((p) => p.content ?? []);
+    const ids = content.map((b) => b.id);
+    const entities = Object.fromEntries(content.map((b) => [b.id, b]));
 
     if (ids?.length) {
       let limitContent = [];
@@ -325,7 +318,7 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
       </Stack>
       {!isFetching && isCollapsable && (
         <Showmore onClick={handleShowMore}>
-          {!showmore || isMore ? (
+          {!showmore || hasNextPage ? (
             <>
               {t("show.more")}
               <Badge color="primary" variant="dot" invisible={!containedSelected()}>
@@ -347,46 +340,23 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
   const { t } = useTranslation();
   const [selectedPub, setSelectedPub] = useState(pubs || []);
   const [showmore, setShowmore] = useState(false);
-  const [pagination, setPagination] = useState({
-    isMore: true, // Merge new data
-    number: 0,
-    totalPages: 0,
-    totalElements: 0,
-  });
 
-  const { data, isLoading, isFetching, isSuccess, isError } = (
-    cateId ? useGetRelevantPublishersQuery : useGetPublishersQuery
+  const { data, isLoading, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage, isSuccess, isError } = (
+    cateId ? useGetRelevantPublishersScrollInfiniteQuery : useGetPublishersScrollInfiniteQuery
   )({
-    page: pagination?.number,
     cateId,
-    loadMore: pagination?.isMore,
   });
-
-  useEffect(() => {
-    setSelectedPub(pubs);
-  }, [pubs]);
-
-  useEffect(() => {
-    if (data && !isLoading && isSuccess) {
-      setPagination({
-        ...pagination,
-        number: data.page,
-        totalPages: data.totalPages,
-        totalElements: data.totalElements,
-      });
-    }
-  }, [data]);
 
   /**
    * Handle change pub
    * @param {string} id
    */
   const handleChangePub = (id) => {
-    const selectedIndex = selectedPub.indexOf(id);
+    const selectedIndex = selectedPub.indexOf(String(id));
     let newSelected = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selectedPub, id);
+      newSelected = newSelected.concat(selectedPub, String(id));
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selectedPub.slice(1));
     } else if (selectedIndex === selectedPub.length - 1) {
@@ -411,21 +381,26 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
    * Handle show more
    */
   const handleShowMore = () => {
-    let currPage = (pagination?.number || 0) + 1;
-    if (pagination?.totalPages <= currPage) {
+    const totalPages = data?.pages?.[0]?.totalPages;
+    const currentPage = data?.pageParams?.[data?.pageParams?.length - 1] || 0;
+    if (totalPages <= currentPage + 1) {
       setShowmore((prev) => !prev);
     } else {
-      setPagination({ ...pagination, number: currPage });
       setShowmore(true);
     }
+
+    if (isFetchingNextPage || !hasNextPage) return;
+    fetchNextPage();
   };
 
   const isSelected = (id) => selectedPub.indexOf(id) !== -1;
-  let isMore = pagination?.totalPages > (pagination?.number || 0) + 1;
-  let isCollapsable = pagination?.totalElements > LIMIT_PUBS;
+  const isCollapsable = data?.pages?.[0]?.totalElements > LIMIT_PUBS;
   let containedSelected = false;
-  let isContained = (id) => {
-    let pubIndex = data?.ids?.indexOf(id);
+  const isContained = (id) => {
+    const pubIndex = data?.pages
+      ?.flatMap((p) => p.content ?? [])
+      .map((b) => b.id)
+      .indexOf(id);
     return selectedPub?.length && (pubIndex < 0 || pubIndex >= LIMIT_PUBS);
   };
   let pubsContent;
@@ -437,7 +412,9 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
       </Fragment>
     ));
   } else if (isSuccess) {
-    const { ids, entities } = data;
+    const content = data?.pages?.flatMap((p) => p.content ?? []);
+    const ids = content.map((b) => b.id);
+    const entities = Object.fromEntries(content.map((b) => [b.id, b]));
 
     if (ids?.length) {
       let limitContent = [];
@@ -496,7 +473,7 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
       </Stack>
       {!isFetching && isCollapsable && (
         <Showmore onClick={handleShowMore}>
-          {!showmore || isMore ? (
+          {!showmore || hasNextPage ? (
             <>
               {t("show.more")}
               <Badge color="primary" variant="dot" invisible={!containedSelected}>
@@ -619,17 +596,16 @@ const TypeFilter = memo(({ types, onChangeType }) => {
         <FilterText>{t("product.type.label")}</FilterText>
       </TitleContainer>
       <Stack spacing={{ xs: 1 }} direction="row" useFlexGap flexWrap="wrap">
-        {Object.values(BookType).map((option, index) => {
-          const isItemSelected = isSelected(option);
-          const typeMeta = getBookType(option);
+        {bookTypeOptions.map((option, index) => {
+          const isItemSelected = isSelected(option.value);
 
           return (
             <StyledButton
               key={`type-${index}`}
               className={isItemSelected ? "checked" : ""}
-              onClick={() => handleChangeType(option)}
+              onClick={() => handleChangeType(option.value)}
             >
-              <ContentText>{t(typeMeta?.label)}</ContentText>
+              <ContentText>{t(option.label)}</ContentText>
             </StyledButton>
           );
         })}

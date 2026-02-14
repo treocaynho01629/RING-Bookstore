@@ -18,6 +18,10 @@ const getColor = (props) => {
   return props.theme.vars.palette.primary.main;
 };
 
+const StyledSection = styled.section`
+  width: 100%;
+`;
+
 const DropZoneContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -339,7 +343,7 @@ const CustomDropZone = ({ thumbnailId, setThumbnailId, remove, setRemove, images
   }
 
   return (
-    <section>
+    <StyledSection>
       <DropZoneContainer {...getRootProps({ isFocused, isDragAccept, isDragReject, isMissing })}>
         <input {...getInputProps()} style={{ display: "none" }} />
         <DropZoneContent>
@@ -359,7 +363,7 @@ const CustomDropZone = ({ thumbnailId, setThumbnailId, remove, setRemove, images
           </ButtonContainer>
         </>
       )}
-    </section>
+    </StyledSection>
   );
 };
 

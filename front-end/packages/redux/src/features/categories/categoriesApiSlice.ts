@@ -1,6 +1,4 @@
 import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
-import { defaultSerializeQueryArgs } from "@reduxjs/toolkit/query";
-import { isEqual } from "lodash-es";
 import { CategoryDTO } from "@ring/shared/models/categoryDTO";
 import apiSlice from "../../lib/apiSlice";
 
@@ -23,6 +21,9 @@ export interface CategoriesQueryArgs {
   parentId?: number;
   loadMore?: boolean;
 }
+
+/** Query arg for infinite endpoint (filters only; page comes from pageParam). */
+export type CategoriesInfiniteQueryArgs = Omit<CategoriesQueryArgs, "page" | "loadMore">;
 
 interface CatesResponse {
   content: CateResponse[];
@@ -97,47 +98,50 @@ export const categoriesApiSlice = apiWithEnum.injectEndpoints({
           content
         );
       },
-      serializeQueryArgs: ({ endpointName, queryArgs, endpointDefinition }) => {
-        if (queryArgs) {
-          const { loadMore, ...mainQuery } = queryArgs;
-
-          if (loadMore) {
-            //Load more >> serialize without <pagination>
-            const { page, size, ...rest } = mainQuery;
-            if (JSON.stringify(rest) === "{}") return endpointName + "Merge";
-            return defaultSerializeQueryArgs({
-              endpointName: endpointName + "Merge",
-              queryArgs: rest,
-              endpointDefinition,
-            });
-          }
-
-          //Serialize like normal
-          if (JSON.stringify(mainQuery) === "{}") return endpointName;
-          return defaultSerializeQueryArgs({
-            endpointName,
-            queryArgs: mainQuery,
-            endpointDefinition,
-          });
-        } else {
-          return endpointName;
-        }
-      },
-      merge: (currentCache, newItems, { arg: currentArg }) => {
-        currentCache.page = newItems.page;
-        if (!currentArg?.loadMore) catesAdapter.removeAll(currentCache);
-        catesAdapter.upsertMany(currentCache, catesSelector.selectAll(newItems));
-      },
-      forceRefetch: ({ currentArg, previousArg }) => {
-        return !!(
-          currentArg?.loadMore &&
-          !isEqual(currentArg, previousArg) &&
-          (currentArg?.page ?? 0) > (previousArg?.page ?? 0)
-        );
-      },
       providesTags: (result) =>
         result
           ? [...result.ids.map((id) => ({ type: "Category" as const, id })), { type: "Category", id: "LIST" }]
+          : [{ type: "Category", id: "LIST" }],
+    }),
+    getCategoriesScroll: builder.infiniteQuery<CatesResponse, CategoriesInfiniteQueryArgs | void, number>({
+      query: ({ queryArg, pageParam }) => {
+        const args = queryArg ?? {};
+        const { size, sortBy, sortDir, include, parentId } = args;
+
+        const params = new URLSearchParams();
+        params.append("pageNo", String(pageParam));
+        if (size) params.append("pSize", String(size));
+        if (sortBy) params.append("sortBy", sortBy);
+        if (sortDir) params.append("sortDir", sortDir);
+        if (include) params.append("include", include);
+        if (parentId) params.append("parentId", String(parentId));
+
+        return {
+          url: `/api/categories?${params.toString()}`,
+          validateStatus: (response, result) => {
+            return response.status === 200 && !result?.isError;
+          },
+        };
+      },
+      infiniteQueryOptions: {
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages, lastPageParam) => {
+          const nextPage = lastPageParam + 1;
+          if (nextPage >= lastPage.totalPages) return undefined;
+          return nextPage;
+        },
+        getPreviousPageParam: (firstPage, allPages, firstPageParam) => {
+          const prevPage = firstPageParam - 1;
+          if (prevPage < 0) return undefined;
+          return prevPage;
+        },
+      },
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.pages.flatMap((p) => p.content.map((c) => ({ type: "Category" as const, id: c.id }))),
+              { type: "Category", id: "LIST" },
+            ]
           : [{ type: "Category", id: "LIST" }],
     }),
   }),

@@ -68,6 +68,7 @@
   "notification": "Notification",
   "ring": "RING!",
   "home": "Home",
+  "breadcrumbs": "Breadcrumbs",
   "store": "Store",
   "saved": "Saved",
   "items": "items",
@@ -118,7 +119,7 @@
   "above": "and above",
   "role": {
     "admin": "Admin",
-    "user": "User",
+    "user": "Member",
     "seller": "Seller",
     "guest": "Guest"
   },
@@ -263,7 +264,11 @@
   },
   "pagination": {
     "display": "Display {{count}}",
-    "jump": "Go to page?"
+    "jump": "Go to page?",
+    "prev": "Previous page",
+    "next": "Next page",
+    "pages": "Pages",
+    "scroll": "Infinite scroll"
   },
   "payment": {
     "label": "Payment method",

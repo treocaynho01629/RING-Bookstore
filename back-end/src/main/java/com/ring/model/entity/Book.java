@@ -28,21 +28,11 @@ public class Book extends Auditable {
 
     @Id
     @Column(nullable = false, updatable = false)
-    @SequenceGenerator(
-            name = "primary_sequence",
-            sequenceName = "primary_sequence",
-            allocationSize = 1,
-            initialValue = 10000
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "primary_sequence"
-    )
+    @SequenceGenerator(name = "primary_sequence", sequenceName = "primary_sequence", allocationSize = 1, initialValue = 10000)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "primary_sequence")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY,
-            orphanRemoval = true,
-            cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id")
     @JsonIgnore
     @EqualsAndHashCode.Exclude
@@ -91,26 +81,17 @@ public class Book extends Auditable {
     @JsonIgnore
     private Category cate;
 
-    @OneToOne(cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY,
-            mappedBy = "book",
-            orphanRemoval = true,
-            optional = false)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "book", orphanRemoval = true, optional = false)
     @PrimaryKeyJoinColumn
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     private BookDetail detail;
 
-    @OneToMany(cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            mappedBy = "book",
-            fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "book", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Review> bookReviews;
 
-    @OneToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST},
-            mappedBy = "book",
-            fetch = FetchType.LAZY)
+    @OneToMany(cascade = { CascadeType.MERGE, CascadeType.PERSIST }, mappedBy = "book", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<OrderItem> orderItems;
 

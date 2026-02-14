@@ -52,4 +52,5 @@ export const couponsApiSlice = initialsApiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetCouponQuery, useGetCouponsQuery, useGetRecommendCouponsQuery } = couponsApiSlice;
+export const { useGetCouponQuery, useGetCouponsQuery, useGetCouponsScrollInfiniteQuery, useGetRecommendCouponsQuery } =
+  couponsApiSlice;

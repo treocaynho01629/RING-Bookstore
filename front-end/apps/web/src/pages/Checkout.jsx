@@ -555,6 +555,10 @@ const Checkout = () => {
   };
 
   const calculatedContextShop = calculated?.details?.find((detail) => detail?.shopId == contextShop);
+  const breadcrumbItems = [
+    { label: t("cart.title"), href: "/cart" },
+    { label: t("checkout.title"), href: "/checkout" },
+  ];
   //#endregion
 
   if (selected?.length) {
@@ -565,10 +569,7 @@ const Checkout = () => {
             <PendingModal open={isLoading || pending} message={t("order.processing", { ns: "authenticated" })} />
           </Suspense>
         )}
-        <CustomBreadcrumbs separator="›" maxItems={4} aria-label="Breadcrumb" className="transparent">
-          <NavLink to={"/cart"}>{t("cart.title")}</NavLink>
-          <NavLink to={"/checkout"}>{t("checkout.title")}</NavLink>
-        </CustomBreadcrumbs>
+        <CustomBreadcrumbs items={breadcrumbItems} type="transparent" />
         <CheckoutContainer>
           <Title ref={scrollRef}>
             <ShoppingCartCheckout />

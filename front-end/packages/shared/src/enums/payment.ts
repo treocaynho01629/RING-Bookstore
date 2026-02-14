@@ -9,6 +9,17 @@ export interface PaymentTypeMeta {
   icon: string;
 }
 
+export interface PaymentStatusMeta {
+  value: string;
+  label: string;
+  color: string;
+}
+
+/**
+ * Get payment type meta
+ * @param {PaymentType} paymentType
+ * @returns {PaymentTypeMeta}
+ */
 export const getPaymentType = (paymentType: PaymentType): PaymentTypeMeta => {
   switch (paymentType) {
     case PaymentType.CASH:
@@ -38,12 +49,18 @@ export const getPaymentType = (paymentType: PaymentType): PaymentTypeMeta => {
   }
 };
 
-export interface PaymentStatusMeta {
-  value: string;
-  label: string;
-  color: string;
-}
+/**
+ * Get payment type options
+ */
+export const paymentTypeOptions: PaymentTypeMeta[] = (Object.keys(PaymentType) as (keyof typeof PaymentType)[]).map(
+  (k) => getPaymentType(PaymentType[k])
+);
 
+/**
+ * Get payment status meta
+ * @param {PaymentStatus} paymentStatus
+ * @returns {PaymentStatusMeta}
+ */
 export const getPaymentStatus = (paymentStatus: PaymentStatus): PaymentStatusMeta => {
   switch (paymentStatus) {
     case PaymentStatus.PENDING:
@@ -84,3 +101,10 @@ export const getPaymentStatus = (paymentStatus: PaymentStatus): PaymentStatusMet
       };
   }
 };
+
+/**
+ * Get payment status options
+ */
+export const paymentStatusOptions: PaymentStatusMeta[] = (
+  Object.keys(PaymentStatus) as (keyof typeof PaymentStatus)[]
+).map((k) => getPaymentStatus(PaymentStatus[k]));

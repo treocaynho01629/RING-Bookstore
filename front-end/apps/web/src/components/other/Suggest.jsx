@@ -95,7 +95,7 @@ const Suggest = () => {
         {suggest?.map((tab, index) => (
           <Grid key={`suggest-${index}`} size={{ xs: 2.4, md: 1.2 }} display="flex" justifyContent="center">
             <ItemWrapper key={`suggest-tab-${index}`}>
-              <Link to={tab.url} title={tab.label}>
+              <Link to={tab.url} title={t(tab.label)}>
                 <ItemContainer color={tab.color}>
                   {tab.icon}
                   <ItemName>{t(tab.label)}</ItemName>

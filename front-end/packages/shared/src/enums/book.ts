@@ -6,6 +6,16 @@ export interface BookLanguageMeta {
   value: string;
 }
 
+export interface BookTypeMeta {
+  label: string;
+  value: string;
+}
+
+/**
+ * Get book language meta
+ * @param {BookLanguage} bookLanguage
+ * @returns {BookLanguageMeta}
+ */
 export const getBookLanguage = (bookLanguage: BookLanguage): BookLanguageMeta => {
   switch (bookLanguage) {
     case BookLanguage.VN:
@@ -36,11 +46,18 @@ export const getBookLanguage = (bookLanguage: BookLanguage): BookLanguageMeta =>
   }
 };
 
-export interface BookTypeMeta {
-  label: string;
-  value: string;
-}
+/**
+ * Get book language options
+ */
+export const bookLanguageOptions: BookLanguageMeta[] = (Object.keys(BookLanguage) as (keyof typeof BookLanguage)[]).map(
+  (k) => getBookLanguage(BookLanguage[k])
+);
 
+/**
+ * Get book type meta
+ * @param {BookType} bookType
+ * @returns {BookTypeMeta}
+ */
 export const getBookType = (bookType: BookType): BookTypeMeta => {
   switch (bookType) {
     case BookType.HARD_COVER:
@@ -75,3 +92,10 @@ export const getBookType = (bookType: BookType): BookTypeMeta => {
       };
   }
 };
+
+/**
+ * Get book type options
+ */
+export const bookTypeOptions: BookTypeMeta[] = (Object.keys(BookType) as (keyof typeof BookType)[]).map((k) =>
+  getBookType(BookType[k])
+);

@@ -459,6 +459,7 @@ const PopoverComponents = ({ mode, setMode, cartProducts, username, image, handl
                   {...{
                     anchorEl,
                     setAnchorEl,
+                    handleOpen: handleProfilePopover,
                     handleClose: handleProfileClose,
                     handleSignOut,
                     mode,

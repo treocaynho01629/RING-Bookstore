@@ -1,9 +1,14 @@
 import styled from "@emotion/styled";
 import { useState, useEffect, Fragment, memo, useRef } from "react";
-import { BookType } from "@ring/shared/models/bookType";
-import { getBookType } from "@ring/shared/enums/book";
-import { useGetCategoriesQuery, useGetRelevantCategoriesQuery } from "../../../features/categories/categoriesApiSlice";
-import { useGetPublishersQuery, useGetRelevantPublishersQuery } from "../../../features/publishers/publishersApiSlice";
+import { bookTypeOptions } from "@ring/shared/enums/book";
+import {
+  useGetCategoriesScrollInfiniteQuery,
+  useGetRelevantCategoriesScrollInfiniteQuery,
+} from "../../../features/categories/categoriesApiSlice";
+import {
+  useGetPublishersScrollInfiniteQuery,
+  useGetRelevantPublishersScrollInfiniteQuery,
+} from "../../../features/publishers/publishersApiSlice";
 import { suggestPrices } from "../../../utils/filters";
 import { useTranslation } from "react-i18next";
 import { capitalize } from "lodash-es";
@@ -155,32 +160,13 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
   const childContainedRef = useRef(null);
   const [open, setOpen] = useState(false); // Open sub cate
   const [showmore, setShowmore] = useState(false);
-  const [pagination, setPagination] = useState({
-    isMore: true, // Merge new data
-    number: 0,
-    totalPages: 0,
-    totalElements: 0,
-  });
 
-  const { data, isLoading, isFetching, isSuccess, isError } = (
-    shopId != null ? useGetRelevantCategoriesQuery : useGetCategoriesQuery
+  const { data, isLoading, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage, isSuccess, isError } = (
+    shopId != null ? useGetRelevantCategoriesScrollInfiniteQuery : useGetCategoriesScrollInfiniteQuery
   )({
     include: "children",
-    page: pagination?.number,
-    loadMore: pagination?.isMore,
     id: shopId,
   });
-
-  useEffect(() => {
-    if (data && !isLoading && isSuccess) {
-      setPagination({
-        ...pagination,
-        number: data.page,
-        totalPages: data.totalPages,
-        totalElements: data.totalElements,
-      });
-    }
-  }, [data]);
 
   /**
    * Handle change cate
@@ -204,20 +190,24 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
    * Handle show more
    */
   const handleShowMore = () => {
-    let currPage = (pagination?.number || 0) + 1;
-    if (pagination?.totalPages <= currPage) {
+    const totalPages = data?.pages?.[0]?.totalPages;
+    const currentPage = data?.pageParams?.[data?.pageParams?.length - 1] || 0;
+    if (totalPages <= currentPage + 1) {
       setShowmore((prev) => !prev);
     } else {
-      setPagination({ ...pagination, number: currPage });
       setShowmore(true);
     }
+
+    if (isFetchingNextPage || !hasNextPage) return;
+    fetchNextPage();
   };
 
-  let isMore = pagination?.totalPages > (pagination?.number || 0) + 1;
-  let isCollapsable = pagination?.totalElements > LIMIT_CATES;
+  const isCollapsable = data?.pages?.[0]?.totalElements > LIMIT_CATES;
   let containedSelected = () => {
-    let checkId = childContainedRef.current || cateId;
-    let cateIndex = data?.ids?.indexOf(+checkId);
+    const checkId = childContainedRef.current || cateId;
+    const content = data?.pages?.flatMap((p) => p.content ?? []);
+    const ids = content.map((b) => b.id);
+    const cateIndex = ids?.indexOf(+checkId);
     return checkId && (cateIndex < 0 || cateIndex >= LIMIT_CATES);
   };
   let catesContent;
@@ -233,7 +223,9 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
       </Fragment>
     ));
   } else if (isSuccess) {
-    const { ids, entities } = data;
+    const content = data?.pages?.flatMap((p) => p.content ?? []);
+    const ids = content.map((b) => b.id);
+    const entities = Object.fromEntries(content.map((b) => [b.id, b]));
 
     if (ids?.length) {
       let limitContent = [];
@@ -319,7 +311,7 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
       </List>
       {!isFetching && isCollapsable && (
         <Showmore onClick={handleShowMore}>
-          {!showmore || isMore ? (
+          {!showmore || hasNextPage ? (
             <>
               {t("show.more")}
               <Badge color="primary" variant="dot" invisible={!containedSelected()}>
@@ -339,38 +331,18 @@ const CateFilter = memo(({ cateId, shopId, onChangeCate }) => {
 
 const PublisherFilter = memo(({ pubs, cateId, onChangePubs, pubsRef }) => {
   const { t } = useTranslation();
-
   const [selectedPub, setSelectedPub] = useState(pubs || []);
   const [showmore, setShowmore] = useState(false);
-  const [pagination, setPagination] = useState({
-    isMore: true, // Merge new data
-    number: 0,
-    totalPages: 0,
-    totalElements: 0,
-  });
 
-  const { data, isLoading, isFetching, isSuccess, isError } = (
-    cateId ? useGetRelevantPublishersQuery : useGetPublishersQuery
+  const { data, isLoading, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage, isSuccess, isError } = (
+    cateId ? useGetRelevantPublishersScrollInfiniteQuery : useGetPublishersScrollInfiniteQuery
   )({
-    page: pagination?.number,
     cateId,
-    loadMore: pagination?.isMore,
   });
 
   useEffect(() => {
     setSelectedPub(pubs);
   }, [pubs]);
-
-  useEffect(() => {
-    if (data && !isLoading && isSuccess) {
-      setPagination({
-        ...pagination,
-        number: data.page,
-        totalPages: data.totalPages,
-        totalElements: data.totalElements,
-      });
-    }
-  }, [data]);
 
   /**
    * Handle change pub
@@ -406,21 +378,26 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePubs, pubsRef }) => {
    * Handle show more
    */
   const handleShowMore = () => {
-    let currPage = (pagination?.number || 0) + 1;
-    if (pagination?.totalPages <= currPage) {
+    const totalPages = data?.pages?.[0]?.totalPages;
+    const currentPage = data?.pageParams?.[data?.pageParams?.length - 1] || 0;
+    if (totalPages <= currentPage + 1) {
       setShowmore((prev) => !prev);
     } else {
-      setPagination({ ...pagination, number: currPage });
       setShowmore(true);
     }
+
+    if (isFetchingNextPage || !hasNextPage) return;
+    fetchNextPage();
   };
 
   const isSelected = (id) => selectedPub.indexOf(id) !== -1;
-  let isMore = pagination?.totalPages > (pagination?.number || 0) + 1;
-  let isCollapsable = pagination?.totalElements > LIMIT_PUBS;
+  const isCollapsable = data?.pages?.[0]?.totalElements > LIMIT_PUBS;
   let containedSelected = false;
-  let isContained = (id) => {
-    let pubIndex = data?.ids?.indexOf(id);
+  const isContained = (id) => {
+    const pubIndex = data?.pages
+      ?.flatMap((p) => p.content ?? [])
+      .map((b) => b.id)
+      .indexOf(id);
     return selectedPub?.length && (pubIndex < 0 || pubIndex >= LIMIT_PUBS);
   };
   let pubsContent;
@@ -432,7 +409,9 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePubs, pubsRef }) => {
       </CheckPlaceholder>
     ));
   } else if (isSuccess) {
-    const { ids, entities } = data;
+    const content = data?.pages?.flatMap((p) => p.content ?? []);
+    const ids = content.map((b) => b.id);
+    const entities = Object.fromEntries(content.map((b) => [b.id, b]));
 
     if (ids?.length) {
       let limitContent = [];
@@ -500,7 +479,7 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePubs, pubsRef }) => {
       </FormGroup>
       {!isFetching && isCollapsable && (
         <Showmore onClick={handleShowMore}>
-          {!showmore || isMore ? (
+          {!showmore || hasNextPage ? (
             <>
               {t("show.more")}
               <Badge color="primary" variant="dot" invisible={!containedSelected}>
@@ -570,30 +549,26 @@ const RangeFilter = memo(({ value, onChangeInputRange, onChangeRange, valueRef }
         <FilterText>{t("search.price.range")}</FilterText>
       </TitleContainer>
       <FormGroup sx={{ padding: 0, width: "100%", mb: 1 }}>
-        {suggestPrices.map((option, index) => {
-          const isItemSelected = isSelected(option.value);
-
-          return (
-            <FormControlLabel
-              key={`range-${index}`}
-              control={
-                <Radio
-                  value={option.value}
-                  checked={isItemSelected}
-                  onChange={handleSelect}
-                  disableRipple
-                  disableTouchRipple
-                  disableFocusRipple
-                  name={option.label}
-                  color="primary"
-                  size="small"
-                />
-              }
-              sx={{ fontSize: "14px", width: "100%", marginRight: 0 }}
-              label={<LabelText>{option.label}</LabelText>}
-            />
-          );
-        })}
+        {suggestPrices.map((option, index) => (
+          <FormControlLabel
+            key={`range-${index}`}
+            control={
+              <Radio
+                value={option.value}
+                checked={isSelected(option.value)}
+                onChange={handleSelect}
+                disableRipple
+                disableTouchRipple
+                disableFocusRipple
+                name={option.label}
+                color="primary"
+                size="small"
+              />
+            }
+            sx={{ fontSize: "14px", width: "100%", marginRight: 0 }}
+            label={<LabelText>{option.label}</LabelText>}
+          />
+        ))}
       </FormGroup>
       <PriceRangeSlider {...{ value: valueInput, onChange: handleChangeRange }} />
     </Filter>
@@ -646,29 +621,24 @@ const TypeFilter = memo(({ types, onChangeTypes, typesRef }) => {
         <FilterText>{t("product.type.label")}</FilterText>
       </TitleContainer>
       <FormGroup sx={{ padding: 0, width: "100%" }}>
-        {Object.values(BookType).map((option, index) => {
-          const isItemSelected = isSelected(option);
-          const typeMeta = getBookType(option);
-
-          return (
-            <FormControlLabel
-              key={`type-${index}`}
-              control={
-                <Checkbox
-                  value={option}
-                  checked={isItemSelected}
-                  onChange={handleChangeType}
-                  disableRipple
-                  name={t(typeMeta?.label)}
-                  color="primary"
-                  size="small"
-                />
-              }
-              sx={{ fontSize: "14px", width: "100%", marginRight: 0 }}
-              label={<LabelText>{t(typeMeta?.label)}</LabelText>}
-            />
-          );
-        })}
+        {bookTypeOptions.map((option, index) => (
+          <FormControlLabel
+            key={`type-${index}`}
+            control={
+              <Checkbox
+                value={option.value}
+                checked={isSelected(option.value)}
+                onChange={handleChangeType}
+                disableRipple
+                name={t(option.label)}
+                color="primary"
+                size="small"
+              />
+            }
+            sx={{ fontSize: "14px", width: "100%", marginRight: 0 }}
+            label={<LabelText>{t(option.label)}</LabelText>}
+          />
+        ))}
       </FormGroup>
     </Filter>
   );

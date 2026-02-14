@@ -70,7 +70,7 @@ export const shopsApiSlice = apiWithEnum.injectEndpoints({
       query: (args) => {
         const { page, size, sortBy, sortDir, keyword, userId } = args || {};
 
-        //Params
+        // Params
         const params = new URLSearchParams();
         if (page) params.append("pageNo", page.toString());
         if (size) params.append("pSize", size.toString());
@@ -175,7 +175,7 @@ export const shopsApiSlice = apiWithEnum.injectEndpoints({
       query: (args) => {
         const { keyword, userId, ids } = args || {};
 
-        //Params
+        // Params
         const params = new URLSearchParams();
         if (keyword) params.append("keyword", keyword);
         if (userId) params.append("userId", userId);

@@ -1,5 +1,5 @@
 import { Fragment, Suspense, useCallback, useState, useEffect, lazy } from "react";
-import { useGetMyReviewsQuery } from "../../features/reviews/reviewsApiSlice";
+import { useGetMyReviewsScrollInfiniteQuery } from "../../features/reviews/reviewsApiSlice";
 import { Message } from "@ring/ui/Components";
 import { capitalize, debounce } from "lodash-es";
 import {
@@ -9,6 +9,7 @@ import {
   StyledEmptyIcon,
   StyledDialogTitle,
 } from "../custom/ProfileComponents";
+import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import useAuth from "../../hooks/useAuth";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
@@ -26,31 +27,24 @@ const ReviewsContainer = styled.div`
 `;
 //#endregion
 
-const defaultSize = 5;
+const DEFAULT_SIZE = 5;
 
-const ReviewsList = ({ mobileMode, tabletMode, pending, setPending, handleClose }) => {
+const ReviewsList = ({ mobileMode, tabletMode, pending, setPending }) => {
   const { username } = useAuth();
   const { t } = useTranslation();
   const [openForm, setOpenForm] = useState(undefined);
   const [contextReview, setContextReview] = useState(null);
-  const [pagination, setPagination] = useState({
-    number: 0,
-    size: defaultSize,
-    isMore: true,
-  });
 
   // Fetch orders
-  const { data, isLoading, isFetching, isSuccess, isError, error } = useGetMyReviewsQuery({
-    page: pagination?.number,
-    size: pagination?.size,
-    loadMore: pagination?.isMore,
-  });
+  const { data, isLoading, isSuccess, isError, error, isFetchingNextPage, hasNextPage, fetchNextPage } =
+    useGetMyReviewsScrollInfiniteQuery({
+      size: DEFAULT_SIZE,
+    });
 
   // Show more
   const handleShowMore = () => {
-    if (isFetching || typeof data?.page !== "number" || data?.page < pagination?.number) return;
-    const nextPage = data?.page + 1;
-    if (nextPage < data?.totalPages) setPagination((prev) => ({ ...prev, number: nextPage }));
+    if (isFetchingNextPage || !hasNextPage) return;
+    fetchNextPage();
   };
 
   /**
@@ -98,7 +92,7 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending, handleClose 
 
   let reviewsContent;
 
-  if (isLoading || (isFetching && pagination.number == 0)) {
+  if (isLoading) {
     reviewsContent = (
       <PlaceholderContainer>
         <LoadContainer>
@@ -107,7 +101,9 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending, handleClose 
       </PlaceholderContainer>
     );
   } else if (isSuccess) {
-    const { ids, entities } = data;
+    const content = data?.pages?.flatMap((p) => p.content ?? []);
+    const ids = content.map((b) => b.id);
+    const entities = Object.fromEntries(content.map((b) => [b.id, b]));
 
     reviewsContent = (
       <>
@@ -142,9 +138,9 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending, handleClose 
   return (
     <>
       <StyledDialogTitle>
-        <a onClick={handleClose}>
+        <Link to={-1}>
           <KeyboardArrowLeft />
-        </a>
+        </Link>
         <Try />
         &nbsp;{t("review.title", { ns: "authenticated" })}
       </StyledDialogTitle>
@@ -154,7 +150,7 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending, handleClose 
       >
         <ReviewsContainer>
           {reviewsContent}
-          {pagination.number > 0 && isFetching && (
+          {isFetchingNextPage && (
             <LoadContainer>
               <CircularProgress size={30} color="primary" />
             </LoadContainer>

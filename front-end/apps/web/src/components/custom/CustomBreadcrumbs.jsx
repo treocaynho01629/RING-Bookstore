@@ -1,5 +1,5 @@
-import { Link } from "react-router";
-import { Breadcrumbs } from "@mui/material";
+import { NavLink } from "react-router";
+import { Breadcrumbs, Skeleton } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import styled from "@emotion/styled";
 
@@ -36,21 +36,25 @@ const BreadcrumbsContainer = styled.div`
   }
 `;
 
-const StyledMainCrumb = styled(Link)`
+const StyledMainCrumb = styled(NavLink)`
   background-color: ${({ theme }) => theme.vars.palette.primary.main};
   color: ${({ theme }) => theme.vars.palette.primary.contrastText};
   padding: 5px 15px;
 `;
 
-export default function CustomBreadcrumbs(props) {
+export default function CustomBreadcrumbs({ items, type = "default", loading = false }) {
   const { t } = useTranslation();
-  const { children, className, ...leftProps } = props;
 
   return (
-    <BreadcrumbsContainer className={className ?? ""}>
-      <Breadcrumbs {...leftProps}>
+    <BreadcrumbsContainer className={type}>
+      <Breadcrumbs separator="›" aria-label={t("breadcrumbs")} maxItems={4}>
         <StyledMainCrumb to={"/"}>{t("home")}</StyledMainCrumb>
-        {children}
+        {items.map((item) => (
+          <NavLink key={item.href} to={item.href} end={item.end}>
+            {item.label}
+          </NavLink>
+        ))}
+        {loading && <Skeleton variant="text" sx={{ fontSize: "16px" }} width={200} />}
       </Breadcrumbs>
     </BreadcrumbsContainer>
   );

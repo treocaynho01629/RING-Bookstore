@@ -466,9 +466,8 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
                   ) : (
                     t(stepContent?.summary, {
                       ns: "authenticated",
-                      date: stepContent?.date
-                        ? `${timeFormatter(stepContent?.date, i18n.language)} ${dateFormatter(stepContent?.date, i18n.language)}`
-                        : undefined,
+                      date: stepContent?.date ? dateFormatter(stepContent?.date, i18n.language) : undefined,
+                      time: stepContent?.date ? timeFormatter(stepContent?.date, i18n.language) : undefined,
                       amount: stepContent?.price ? currencyFormat.format(stepContent?.price) : undefined,
                     })
                   )}
@@ -495,6 +494,17 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
                 ) : order?.status == OrderStatus.SHIPPING && order?.paymentStatus == PaymentStatus.PAID ? (
                   <MainButton variant="contained" color="success" size="large" fullWidth onClick={handleConfirmOrder}>
                     {t("order.confirm.confirmed", { ns: "authenticated" })}
+                  </MainButton>
+                ) : order?.status == OrderStatus.PENDING_PAYMENT ? (
+                  <MainButton
+                    component={Link}
+                    to={`/profile/order/checkout/${order?.orderId}`}
+                    variant="contained"
+                    color="warning"
+                    size="large"
+                    fullWidth
+                  >
+                    {t("order.checkout")}
                   </MainButton>
                 ) : (
                   <>
@@ -571,7 +581,7 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
                       <Suspense fallback={null}>
                         <ShippingTag color={shippingMeta?.color}>
                           {Icon && <Icon color={shippingMeta?.color} />}
-                          {t(shippingMeta?.label)}:
+                          &nbsp;{t(shippingMeta?.label)}:
                         </ShippingTag>
                         &nbsp;{t("shipping.estimate", { date: shippingMeta?.estimate })}
                       </Suspense>
@@ -650,6 +660,17 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
             ) : order?.status == OrderStatus.SHIPPING ? (
               <MainButton variant="contained" color="success" size="large" fullWidth onClick={handleConfirmOrder}>
                 {t("order.confirm.confirmed", { ns: "authenticated" })}
+              </MainButton>
+            ) : order?.status == OrderStatus.PENDING_PAYMENT ? (
+              <MainButton
+                component={Link}
+                to={`/profile/order/checkout/${order?.orderId}`}
+                variant="contained"
+                color="warning"
+                size="large"
+                fullWidth
+              >
+                {t("order.checkout")}
               </MainButton>
             ) : (
               <MainButton variant="contained" color="primary" size="large" fullWidth onClick={handleAddToCart}>

@@ -55,7 +55,7 @@ export const sortBooksBy = [
     label: "search.sort.best-selling",
   },
   {
-    value: "rating",
+    value: "favorite",
     label: "search.sort.favorite",
   },
   {
@@ -106,7 +106,7 @@ export const sortReviewsBy = [
 export const filterShopsBy = [
   {
     value: "ALL",
-    label: "all",
+    label: "all.label",
   },
   {
     value: "FOLLOWED",

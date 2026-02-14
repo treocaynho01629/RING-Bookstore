@@ -68,6 +68,7 @@
   "notification": "Thông báo",
   "ring": "RING!",
   "home": "Trang chủ",
+  "breadcrumbs": "Đường dẫn",
   "store": "Cửa hàng",
   "saved": "Đã lưu",
   "items": "sản phẩm",
@@ -118,7 +119,7 @@
   "above": "trở lên",
   "role": {
     "admin": "Quản trị viên",
-    "user": "Người dùng",
+    "user": "Thành viên",
     "seller": "Người bán",
     "guest": "Khách"
   },
@@ -263,7 +264,11 @@
   },
   "pagination": {
     "display": "Hiển thị {{count}}",
-    "jump": "Đi đến trang?"
+    "jump": "Đi đến trang?",
+    "prev": "Trang trước",
+    "next": "Trang sau",
+    "pages": "Theo trang",
+    "scroll": "Cuộn vô hạn"
   },
   "payment": {
     "label": "Hình thức thanh toán",

@@ -1,8 +1,12 @@
 import styled from "@emotion/styled";
-import { useState, useEffect, lazy, Suspense, useRef } from "react";
+import { useState, useEffect, lazy, useRef } from "react";
 import { Link, useNavigate } from "react-router";
 import { useGetCategoriesQuery } from "../features/categories/categoriesApiSlice";
-import { useGetBooksQuery, useGetRandomBooksQuery } from "../features/books/booksApiSlice";
+import {
+  useGetBooksQuery,
+  useGetRandomBooksQuery,
+  useGetBooksScrollInfiniteQuery,
+} from "../features/books/booksApiSlice";
 import { CustomTab, CustomTabs } from "../components/custom/CustomTabs";
 import { useTranslation } from "react-i18next";
 import { useGetPublishersQuery } from "../features/publishers/publishersApiSlice";
@@ -204,8 +208,7 @@ const SaleContainer = styled.div`
 `;
 //#endregion
 
-const defaultSize = 15;
-const defaultMore = 5;
+const DEFAULT_SIZE = 15;
 
 const cateToTabs = (cate) => {
   return cate?.children?.flatMap(function (child, index) {
@@ -473,11 +476,6 @@ const Home = () => {
   const [catesWithChilds, setCatesWithChilds] = useState([]);
   const [cates, setCates] = useState([]);
   const [pubs, setPubs] = useState([]);
-  const [pagination, setPagination] = useState({
-    number: 0,
-    size: defaultSize,
-    isMore: true,
-  });
 
   // Fetch
   const {
@@ -486,11 +484,10 @@ const Home = () => {
     isSuccess: doneCates,
   } = useGetCategoriesQuery({ include: "children" });
   const { data: publishers, isLoading: loadPubs, isSuccess: donePubs } = useGetPublishersQuery();
-  const { data, isLoading, isSuccess, isError } = useGetBooksQuery({
-    page: pagination?.number,
-    size: pagination?.size,
-    loadMore: pagination?.isMore,
-  });
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, isSuccess, isError, refetch } =
+    useGetBooksScrollInfiniteQuery({
+      size: DEFAULT_SIZE,
+    });
 
   useEffect(() => {
     if (!loadCates && doneCates && categories) {
@@ -523,11 +520,11 @@ const Home = () => {
    * Show more products
    */
   const handleShowMore = () => {
-    if (pagination?.number >= 5) {
+    if (isFetchingNextPage || !hasNextPage) return;
+    if (data?.pages?.length >= 2) {
       navigate("/store");
     } else {
-      const nextPage = data?.ids?.length / defaultMore;
-      if (nextPage >= 1) setPagination({ ...pagination, number: nextPage, size: defaultMore });
+      fetchNextPage();
     }
   };
 

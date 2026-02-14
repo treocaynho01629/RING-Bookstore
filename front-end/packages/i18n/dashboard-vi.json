@@ -7,7 +7,8 @@
   "general": {
     "add": "Thêm",
     "view": "Xem chi tiết",
-    "id": "ID"
+    "id": "ID",
+    "filter": "Bộ lọc nâng cao"
   },
   "all": {
     "shop": "Tổng thể"
@@ -20,8 +21,19 @@
     "title": "Tiêu đề",
     "orders": "Lượt mua",
     "shop": "Tên Shop",
-    "price": "Giá",
-    "discount": "Giảm giá"
+    "price": {
+      "label": "Giá",
+      "original": "Giá gốc",
+      "sale": "Giá giảm",
+      "discount": "Giảm giá"
+    },
+    "info": "Thông tin sản phẩm",
+    "basic": "Thông tin cơ bản",
+    "inventory": "Giá và tồn kho",
+    "add": "Thêm sản phẩm",
+    "edit": "Chỉnh sửa sản phẩm",
+    "images": "Hình ảnh",
+    "date": "Ngày xuất bản"
   },
   "user": {
     "member": "Thành viên",

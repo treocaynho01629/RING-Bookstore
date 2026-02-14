@@ -103,8 +103,8 @@ public class BookController {
             @RequestParam(value = "rating", defaultValue = "0") Integer rating,
             @RequestParam(value = "amount", defaultValue = "1") Integer amount,
             @RequestParam(value = "withDesc", defaultValue = "false") Boolean withDesc) {
-        
-                PagingResponse<BookDisplayDTO> books = bookService.getBooks(
+
+        PagingResponse<BookDisplayDTO> books = bookService.getBooks(
                 pageNo,
                 pageSize,
                 sortBy,
@@ -169,7 +169,8 @@ public class BookController {
      * @return a {@link ResponseEntity} containing list of keyword suggestions.
      */
     @GetMapping("/suggest")
-    public ResponseEntity<List<String>> getBooksSuggestion(@RequestParam(value = "keyword", defaultValue = "") String keyword) {
+    public ResponseEntity<List<String>> getBooksSuggestion(
+            @RequestParam(value = "keyword", defaultValue = "") String keyword) {
 
         List<String> keywords = bookService.getBooksSuggestion(keyword);
         return new ResponseEntity<>(keywords, HttpStatus.OK);
@@ -305,7 +306,7 @@ public class BookController {
             @RequestParam(value = "amount", defaultValue = "1") Integer amount,
             @RequestParam("ids") List<Long> ids,
             @CurrentAccount Account currUser) {
-                
+
         bookService.deleteBooksInverse(keyword,
                 amount,
                 rating,
@@ -335,7 +336,7 @@ public class BookController {
     public ResponseEntity<String> deleteAllBooks(
             @RequestParam(value = "shopId", required = false) Long shopId,
             @CurrentAccount Account currUser) {
-                
+
         bookService.deleteAllBooks(shopId, currUser);
         String message = messageService.getMessage("message.delete.succeeded");
 

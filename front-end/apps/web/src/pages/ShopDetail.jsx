@@ -1,12 +1,11 @@
 import { useState, useRef, Suspense, useEffect, memo, useCallback } from "react";
-import { useParams, Navigate, NavLink, useSearchParams, useNavigate } from "react-router";
+import { useParams, Navigate, useSearchParams, useNavigate } from "react-router";
 import { useGetShopQuery } from "../features/shops/shopsApiSlice";
 import { booksAmount, pageSizes, sortBooksBy } from "../utils/filters";
-import { useGetBooksQuery } from "../features/books/booksApiSlice";
+import { useGetBooksQuery, useGetBooksScrollInfiniteQuery } from "../features/books/booksApiSlice";
 import { debounce, isEqual } from "lodash-es";
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
-import Skeleton from "@mui/material/Skeleton";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Grid from "@mui/material/Grid";
 import CustomBreadcrumbs from "../components/custom/CustomBreadcrumbs";
@@ -18,6 +17,7 @@ import FilteredProducts from "../components/product/filter/FilteredProducts";
 import JumpPagination from "../components/custom/JumpPagination";
 import AppPagination from "../components/custom/AppPagination";
 import FilterList from "../components/product/filter/FilterList";
+import useTitle from "@ring/shared/useTitle";
 
 const DEFAULT_FILTERS = {
   keyword: "",
@@ -32,22 +32,37 @@ const DEFAULT_PAGINATION = {
   sortBy: sortBooksBy[0].value,
   sortDir: "desc",
   amount: booksAmount[0].value,
+  mode: "scroll",
 };
 
 const Pagination = memo(AppPagination);
 
-const HeaderComponent = ({ id }) => {
+const HeaderComponent = ({ shopId }) => {
+  const { t } = useTranslation();
+
   // Fetch data
-  const { data, isError, error } = useGetShopQuery(id, {
-    skip: !id,
+  const { data, isError, error } = useGetShopQuery(shopId, {
+    skip: !shopId,
   });
 
-  return isError && error?.status === 404 ? <Navigate to="/missing" replace /> : <ShopDetailComponent shop={data} />;
+  // Set title
+  useTitle(data?.name ?? t("shop.detail"));
+
+  const breadcrumbItems = [
+    { label: t("shop.title"), href: "/shop", end: true },
+    data && { label: data?.name, href: "#" },
+  ].filter(Boolean);
+
+  return (
+    <>
+      <CustomBreadcrumbs items={breadcrumbItems} loading={!data} />
+      {isError && error?.status === 404 ? <Navigate to="/missing" replace /> : <ShopDetailComponent shop={data} />}
+    </>
+  );
 };
 
 const ShopDetail = () => {
-  const { id } = useParams(); //Shop id
-  const { t } = useTranslation();
+  const { id } = useParams(); // Shop id
 
   // Scroll ref
   const scrollRef = useRef(null);
@@ -59,8 +74,8 @@ const ShopDetail = () => {
   const mobileMode = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md_lg"));
 
-  const [open, setOpen] = useState(undefined); //Filter
-  const [openPagination, setOpenPagination] = useState(undefined); //Pagination
+  const [open, setOpen] = useState(undefined); // Filter
+  const [openPagination, setOpenPagination] = useState(undefined); // Pagination
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -81,23 +96,51 @@ const ShopDetail = () => {
     sortBy: searchParams.get("sort") ?? DEFAULT_PAGINATION.sortBy,
     sortDir: searchParams.get("dir") ?? DEFAULT_PAGINATION.sortDir,
     amount: searchParams.get("amount") ?? DEFAULT_PAGINATION.amount,
+    mode: searchParams.get("mode") ?? DEFAULT_PAGINATION.mode,
   });
 
-  // Fetch data
-  const { data, isLoading, isFetching, isUninitialized, isError, error } = useGetBooksQuery({
-    // Books
-    page: pagination.number,
-    size: pagination.size,
-    sortBy: pagination.sortBy,
-    sortDir: pagination.sortDir,
-    amount: pagination.amount,
-    keyword: filters.keyword,
-    cateId: filters.cate.id,
-    rating: filters.rating,
-    types: filters.types,
-    value: filters.value,
-    shopId: filters.shopId,
-  });
+  // Fetch data: pages mode uses getBooks, scroll mode uses getBooksScroll
+  const { data, isLoading, isFetching, isUninitialized, isError, error } = useGetBooksQuery(
+    {
+      page: pagination.number,
+      size: pagination.size,
+      sortBy: pagination.sortBy,
+      sortDir: pagination.sortDir,
+      amount: pagination.amount,
+      keyword: filters.keyword,
+      cateId: filters.cate.id,
+      rating: filters.rating,
+      types: filters.types,
+      value: filters.value,
+      shopId: filters.shopId,
+    },
+    { skip: pagination.mode === "scroll" }
+  );
+
+  const {
+    data: infiniteData,
+    isLoading: infiniteLoading,
+    isFetching: infiniteFetching,
+    isFetchingNextPage,
+    isError: infiniteError,
+    error: infiniteErrorObj,
+    fetchNextPage,
+    hasNextPage,
+  } = useGetBooksScrollInfiniteQuery(
+    {
+      size: pagination.size,
+      sortBy: pagination.sortBy,
+      sortDir: pagination.sortDir,
+      amount: pagination.amount,
+      keyword: filters.keyword,
+      cateId: filters.cate.id,
+      rating: filters.rating,
+      types: filters.types,
+      value: filters.value,
+      shopId: filters.shopId,
+    },
+    { skip: pagination.mode !== "scroll" }
+  );
 
   /**
    * Update filters
@@ -120,6 +163,7 @@ const ShopDetail = () => {
       sortBy: searchParams.get("sort") ?? DEFAULT_PAGINATION.sortBy,
       sortDir: searchParams.get("dir") ?? DEFAULT_PAGINATION.sortDir,
       amount: searchParams.get("amount") ?? DEFAULT_PAGINATION.amount,
+      mode: searchParams.get("mode") ?? DEFAULT_PAGINATION.mode,
     }));
   };
 
@@ -239,7 +283,12 @@ const ShopDetail = () => {
    * Handle change page
    */
   const handleChangePage = (page) => {
-    setPagination((prev) => ({ ...prev, number: page - 1 }));
+    if (pagination.mode === "pages") {
+      setPagination((prev) => ({ ...prev, number: page - 1 }));
+    } else {
+      setPagination((prev) => ({ ...prev, number: page - 1, mode: "pages" }));
+      searchParams.set("mode", "pages");
+    }
     page - 1 == DEFAULT_PAGINATION.number ? searchParams.delete("pNo") : searchParams.set("pNo", page);
     setSearchParams(searchParams);
     scrollToTop();
@@ -313,6 +362,50 @@ const ShopDetail = () => {
   };
 
   /**
+   * Handle change pagination mode
+   * @param {string} mode
+   */
+  const handleChangePaginationMode = (mode) => {
+    const currPage = infiniteData?.pageParams?.[infiniteData?.pageParams.length - 1] ?? DEFAULT_PAGINATION.number;
+    searchParams.set("mode", mode);
+    if (mode === "scroll") {
+      searchParams.delete("pNo");
+      searchParams.delete("mode");
+    } else {
+      if (currPage != DEFAULT_PAGINATION.number) searchParams.set("pNo", currPage + 1);
+    }
+    setSearchParams(searchParams, { replace: true });
+    setPagination((prev) => ({ ...prev, mode, number: currPage }));
+    scrollToTop();
+  };
+
+  /**
+   * Handle load more items
+   */
+  const handleLoadMore = useCallback(() => {
+    if (pagination.mode !== "scroll" || isFetchingNextPage || !hasNextPage) return;
+    fetchNextPage();
+    setPagination((prev) => ({ ...prev, number: prev.number + 1 }));
+  }, [pagination.mode, pagination.number, fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  /**
+   * Scroll listener for infinite load
+   */
+  const handleWindowScroll = useCallback(
+    debounce(() => {
+      const trigger = document.body.scrollHeight - 700 < window.scrollY + window.innerHeight;
+      if (trigger) handleLoadMore();
+    }, 400),
+    [handleLoadMore]
+  );
+
+  useEffect(() => {
+    if (pagination.mode !== "scroll") return;
+    window.addEventListener("scroll", handleWindowScroll);
+    return () => window.removeEventListener("scroll", handleWindowScroll);
+  }, [pagination.mode, handleWindowScroll]);
+
+  /**
    * Handle reset filters
    */
   const handleResetFilters = () => {
@@ -341,28 +434,32 @@ const ShopDetail = () => {
     setOpen(false);
   };
 
-  //Stuff
-  let loading = isLoading || isFetching || isError || isUninitialized;
-  let isChanged = !isEqual(filters, DEFAULT_FILTERS);
+  // Display data and pagination
+  const loading =
+    pagination.mode === "scroll"
+      ? infiniteLoading || infiniteFetching || infiniteError
+      : isLoading || isFetching || isError || isUninitialized;
+  const isChanged = !isEqual(filters, DEFAULT_FILTERS);
+  const displayData =
+    pagination.mode === "scroll" && infiniteData?.pages
+      ? (() => {
+          const content = infiniteData.pages.flatMap((p) => p.content ?? []);
+          const ids = content.map((b) => b.id);
+          const entities = Object.fromEntries(content.map((b) => [b.id, b]));
+          return { ids, entities };
+        })()
+      : data;
+  const displayError = pagination.mode === "scroll" ? infiniteErrorObj : error;
+  const totalPages =
+    pagination.mode === "scroll" && infiniteData?.pages?.length
+      ? (infiniteData.pages[infiniteData.pages.length - 1]?.totalPages ?? 0)
+      : (data?.totalPages ?? 0);
+  const isLastPage = pagination.mode === "scroll" && totalPages === pagination.number + 1;
 
   return (
     <>
       <Box display="relative">
-        <CustomBreadcrumbs separator="›" maxItems={4} aria-label="breadcrumb">
-          {data ? (
-            [
-              <NavLink to={"/shop"} key="shop">
-                {t("shop.title")}
-              </NavLink>,
-              <NavLink to="#" key="shop-name">
-                {data?.name}
-              </NavLink>,
-            ]
-          ) : (
-            <Skeleton variant="text" sx={{ fontSize: "16px" }} width={200} />
-          )}
-        </CustomBreadcrumbs>
-        <HeaderComponent id={id} />
+        <HeaderComponent shopId={id} />
         <Grid container spacing={2} mt={2} size="grow" position="relative" display="flex" justifyContent="center">
           {tabletMode ? (
             <Suspense fallback={null}>
@@ -428,6 +525,7 @@ const ShopDetail = () => {
             <FilterSortList
               {...{
                 pagination,
+                totalPages,
                 mobileMode,
                 onOpenFilters: handleOpen,
                 isChanged,
@@ -436,22 +534,33 @@ const ShopDetail = () => {
                 onChangeDir: handleChangeDir,
                 onChangeAmount: handleChangeAmount,
                 onPageChange: handleChangePage,
+                onChangePaginationMode: handleChangePaginationMode,
               }}
             />
-            <FilteredProducts {...{ data, error, loading }} />
-            <Pagination
-              page={pagination?.number}
-              size={pagination?.size}
-              count={data?.totalPages ?? 0}
-              onPageChange={handleChangePage}
-              onSizeChange={handleChangeSize}
+            <FilteredProducts
+              {...{
+                data: displayData,
+                error: displayError,
+                loading,
+                mode: pagination.mode,
+                isLastPage,
+              }}
             />
+            {pagination.mode === "pages" && (
+              <Pagination
+                page={pagination?.number}
+                size={pagination?.size}
+                count={totalPages}
+                onPageChange={handleChangePage}
+                onSizeChange={handleChangeSize}
+              />
+            )}
             <Suspense fallback={null}>
               {openPagination != undefined && (
                 <JumpPagination
                   {...{
                     pagination,
-                    totalPages: data?.totalPages ?? 0,
+                    totalPages,
                     onPageChange: handleChangePage,
                     open: openPagination,
                     handleClose: handleClosePagination,

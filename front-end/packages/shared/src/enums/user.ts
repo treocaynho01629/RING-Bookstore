@@ -13,6 +13,11 @@ export interface UserRoleMeta {
   color: string;
 }
 
+/**
+ * Get gender type meta
+ * @param {Gender} gender
+ * @returns {GenderTypeMeta}
+ */
 export const getGenderType = (gender: Gender): GenderTypeMeta => {
   switch (gender) {
     case Gender.MALE:
@@ -36,8 +41,19 @@ export const getGenderType = (gender: Gender): GenderTypeMeta => {
   }
 };
 
-export const getUserRole = (userRole: UserRole): UserRoleMeta => {
+/**
+ * Get gender type options
+ */
+export const genderTypeOptions: GenderTypeMeta[] = (Object.keys(Gender) as (keyof typeof Gender)[]).map((k) =>
+  getGenderType(Gender[k])
+);
 
+/**
+ * Get user role meta
+ * @param {UserRole} userRole
+ * @returns {UserRoleMeta}
+ */
+export const getUserRole = (userRole: UserRole): UserRoleMeta => {
   switch (userRole) {
     case UserRole.ROLE_USER:
       return {
@@ -71,3 +87,10 @@ export const getUserRole = (userRole: UserRole): UserRoleMeta => {
       };
   }
 };
+
+/**
+ * Get user role options
+ */
+export const userRoleOptions: UserRoleMeta[] = (Object.keys(UserRole) as (keyof typeof UserRole)[]).map((k) =>
+  getUserRole(UserRole[k])
+);

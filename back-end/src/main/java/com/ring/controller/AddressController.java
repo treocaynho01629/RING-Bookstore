@@ -1,6 +1,5 @@
 package com.ring.controller;
 
-import com.ring.common.AppConstants;
 import com.ring.config.CurrentAccount;
 import com.ring.dto.request.AddressRequest;
 import com.ring.dto.response.accounts.AddressDTO;
@@ -117,8 +116,8 @@ public class AddressController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('USER') and hasAuthority('delete:address')")
     public ResponseEntity<Address> deleteAddress(
-        @PathVariable("id") Long id, 
-        @CurrentAccount Account currUser) {
+            @PathVariable("id") Long id,
+            @CurrentAccount Account currUser) {
 
         Address address = addressService.deleteAddress(id, currUser);
         return new ResponseEntity<>(address, HttpStatus.OK);

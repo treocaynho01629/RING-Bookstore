@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useGetCouponQuery, useGetCouponsQuery } from "../../features/coupons/couponsApiSlice";
+import { useGetCouponQuery, useGetCouponsScrollInfiniteQuery } from "../../features/coupons/couponsApiSlice";
 import { getCouponType, getCouponCriteria } from "@ring/shared/enums/coupon";
 import { CouponType } from "@ring/shared/models/couponType";
 import { Instruction, Message } from "@ring/ui/Components";
@@ -98,13 +98,7 @@ const Showmore = styled.div`
 `;
 //#endregion
 
-const defaultSize = 4;
-const DEFAULT_PAGINATON = {
-  number: 0,
-  size: defaultSize,
-  totalPages: 0,
-  isMore: true,
-};
+const DEFAULT_SIZE = 4;
 
 const CouponDialog = ({
   numSelected,
@@ -126,67 +120,63 @@ const CouponDialog = ({
   const [currCoupon, setCurrCoupon] = useState(selectedCoupon);
   const [tempCoupon, setTempCoupon] = useState(selectedCoupon);
   const [isSaved, setIsSaved] = useState(false);
-  const [shipPagination, setShipPagination] = useState(DEFAULT_PAGINATON);
-  const [pagination, setPagination] = useState(DEFAULT_PAGINATON);
-  const [savedPagination, setSavedPagination] = useState(DEFAULT_PAGINATON);
 
   // Fetch coupons
   const {
     data: shipping,
     currentData: currentShipping,
     isLoading: loadShipping,
-    isFetching: fetchingShipping,
+    isFetchingNextPage: isFetchingNextShipping,
+    hasNextPage: hasNextShipping,
+    fetchNextPage: fetchNextShipping,
     isSuccess: doneShipping,
     isError: errorShipping,
-  } = useGetCouponsQuery(
+  } = useGetCouponsScrollInfiniteQuery(
     {
       shopId,
       types: [CouponType.SHIPPING],
       byShop: shopId != null,
       cValue: checkState?.value,
       cQuantity: checkState?.quantity,
-      size: shipPagination.size,
-      page: shipPagination.number,
+      size: DEFAULT_SIZE,
       showUsed: false,
       showExpired: false,
-      loadMore: shipPagination.isMore,
     },
     { skip: (!shopId && !selectMode) || isSaved }
   );
-  const { data, currentData, isLoading, isFetching, isSuccess, isError } = useGetCouponsQuery(
-    {
-      shopId,
-      types: [CouponType.PRODUCT],
-      byShop: shopId != null,
-      cValue: checkState?.value,
-      cQuantity: checkState?.quantity,
-      size: pagination.size,
-      page: pagination.number,
-      showUsed: false,
-      showExpired: false,
-      loadMore: pagination.isMore,
-    },
-    { skip: (!shopId && !selectMode) || isSaved }
-  );
+  const { data, currentData, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, isSuccess, isError } =
+    useGetCouponsScrollInfiniteQuery(
+      {
+        shopId,
+        types: [CouponType.PRODUCT],
+        byShop: shopId != null,
+        cValue: checkState?.value,
+        cQuantity: checkState?.quantity,
+        size: DEFAULT_SIZE,
+        showUsed: false,
+        showExpired: false,
+      },
+      { skip: (!shopId && !selectMode) || isSaved }
+    );
   const {
     data: saved,
     currentData: currentSaved,
     isLoading: loadSaved,
-    isFetching: fetchingSaved,
+    isFetchingNextPage: isFetchingNextSaved,
+    hasNextPage: hasNextSaved,
+    fetchNextPage: fetchNextSaved,
     isSuccess: doneSaved,
     isError: errorSaved,
-  } = useGetCouponsQuery(
+  } = useGetCouponsScrollInfiniteQuery(
     {
       codes: savedCodes,
       shopId,
       byShop: shopId != null,
       cValue: checkState?.value,
       cQuantity: checkState?.quantity,
-      size: savedPagination.size,
-      page: savedPagination.number,
+      size: DEFAULT_SIZE,
       showUsed: true,
       showExpired: true,
-      loadMore: savedPagination.isMore,
     },
     { skip: !isSaved && !selectMode && savedCodes?.length > 0 }
   );
@@ -222,74 +212,68 @@ const CouponDialog = ({
     }
   }, [code, loadCode, selectedCoupon]);
 
-  useEffect(() => {
-    if (data && !isLoading && isSuccess) {
-      setPagination({
-        ...pagination,
-        number: data.page,
-        totalPages: data.totalPages,
-      });
-    }
-  }, [data, isLoading]);
-
-  useEffect(() => {
-    if (shipping && !loadShipping && doneShipping) {
-      setShipPagination({
-        ...shipPagination,
-        number: shipping.page,
-        totalPages: shipping.totalPages,
-      });
-    }
-  }, [shipping]);
-
-  useEffect(() => {
-    if (saved && !loadSaved && doneSaved) {
-      setSavedPagination({
-        ...savedPagination,
-        number: saved.page,
-        totalPages: saved.totalPages,
-      });
-    }
-  }, [saved]);
-
+  /**
+   * Handle change coupon code input
+   * @param {React.FormEvent<HTMLFormElement>} e
+   */
   const handleChangeInput = (e) => {
     e.preventDefault();
     setCouponInput(inputRef?.current?.value);
   };
+
+  /**
+   * Handle click apply coupon
+   * @param {Coupon} coupon
+   * @param {number} shopId
+   */
   const handleClickApply = (coupon, shopId) => {
     if (onSubmit) onSubmit(coupon, shopId);
     onClose();
   };
 
+  /**
+   * Handle show more shipping coupons
+   */
   const handleShowMoreShipping = () => {
-    if (fetchingShipping || typeof shipping?.page !== "number" || shipping?.page < shipPagination?.number) return;
-    const nextPage = shipping?.page + 1;
-    if (nextPage < shipping?.totalPages) setShipPagination((prev) => ({ ...prev, number: nextPage }));
+    if (isFetchingNextShipping || !hasNextShipping) return;
+    fetchNextShipping();
   };
 
+  /**
+   * Handle show more coupons
+   */
   const handleShowMore = () => {
-    if (isFetching || typeof data?.page !== "number" || data?.page < pagination?.number) return;
-    const nextPage = data?.page + 1;
-    if (nextPage < data?.totalPages) setPagination((prev) => ({ ...prev, number: nextPage }));
+    if (isFetchingNextPage || !hasNextPage) return;
+    fetchNextPage();
   };
 
+  /**
+   * Handle show more saved coupons
+   */
   const handleShowMoreSaved = () => {
-    if (fetchingSaved || typeof saved?.page !== "number" || saved?.page < savedPagination?.number) return;
-    const nextPage = saved?.page + 1;
-    if (nextPage < saved?.totalPages) setSavedPagination((prev) => ({ ...prev, number: nextPage }));
+    if (isFetchingNextSaved || !hasNextSaved) return;
+    fetchNextSaved();
   };
 
+  /**
+   * Toggle saved coupons
+   */
   const toggleSaved = () => {
     setIsSaved((prev) => !prev);
   };
 
+  /**
+   * Handle close dialog
+   */
   const onClose = () => {
     handleClose();
-    setPagination(DEFAULT_PAGINATON);
-    setShipPagination(DEFAULT_PAGINATON);
-    setSavedPagination(DEFAULT_PAGINATON);
   };
 
+  /**
+   * Check if coupon is disabled
+   * @param {Coupon} coupon
+   * @returns {boolean}
+   */
   const checkDisabled = (coupon) => selectMode && (!loggedIn || !coupon?.isUsable || coupon?.shopId != shopId);
 
   // Display contents
@@ -303,9 +287,11 @@ const CouponDialog = ({
   );
 
   if (doneShipping && currentShipping) {
-    const { ids, entities } = currentShipping;
+    const content = currentShipping?.pages?.flatMap((p) => p.content ?? []);
+    const ids = content.map((b) => b.id);
+    const entities = Object.fromEntries(content.map((b) => [b.id, b]));
 
-    let content = [];
+    let displayContent = [];
 
     if (currCoupon && currCoupon?.type == CouponType.SHIPPING) {
       const couponInfo = {
@@ -318,7 +304,7 @@ const CouponDialog = ({
         criteria: getCouponCriteria(currCoupon?.criteria),
       };
 
-      content.push(
+      displayContent.push(
         <CouponItem
           key={`coupon-${currCoupon?.id}`}
           {...{
@@ -359,21 +345,23 @@ const CouponDialog = ({
         })
       : [];
 
-    content = content.concat(fetchContent);
-    content = compact(content); // Removes undefined
+    displayContent = displayContent.concat(fetchContent);
+    displayContent = compact(displayContent); // Removes undefined
 
     shippingCoupons = (
       <>
-        {content?.length > 0 && <DetailTitle>{t("coupon.shipping")}</DetailTitle>}
-        {content}
+        {displayContent?.length > 0 && <DetailTitle>{t("coupon.shipping")}</DetailTitle>}
+        {displayContent}
       </>
     );
   }
 
   if (isSuccess && currentData) {
-    const { ids, entities } = currentData;
+    const content = currentData?.pages?.flatMap((p) => p.content ?? []);
+    const ids = content.map((b) => b.id);
+    const entities = Object.fromEntries(content.map((b) => [b.id, b]));
 
-    let content = [];
+    let displayContent = [];
 
     if (currCoupon && currCoupon?.type != CouponType.SHIPPING) {
       const couponInfo = {
@@ -386,7 +374,7 @@ const CouponDialog = ({
         criteria: getCouponCriteria(currCoupon?.criteria),
       };
 
-      content.push(
+      displayContent.push(
         <CouponItem
           key={`coupon-${currCoupon?.id}`}
           {...{
@@ -426,21 +414,23 @@ const CouponDialog = ({
         })
       : [];
 
-    content = content.concat(fetchContent);
-    content = compact(content); // Removes undefined
+    displayContent = displayContent.concat(fetchContent);
+    displayContent = compact(displayContent); // Removes undefined
 
     coupons = (
       <>
-        {content?.length > 0 && <DetailTitle>{t("coupon.discount")}</DetailTitle>}
-        {content}
+        {displayContent?.length > 0 && <DetailTitle>{t("coupon.discount")}</DetailTitle>}
+        {displayContent}
       </>
     );
   }
 
   if (doneSaved && currentSaved) {
-    const { ids, entities } = currentSaved;
+    const content = currentSaved?.pages?.flatMap((p) => p.content ?? []);
+    const ids = content.map((b) => b.id);
+    const entities = Object.fromEntries(content.map((b) => [b.id, b]));
 
-    let content = ids?.length
+    let displayContent = ids?.length
       ? ids?.map((id, index) => {
           if (id != currCoupon?.id) {
             const coupon = entities[id];
@@ -468,12 +458,12 @@ const CouponDialog = ({
         })
       : [];
 
-    content = compact(content); // Removes undefined
+    displayContent = compact(displayContent); // Removes undefined
 
     savedCoupons = (
       <>
-        {content?.length > 0 && <DetailTitle>{t("coupon.saved")}</DetailTitle>}
-        {content}
+        {displayContent?.length > 0 && <DetailTitle>{t("coupon.saved")}</DetailTitle>}
+        {displayContent}
       </>
     );
   }
@@ -486,9 +476,9 @@ const CouponDialog = ({
         ? t("required.select")
         : "";
 
-  const savedEmpty = isSaved && saved?.ids?.length == 0 && !fetchingSaved;
+  const savedEmpty = isSaved && saved?.pages[0]?.totalCount == 0 && !isFetchingNextSaved;
   const couponsEmpty =
-    !isSaved && data?.ids?.length == 0 && shipping?.ids?.length == 0 && !isFetching && !fetchingShipping;
+    !isSaved && data?.pages[0]?.totalCount == 0 && shipping?.pages[0]?.totalCount == 0 && !isFetchingNextShipping;
   const errorFlag = isError || errorShipping || errorSaved;
 
   return (
@@ -579,31 +569,31 @@ const CouponDialog = ({
             {isSaved ? (
               <>
                 {savedCoupons}
-                {!loadSaved && savedPagination.totalPages > savedPagination.number + 1 && (
+                {!loadSaved && hasNextSaved && (
                   <Showmore onClick={handleShowMoreSaved}>
                     {t("show.more")}
                     <ExpandMore />
                   </Showmore>
                 )}
-                {fetchingSaved && loadingComponent}
+                {isFetchingNextSaved && loadingComponent}
               </>
             ) : (
               <>
                 {shippingCoupons}
-                {!loadShipping && shipPagination.totalPages > shipPagination.number + 1 && (
+                {!loadShipping && hasNextShipping && (
                   <Showmore onClick={handleShowMoreShipping}>
                     {t("show.more")}
                     <ExpandMore />
                   </Showmore>
                 )}
                 {coupons}
-                {!isLoading && pagination.totalPages > pagination.number + 1 && (
+                {!isLoading && hasNextPage && (
                   <Showmore onClick={handleShowMore}>
                     {t("show.more")}
                     <ExpandMore />
                   </Showmore>
                 )}
-                {(isFetching || fetchingShipping) && loadingComponent}
+                {(isFetchingNextPage || isFetchingNextShipping) && loadingComponent}
               </>
             )}
             {savedEmpty ||

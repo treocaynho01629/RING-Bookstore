@@ -59,6 +59,7 @@ export const Title = styled("span")`
   align-items: center;
   font-size: 18px;
   font-weight: 400;
+  width: 100%;
   margin: ${({ theme }) => theme.spacing(1.5)} 0;
 `;
 
@@ -87,4 +88,3 @@ export const InfoTable = styled("table")`
     width: 50%;
   }
 `;
-

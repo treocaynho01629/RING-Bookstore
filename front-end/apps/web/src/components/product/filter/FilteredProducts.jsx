@@ -6,8 +6,9 @@ import Progress from "@ring/ui/Progress";
 import Product from "../Product";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
+import CircularProgress from "@mui/material/CircularProgress";
 
-const FilteredProducts = memo(({ data, error, loading, scrollPosition }) => {
+const FilteredProducts = memo(({ data, error, loading, mode, isLastPage, scrollPosition }) => {
   const { t } = useTranslation();
 
   let productsContent;
@@ -26,13 +27,13 @@ const FilteredProducts = memo(({ data, error, loading, scrollPosition }) => {
         );
       })
     ) : (
-      <Box sx={{ marginTop: 2, width: "100%", textAlign: "center" }}>
+      <Box sx={{ mt: 2, width: "100%", textAlign: "center" }}>
         {capitalize(t("message.none", { item: t("product.label") }))}
       </Box>
     );
   } else if (error) {
     productsContent = (
-      <Box sx={{ marginTop: 2, width: "100%", textAlign: "center" }}>{error?.error ?? t("error.general")}</Box>
+      <Box sx={{ mt: 2, width: "100%", textAlign: "center" }}>{error?.error ?? t("error.general")}</Box>
     );
   }
 
@@ -49,6 +50,16 @@ const FilteredProducts = memo(({ data, error, loading, scrollPosition }) => {
       <Grid container spacing={0.5} size="grow">
         {productsContent}
       </Grid>
+      {mode === "scroll" && loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+          <CircularProgress size={30} color="primary" />
+        </Box>
+      )}
+      {mode === "scroll" && !loading && isLastPage && (
+        <Box sx={{ textAlign: "center", pt: 2, color: "text.secondary" }}>
+          {capitalize(t("message.out", { item: t("product.label") }))}
+        </Box>
+      )}
     </Box>
   );
 });

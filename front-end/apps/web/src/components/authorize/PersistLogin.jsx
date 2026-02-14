@@ -43,8 +43,8 @@ const PersistLogin = () => {
 
     // Refresh on time buffer
     // Prevent refresh from multiple endpoints if token expired
-    const currentTime = Math.floor(Date.now());
-    const checkBuffer = 30 * 1000; // 30 seconds
+    const currentTime = Math.floor(Date.now() / 1000);
+    const checkBuffer = 30; // 30 seconds
     const expireSoon = exp && currentTime > exp - checkBuffer;
 
     // Refresh token if persist and token is expired

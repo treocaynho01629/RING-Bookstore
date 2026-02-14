@@ -9,6 +9,11 @@ export interface ShippingTypeMeta {
   estimate: string;
 }
 
+/**
+ * Get shipping type meta
+ * @param {ShippingType} shippingType
+ * @returns {ShippingTypeMeta}
+ */
 export const getShippingType = (shippingType: ShippingType): ShippingTypeMeta => {
   switch (shippingType) {
     case ShippingType.ECONOMY:
@@ -49,3 +54,10 @@ export const getShippingType = (shippingType: ShippingType): ShippingTypeMeta =>
       };
   }
 };
+
+/**
+ * Get shipping type options
+ */
+export const shippingTypeOptions: ShippingTypeMeta[] = (Object.keys(ShippingType) as (keyof typeof ShippingType)[]).map(
+  (k) => getShippingType(ShippingType[k])
+);

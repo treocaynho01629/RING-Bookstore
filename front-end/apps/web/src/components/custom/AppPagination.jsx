@@ -112,7 +112,7 @@ const AppPagination = ({ page, count, size, onPageChange, onSizeChange, sizes })
         className={totalPages == 0 ? "hidden" : ""}
       />
       <MoreContainer>
-        <StyledInput size="small" select value={size} onChange={handleChangeSize}>
+        <StyledInput size="small" select value={size} onChange={handleChangeSize} className="border">
           {(sizes ?? pageSizes).map((option, index) => (
             <MenuItem value={option} key={`option-${index}`}>
               {t("pagination.display", { count: option })}

@@ -74,6 +74,11 @@ public class Shop extends Auditable {
     @JsonIgnore
     private Address address;
 
+    // TODO: Add verification process
+    // @Column(nullable = false)
+    // @Builder.Default
+    // private Boolean verified = false;
+
     public void addBook(Book book) {
         this.books.add(book);
         book.setShop(this);

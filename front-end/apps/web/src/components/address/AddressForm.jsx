@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { Instruction } from "@ring/ui/Components";
 import { PHONE_REGEX } from "@ring/shared/utils/regex";
-import { getAddressType } from "@ring/shared/enums/address";
+import { addressTypeOptions } from "@ring/shared/enums/address";
 import { location } from "@ring/shared/utils/location";
 import { useTranslation } from "react-i18next";
-import { AddressType } from "@ring/shared/models/addressType";
 import { PatternFormat } from "react-number-format";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
@@ -325,15 +324,11 @@ const AddressForm = ({
                 <MenuItem value={null}>
                   <em>--{t("none")}--</em>
                 </MenuItem>
-                {Object.values(AddressType).map((type, index) => {
-                  const itemMeta = getAddressType(type);
-
-                  return (
-                    <MenuItem key={index} value={type}>
-                      {t(itemMeta?.label)}
-                    </MenuItem>
-                  );
-                })}
+                {addressTypeOptions.map((type, index) => (
+                  <MenuItem key={index} value={type.value}>
+                    {t(type.label, { ns: "authenticated" })}
+                  </MenuItem>
+                ))}
               </TextField>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>

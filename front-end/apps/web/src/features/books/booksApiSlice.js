@@ -13,9 +13,7 @@ export const booksApiSlice = initialsApiSlice.injectEndpoints({
           return response.status === 200 && !result?.isError;
         },
       }),
-      providesTags: (result, error) => [
-        { type: "Book", id: result ? result.id : "LIST" },
-      ],
+      providesTags: (result, error) => [{ type: "Book", id: result ? result.id : "LIST" }],
     }),
     getBooksByIds: builder.query({
       query: (ids) => {
@@ -35,10 +33,7 @@ export const booksApiSlice = initialsApiSlice.injectEndpoints({
       },
       providesTags: (result, error, arg) => {
         if (result?.ids) {
-          return [
-            { type: "Book", id: "LIST" },
-            ...result.ids.map((id) => ({ type: "Book", id })),
-          ];
+          return [{ type: "Book", id: "LIST" }, ...result.ids.map((id) => ({ type: "Book", id }))];
         } else return [{ type: "Book", id: "LIST" }];
       },
     }),
@@ -63,10 +58,7 @@ export const booksApiSlice = initialsApiSlice.injectEndpoints({
       },
       providesTags: (result, error, arg) => {
         if (result?.ids) {
-          return [
-            { type: "Book", id: "LIST" },
-            ...result.ids.map((id) => ({ type: "Book", id })),
-          ];
+          return [{ type: "Book", id: "LIST" }, ...result.ids.map((id) => ({ type: "Book", id }))];
         } else return [{ type: "Book", id: "LIST" }];
       },
     }),
@@ -85,6 +77,7 @@ export const booksApiSlice = initialsApiSlice.injectEndpoints({
 export const {
   useGetBookDetailQuery,
   useGetBooksQuery,
+  useGetBooksScrollInfiniteQuery,
   useGetBooksByIdsQuery,
   useGetRandomBooksQuery,
   useGetBooksSuggestionQuery,

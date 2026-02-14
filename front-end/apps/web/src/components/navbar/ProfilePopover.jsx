@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { useState } from "react";
 import { LocaleType } from "@ring/shared/enums/locales";
 import { useTranslation } from "react-i18next";
-import { debounce, upperCase } from "lodash-es";
+import { upperCase } from "lodash-es";
 import Avatar from "@mui/material/Avatar";
 import Language from "@mui/icons-material/Language";
 import Menu from "@mui/material/Menu";
@@ -18,7 +18,17 @@ import ContrastOutlined from "@mui/icons-material/ContrastOutlined";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import LockOutlined from "@mui/icons-material/LockOutlined";
 
-const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, handleSignOut, mode, setMode, username }) => {
+const ProfilePopover = ({
+  image,
+  anchorEl,
+  setAnchorEl,
+  handleOpen,
+  handleClose,
+  handleSignOut,
+  mode,
+  setMode,
+  username,
+}) => {
   const { t, i18n } = useTranslation();
   const [openSetting, setOpenSetting] = useState(null);
   const open = Boolean(anchorEl);
@@ -39,6 +49,14 @@ const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, handleSignO
     if (setMode) setMode(theme);
     setAnchorEl(null);
     setOpenSetting(null);
+  };
+
+  /**
+   * Handle change setting tab
+   */
+  const handleChangeSetting = (e, setting) => {
+    e.stopPropagation();
+    setOpenSetting(setting);
   };
 
   const mainPopover = [
@@ -77,7 +95,7 @@ const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, handleSignO
       </Link>
     ),
     <Divider key="divider" />,
-    <MenuItem aria-label={t("theme.description")} key="theme" onClick={(e) => setOpenSetting("theme")}>
+    <MenuItem aria-label={t("theme.description")} key="theme" onClick={(e) => handleChangeSetting(e, "theme")}>
       <ListItemIcon>
         {mode === "dark" ? (
           <NightlightOutlined fontSize="small" />
@@ -91,7 +109,7 @@ const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, handleSignO
       </ListItemIcon>
       {t("theme.label")}
     </MenuItem>,
-    <MenuItem key="language" onClick={() => setOpenSetting("language")}>
+    <MenuItem key="language" onClick={(e) => handleChangeSetting(e, "language")}>
       <ListItemIcon>
         <Language fontSize="small" />
       </ListItemIcon>
@@ -108,7 +126,7 @@ const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, handleSignO
   ];
 
   const languagePopover = [
-    <MenuItem key="language-back" onClick={() => setOpenSetting(null)}>
+    <MenuItem key="language-back" onClick={(e) => handleChangeSetting(e, null)}>
       <ListItemIcon>
         <KeyboardArrowLeft fontSize="small" />
       </ListItemIcon>
@@ -128,7 +146,7 @@ const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, handleSignO
   ];
 
   const themePopover = [
-    <MenuItem key="theme-back" onClick={() => setOpenSetting(null)}>
+    <MenuItem key="theme-back" onClick={(e) => handleChangeSetting(e, null)}>
       <ListItemIcon>
         <KeyboardArrowLeft fontSize="small" />
       </ListItemIcon>

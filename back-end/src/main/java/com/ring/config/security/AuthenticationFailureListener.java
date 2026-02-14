@@ -15,8 +15,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 /**
  * Listener for authentication failure events triggered due to bad credentials.
  *
- * This component listens for {@link AuthenticationFailureBadCredentialsEvent} and interacts with
- * {@link LoginProtectionService} to track failed login attempts, helping to prevent brute-force attacks.
+ * This component listens for {@link AuthenticationFailureBadCredentialsEvent}
+ * and interacts with
+ * {@link LoginProtectionService} to track failed login attempts, helping to
+ * prevent brute-force attacks.
  */
 @Component
 @RequiredArgsConstructor
@@ -25,18 +27,25 @@ public class AuthenticationFailureListener implements ApplicationListener<Authen
     private final LoginProtectionService loginProtectionService;
 
     /**
-     * Handles the {@link AuthenticationFailureBadCredentialsEvent} by identifying the client's IP address
+     * Handles the {@link AuthenticationFailureBadCredentialsEvent} by identifying
+     * the client's IP address
      * and recording a failed login attempt through {@link LoginProtectionService}.
      *
-     * @param e The event triggered when authentication fails due to bad credentials.
+     * @param e The event triggered when authentication fails due to bad
+     *          credentials.
      */
     @Override
     public void onApplicationEvent(final AuthenticationFailureBadCredentialsEvent e) {
 
         RequestAttributes attribs = RequestContextHolder.getRequestAttributes();
+
+        if (attribs == null || !(attribs instanceof NativeWebRequest)) {
+            return;
+        }
+
         HttpServletRequest request = (HttpServletRequest) ((NativeWebRequest) attribs).getNativeRequest();
         final String xfHeader = request.getHeader(HttpHeaders.X_FORWARDED_FOR);
-        
+
         if (xfHeader == null || xfHeader.isEmpty() || !xfHeader.contains(request.getRemoteAddr())) {
             loginProtectionService.loginFailed(request.getRemoteAddr());
         } else {

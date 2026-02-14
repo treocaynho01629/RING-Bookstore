@@ -6,6 +6,11 @@ export interface OrderStatusMeta {
   color: string;
 }
 
+/**
+ * Get order status meta
+ * @param {OrderStatus} orderStatus
+ * @returns {OrderStatusMeta}
+ */
 export const getOrderStatus = (orderStatus: OrderStatus): OrderStatusMeta => {
   switch (orderStatus) {
     case OrderStatus.COMPLETED:
@@ -28,3 +33,10 @@ export const getOrderStatus = (orderStatus: OrderStatus): OrderStatusMeta => {
       return { value: "UNKNOWN", label: "unknown", color: "error" };
   }
 };
+
+/**
+ * Get order status options
+ */
+export const orderStatusOptions: OrderStatusMeta[] = (Object.keys(OrderStatus) as (keyof typeof OrderStatus)[]).map(
+  (k) => getOrderStatus(OrderStatus[k])
+);

@@ -68,7 +68,7 @@ export const ToggleGroupContainer = styled.div`
   white-space: nowrap;
   position: sticky;
   top: ${({ theme }) => theme.mixins.toolbar.minHeight + 16.5}px;
-  z-index: 1;
+  z-index: 2;
 
   ${({ theme }) => theme.breakpoints.down("md")} {
     top: 0;

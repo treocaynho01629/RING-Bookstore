@@ -7,7 +7,8 @@
   "general": {
     "add": "Add",
     "view": "View",
-    "id": "ID"
+    "id": "ID",
+    "filter": "Advanced Filter"
   },
   "all": {
     "shop": "All shops"
@@ -20,8 +21,19 @@
     "title": "Title",
     "orders": "Orders",
     "shop": "Shop Name",
-    "price": "Price",
-    "discount": "Discount"
+    "price": {
+      "label": "Price",
+      "original": "Original Price",
+      "sale": "Sale Price",
+      "discount": "Discount"
+    },
+    "info": "Product Information",
+    "basic": "Basic Information",
+    "inventory": "Price and Inventory",
+    "add": "Add product",
+    "edit": "Edit product",
+    "images": "Images",
+    "date": "Publication Date"
   },
   "user": {
     "member": "Members",

@@ -293,7 +293,6 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
     setOpen((prevState) => !prevState);
   };
 
-  // TODO: Fix Back button include switching tabs
   return (
     <ListContainer>
       <ProfileContainer>

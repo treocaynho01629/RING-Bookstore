@@ -12,7 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
- * A mapper for {@link ICoupon}, {@link Coupon} to {@link CouponDTO}, {@link CouponDetailDTO}.
+ * A mapper for {@link ICoupon}, {@link Coupon} to {@link CouponDTO},
+ * {@link CouponDetailDTO}.
  */
 @RequiredArgsConstructor
 @Service
@@ -27,10 +28,9 @@ public class CouponMapper {
      * @return the mapped {@link CouponDTO}
      */
     public CouponDTO couponToDTO(ICoupon projection) {
-
         Coupon coupon = projection.getCoupon();
         CouponDetail detail = coupon.getDetail();
-        String url = projection.getShopImage() != null 
+        String url = projection.getShopImage() != null
                 ? cloudinary.url()
                         .transformation(CloudinaryTransformations.AVATAR_TRANSFORMATION)
                         .secure(true)

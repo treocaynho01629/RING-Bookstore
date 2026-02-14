@@ -56,7 +56,7 @@
     "invalid": "Mã không hợp lệ",
     "expired.date": "HSD:",
     "expired.usage": "Còn: {{count}} lượt",
-    "used": "Đã qua sử dụng",
+    "used": "Đã sử dụng",
     "not.usable": "Chưa thoã điều kiện",
     "add": "Nhập mã giảm giá",
     "not.found": "Hiện không có khuyến mãi",
@@ -144,6 +144,7 @@
   },
   "shop": {
     "title": "Danh sách cửa hàng",
+    "detail": "Chi tiết cửa hàng",
     "following": "Đang theo dõi",
     "follow": "Theo dõi",
     "explore": "Duyệt cửa hàng",

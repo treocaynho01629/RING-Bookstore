@@ -55,12 +55,6 @@ const PaymentContainer = styled.div`
   }
 `;
 
-const Message = styled.span`
-  ${({ theme }) => theme.breakpoints.down("sm")} {
-    font-size: 14px;
-  }
-`;
-
 const Title = styled.h4`
   margin: ${({ theme }) => theme.spacing(1.5)} 0;
   margin-top: 0;

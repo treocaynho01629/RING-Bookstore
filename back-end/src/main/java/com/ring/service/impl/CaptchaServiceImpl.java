@@ -2,7 +2,6 @@ package com.ring.service.impl;
 
 import com.ring.common.AppConstants;
 import com.ring.config.captcha.CaptchaSettings;
-import com.ring.dto.request.ReCaptchaRequest;
 import com.ring.dto.response.RecaptchaResponse;
 import com.ring.exception.ReCaptchaInvalidException;
 import com.ring.exception.ReCaptchaSuspiciousException;
@@ -13,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -55,13 +56,13 @@ public class CaptchaServiceImpl implements CaptchaService {
         String secretKey = source.equals(RECAPTCHA_V2)
                 ? captchaSettings.getSecret()
                 : captchaSettings.getV3Secret();
-        ReCaptchaRequest req = ReCaptchaRequest.builder()
-                .secret(secretKey)
-                .response(recaptchaToken)
-                .build();
+
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        map.add("secret", secretKey);
+        map.add("response", recaptchaToken);
 
         ResponseEntity<RecaptchaResponse> responseEntity = null;
-        HttpEntity<ReCaptchaRequest> httpEntity = new HttpEntity<>(req, headers);
+        HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(map, headers);
 
         try {
             responseEntity = restTemplate.exchange(
@@ -95,7 +96,7 @@ public class CaptchaServiceImpl implements CaptchaService {
      * Verify the v3 recaptcha response.
      * 
      * @param response The recaptcha response.
-     * @param action The action.
+     * @param action   The action.
      */
     protected void verifyV3(RecaptchaResponse response, final String action) {
 

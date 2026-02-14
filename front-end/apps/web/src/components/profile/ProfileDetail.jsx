@@ -7,8 +7,8 @@ import { PatternFormat } from "react-number-format";
 import { PHONE_REGEX } from "@ring/shared/utils/regex";
 import { useTranslation } from "react-i18next";
 import { capitalize } from "lodash-es";
-import { getGenderType } from "@ring/shared/enums/user";
-import { Gender } from "@ring/shared/models/gender";
+import { genderTypeOptions } from "@ring/shared/enums/user";
+import { Link } from "react-router";
 import useConfirm from "@ring/shared/useConfirm";
 import useAuth from "../../hooks/useAuth";
 import Button from "@mui/material/Button";
@@ -176,7 +176,6 @@ const ProfileDetail = ({
   mobileMode,
   tabletMode,
   verifyRefreshToken,
-  handleClose,
 }) => {
   // Initial value
   const { username } = useAuth();
@@ -416,9 +415,9 @@ const ProfileDetail = ({
   return (
     <>
       <StyledDialogTitle>
-        <a onClick={handleClose}>
+        <Link to={-1}>
           <KeyboardArrowLeft />
-        </a>
+        </Link>
         <Person />
         &nbsp;{t("profile.title")}
       </StyledDialogTitle>
@@ -604,14 +603,11 @@ const ProfileDetail = ({
                         fullWidth
                       >
                         <MenuItem value={""}>{t("none")}</MenuItem>
-                        {Object.values(Gender).map((gender, index) => {
-                          const genderMeta = getGenderType(gender);
-                          return (
-                            <MenuItem key={`menu-${genderMeta?.value}-${index}`} value={genderMeta?.value}>
-                              {t(genderMeta?.label)}
-                            </MenuItem>
-                          );
-                        })}
+                        {genderTypeOptions.map((gender, index) => (
+                          <MenuItem key={`menu-${gender.value}-${index}`} value={gender.value}>
+                            {t(gender.label)}
+                          </MenuItem>
+                        ))}
                       </TextField>
                     )
                   ) : loading ? (
@@ -623,17 +619,14 @@ const ProfileDetail = ({
                   ) : (
                     <RadioGroup spacing={1} row value={gender} onChange={(e) => setGender(e.target.value)}>
                       <FormControlLabel value={""} control={<Radio />} label={t("none")} />
-                      {Object.values(Gender).map((gender, index) => {
-                        const genderMeta = getGenderType(gender);
-                        return (
-                          <FormControlLabel
-                            key={`radio-${genderMeta?.value}-${index}`}
-                            value={genderMeta?.value}
-                            control={<Radio />}
-                            label={t(genderMeta?.label)}
-                          />
-                        );
-                      })}
+                      {genderTypeOptions.map((gender, index) => (
+                        <FormControlLabel
+                          key={`radio-${gender.value}-${index}`}
+                          value={gender.value}
+                          control={<Radio />}
+                          label={t(gender.label)}
+                        />
+                      ))}
                     </RadioGroup>
                   )}
                 </InfoStackContainer>

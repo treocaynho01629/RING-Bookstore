@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useState, Suspense, lazy, useEffect, useCallback, useRef, memo } from "react";
-import { NavLink, useLocation, useNavigate, useSearchParams } from "react-router";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import {
   useFollowShopMutation,
   useGetDisplayShopsQuery,
@@ -23,6 +23,7 @@ import Shop from "../components/shop/Shop";
 import ShopSortList from "../components/shop/ShopSortList";
 import useAuth from "../hooks/useAuth";
 
+// TODO: Scroll + jump
 const JumpPagination = lazy(() => import("../components/custom/JumpPagination"));
 
 //#region styled
@@ -89,7 +90,7 @@ const Shops = () => {
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md"));
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const [openPagination, setOpenPagination] = useState(undefined); //Pagination
+  const [openPagination, setOpenPagination] = useState(undefined); // Pagination
   const [keyword, setKeyword] = useState(searchParams.get("q") ?? "");
   const [pagination, setPagination] = useState({
     number: searchParams.get("pNo") ? searchParams.get("pNo") - 1 : DEFAULT_PAGINATION.number,
@@ -278,28 +279,23 @@ const Shops = () => {
         );
       })
     ) : (
-      <Box sx={{ marginTop: 2, width: "100%", textAlign: "center" }}>
+      <Box sx={{ mt: 2, width: "100%", textAlign: "center" }}>
         {capitalize(t("message.none", { item: t("store") }))}
       </Box>
     );
   } else if (isError) {
-    shopsContent = (
-      <Box sx={{ marginTop: 2, width: "100%", textAlign: "center" }}>{error?.error ?? t("error.general")}</Box>
-    );
+    shopsContent = <Box sx={{ mt: 2, width: "100%", textAlign: "center" }}>{error?.error ?? t("error.general")}</Box>;
   }
 
-  let loading = isLoading || isFetching || isError || isUninitialized;
+  const loading = isLoading || isFetching || isError || isUninitialized;
+  const breadcrumbItems = [
+    { label: t("shop.title"), href: "/shop", end: true },
+    keyword && { label: keyword, href: "#" },
+  ].filter(Boolean);
 
   return (
     <Wrapper>
-      <CustomBreadcrumbs separator="›" maxItems={4} aria-label="breadcrumb">
-        <NavLink to={"/shop"}>{t("shop.title")}</NavLink>
-        {keyword && (
-          <NavLink to={"#"} key={"keyword"}>
-            {t("search.results", { keyword })}
-          </NavLink>
-        )}
-      </CustomBreadcrumbs>
+      <CustomBreadcrumbs items={breadcrumbItems} loading={loading} />
       <Container ref={scrollRef}>
         <CustomDivider sx={{ display: { xs: "none", md: "flex" } }}>{t("shop.title")}</CustomDivider>
         {!tabletMode && keyword && (
@@ -314,7 +310,7 @@ const Shops = () => {
           </Keyword>
         )}
         <ShopSortList
-          {...{ pagination, mobileMode, keyword }}
+          {...{ pagination, mobileMode, keyword, totalPages: data?.totalPages ?? 0 }}
           onOpenPagination={handleOpenPagination}
           onChangeOrder={handleChangeOrder}
           onChangeDir={handleChangeDir}

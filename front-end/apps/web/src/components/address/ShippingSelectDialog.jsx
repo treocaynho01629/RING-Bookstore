@@ -96,8 +96,6 @@ const ShippingSelectDialog = ({ open, handleClose, selectedShipping, shippingFee
   const fullScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const [value, setValue] = useState(selectedShipping);
 
-  console.log(shippingFee, shippingDiscount);
-
   useEffect(() => {
     setValue(selectedShipping);
   }, [selectedShipping]);

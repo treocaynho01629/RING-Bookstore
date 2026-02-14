@@ -85,22 +85,6 @@ const Name = styled.p`
   }
 `;
 
-const ShippingTag = styled.span`
-  display: flex;
-  align-items: center;
-  font-weight: 450;
-  color: ${({ theme, color }) => theme.vars.palette[color]?.dark || theme.vars.palette.primary.dark};
-`;
-
-const StuffContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-
-  ${({ theme }) => theme.breakpoints.down("md")} {
-    align-items: flex-end;
-  }
-`;
-
 const ContentWrapper = styled.div`
   padding: ${({ theme }) => theme.spacing(2)} 0;
 

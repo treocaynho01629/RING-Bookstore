@@ -1,6 +1,4 @@
 import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
-import { defaultSerializeQueryArgs } from "@reduxjs/toolkit/query";
-import { isEqual } from "lodash-es";
 import { CouponDTO } from "@ring/shared/models/couponDTO";
 import apiSlice from "../../lib/apiSlice";
 
@@ -26,6 +24,9 @@ export interface CouponQueryArgs {
   sortDir?: string;
   loadMore?: boolean;
 }
+
+/** Query arg for infinite endpoint (filters only; page comes from pageParam). */
+export type CouponInfiniteQueryArgs = Omit<CouponQueryArgs, "page" | "loadMore">;
 
 export interface CouponsResponse {
   content: CouponResponse[];
@@ -116,47 +117,74 @@ export const couponsApiSlice = apiWithEnum.injectEndpoints({
           content
         );
       },
-      serializeQueryArgs: ({ endpointName, queryArgs, endpointDefinition }) => {
-        if (queryArgs) {
-          const { loadMore, ...mainQuery } = queryArgs;
-
-          if (loadMore) {
-            // Load more >> serialize without <pagination>
-            const { page, size, ...rest } = mainQuery;
-            if (JSON.stringify(rest) === "{}") return endpointName + "Merge";
-            return defaultSerializeQueryArgs({
-              endpointName: endpointName + "Merge",
-              queryArgs: rest,
-              endpointDefinition,
-            });
-          }
-
-          // Serialize like normal
-          if (JSON.stringify(mainQuery) === "{}") return endpointName;
-          return defaultSerializeQueryArgs({
-            endpointName,
-            queryArgs: mainQuery,
-            endpointDefinition,
-          });
-        } else {
-          return endpointName;
-        }
-      },
-      merge: (currentCache, newItems, { arg: currentArg }) => {
-        currentCache.page = newItems.page;
-        if (!currentArg?.loadMore) couponsAdapter.removeAll(currentCache);
-        couponsAdapter.upsertMany(currentCache, couponsSelector.selectAll(newItems));
-      },
-      forceRefetch: ({ currentArg, previousArg }) => {
-        return !!(
-          currentArg?.loadMore &&
-          !isEqual(currentArg, previousArg) &&
-          (currentArg?.page ?? 0) > (previousArg?.page ?? 0)
-        );
-      },
       providesTags: (result) =>
         result
           ? [...result.ids.map((id) => ({ type: "Coupon" as const, id })), { type: "Coupon", id: "LIST" }]
+          : [{ type: "Coupon", id: "LIST" }],
+    }),
+    getCouponsScroll: builder.infiniteQuery<CouponsResponse, CouponInfiniteQueryArgs | void, number>({
+      query: ({ queryArg, pageParam }) => {
+        const args = queryArg ?? {};
+        const {
+          types,
+          criterias,
+          shopId,
+          userId,
+          byShop,
+          showExpired,
+          showUsed,
+          codes,
+          code,
+          cValue,
+          cQuantity,
+          size,
+          sortBy,
+          sortDir,
+        } = args;
+
+        const params = new URLSearchParams();
+        params.append("pageNo", String(pageParam));
+        if (types?.length) params.append("types", types.join(","));
+        if (criterias?.length) params.append("criterias", criterias.join(","));
+        if (shopId) params.append("shopId", String(shopId));
+        if (userId) params.append("userId", String(userId));
+        if (byShop != null) params.append("byShop", String(byShop));
+        if (showExpired) params.append("showExpired", String(showExpired));
+        if (showUsed) params.append("showUsed", String(showUsed));
+        if (codes?.length) params.append("codes", codes.join(","));
+        if (code) params.append("code", code);
+        if (cValue) params.append("cValue", String(cValue));
+        if (cQuantity) params.append("cQuantity", String(cQuantity));
+        if (size) params.append("pSize", String(size));
+        if (sortBy) params.append("sortBy", sortBy);
+        if (sortDir) params.append("sortDir", sortDir);
+
+        return {
+          url: `/api/coupons?${params.toString()}`,
+          validateStatus: (response: Response, result: any) => {
+            return response.status === 200 && !result?.isError;
+          },
+        };
+      },
+      infiniteQueryOptions: {
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages, lastPageParam) => {
+          const nextPage = lastPageParam + 1;
+          if (nextPage >= lastPage.totalPages) return undefined;
+          return nextPage;
+        },
+        getPreviousPageParam: (firstPage, allPages, firstPageParam) => {
+          const prevPage = firstPageParam - 1;
+          if (prevPage < 0) return undefined;
+          return prevPage;
+        },
+      },
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.pages.flatMap((p) => p.content.map((c) => ({ type: "Coupon" as const, id: c.id }))),
+              { type: "Coupon", id: "LIST" },
+            ]
           : [{ type: "Coupon", id: "LIST" }],
     }),
   }),

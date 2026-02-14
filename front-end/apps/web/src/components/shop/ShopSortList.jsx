@@ -19,6 +19,7 @@ import QuickPagination from "../custom/QuickPagination";
 const ShopSortList = ({
   mobileMode,
   pagination,
+  totalPages,
   keyword,
   onOpenPagination,
   onChangeOrder,
@@ -102,6 +103,7 @@ const ShopSortList = ({
               input: { endAdornment },
               select: { IconComponent: () => null },
             }}
+            sx={{ mr: 1 }}
           >
             {sortShopsBy.map((option, index) => (
               <MenuItem key={`sort-${option.label}-${index}`} value={option.value}>
@@ -130,9 +132,11 @@ const ShopSortList = ({
             {t("search.keyword.label")}
           </StyledSortButton>
         </MainContainer>
-        <AltContainer>
-          <QuickPagination {...{ pagination, onPageChange, onOpenPagination }} />
-        </AltContainer>
+        {!mobileMode && (
+          <AltContainer>
+            <QuickPagination {...{ page: pagination?.number, count: totalPages, onPageChange, onOpenPagination }} />
+          </AltContainer>
+        )}
       </SortContainer>
     </SortWrapper>
   );

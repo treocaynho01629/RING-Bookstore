@@ -31,21 +31,19 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
 		// Check exists
 		if (token == null || token.isEmpty()) {
-
 			var errorMsg = messageService.getMessage("exception.invalid",
-					new Object[]{ AppConstants.REFRESH_TOKEN_LABEL });
-			throw new HttpResponseException(HttpStatus.BAD_REQUEST, 
-					AppConstants.INVALID_ARGUMENT, 
+					new Object[] { AppConstants.REFRESH_TOKEN_LABEL });
+			throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+					AppConstants.INVALID_ARGUMENT,
 					errorMsg);
 		}
-			
 
 		// Find user with token
 		String username = tokenService.extractRefreshUsername(token);
 		Account user = accountRepo.findByRefreshTokenAndUsername(token, username)
 				.orElseThrow(() -> {
 					var errorMsg = messageService.getMessage("exception.not.found",
-							new Object[]{ AppConstants.REFRESH_TOKEN_LABEL });
+							new Object[] { AppConstants.REFRESH_TOKEN_LABEL });
 					return new ResourceNotFoundException(errorMsg);
 				});
 
@@ -54,7 +52,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 			if (!tokenService.isRefreshTokenValid(token, username)) { // Invalidate token
 
 				// Remove token
-				refreshTokenRepo.deleteByRefreshToken(token);	
+				refreshTokenRepo.deleteByRefreshToken(token);
 				var errorMsg = messageService.getMessage("exception.refresh.token.expired");
 				throw new TokenRefreshException(errorMsg);
 			}
@@ -64,7 +62,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 	}
 
 	@Transactional
-	public ResponseCookie generateRefreshCookie(Account user){
+	public ResponseCookie generateRefreshCookie(Account user) {
 
 		String token = tokenService.generateRefreshToken(user); // New refresh token
 		RefreshToken refreshToken = RefreshToken.builder()

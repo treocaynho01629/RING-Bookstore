@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense, lazy, useMemo } from "react";
-import { Add, Delete, Edit, Star } from "@mui/icons-material";
+import { Add, Delete, Edit, FilterAlt, Star } from "@mui/icons-material";
 import { Visibility } from "@mui/icons-material";
 import { useGetBooksQuery } from "@/features/books/booksApiSlice";
 import { MRT_ColumnDef, MRT_PaginationState, MRT_Row, MRT_SortingState, MRT_TableInstance } from "material-react-table";
@@ -10,7 +10,7 @@ import { getImageSrc } from "@ring/shared/enums/image";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { currencyFormat, idFormatter } from "@ring/shared";
 import { useTranslations } from "next-intl";
-import type { BookResponse } from "@ring/redux/booksApiSlice";
+import { usePathname } from "next/navigation";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -21,6 +21,8 @@ import CustomBreadcrumbs from "@/components/custom/CustomBreadcrumbs";
 import CustomReactTable from "@/components/table/CustomReactTable";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
+
+import type { BookResponse } from "@ring/redux/booksApiSlice";
 
 const ProductFormDialog = lazy(() => import("@/components/dialog/ProductFormDialog"));
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
@@ -44,7 +46,7 @@ const ManageProducts = () => {
     pageIndex: 0,
     pageSize: 25,
   });
-  const { data, isLoading, isSuccess, isError, error, isFetching } = useGetBooksQuery(
+  const { data, isLoading, isError, isFetching } = useGetBooksQuery(
     {
       page: pagination?.pageIndex,
       size: pagination?.pageSize,
@@ -61,13 +63,14 @@ const ManageProducts = () => {
     { skip: !id }
   );
 
+  const handleOpenFilter = () => {};
+
   const handleOpen = () => {
     setContextProduct(null);
     setOpen(true);
   };
 
   const handleOpenEdit = (productId: number) => {
-    console.log("test");
     // getBook(productId)
     //   .unwrap()
     //   .then((book) => {
@@ -87,7 +90,9 @@ const ManageProducts = () => {
         accessorKey: "id",
         header: t("general.id"),
         size: 80,
-        Cell: ({ renderedCellValue }) => idFormatter(Number(renderedCellValue)),
+        Cell: ({ renderedCellValue }) => (
+          <Link href={`/product/${renderedCellValue}`}>{idFormatter(Number(renderedCellValue))}</Link>
+        ),
       },
       {
         accessorKey: "title",
@@ -196,21 +201,19 @@ const ManageProducts = () => {
     <Box display="flex" flexDirection="column" height="100%">
       {pending && (
         <Suspense fallback={<></>}>
-          <PendingModal open={pending} message="Đang gửi yêu cầu..." />
+          <PendingModal open={pending} message={t("pending")} />
         </Suspense>
       )}
-      <Box display="flex" justifyContent="space-between" alignItems="center">
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
         <Box>
           <Typography variant="h5" sx={{ mb: 1 }}>
             {t("product.management")}
           </Typography>
-          <CustomBreadcrumbs separator="." maxItems={4} aria-label="breadcrumb">
-            <Link href={"/product"}>{t("product.management")}</Link>
-          </CustomBreadcrumbs>
+          <CustomBreadcrumbs items={[{ label: t("product.management"), href: "/product" }]} />
         </Box>
         <Box sx={{ my: 3 }}>
-          <Button variant="outlined" startIcon={<Add />} onClick={handleOpen}>
-            {t("general.add")}
+          <Button variant="outlined" color="info" startIcon={<FilterAlt />} onClick={handleOpenFilter}>
+            {t("general.filter")}
           </Button>
         </Box>
       </Box>
@@ -291,24 +294,27 @@ const ManageProducts = () => {
                 };
 
                 return (
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <Box display="flex">
                     <Button
                       color="error"
                       disabled={table.getSelectedRowModel().flatRows.length === 0}
                       onClick={handleDeleleMultiple}
                       variant="outlined"
                       startIcon={<Delete />}
-                      sx={{ ml: 2 }}
+                      sx={{ mx: 2 }}
                     >
                       {t("delete")}
                     </Button>
-                  </div>
+                    <Button variant="outlined" startIcon={<Add />} onClick={handleOpen}>
+                      {t("general.add")}
+                    </Button>
+                  </Box>
                 );
               },
               muiToolbarAlertBannerProps: isError
                 ? {
                     color: "error",
-                    children: t("error.network"),
+                    children: t("error.general"),
                   }
                 : { color: "success" },
             }}

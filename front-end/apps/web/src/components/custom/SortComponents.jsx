@@ -60,7 +60,8 @@ export const AltContainer = styled.div`
   ${({ theme }) => theme.breakpoints.down("sm")} {
     position: fixed;
     bottom: ${({ theme }) => theme.spacing(1)};
-    left: ${({ theme }) => theme.spacing(1)};
+    left: 50%;
+    transform: translateX(-50%);
   }
 `;
 
@@ -68,6 +69,7 @@ export const FilterTitle = styled.span`
   display: block;
   margin-right: 15px;
   font-weight: 450;
+  white-space: nowrap;
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
     display: none;
@@ -94,8 +96,10 @@ export const StyledInput = styled(TextField)`
       font-size: 14px;
     }
 
-    .MuiOutlinedInput-notchedOutline {
-      border: none;
+    &:not(.border) {
+      .MuiOutlinedInput-notchedOutline {
+        border: none;
+      }
     }
   }
 `;
@@ -107,9 +111,18 @@ export const StyledSortButton = styled(Button)`
   max-width: 100px;
   background-color: ${({ theme }) => theme.vars.palette.background.paper};
   color: ${({ theme }) => theme.vars.palette.text.primary};
+  border-radius: 0;
+  padding: ${({ theme }) => theme.spacing(0.8, 1.75)};
+  border: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
+  background-color: ${({ theme }) => theme.vars.palette.background.paper};
 
   ${({ theme }) => theme.breakpoints.down("md_lg")} {
     display: flex;
+  }
+
+  ${({ theme }) => theme.breakpoints.down("sm")} {
+    border: none;
+    padding: none;
   }
 `;
 

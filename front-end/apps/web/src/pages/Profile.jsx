@@ -1,12 +1,12 @@
 import styled from "@emotion/styled";
-import Dialog from "@mui/material/Dialog";
 import Skeleton from "@mui/material/Skeleton";
-import { lazy, Suspense, forwardRef, useState, useEffect } from "react";
-import { StyledDialogTitle, TabContentContainer } from "../components/custom/ProfileComponents";
-import { useNavigate, useOutletContext, useParams } from "react-router";
-import { useRefreshMutation, useSignOutMutation } from "@ring/redux/authApiSlice";
+import { lazy, Suspense, useState, useEffect } from "react";
+import { StyledDialogTitle } from "../components/custom/ProfileComponents";
+import { useOutletContext, useParams } from "react-router";
+import { useRefreshMutation } from "@ring/redux/authApiSlice";
+import { useTranslation } from "react-i18next";
 import Placeholder from "@ring/ui/Placeholder";
-import Slide from "@mui/material/Slide";
+import useLogout from "../hooks/useLogout";
 
 const ProfileDetail = lazy(() => import("../components/profile/ProfileDetail"));
 const AddressComponent = lazy(() => import("../components/address/AddressComponent"));
@@ -42,18 +42,13 @@ const PlaceholderContent = ({ tab }) => {
   );
 };
 
-const Transition = forwardRef(function Transition(props, ref) {
-  return <Slide direction="left" ref={ref} {...props} />;
-});
-
 const Profile = () => {
   const { tab } = useParams();
-  const { profile, loading, isSuccess, tabletMode, mobileMode, pending, setPending } = useOutletContext();
+  const { t } = useTranslation();
+  const { profile, loading, isSuccess, tabletMode, mobileMode, pending, setPending, setOpen } = useOutletContext();
   const [refresh, { isLoading: refreshing }] = useRefreshMutation();
-  const [logout] = useSignOutMutation();
-  const [open, setOpen] = useState(false);
   const [currTab, setCurrTab] = useState("info");
-  const navigate = useNavigate();
+  const signout = useLogout();
 
   useEffect(() => {
     setOpen(!!tab);
@@ -73,14 +68,8 @@ const Profile = () => {
       } else if (error?.status === 400 || error?.status === 403) {
         errorMsg = t("error.auth.expired");
       }
-      await logout().unwrap();
+      await signout(errorMsg);
     }
-  };
-
-  const handleClose = (e) => {
-    e.preventDefault();
-    setOpen(false);
-    navigate(-1);
   };
 
   let content;
@@ -98,7 +87,6 @@ const Profile = () => {
             mobileMode,
             tabletMode,
             verifyRefreshToken,
-            handleClose,
           }}
         />
       );
@@ -111,9 +99,7 @@ const Profile = () => {
       break;
     default: {
       content = !tabletMode ? (
-        <ProfileDetail
-          {...{ pending, setPending, profile, loading, isSuccess, tabletMode, verifyRefreshToken, handleClose }}
-        />
+        <ProfileDetail {...{ pending, setPending, profile, loading, isSuccess, tabletMode, verifyRefreshToken }} />
       ) : (
         <PlaceholderContent tab={currTab} />
       );
@@ -121,31 +107,7 @@ const Profile = () => {
     }
   }
 
-  return tabletMode ? (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      fullScreen={mobileMode}
-      scroll={"paper"}
-      maxWidth={"md"}
-      fullWidth
-      closeAfterTransition={false}
-      slots={{
-        transition: Transition,
-      }}
-      slotProps={{
-        paper: {
-          elevation: 0,
-        },
-      }}
-    >
-      <Suspense fallback={<PlaceholderContent tab={currTab} />}>{content}</Suspense>
-    </Dialog>
-  ) : (
-    <TabContentContainer>
-      <Suspense fallback={<PlaceholderContent tab={currTab} />}>{content}</Suspense>
-    </TabContentContainer>
-  );
+  return <Suspense fallback={<PlaceholderContent tab={currTab} />}>{content}</Suspense>;
 };
 
 export default Profile;

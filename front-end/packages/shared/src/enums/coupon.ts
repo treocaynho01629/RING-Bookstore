@@ -11,6 +11,20 @@ export interface CouponTypeMeta {
   summaryFull: string;
 }
 
+export interface CouponCriteriaMeta {
+  label: string;
+  value: string;
+  condition: string;
+  conditionAll: string;
+  formatter: (value: number) => string;
+  unit: string;
+}
+
+/**
+ * Get coupon type meta
+ * @param {CouponType} couponType
+ * @returns {CouponTypeMeta}
+ */
 export const getCouponType = (couponType: CouponType): CouponTypeMeta => {
   switch (couponType) {
     case CouponType.SHIPPING:
@@ -43,18 +57,19 @@ export const getCouponType = (couponType: CouponType): CouponTypeMeta => {
   }
 };
 
-export interface CouponCriteriaMeta {
-  label: string;
-  value: string;
-  condition: string;
-  conditionAll: string;
-  formatter: Function;
-  unit: string;
-}
+/**
+ * Get coupon type options
+ */
+export const couponTypeOptions: CouponTypeMeta[] = (Object.keys(CouponType) as (keyof typeof CouponType)[]).map((k) =>
+  getCouponType(CouponType[k])
+);
 
-export const getCouponCriteria = (
-  couponCriteria: CouponCriteria
-): CouponCriteriaMeta => {
+/**
+ * Get coupon criteria meta
+ * @param {CouponCriteria} couponCriteria
+ * @returns {CouponCriteriaMeta}
+ */
+export const getCouponCriteria = (couponCriteria: CouponCriteria): CouponCriteriaMeta => {
   switch (couponCriteria) {
     case CouponCriteria.VALUE:
       return {
@@ -85,3 +100,10 @@ export const getCouponCriteria = (
       };
   }
 };
+
+/**
+ * Get coupon criteria options
+ */
+export const couponCriteriaOptions: CouponCriteriaMeta[] = (
+  Object.keys(CouponCriteria) as (keyof typeof CouponCriteria)[]
+).map((k) => getCouponCriteria(CouponCriteria[k]));

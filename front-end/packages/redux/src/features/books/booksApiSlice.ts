@@ -1,6 +1,4 @@
 import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
-import { defaultSerializeQueryArgs } from "@reduxjs/toolkit/query";
-import { isEqual } from "lodash-es";
 import { BookDisplayDTO } from "@ring/shared/models/bookDisplayDTO";
 import apiSlice from "../../lib/apiSlice";
 
@@ -25,6 +23,9 @@ export interface BookQueryArgs {
   value?: [number, number];
   withDesc?: boolean;
 }
+
+/** Query arg for infinite endpoint (filters only; page comes from pageParam). */
+export type BookInfiniteQueryArgs = Omit<BookQueryArgs, "page" | "loadMore">;
 
 export interface BooksResponse {
   content: BookResponse[];
@@ -104,57 +105,87 @@ export const booksApiSlice = apiWithEnum.injectEndpoints({
       },
       transformResponse: (response: BooksResponse) => {
         const { content, empty, page, size, totalElements, totalPages } = response;
-        const state = booksAdapter.setAll(booksInitialState, content);
-        return {
-          ...state,
-          empty,
-          page,
-          size,
-          totalElements,
-          totalPages,
-        };
-      },
-      serializeQueryArgs: ({ endpointName, queryArgs, endpointDefinition }) => {
-        if (queryArgs) {
-          const { loadMore, ...mainQuery } = queryArgs;
-
-          if (loadMore) {
-            //Load more >> serialize without <pagination>
-            const { page, size, ...rest } = mainQuery;
-            if (JSON.stringify(rest) === "{}") return endpointName + "Merge";
-            return defaultSerializeQueryArgs({
-              endpointName: endpointName + "Merge",
-              queryArgs: rest,
-              endpointDefinition,
-            });
-          }
-
-          //Serialize like normal
-          if (JSON.stringify(mainQuery) === "{}") return endpointName;
-          return defaultSerializeQueryArgs({
-            endpointName,
-            queryArgs: mainQuery,
-            endpointDefinition,
-          });
-        } else {
-          return endpointName;
-        }
-      },
-      merge: (currentCache, newItems, { arg: currentArg }) => {
-        currentCache.page = newItems.page;
-        if (!currentArg?.loadMore) booksAdapter.removeAll(currentCache);
-        booksAdapter.upsertMany(currentCache, booksSelector.selectAll(newItems));
-      },
-      forceRefetch: ({ currentArg, previousArg }) => {
-        return !!(
-          currentArg?.loadMore &&
-          !isEqual(currentArg, previousArg) &&
-          (currentArg?.page ?? 0) > (previousArg?.page ?? 0)
+        return booksAdapter.setAll(
+          {
+            ...booksInitialState,
+            empty,
+            page,
+            size,
+            totalElements,
+            totalPages,
+          },
+          content
         );
       },
       providesTags: (result) =>
         result
           ? [...result.ids.map((id) => ({ type: "Book" as const, id })), { type: "Book", id: "LIST" }]
+          : [{ type: "Book", id: "LIST" }],
+    }),
+    getBooksScroll: builder.infiniteQuery<BooksResponse, BookInfiniteQueryArgs | void, number>({
+      query: ({ queryArg, pageParam }) => {
+        const args = queryArg ?? {};
+        const {
+          size,
+          sortBy,
+          sortDir,
+          keyword,
+          cateId,
+          rating,
+          amount,
+          pubIds,
+          types,
+          shopId,
+          userId,
+          value,
+          withDesc,
+        } = args;
+
+        const params = new URLSearchParams();
+        params.append("pageNo", String(pageParam));
+        if (size) params.append("pSize", String(size));
+        if (sortBy) params.append("sortBy", sortBy);
+        if (sortDir) params.append("sortDir", sortDir);
+        if (keyword) params.append("keyword", keyword);
+        if (cateId) params.append("cateId", String(cateId));
+        if (rating) params.append("rating", rating);
+        if (amount != null) params.append("amount", String(amount));
+        if (types?.length) params.append("types", types.join(","));
+        if (shopId) params.append("shopId", String(shopId));
+        if (userId) params.append("userId", String(userId));
+        if (withDesc) params.append("withDesc", String(withDesc));
+        if (pubIds?.length) params.append("pubIds", pubIds.join(","));
+        if (value) {
+          if (value[0] != 0) params.append("fromRange", String(value[0]));
+          if (value[1] != 10000000) params.append("toRange", String(value[1]));
+        }
+
+        return {
+          url: `/api/books?${params.toString()}`,
+          validateStatus: (response: Response, result: any) => {
+            return response.status === 200 && !result?.isError;
+          },
+        };
+      },
+      infiniteQueryOptions: {
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages, lastPageParam) => {
+          const nextPage = lastPageParam + 1;
+          if (nextPage >= lastPage.totalPages) return undefined;
+          return nextPage;
+        },
+        getPreviousPageParam: (firstPage, allPages, firstPageParam) => {
+          const prevPage = firstPageParam - 1;
+          if (prevPage < 0) return undefined;
+          return prevPage;
+        },
+      },
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.pages.flatMap((p) => p.content.map((b) => ({ type: "Book" as const, id: b.id }))),
+              { type: "Book", id: "LIST" },
+            ]
           : [{ type: "Book", id: "LIST" }],
     }),
   }),

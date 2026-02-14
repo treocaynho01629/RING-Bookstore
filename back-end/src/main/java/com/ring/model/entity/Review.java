@@ -17,38 +17,31 @@ import org.hibernate.annotations.Nationalized;
 @EqualsAndHashCode(callSuper = true)
 public class Review extends Auditable {
 
-    @Id
-    @Column(nullable = false, updatable = false)
-    @SequenceGenerator(
-            name = "primary_sequence",
-            sequenceName = "primary_sequence",
-            allocationSize = 1,
-            initialValue = 10000
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "primary_sequence"
-    )
-    private Long id;
-    
-    @Column(length = 1000)
-    @Nationalized 
-    private String rContent;
+        @Id
+        @Column(nullable = false, updatable = false)
+        @SequenceGenerator(name = "primary_sequence", sequenceName = "primary_sequence", allocationSize = 1, initialValue = 10000)
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "primary_sequence")
+        private Long id;
 
-    @Column
-    private Integer rating;
+        @Column(length = 1000)
+        @Nationalized
+        private String rContent;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
-    @JsonIgnore
-    private Book book;
+        @Column
+        private Integer rating;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    @JsonIgnore
-    private Account user;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "book_id")
+        @JsonIgnore
+        private Book book;
 
-    @JsonIgnore
-    @Column(columnDefinition = "boolean default false")
-    private boolean isHidden = false;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "user_id")
+        @JsonIgnore
+        private Account user;
+
+        // TODO: Add hidden/spoiler review process
+        @JsonIgnore
+        @Column(columnDefinition = "boolean default false")
+        private boolean isHidden = false;
 }

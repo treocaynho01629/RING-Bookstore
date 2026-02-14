@@ -134,7 +134,7 @@ public class CouponServiceImpl implements CouponService {
         ICoupon coupon = couponRepo.findCouponById(id)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.coupon") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.coupon") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         return couponMapper.couponToDetailDTO(coupon);
@@ -149,7 +149,7 @@ public class CouponServiceImpl implements CouponService {
         ICoupon projection = couponRepo.findCouponByCode(code, user != null ? user.getId() : null)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.coupon") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.coupon") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         if (cValue != null || cQuantity != null) {
@@ -164,7 +164,7 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Cacheable(cacheNames = AppConstants.COUPONS)
-    public List<CouponDTO> recommendCoupons(List<Long> shopIds, 
+    public List<CouponDTO> recommendCoupons(List<Long> shopIds,
             Account user) {
         List<ICoupon> couponsList = couponRepo.recommendCoupons(shopIds, user.getId());
         return couponsList.stream()
@@ -208,19 +208,19 @@ public class CouponServiceImpl implements CouponService {
             Shop shop = shopRepo.findById(request.getShopId())
                     .orElseThrow(() -> {
                         var errorMsg = messageService.getMessage("exception.not.found",
-                                new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                                new Object[] { new DefaultMessageSourceResolvable("label.shop") });
                         return new ResourceNotFoundException(errorMsg);
                     });
             if (!CommonUtils.isValidShopOwner(shop, user)) {
                 var errorMsg = messageService.getMessage("exception.ownership",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                        new Object[] { new DefaultMessageSourceResolvable("label.shop") });
                 throw new EntityOwnershipException(errorMsg);
             }
             coupon.setShop(shop);
         } else {
             if (!CommonUtils.isAuthAdmin()) {
                 var errorMsg = messageService.getMessage("exception.required.for",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.shop"),
+                        new Object[] { new DefaultMessageSourceResolvable("label.shop"),
                                 new DefaultMessageSourceResolvable(UserRole.ROLE_ADMIN.getLabel()) });
                 throw new HttpResponseException(HttpStatus.BAD_REQUEST,
                         AppConstants.INVALID_ARGUMENT,
@@ -247,7 +247,7 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Caching(evict = {
-            @CacheEvict(cacheNames = { AppConstants.COUPONS,  AppConstants.COUPON_ANALYTICS }, allEntries = true),
+            @CacheEvict(cacheNames = { AppConstants.COUPONS, AppConstants.COUPON_ANALYTICS }, allEntries = true),
             @CacheEvict(cacheNames = AppConstants.COUPON_DETAIL, key = "#id") })
     @Transactional
     public Coupon updateCoupon(Long id, CouponRequest request, Account user) {
@@ -256,7 +256,7 @@ public class CouponServiceImpl implements CouponService {
         Coupon coupon = couponRepo.findById(id)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.coupon") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.coupon") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
@@ -264,7 +264,7 @@ public class CouponServiceImpl implements CouponService {
         if (!CommonUtils.isValidShopOwner(coupon.getShop(), user)) {
             if (!CommonUtils.isAuthAdmin()) {
                 var errorMsg = messageService.getMessage("exception.ownership",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.coupon") });
+                        new Object[] { new DefaultMessageSourceResolvable("label.coupon") });
                 throw new EntityOwnershipException(errorMsg);
             }
         }
@@ -274,19 +274,19 @@ public class CouponServiceImpl implements CouponService {
             Shop shop = shopRepo.findById(request.getShopId())
                     .orElseThrow(() -> {
                         var errorMsg = messageService.getMessage("exception.not.found",
-                                new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                                new Object[] { new DefaultMessageSourceResolvable("label.shop") });
                         return new ResourceNotFoundException(errorMsg);
                     });
             if (!CommonUtils.isValidShopOwner(shop, user)) {
                 var errorMsg = messageService.getMessage("exception.ownership",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                        new Object[] { new DefaultMessageSourceResolvable("label.shop") });
                 throw new EntityOwnershipException(errorMsg);
             }
             coupon.setShop(shop);
         } else {
             if (!CommonUtils.isAuthAdmin()) {
                 var errorMsg = messageService.getMessage("exception.required.for",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.shop"),
+                        new Object[] { new DefaultMessageSourceResolvable("label.shop"),
                                 new DefaultMessageSourceResolvable(UserRole.ROLE_ADMIN.getLabel()) });
                 throw new HttpResponseException(HttpStatus.BAD_REQUEST,
                         AppConstants.INVALID_ARGUMENT,
@@ -319,7 +319,7 @@ public class CouponServiceImpl implements CouponService {
         Coupon coupon = couponRepo.findById(id)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.coupon") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.coupon") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
@@ -327,7 +327,7 @@ public class CouponServiceImpl implements CouponService {
         if (!CommonUtils.isValidShopOwner(coupon.getShop(), user)) {
             if (!CommonUtils.isAuthAdmin()) {
                 var errorMsg = messageService.getMessage("exception.ownership",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.coupon") });
+                        new Object[] { new DefaultMessageSourceResolvable("label.coupon") });
                 throw new EntityOwnershipException(errorMsg);
             }
         }
@@ -454,7 +454,7 @@ public class CouponServiceImpl implements CouponService {
     /**
      * Check if coupon is usable.
      * 
-     * @param coupon The coupon.
+     * @param coupon  The coupon.
      * @param request The request.
      * @return true if coupon is usable, false otherwise.
      */

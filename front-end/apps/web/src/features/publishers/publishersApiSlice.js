@@ -1,10 +1,7 @@
-import { defaultSerializeQueryArgs } from "@reduxjs/toolkit/query";
-import { isEqual } from "lodash-es";
 import {
   publishersApiSlice as initialsApiSlice,
   pubsInitialState as initialState,
   pubsAdapter,
-  pubsSelector,
 } from "@ring/redux/publishersApiSlice";
 
 export const publishersApiSlice = initialsApiSlice.injectEndpoints({
@@ -13,7 +10,7 @@ export const publishersApiSlice = initialsApiSlice.injectEndpoints({
       query: (args) => {
         const { page, size, cateId } = args || {};
 
-        //Params
+        // Params
         const params = new URLSearchParams();
         if (page) params.append("pageNo", page);
         if (size) params.append("pSize", size);
@@ -26,8 +23,7 @@ export const publishersApiSlice = initialsApiSlice.injectEndpoints({
         };
       },
       transformResponse: (responseData) => {
-        const { content, empty, page, size, totalElements, totalPages } =
-          responseData;
+        const { content, empty, page, size, totalElements, totalPages } = responseData;
         return pubsAdapter.setAll(
           {
             ...initialState,
@@ -40,52 +36,48 @@ export const publishersApiSlice = initialsApiSlice.injectEndpoints({
           content
         );
       },
-      serializeQueryArgs: ({ endpointName, queryArgs, endpointDefinition }) => {
-        if (queryArgs) {
-          const { loadMore, ...mainQuery } = queryArgs;
-
-          if (loadMore) {
-            //Load more >> serialize without <pagination>
-            const { page, size, ...rest } = mainQuery;
-            if (JSON.stringify(rest) === "{}") return endpointName + "Merge";
-            return defaultSerializeQueryArgs({
-              endpointName: endpointName + "Merge",
-              queryArgs: rest,
-              endpointDefinition,
-            });
-          }
-
-          //Serialize like normal
-          if (JSON.stringify(mainQuery) === "{}") return endpointName;
-          return defaultSerializeQueryArgs({
-            endpointName,
-            queryArgs: mainQuery,
-            endpointDefinition,
-          });
-        } else {
-          return endpointName;
-        }
-      },
-      merge: (currentCache, newItems, { arg: currentArg }) => {
-        currentCache.page = newItems.page;
-        if (!currentArg?.loadMore) pubsAdapter.removeAll(currentCache);
-        pubsAdapter.upsertMany(currentCache, pubsSelector.selectAll(newItems));
-      },
-      forceRefetch: ({ currentArg, previousArg }) => {
-        const isForceRefetch =
-          currentArg?.loadMore &&
-          !isEqual(currentArg, previousArg) &&
-          currentArg?.page > previousArg?.page;
-        return isForceRefetch;
-      },
       providesTags: (result, error, arg) => {
         if (result?.ids) {
-          return [
-            { type: "Publisher", id: "LIST" },
-            ...result.ids.map((id) => ({ type: "Publisher", id })),
-          ];
+          return [{ type: "Publisher", id: "LIST" }, ...result.ids.map((id) => ({ type: "Publisher", id }))];
         } else return [{ type: "Publisher", id: "LIST" }];
       },
+    }),
+    getRelevantPublishersScroll: builder.infiniteQuery({
+      query: ({ queryArg, pageParam }) => {
+        const { size, cateId } = queryArg || {};
+
+        // Params
+        const params = new URLSearchParams();
+        params.append("pageNo", pageParam);
+        if (size) params.append("pSize", size);
+
+        return {
+          url: `/api/publishers/relevant/${cateId}?${params.toString()}`,
+          validateStatus: (response, result) => {
+            return response.status === 200 && !result?.isError;
+          },
+        };
+      },
+      infiniteQueryOptions: {
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages, lastPageParam) => {
+          const nextPage = lastPageParam + 1;
+          if (nextPage >= lastPage.totalPages) return undefined;
+          return nextPage;
+        },
+        getPreviousPageParam: (firstPage, allPages, firstPageParam) => {
+          const prevPage = firstPageParam - 1;
+          if (prevPage < 0) return undefined;
+          return prevPage;
+        },
+      },
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.pages.flatMap((p) => p.content.map((pub) => ({ type: "Publisher", id: pub.id }))),
+              { type: "Publisher", id: "LIST" },
+            ]
+          : [{ type: "Publisher", id: "LIST" }],
     }),
   }),
 });
@@ -93,5 +85,7 @@ export const publishersApiSlice = initialsApiSlice.injectEndpoints({
 export const {
   useGetPublisherQuery,
   useGetPublishersQuery,
+  useGetPublishersScrollInfiniteQuery,
   useGetRelevantPublishersQuery,
+  useGetRelevantPublishersScrollInfiniteQuery,
 } = publishersApiSlice;

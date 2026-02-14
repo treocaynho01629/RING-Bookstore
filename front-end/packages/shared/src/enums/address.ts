@@ -6,6 +6,11 @@ export interface AddressTypeMeta {
   color: string;
 }
 
+/**
+ * Get address type meta
+ * @param {AddressType} addressType
+ * @returns {AddressTypeMeta}
+ */
 export const getAddressType = (addressType: AddressType): AddressTypeMeta => {
   switch (addressType) {
     case AddressType.HOME:
@@ -28,3 +33,10 @@ export const getAddressType = (addressType: AddressType): AddressTypeMeta => {
       };
   }
 };
+
+/**
+ * Get address type options
+ */
+export const addressTypeOptions: AddressTypeMeta[] = (Object.keys(AddressType) as (keyof typeof AddressType)[]).map(
+  (k) => getAddressType(AddressType[k])
+);

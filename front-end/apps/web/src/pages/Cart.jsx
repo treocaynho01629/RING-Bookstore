@@ -86,9 +86,7 @@ const Cart = () => {
 
   return (
     <Wrapper>
-      <CustomBreadcrumbs separator="›" maxItems={4} aria-label="Breadcrumbs" className="transparent">
-        <NavLink to={"/cart"}>{t("cart.label")}</NavLink>
-      </CustomBreadcrumbs>
+      <CustomBreadcrumbs items={[{ label: t("cart.label"), href: "/cart" }]} type="transparent" />
       {!cartProducts.length ? (
         <EmptyWrapper>
           <IconWrapper>

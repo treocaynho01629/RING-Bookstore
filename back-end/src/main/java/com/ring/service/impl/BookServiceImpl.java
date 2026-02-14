@@ -34,6 +34,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -95,10 +96,20 @@ public class BookServiceImpl implements BookService {
             Double fromRange,
             Double toRange,
             Boolean withDesc) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize,
-                sortDir.equals(AppConstants.ASCENDING)
-                        ? Sort.by(sortBy).ascending()
-                        : Sort.by(sortBy).descending());
+
+        // Favorite sort
+        Pageable pageable;
+        if (sortBy.equals("favorite")) {
+            sortBy = "((COALESCE(rating, 0) * 0.6) + ((COUNT(rv.rating) / 100.0) * 0.25) + ((COALESCE(totalOrders, 0) / 100.0) * 0.15))";
+            pageable = PageRequest.of(pageNo, pageSize,
+                    JpaSort.unsafe(sortDir.equals(AppConstants.ASCENDING) ? Sort.Direction.ASC
+                            : Sort.Direction.DESC, sortBy));
+        } else {
+            // Normal sort by
+            pageable = PageRequest.of(pageNo, pageSize,
+                    Sort.by(sortDir.equals(AppConstants.ASCENDING) ? Sort.Direction.ASC
+                            : Sort.Direction.DESC, sortBy));
+        }
 
         // Fetch from the database
         Page<IBookDisplay> booksList = bookRepo.findBooksWithFilter(
@@ -129,7 +140,8 @@ public class BookServiceImpl implements BookService {
         IBook book = detailRepo.findBook(id)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.product") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         List<Long> imageIds = book.getPreviews() != null ? book.getPreviews() : new ArrayList<>();
@@ -144,7 +156,8 @@ public class BookServiceImpl implements BookService {
         IBookDetail book = detailRepo.findBookDetail(id, null)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.product") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         return bookMapper.detailToDTO(book); // Map to DTO
@@ -155,7 +168,8 @@ public class BookServiceImpl implements BookService {
         IBookDetail book = detailRepo.findBookDetail(null, slug)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.product") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         return bookMapper.detailToDTO(book); // Map to DTO
@@ -172,9 +186,7 @@ public class BookServiceImpl implements BookService {
                     AppConstants.BOOK_ANALYTICS }, allEntries = true),
             @CacheEvict(cacheNames = { AppConstants.BOOK,
                     AppConstants.BOOK_DETAIL }, key = "#result.id"),
-            @CacheEvict(cacheNames = AppConstants.BOOK_DETAIL,
-                    key = "#result.slug",
-                    condition = "#result != null") })
+            @CacheEvict(cacheNames = AppConstants.BOOK_DETAIL, key = "#result.slug", condition = "#result != null") })
     @Transactional
     public BookResponseDTO addBook(BookRequest request,
             MultipartFile thumbnail,
@@ -184,24 +196,27 @@ public class BookServiceImpl implements BookService {
         Category cate = cateRepo.findById(request.getCateId())
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.cate") });
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.cate") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         Publisher pub = pubRepo.findById(request.getPubId())
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.pub") });
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.pub") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         Shop shop = shopRepo.findById(request.getShopId())
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.shop") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         if (!CommonUtils.isValidShopOwner(shop, user)) {
             var errorMsg = messageService.getMessage("exception.ownership",
-                    new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                    new Object[] { new DefaultMessageSourceResolvable("label.shop") });
             throw new EntityOwnershipException(errorMsg);
         }
 
@@ -253,11 +268,10 @@ public class BookServiceImpl implements BookService {
     }
 
     @Caching(evict = {
-            @CacheEvict(cacheNames = { AppConstants.BOOKS, AppConstants.BOOK_SUGGESTIONS }, allEntries = true),
+            @CacheEvict(cacheNames = { AppConstants.BOOKS,
+                    AppConstants.BOOK_SUGGESTIONS }, allEntries = true),
             @CacheEvict(cacheNames = { AppConstants.BOOK, AppConstants.BOOK_DETAIL }, key = "#id"),
-            @CacheEvict(cacheNames = AppConstants.BOOK_DETAIL,
-                    key = "#result.slug",
-                    condition = "#result != null") })
+            @CacheEvict(cacheNames = AppConstants.BOOK_DETAIL, key = "#result.slug", condition = "#result != null") })
     @Transactional
     public BookResponseDTO updateBook(Long id,
             BookRequest request,
@@ -269,19 +283,22 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepo.findById(id)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.product") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         Category cate = cateRepo.findById(request.getCateId())
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.cate") });
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.cate") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         Publisher pub = pubRepo.findById(request.getPubId())
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.pub") });
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.pub") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         BookDetail currDetail = book.getDetail();
@@ -291,7 +308,7 @@ public class BookServiceImpl implements BookService {
         // Check if correct ownership
         if (!CommonUtils.isValidShopOwner(book.getShop(), user)) {
             var errorMsg = messageService.getMessage("exception.ownership",
-                    new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+                    new Object[] { new DefaultMessageSourceResolvable("label.product") });
             throw new EntityOwnershipException(errorMsg);
         }
 
@@ -311,7 +328,8 @@ public class BookServiceImpl implements BookService {
             Image newImage = imageRepo.findBookImage(id, request.getThumbnailId())
                     .orElseThrow(() -> {
                         var errorMsg = messageService.getMessage("exception.not.found",
-                                new Object[]{ new DefaultMessageSourceResolvable("label.image") });
+                                new Object[] { new DefaultMessageSourceResolvable(
+                                        "label.image") });
                         return new ResourceNotFoundException(errorMsg);
                     });
 
@@ -372,22 +390,21 @@ public class BookServiceImpl implements BookService {
                     AppConstants.BOOK_ANALYTICS }, allEntries = true),
             @CacheEvict(cacheNames = { AppConstants.BOOK,
                     AppConstants.BOOK_DETAIL }, key = "#id"),
-            @CacheEvict(cacheNames = AppConstants.BOOK_DETAIL,
-                    key = "#result.slug",
-                    condition = "#result != null") })
+            @CacheEvict(cacheNames = AppConstants.BOOK_DETAIL, key = "#result.slug", condition = "#result != null") })
     @Transactional
     public BookResponseDTO deleteBook(Long id, Account user) {
         Book book = bookRepo.findById(id)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.product") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
         // Check if correct ownership
         if (!CommonUtils.isValidShopOwner(book.getShop(), user)) {
             var errorMsg = messageService.getMessage("exception.ownership",
-                    new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+                    new Object[] { new DefaultMessageSourceResolvable("label.product") });
             throw new EntityOwnershipException(errorMsg);
         }
 
@@ -402,7 +419,8 @@ public class BookServiceImpl implements BookService {
             AppConstants.BOOK_ANALYTICS }, allEntries = true)
     @Transactional
     public void deleteBooks(List<Long> ids, Account user) {
-        List<Long> deleteIds = CommonUtils.isAuthAdmin() ? ids : bookRepo.findBookIdsByInIdsAndOwner(ids, user.getId());
+        List<Long> deleteIds = CommonUtils.isAuthAdmin() ? ids
+                : bookRepo.findBookIdsByInIdsAndOwner(ids, user.getId());
         bookRepo.deleteAllById(deleteIds);
     }
 
@@ -410,7 +428,7 @@ public class BookServiceImpl implements BookService {
             AppConstants.BOOK_DETAIL,
             AppConstants.BOOKS,
             AppConstants.BOOK_SUGGESTIONS,
-            AppConstants.BOOK_ANALYTICS  }, allEntries = true)
+            AppConstants.BOOK_ANALYTICS }, allEntries = true)
     @Transactional
     public void deleteBooksInverse(String keyword,
             Integer amount,
