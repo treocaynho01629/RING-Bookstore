@@ -117,7 +117,6 @@ export const usersApiSlice = apiWithEnum.injectEndpoints({
         url: `/api/accounts/${id}`,
         method: "DELETE",
         credentials: "include",
-        responseHandler: "text",
       }),
       invalidatesTags: (result, error, id) => [{ type: "User", id }],
     }),
@@ -126,7 +125,6 @@ export const usersApiSlice = apiWithEnum.injectEndpoints({
         url: `/api/accounts/delete-multiple?ids=${ids}`,
         method: "DELETE",
         credentials: "include",
-        responseHandler: "text",
       }),
       invalidatesTags: (result, error) => [{ type: "User", id: "LIST" }],
     }),
@@ -146,7 +144,6 @@ export const usersApiSlice = apiWithEnum.injectEndpoints({
           validateStatus: (response, result) => {
             return response.status === 200 && !result?.isError;
           },
-          responseHandler: "text",
         };
       },
       invalidatesTags: (result, error) => [{ type: "User", id: "LIST" }],

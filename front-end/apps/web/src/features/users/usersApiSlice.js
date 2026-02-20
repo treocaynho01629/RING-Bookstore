@@ -27,7 +27,6 @@ export const usersApiSlice = apiWithEnum.injectEndpoints({
       query: (changeBody) => ({
         url: "/api/accounts/change-password",
         method: "PUT",
-        responseHandler: "text",
         body: {
           ...changeBody,
         },

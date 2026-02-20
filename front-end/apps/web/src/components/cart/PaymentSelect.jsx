@@ -46,7 +46,7 @@ const RadioContainer = styled.div`
 
 const PaymentContainer = styled.div`
   padding: ${({ theme }) => theme.spacing(2)};
-  margin-top: ${({ theme }) => theme.spacing(1)};
+  margin: ${({ theme }) => theme.spacing(1, 0, 3)};
   border: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
   background-color: ${({ theme }) => theme.vars.palette.background.paper};
 

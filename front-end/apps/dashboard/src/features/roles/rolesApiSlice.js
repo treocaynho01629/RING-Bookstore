@@ -46,7 +46,6 @@ export const rolesApiSlice = apiWithEnum.injectEndpoints({
           credentials: "include",
           body: formData,
           formData: true,
-          responseHandler: "text",
         };
       },
       invalidatesTags: (result, error, { name }) => [{ type: "Role", id: name }],

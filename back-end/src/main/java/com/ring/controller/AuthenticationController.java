@@ -4,6 +4,7 @@ import com.ring.dto.request.AuthenticationRequest;
 import com.ring.dto.request.RegisterRequest;
 import com.ring.dto.request.ResetPassRequest;
 import com.ring.dto.response.AuthenticationResponse;
+import com.ring.dto.response.GenericResponse;
 import com.ring.model.entity.Account;
 import com.ring.service.AuthenticationService;
 import com.ring.service.RefreshTokenService;
@@ -23,7 +24,8 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * Controller named {@link AuthenticationController}
- * for handling authentication-related requests such as registration, login, token refresh.
+ * for handling authentication-related requests such as registration, login,
+ * token refresh.
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -35,20 +37,22 @@ public class AuthenticationController {
 	private final TokenService tokenService;
 	private final RefreshTokenService refreshService;
 	private final MessageService messageService;
+
 	/**
 	 * Registers a new user.
 	 *
-	 * @param registerRequest 	The registration request containing user details.
-	 * @param request 			The HTTP request containing reCAPTCHA score in the header.
+	 * @param registerRequest The registration request containing user details.
+	 * @param request         The HTTP request containing Turnstile token in the
+	 *                        header.
 	 * @return a {@link ResponseEntity} containing a success or failure message.
 	 */
 	@PostMapping("/register")
-	public ResponseEntity<String> register(
+	public ResponseEntity<?> register(
 			@RequestBody @Valid RegisterRequest registerRequest,
 			HttpServletRequest request) {
 
 		registerService.register(registerRequest, request);
-		String message = messageService.getMessage("message.create.succeeded");
+		GenericResponse message = new GenericResponse(messageService.getMessage("message.create.succeeded"));
 
 		return new ResponseEntity<>(message, HttpStatus.CREATED);
 	}
@@ -56,10 +60,12 @@ public class AuthenticationController {
 	/**
 	 * Logs in a user and returns an access token.
 	 *
-	 * @param authRequest 	The login request containing user credentials.
-	 * @param request 		The HTTP request containing reCAPTCHA score in the header.
-	 * @param persist whether to persist the refresh token.
-	 * @return a {@link ResponseEntity} containing the {@link AuthenticationResponse} with the JWT token and refresh token in headers cookie.
+	 * @param authRequest The login request containing user credentials.
+	 * @param request     The HTTP request containing Turnstile token in the header.
+	 * @param persist     whether to persist the refresh token.
+	 * @return a {@link ResponseEntity} containing the
+	 *         {@link AuthenticationResponse} with the JWT token and refresh token
+	 *         in headers cookie.
 	 */
 	@PostMapping("/authenticate")
 	public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody @Valid AuthenticationRequest authRequest,
@@ -85,15 +91,18 @@ public class AuthenticationController {
 	}
 
 	/**
-	 * Refreshes the authentication token using the refresh token from the HTTP request.
+	 * Refreshes the authentication token using the refresh token from the HTTP
+	 * request.
 	 *
-	 * @param request 		The HTTP request containing the refresh token in the cookie.
-	 * @param refreshToken  The refresh token value.
-	 * @return a {@link ResponseEntity} containing the new {@link AuthenticationResponse} with the refreshed JWT token.
+	 * @param request      The HTTP request containing the refresh token in the
+	 *                     cookie.
+	 * @param refreshToken The refresh token value.
+	 * @return a {@link ResponseEntity} containing the new
+	 *         {@link AuthenticationResponse} with the refreshed JWT token.
 	 */
 	@GetMapping("/refresh-token")
 	public ResponseEntity<AuthenticationResponse> refreshToken(HttpServletRequest request,
-		   @RequestParam(required = false) String refreshToken) {
+			@RequestParam(required = false) String refreshToken) {
 
 		// Get refresh token
 		String token = refreshToken != null ? refreshToken : tokenService.extractRefreshToken(request);
@@ -112,36 +121,38 @@ public class AuthenticationController {
 	 * Sends a password recovery email to the user.
 	 *
 	 * @param email   The email address of the user requesting password reset.
-	 * @param request The HTTP request containing reCAPTCHA score in the header.
+	 * @param request The HTTP request containing Turnstile token in the header.
 	 * @return a {@link ResponseEntity} containing a success message.
 	 */
 	@PostMapping("/forgot-password")
-	public ResponseEntity<String> forgotPassword(
+	public ResponseEntity<?> forgotPassword(
 			@RequestParam("email") @NotBlank(message = "{validation.constraints.not.blank}") String email,
-			HttpServletRequest request){
+			HttpServletRequest request) {
 
 		registerService.forgotPassword(email, request);
-		String message = messageService.getMessage("message.send.email.succeeded");
+		GenericResponse message = new GenericResponse(messageService.getMessage("message.send.email.succeeded"));
 
 		return new ResponseEntity<>(message, HttpStatus.OK);
 	}
 
 	/**
-	 * Resets the user's password using the provided reset token and new password details.
+	 * Resets the user's password using the provided reset token and new password
+	 * details.
 	 *
-	 * @param token         The reset password token sent to the user's email.
-	 * @param resetRequest  The request body containing the new password details.
-	 * @param request       The HTTP request containing reCAPTCHA score in the header.
+	 * @param token        The reset password token sent to the user's email.
+	 * @param resetRequest The request body containing the new password details.
+	 * @param request      The HTTP request containing Turnstile token in the
+	 *                     header.
 	 * @return a {@link ResponseEntity} containing a success message.
 	 */
 	@PutMapping("/reset-password/{token}")
-	public ResponseEntity<String> resetPassword(
+	public ResponseEntity<?> resetPassword(
 			@PathVariable("token") String token,
 			@Valid @RequestBody ResetPassRequest resetRequest,
-			HttpServletRequest request){
-												
+			HttpServletRequest request) {
+
 		registerService.resetPassword(token, resetRequest, request);
-		String message = messageService.getMessage("message.update.succeeded");
+		GenericResponse message = new GenericResponse(messageService.getMessage("message.update.succeeded"));
 
 		return new ResponseEntity<>(message, HttpStatus.OK);
 	}

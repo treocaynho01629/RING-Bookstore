@@ -7,7 +7,6 @@ export * from "./src/lib/theme";
 
 // Components
 export * from "./src/components/Components";
-export * from "./src/components/AuthComponents";
 export { default as ConfirmDialog } from "./src/components/ConfirmDialog";
 export { default as LightboxImage } from "./src/components/LightboxImage";
 export { default as LightboxImages } from "./src/components/LightboxImages";

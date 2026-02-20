@@ -13,7 +13,8 @@ public interface AuthenticationService {
      * Performs user login based on the provided login request.
      *
      * @param authRequest The login request containing user credentials.
-     * @param request The servlet request containing reCAPTCHA score in the header.
+     * @param request     The servlet request containing Turnstile token in the
+     *                    header.
      * @return The authed user entity.
      */
     Account authenticate(AuthenticationRequest authRequest, HttpServletRequest request);

@@ -74,10 +74,17 @@
     "thought": "Your review",
     "view": "View review"
   },
+  "payment": {
+    "methods": {
+      "qr": "Scan QR Code",
+      "transfer": "Bank Transfer"
+    },
+    "pending": "Processing payment...",
+    "message": "After successful payment, please wait for 5 - 10 seconds for the order to be automatically processed."
+  },
   "order": {
     "view": "View order",
     "title": "Payment process",
-    "message": "After successful payment, please wait for 5 - 10 seconds for the order to be automatically processed.",
     "empty": "No orders found",
     "out": "No more orders",
     "your": "Your orders",

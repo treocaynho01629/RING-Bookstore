@@ -9,6 +9,6 @@ export default defineConfig((options: Options) => ({
   clean: true,
   sourcemap: true,
   dts: true,
-  external: ["react", "@mui/material"],
+  external: ["react", "@mui/material", "@marsidev/react-turnstile"],
   ...options,
 }));

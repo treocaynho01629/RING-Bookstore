@@ -3,7 +3,6 @@ import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import HelpOutline from "@mui/icons-material/HelpOutline";
 import Button from "@mui/material/Button";
-import SimpleNavbar from "../components/navbar/SimpleNavbar";
 
 //#region styled
 const Wrapper = styled.div`
@@ -123,7 +122,6 @@ const Missing = () => {
   const { t } = useTranslation();
   return (
     <Wrapper>
-      <SimpleNavbar />
       <RandomShape></RandomShape>
       <Content>
         <h2>{t("missing.title", { ns: "uncommon" })}</h2>

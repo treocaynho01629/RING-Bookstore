@@ -58,7 +58,6 @@ export const booksApiSlice = initialsApiSlice.injectEndpoints({
       query: (ids) => ({
         url: `/api/books/delete-multiple?ids=${ids}`,
         method: "DELETE",
-        responseHandler: "text",
       }),
       invalidatesTags: (result, error) => [{ type: "Book", id: "LIST" }],
     }),
@@ -87,7 +86,6 @@ export const booksApiSlice = initialsApiSlice.injectEndpoints({
           validateStatus: (response, result) => {
             return response.status === 200 && !result?.isError;
           },
-          responseHandler: "text",
         };
       },
       invalidatesTags: (result, error) => [{ type: "Book", id: "LIST" }],
@@ -96,7 +94,6 @@ export const booksApiSlice = initialsApiSlice.injectEndpoints({
       query: (shopId) => ({
         url: `/api/books/delete-all?shopId=${shopId}`,
         method: "DELETE",
-        responseHandler: "text",
       }),
       invalidatesTags: (result, error) => [{ type: "Book", id: "LIST" }],
     }),

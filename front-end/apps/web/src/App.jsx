@@ -2,16 +2,27 @@ import "./App.css";
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router";
 import { useReachable } from "./hooks/useReachable";
+import { useTranslation } from "react-i18next";
+import { useEffect } from "react";
 import FallbackLogo from "@ring/ui/FallbackLogo";
 import RequireAuth from "./components/authorize/RequireAuth";
 import PersistLogin from "./components/authorize/PersistLogin";
 import PageLayout from "./components/layout/PageLayout";
 import Layout from "./components/layout/Layout";
+import SimpleLayout from "./components/layout/SimpleLayout";
+import useApp from "./hooks/useApp";
 import "react-multi-carousel/lib/styles.css";
 import "simplebar-react/dist/simplebar.min.css";
 
 function App() {
   const connected = useReachable();
+  const { i18n } = useTranslation();
+  const { setLanguage } = useApp();
+
+  // Update redux language with i18n default language
+  useEffect(() => {
+    setLanguage(i18n.language);
+  }, [i18n.language]);
 
   const router = createBrowserRouter(
     [
@@ -21,19 +32,39 @@ function App() {
         hydrateFallbackElement: <FallbackLogo />,
         children: [
           {
-            path: "reset/:token?",
-            handle: { title: "forgot.title" },
-            lazy: async () => {
-              let ResetPage = await import("./pages/ResetPage");
-              return { Component: ResetPage.default };
-            },
-          },
-          {
-            path: "unauthorized",
-            lazy: async () => {
-              let Unauthorized = await import("./pages/Unauthorized");
-              return { Component: Unauthorized.default };
-            },
+            element: <SimpleLayout />,
+            children: [
+              {
+                path: "reset/:token?",
+                handle: { title: "forgot.title" },
+                lazy: async () => {
+                  let ResetPage = await import("./pages/ResetPage");
+                  return { Component: ResetPage.default };
+                },
+              },
+              {
+                path: "unauthorized",
+                lazy: async () => {
+                  let Unauthorized = await import("./pages/Unauthorized");
+                  return { Component: Unauthorized.default };
+                },
+              },
+              {
+                path: "*",
+                lazy: async () => {
+                  let Missing = await import("./pages/Missing");
+                  return { Component: Missing.default };
+                },
+              },
+              {
+                path: "auth/:tab",
+                handle: { title: "welcome" },
+                lazy: async () => {
+                  let AuthPage = await import("./pages/AuthPage");
+                  return { Component: AuthPage.default };
+                },
+              },
+            ],
           },
           {
             path: "maintainance",
@@ -43,30 +74,25 @@ function App() {
             },
           },
           {
-            path: "*",
-            lazy: async () => {
-              let Missing = await import("./pages/Missing");
-              return { Component: Missing.default };
-            },
-          },
-          {
-            path: "auth/:tab",
-            handle: { title: "welcome" },
-            lazy: async () => {
-              let AuthPage = await import("./pages/AuthPage");
-              return { Component: AuthPage.default };
-            },
-          },
-          {
             element: <PersistLogin />,
             children: [
               {
-                path: "payment/:id?",
-                handle: { title: "payment" },
-                lazy: async () => {
-                  let Payment = await import("./pages/Payment");
-                  return { Component: Payment.default };
-                },
+                element: <SimpleLayout />,
+                children: [
+                  {
+                    element: <RequireAuth allowedRoles={["ROLE_USER", "ROLE_SELLER", "ROLE_ADMIN", "ROLE_GUEST"]} />,
+                    children: [
+                      {
+                        path: "payment/:id?",
+                        handle: { title: "cart.payment" },
+                        lazy: async () => {
+                          let Payment = await import("./pages/Payment");
+                          return { Component: Payment.default };
+                        },
+                      },
+                    ],
+                  },
+                ],
               },
               {
                 element: <PageLayout />,

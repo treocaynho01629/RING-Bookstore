@@ -106,7 +106,6 @@ const StyledMenu = styled(Menu)`
 const SimpleNavbar = ({ noLink = false }) => {
   const { mode, setMode } = useColorScheme();
   const { t, i18n } = useTranslation();
-
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorElTheme, setAnchorElTheme] = useState(null);
   const open = Boolean(anchorEl);
@@ -132,11 +131,19 @@ const SimpleNavbar = ({ noLink = false }) => {
     setAnchorEl(null);
   };
 
+  /**
+   * Change i18n language
+   * @param {ChangeLanguage} locale
+   */
   const handleChangeLanguage = (locale) => {
     i18n.changeLanguage(locale.value);
     handleClose();
   };
 
+  /**
+   * Change theme
+   * @param {Theme} theme
+   */
   const handleChangeTheme = (theme) => {
     setMode(theme);
     handleCloseTheme();

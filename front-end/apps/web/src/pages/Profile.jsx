@@ -55,6 +55,9 @@ const Profile = () => {
     if (tab) setCurrTab(tab);
   }, [tab]);
 
+  /**
+   * Verify refresh token
+   */
   const verifyRefreshToken = async () => {
     if (refreshing) return;
 

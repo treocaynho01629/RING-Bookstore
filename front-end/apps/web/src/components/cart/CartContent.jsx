@@ -570,10 +570,9 @@ const CartContent = () => {
     getBook({ id: contextProduct?.id })
       .unwrap()
       .then((book) => {
-        navigate(`/store/${book?.category?.slug}
-                ?cate=${book?.category?.id}
-                &pubs=${book?.publisher?.id}
-                &types=${book?.type}`);
+        navigate(
+          `/store/${book?.category?.slug}?cate=${book?.category?.id}&pubs=${book?.publisher?.id}&types=${book?.type}`
+        );
       })
       .catch((rejected) => console.error(rejected));
     handleClose();

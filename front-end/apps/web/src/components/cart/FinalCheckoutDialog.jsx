@@ -120,7 +120,7 @@ const FinalCheckoutDialog = ({
   backFirstStep,
   handleOpenDialog,
   handleSubmit,
-  reCaptchaLoaded,
+  token,
 }) => {
   const { t } = useTranslation();
   const overlapRef = useRef(null);
@@ -235,7 +235,7 @@ const FinalCheckoutDialog = ({
                   size="large"
                   fullWidth
                   sx={{ maxWidth: "42%" }}
-                  disabled={calculating || !reCaptchaLoaded}
+                  disabled={calculating || !token}
                   onClick={handleSubmit}
                 >
                   {t("checkout.order", { ns: "authenticated" })}
@@ -300,7 +300,7 @@ const FinalCheckoutDialog = ({
                   size="large"
                   fullWidth
                   sx={{ maxWidth: "35%" }}
-                  disabled={calculating || !reCaptchaLoaded}
+                  disabled={calculating || !token}
                   onClick={handleSubmit}
                 >
                   {t("checkout.order", { ns: "authenticated" })}
@@ -372,7 +372,7 @@ const FinalCheckoutDialog = ({
                   size="large"
                   fullWidth
                   sx={{ padding: "11px", mt: 1 }}
-                  disabled={calculating || !reCaptchaLoaded}
+                  disabled={calculating || !token}
                   onClick={handleSubmit}
                 >
                   {t("checkout.order", { ns: "authenticated" })}

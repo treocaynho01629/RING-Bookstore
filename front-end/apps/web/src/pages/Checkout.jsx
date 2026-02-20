@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useEffect, useRef, useState, lazy, Suspense, useCallback, useMemo } from "react";
-import { Navigate, NavLink, useLocation, useNavigate } from "react-router";
+import { Navigate, useLocation, useNavigate } from "react-router";
 import { useGetMyAddressQuery } from "../features/addresses/addressesApiSlice";
 import { useCalculateMutation, useCheckoutMutation } from "../features/orders/ordersApiSlice";
 import { debounce, isEqual } from "lodash-es";
@@ -8,9 +8,9 @@ import { PHONE_REGEX } from "@ring/shared/utils/regex";
 import { ShippingType } from "@ring/shared/models/shippingType";
 import { PaymentType } from "@ring/shared/models/paymentType";
 import { useTranslation } from "react-i18next";
+import { useColorScheme, useMediaQuery } from "@mui/material";
 import useDeepEffect from "@ring/shared/useDeepEffect";
 import useAuth from "../hooks/useAuth";
-import useReCaptcha from "@ring/auth/useReCaptcha";
 import Button from "@mui/material/Button";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -36,7 +36,7 @@ import useCart from "../hooks/useCart";
 import useCheckout from "../hooks/useCheckout";
 
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
-const ReCaptcha = lazy(() => import("@ring/auth/ReCaptcha"));
+const Turnstile = lazy(() => import("@ring/auth/Turnstile"));
 const CouponDialog = lazy(() => import("../components/coupon/CouponDialog"));
 const ShippingSelectDialog = lazy(() => import("../components/address/ShippingSelectDialog"));
 const PaymentSelect = lazy(() => import("../components/cart/PaymentSelect"));
@@ -128,7 +128,10 @@ const MAX_STEPS = 3;
 const Checkout = () => {
   //#region construct
   const { username } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { mode } = useColorScheme();
+  const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
+  const resolvedMode = mode === "system" ? (prefersDark ? "dark" : "light") : mode;
 
   const scrollRef = useRef(null);
   const prevPayload = useRef();
@@ -176,16 +179,11 @@ const Checkout = () => {
     total: 0,
   });
   const [calculated, setCalculated] = useState(null);
-  const [calculate, { isLoading: calculating, isError }] = useCalculateMutation();
+  const [calculate, { isLoading: calculating }] = useCalculateMutation();
 
-  // Recaptcha v2
-  const [challenge, setChallenge] = useState(false); //Toggle if marked suspicious by v3
+  // Turnstile
   const [token, setToken] = useState("");
-
-  // Recaptcha
-  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-  const recaptchaV3SiteKey = import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY;
-  const { reCaptchaLoaded, generateReCaptchaToken, hideBadge } = useReCaptcha(recaptchaV3SiteKey);
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
   // Checkout hook
   const [checkout, { isLoading }] = useCheckoutMutation();
@@ -206,10 +204,6 @@ const Checkout = () => {
   useEffect(() => {
     scrollToTop();
   }, [activeStep]);
-
-  useEffect(() => {
-    hideBadge();
-  }, [reCaptchaLoaded]); // Hide badge cuz it's in the way of stepper
 
   /**
    * Handle cart change
@@ -506,7 +500,7 @@ const Checkout = () => {
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isLoading || calculating || pending) return;
+    if (isLoading || calculating || pending || !token) return;
     setPending(true);
 
     // Validation
@@ -523,10 +517,9 @@ const Checkout = () => {
     const { enqueueSnackbar } = await import("notistack");
     const checkoutCart = getCheckoutCart();
 
-    const recaptchaToken = challenge ? token : await generateReCaptchaToken("checkout");
     checkout({
-      token: recaptchaToken,
-      source: challenge ? "v2" : "v3",
+      token,
+      source: "turnstile",
       cart: checkoutCart,
     })
       .unwrap()
@@ -537,7 +530,6 @@ const Checkout = () => {
         } else {
           navigate("/payment?state=success", { replace: true });
         }
-        setChallenge(false);
         setPending(false);
       })
       .catch((err) => {
@@ -548,7 +540,6 @@ const Checkout = () => {
           setErrMsg(t("error.server.response"));
         } else {
           setErrMsg(err?.data?.message);
-          if (err?.status === 412) setChallenge(true);
         }
         setPending(false);
       });
@@ -557,7 +548,7 @@ const Checkout = () => {
   const calculatedContextShop = calculated?.details?.find((detail) => detail?.shopId == contextShop);
   const breadcrumbItems = [
     { label: t("cart.title"), href: "/cart" },
-    { label: t("checkout.title"), href: "/checkout" },
+    { label: t("cart.checkout"), href: "/checkout" },
   ];
   //#endregion
 
@@ -573,7 +564,7 @@ const Checkout = () => {
         <CheckoutContainer>
           <Title ref={scrollRef}>
             <ShoppingCartCheckout />
-            &nbsp;{t("checkout.title")}
+            &nbsp;{t("cart.checkout")}
           </Title>
           <Grid container spacing={2} sx={{ position: "relative", mb: 10, justifyContent: "flex-end" }}>
             <Grid size={{ xs: 12, md_lg: 8 }} position="relative">
@@ -737,9 +728,17 @@ const Checkout = () => {
                         />
                       )}
                     </Suspense>
-                    {reCaptchaLoaded && challenge && (
+                    {activeStep === 2 && (
                       <Suspense fallback={null}>
-                        <ReCaptcha onVerify={(token) => setToken(token)} recaptchaSiteKey={recaptchaSiteKey} />
+                        <Turnstile
+                          siteKey={turnstileSiteKey}
+                          onSuccess={(turnstileToken) => setToken(turnstileToken)}
+                          onExpire={() => setToken("")}
+                          action="checkout"
+                          size="normal"
+                          theme={resolvedMode}
+                          lang={i18n.language}
+                        />
                       </Suspense>
                     )}
                   </StyledStepContent>
@@ -765,7 +764,7 @@ const Checkout = () => {
                   backFirstStep,
                   handleNext,
                   handleSubmit,
-                  reCaptchaLoaded,
+                  token,
                 }}
               />
             </Grid>

@@ -18,7 +18,13 @@ const useApp = () => {
   };
   const removeKeyword = (keyword) => dispatch(removeStateKeyword(keyword));
   const clearKeywords = () => dispatch(resetKeywords());
-  const setLanguage = (language) => dispatch(setStateLanguage(language));
+
+  /**
+   * Change redux language
+   */
+  const setLanguage = (language) => {
+    dispatch(setStateLanguage(language));
+  };
 
   return {
     keywords,

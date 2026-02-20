@@ -3,7 +3,6 @@ import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import Button from "@mui/material/Button";
 import Block from "@mui/icons-material/Block";
-import SimpleNavbar from "../components/navbar/SimpleNavbar";
 
 //#region styled
 const Wrapper = styled.div`
@@ -115,7 +114,6 @@ const Unauthorized = () => {
   const { t } = useTranslation();
   return (
     <Wrapper>
-      <SimpleNavbar />
       <Content>
         <h2>{t("unauthorized.title", { ns: "uncommon" })}</h2>
         <ErrorContainer>

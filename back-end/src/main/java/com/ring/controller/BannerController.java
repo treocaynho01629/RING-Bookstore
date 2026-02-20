@@ -2,6 +2,7 @@ package com.ring.controller;
 
 import com.ring.config.CurrentAccount;
 import com.ring.dto.request.BannerRequest;
+import com.ring.dto.response.GenericResponse;
 import com.ring.dto.response.PagingResponse;
 import com.ring.dto.response.banners.BannerDTO;
 import com.ring.model.entity.Account;
@@ -55,12 +56,12 @@ public class BannerController {
             @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir) {
 
-        PagingResponse<BannerDTO> banners = bannerService.getBanners(pageNo, 
-                pageSize, 
-                sortBy, 
-                sortDir, 
-                keyword, 
-                shopId, 
+        PagingResponse<BannerDTO> banners = bannerService.getBanners(pageNo,
+                pageSize,
+                sortBy,
+                sortDir,
+                keyword,
+                shopId,
                 byShop);
         return new ResponseEntity<>(banners, HttpStatus.OK);
     }
@@ -112,12 +113,12 @@ public class BannerController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:banner')")
-    public ResponseEntity<String> deleteBanner(
-            @PathVariable("id") Integer id, 
+    public ResponseEntity<?> deleteBanner(
+            @PathVariable("id") Integer id,
             @CurrentAccount Account currUser) {
 
         bannerService.deleteBanner(id, currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -131,12 +132,12 @@ public class BannerController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:banner')")
-    public ResponseEntity<String> deleteBanners(
+    public ResponseEntity<?> deleteBanners(
             @RequestParam("ids") List<Integer> ids,
             @CurrentAccount Account currUser) {
 
         bannerService.deleteBanners(ids, currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -154,7 +155,7 @@ public class BannerController {
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:banner')")
-    public ResponseEntity<String> deleteCouponsInverse(
+    public ResponseEntity<?> deleteCouponsInverse(
             @RequestParam(value = "shopId", required = false) Long shopId,
             @RequestParam(value = "byShop", required = false) Boolean byShop,
             @RequestParam(value = "keyword", defaultValue = "") String keyword,
@@ -162,7 +163,7 @@ public class BannerController {
             @CurrentAccount Account currUser) {
 
         bannerService.deleteBannersInverse(keyword, shopId, byShop, ids, currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -176,12 +177,12 @@ public class BannerController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:banner')")
-    public ResponseEntity<String> deleteAllBanners(
+    public ResponseEntity<?> deleteAllBanners(
             @RequestParam(value = "shopId", required = false) Long shopId,
             @CurrentAccount Account currUser) {
 
         bannerService.deleteAllBanners(shopId, currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }

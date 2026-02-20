@@ -51,8 +51,7 @@ export const shopsApiSlice = apiSlice.injectEndpoints({
         };
       },
       transformResponse: (responseData) => {
-        const { content, empty, page, size, totalElements, totalPages } =
-          responseData;
+        const { content, empty, page, size, totalElements, totalPages } = responseData;
         return shopsAdapter.setAll(
           {
             ...initialState,
@@ -67,10 +66,7 @@ export const shopsApiSlice = apiSlice.injectEndpoints({
       },
       providesTags: (result, error, arg) => {
         if (result?.ids) {
-          return [
-            { type: "Shop", id: "LIST" },
-            ...result.ids.map((id) => ({ type: "Shop", id })),
-          ];
+          return [{ type: "Shop", id: "LIST" }, ...result.ids.map((id) => ({ type: "Shop", id }))];
         } else return [{ type: "Shop", id: "LIST" }];
       },
     }),
@@ -79,14 +75,10 @@ export const shopsApiSlice = apiSlice.injectEndpoints({
         url: `/api/shops/follow/${id}`,
         method: "PUT",
         credentials: "include",
-        responseHandler: "text",
       }),
       async onQueryStarted(id, { dispatch, queryFulfilled, getState }) {
         //Get all Shops cache
-        const shopsEntries = shopsApiSlice.util.selectInvalidatedBy(
-          getState(),
-          [{ type: "Shop", id }]
-        );
+        const shopsEntries = shopsApiSlice.util.selectInvalidatedBy(getState(), [{ type: "Shop", id }]);
 
         const shopsPatches = [];
 
@@ -95,23 +87,19 @@ export const shopsApiSlice = apiSlice.injectEndpoints({
           .forEach(({ endpointName, originalArgs }) => {
             const patchResult = dispatch(
               //Update
-              shopsApiSlice.util.updateQueryData(
-                endpointName,
-                originalArgs,
-                (draft) => {
-                  if (draft.entities != null) {
-                    let updatedShop = {
-                      ...draft.entities[id],
-                      followed: true,
-                      totalFollowers: (draft.entities[id].totalFollowers += 1),
-                    };
-                    shopsAdapter.upsertOne(draft, updatedShop);
-                  } else {
-                    draft.followed = true;
-                    draft.totalFollowers++;
-                  }
+              shopsApiSlice.util.updateQueryData(endpointName, originalArgs, (draft) => {
+                if (draft.entities != null) {
+                  let updatedShop = {
+                    ...draft.entities[id],
+                    followed: true,
+                    totalFollowers: (draft.entities[id].totalFollowers += 1),
+                  };
+                  shopsAdapter.upsertOne(draft, updatedShop);
+                } else {
+                  draft.followed = true;
+                  draft.totalFollowers++;
                 }
-              )
+              })
             );
 
             shopsPatches.push(patchResult);
@@ -119,7 +107,7 @@ export const shopsApiSlice = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
         } catch (error) {
-          //Undo patch if request failed
+          // Undo patch if request failed
           patchResult.undo();
           shopsPatches.forEach((patch) => patch.undo());
           console.error(error);
@@ -131,14 +119,10 @@ export const shopsApiSlice = apiSlice.injectEndpoints({
         url: `/api/shops/unfollow/${id}`,
         method: "PUT",
         credentials: "include",
-        responseHandler: "text",
       }),
       async onQueryStarted(id, { dispatch, queryFulfilled, getState }) {
         //Get all Shops cache
-        const shopsEntries = shopsApiSlice.util.selectInvalidatedBy(
-          getState(),
-          [{ type: "Shop", id }]
-        );
+        const shopsEntries = shopsApiSlice.util.selectInvalidatedBy(getState(), [{ type: "Shop", id }]);
 
         const shopsPatches = [];
 
@@ -147,23 +131,19 @@ export const shopsApiSlice = apiSlice.injectEndpoints({
           .forEach(({ endpointName, originalArgs }) => {
             const patchResult = dispatch(
               //Update
-              shopsApiSlice.util.updateQueryData(
-                endpointName,
-                originalArgs,
-                (draft) => {
-                  if (draft.entities != null) {
-                    let updatedShop = {
-                      ...draft.entities[id],
-                      followed: false,
-                      totalFollowers: (draft.entities[id].totalFollowers -= 1),
-                    };
-                    shopsAdapter.upsertOne(draft, updatedShop);
-                  } else {
-                    draft.followed = false;
-                    draft.totalFollowers--;
-                  }
+              shopsApiSlice.util.updateQueryData(endpointName, originalArgs, (draft) => {
+                if (draft.entities != null) {
+                  let updatedShop = {
+                    ...draft.entities[id],
+                    followed: false,
+                    totalFollowers: (draft.entities[id].totalFollowers -= 1),
+                  };
+                  shopsAdapter.upsertOne(draft, updatedShop);
+                } else {
+                  draft.followed = false;
+                  draft.totalFollowers--;
                 }
-              )
+              })
             );
 
             shopsPatches.push(patchResult);

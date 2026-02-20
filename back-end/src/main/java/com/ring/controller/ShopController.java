@@ -2,6 +2,7 @@ package com.ring.controller;
 
 import com.ring.config.CurrentAccount;
 import com.ring.dto.request.ShopRequest;
+import com.ring.dto.response.GenericResponse;
 import com.ring.dto.response.PagingResponse;
 import com.ring.dto.response.dashboard.StatDTO;
 import com.ring.dto.response.shops.ShopDisplayDTO;
@@ -193,12 +194,12 @@ public class ShopController {
      */
     @PutMapping("/follow/{id}")
     @PreAuthorize("hasRole('USER') and hasAuthority('update:profile')")
-    public ResponseEntity<String> followShop(
+    public ResponseEntity<?> followShop(
             @PathVariable("id") Long id,
             @CurrentAccount Account currUser) {
 
         shopService.follow(id, currUser);
-        String message = messageService.getMessage("message.update.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.update.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -212,12 +213,12 @@ public class ShopController {
      */
     @PutMapping("/unfollow/{id}")
     @PreAuthorize("hasRole('USER') and hasAuthority('update:profile')")
-    public ResponseEntity<String> unfollowShop(
+    public ResponseEntity<?> unfollowShop(
             @PathVariable("id") Long id,
             @CurrentAccount Account currUser) {
 
         shopService.unfollow(id, currUser);
-        String message = messageService.getMessage("message.update.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.update.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -271,12 +272,12 @@ public class ShopController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SELLER')  and hasAuthority('delete:shop')")
-    public ResponseEntity<String> deleteShop(
+    public ResponseEntity<?> deleteShop(
             @PathVariable("id") Long id,
             @CurrentAccount Account currUser) {
 
         shopService.deleteShop(id, currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -290,12 +291,12 @@ public class ShopController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('SELLER')  and hasAuthority('delete:shop')")
-    public ResponseEntity<String> deleteCoupons(
+    public ResponseEntity<?> deleteCoupons(
             @RequestParam("ids") List<Long> ids,
             @CurrentAccount Account currUser) {
 
         shopService.deleteShops(ids, currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -311,7 +312,7 @@ public class ShopController {
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('SELLER')  and hasAuthority('delete:shop')")
-    public ResponseEntity<String> deleteCouponsInverse(
+    public ResponseEntity<?> deleteCouponsInverse(
             @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam("ids") List<Long> ids,
@@ -322,7 +323,7 @@ public class ShopController {
                 userId,
                 ids,
                 currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -335,11 +336,11 @@ public class ShopController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('SELLER')  and hasAuthority('delete:shop')")
-    public ResponseEntity<String> deleteAllShops(@CurrentAccount Account currUser) {
+    public ResponseEntity<?> deleteAllShops(@CurrentAccount Account currUser) {
 
         shopService.deleteAllShops(currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
-        
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
+
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 }

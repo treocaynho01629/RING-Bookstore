@@ -152,6 +152,7 @@ const NavDrawer = ({
 
   /**
    * Handle change language
+   * @param {ChangeLanguage} locale
    */
   const handleChangeLanguage = (locale) => {
     i18n.changeLanguage(locale.value);

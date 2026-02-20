@@ -74,10 +74,17 @@
     "thought": "Nhận xét của bạn",
     "view": "Xem đánh giá"
   },
+  "payment": {
+    "methods": {
+      "qr": "Quét mã QR",
+      "transfer": "Chuyển khoản"
+    },
+    "pending": "Đang xử lý thanh toán...",
+    "message": "Sau khi thực hiện thanh toán thành công, vui lòng đợi từ 5 - 10 giây để hệ thống tự động cập nhật."
+  },
   "order": {
     "view": "Xem đơn hàng",
     "title": "Thanh toán đơn hàng",
-    "message": "Sau khi thực hiện thanh toán thành công, vui lòng đợi từ 5 - 10 giây để hệ thống tự động cập nhật.",
     "your": "Đơn hàng của bạn",
     "total": "Thành tiền",
     "id": "Mã vận đơn",

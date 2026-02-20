@@ -1,27 +1,29 @@
-import { useState, useRef, useEffect, Suspense, lazy } from "react";
-import { Grow, Paper, Stack, TextField } from "@mui/material";
+import { useState, useRef, useEffect } from "react";
+import { Grow, Paper, Stack, TextField, useColorScheme, useMediaQuery } from "@mui/material";
 import { useRegisterMutation } from "../../features/auth/authApiSlice";
 import { USER_REGEX, EMAIL_REGEX } from "@ring/shared/utils/regex";
-import { AuthHighlight, AuthText, AuthTitle, ConfirmButton, TermText } from "@ring/ui/AuthComponents";
+import { SimpleHighlight, SimpleText, TermText, SimpleTitle, ConfirmButton } from "../custom/SimpleComponents";
 import { Link } from "react-router";
 import { Instruction } from "@ring/ui/Components";
 import { useTranslation } from "react-i18next";
 import { capitalize } from "lodash-es";
+import Turnstile from "@ring/auth/Turnstile";
 import PasswordInput from "@ring/ui/PasswordInput";
 import PasswordEvaluate from "../custom/PasswordEvaluate";
 
-const ReCaptcha = lazy(() => import("@ring/auth/ReCaptcha"));
-
-const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken }) => {
-  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+const RegisterTab = ({ pending, setPending }) => {
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
   const userRef = useRef();
   const errRef = useRef();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { mode } = useColorScheme();
+  const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
+  const resolvedMode = mode === "system" ? (prefersDark ? "dark" : "light") : mode;
 
   // User validation
-  const [username, setUsername] = useState(""); // user input
-  const [validName, setValidName] = useState(false); // check name validate or not
-  const [userFocus, setUserFocus] = useState(false); // focus on field or not
+  const [username, setUsername] = useState(""); // User name input
+  const [validName, setValidName] = useState(false); // Check name validate or not
+  const [userFocus, setUserFocus] = useState(false); // Focus on field
 
   // Password validation
   const [password, setPassword] = useState("");
@@ -40,8 +42,7 @@ const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaTo
   const [errMsg, setErrMsg] = useState("");
   const [err, setErr] = useState([]);
 
-  // Recaptcha v2
-  const [challenge, setChallenge] = useState(false); // Toggle if marked suspicious by v3
+  // Turnstile
   const [token, setToken] = useState("");
 
   // Register mutation
@@ -78,7 +79,7 @@ const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaTo
   // Register
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (pending || !reCaptchaLoaded) return;
+    if (pending || !token) return;
 
     // Validation
     const v1 = USER_REGEX.test(username);
@@ -92,10 +93,9 @@ const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaTo
 
     const { enqueueSnackbar } = await import("notistack");
 
-    const recaptchaToken = challenge ? token : await generateReCaptchaToken("register");
     register({
-      token: recaptchaToken,
-      source: challenge ? "v2" : "v3",
+      token,
+      source: "turnstile",
       user: {
         username,
         pass: password,
@@ -111,7 +111,7 @@ const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaTo
         setEmail("");
         setErr([]);
         setErrMsg("");
-        setChallenge(false);
+        setToken("");
 
         // Queue snack
         enqueueSnackbar(t("message.success", { action: t("signup.label") }), { variant: "success" });
@@ -125,7 +125,6 @@ const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaTo
           setErrMsg(t("error.server.response"));
         } else {
           setErrMsg(err?.data?.message);
-          if (err?.status === 412) setChallenge(true);
         }
         errRef.current.focus();
         setPending(false);
@@ -136,7 +135,7 @@ const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaTo
 
   return (
     <form style={{ maxHeight: 560 }} onSubmit={handleSubmit}>
-      <AuthTitle>{t("signup.title")}</AuthTitle>
+      <SimpleTitle>{t("signup.title")}</SimpleTitle>
       <Instruction ref={errRef} aria-live="assertive">
         {errMsg != "" ? errMsg : " "}&nbsp;
       </Instruction>
@@ -176,8 +175,8 @@ const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaTo
           onBlur={() => setEmailFocus(false)}
           error={(email && !validEmail) || err?.data?.errors?.email != null}
         />
-        <Stack spacing={{ xs: 0.8, md: 1.5 }} direction={challenge ? "row" : "column"} position="relative">
-          <div style={{ width: "100%s" }}>
+        <Stack spacing={{ xs: 0.8, md: 1.5 }} direction="column" position="relative">
+          <div style={{ width: "100%" }}>
             <PasswordInput
               label={err?.data?.errors?.pass ?? t("password.label")}
               size="small"
@@ -224,37 +223,41 @@ const RegisterTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaTo
             error={(matchPass && !validMatch) || err?.data?.errors?.pass != null}
           />
         </Stack>
-        {reCaptchaLoaded && challenge && (
-          <Suspense fallback={null}>
-            <ReCaptcha onVerify={(token) => setToken(token)} recaptchaSiteKey={recaptchaSiteKey} />
-          </Suspense>
-        )}
+        <Turnstile
+          siteKey={turnstileSiteKey}
+          onSuccess={(turnstileToken) => setToken(turnstileToken)}
+          onExpire={() => setToken("")}
+          action="register"
+          size="flexible"
+          theme={resolvedMode}
+          lang={i18n.language}
+        />
         <TermText>
-          {t("recaptcha")}
+          {t("protected")}
           <br />
-          <a href="https://policies.google.com/terms">
-            <AuthHighlight color="warning">{t("terms")}</AuthHighlight>
+          <a href="https://www.cloudflare.com/website-terms/" target="_blank" rel="noopener noreferrer">
+            <SimpleHighlight color="warning">{t("terms")}</SimpleHighlight>
           </a>
           &nbsp;&&nbsp;
-          <a href="https://policies.google.com/privacy">
-            <AuthHighlight color="warning">{t("policy")}</AuthHighlight>
+          <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">
+            <SimpleHighlight color="warning">{t("policy")}</SimpleHighlight>
           </a>
         </TermText>
         <ConfirmButton
           variant="contained"
           color="primary"
           type="submit"
-          disabled={!validRegister || isLoading || !reCaptchaLoaded}
+          disabled={!validRegister || isLoading || !token}
         >
           {t("signup.label")}
         </ConfirmButton>
       </Stack>
-      <AuthText>
+      <SimpleText>
         {t("login.suggestions")}&nbsp;
         <Link to={"/auth/login"}>
-          <AuthHighlight>{t("login.label")}</AuthHighlight>
+          <SimpleHighlight>{t("login.label")}</SimpleHighlight>
         </Link>
-      </AuthText>
+      </SimpleText>
     </form>
   );
 };

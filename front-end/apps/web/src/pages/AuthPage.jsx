@@ -5,8 +5,6 @@ import { keyframes } from "@emotion/react";
 import { Grow } from "@mui/material";
 import { TransitionGroup } from "react-transition-group";
 import { useTranslation } from "react-i18next";
-import useReCaptcha from "@ring/auth/useReCaptcha";
-import SimpleNavbar from "../components/navbar/SimpleNavbar";
 
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
 const RegisterTab = lazy(() => import("../components/authorize/RegisterTab"));
@@ -129,10 +127,6 @@ function AuthPage() {
   const { t } = useTranslation();
   const [pending, setPending] = useState(false);
 
-  // Recaptcha
-  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY;
-  const { reCaptchaLoaded, generateReCaptchaToken } = useReCaptcha(recaptchaSiteKey);
-
   return (
     <Wrapper>
       {pending && (
@@ -140,7 +134,6 @@ function AuthPage() {
           <PendingModal open={pending} message={t("pending")} />
         </Suspense>
       )}
-      <SimpleNavbar />
       <Container>
         <TransitionGroup component={null}>
           <Suspense fallback={null}>
@@ -151,8 +144,6 @@ function AuthPage() {
                     {...{
                       pending,
                       setPending,
-                      reCaptchaLoaded,
-                      generateReCaptchaToken,
                     }}
                   />
                 </ContentContainer>
@@ -164,8 +155,6 @@ function AuthPage() {
                     {...{
                       pending,
                       setPending,
-                      reCaptchaLoaded,
-                      generateReCaptchaToken,
                     }}
                   />
                 </ContentContainer>

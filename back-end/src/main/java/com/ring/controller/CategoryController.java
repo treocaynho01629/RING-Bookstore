@@ -1,6 +1,7 @@
 package com.ring.controller;
 
 import com.ring.dto.request.CategoryRequest;
+import com.ring.dto.response.GenericResponse;
 import com.ring.dto.response.PagingResponse;
 import com.ring.dto.response.categories.CategoryDTO;
 import com.ring.dto.response.categories.CategoryDetailDTO;
@@ -18,7 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Controller named {@link CategoryController} for handling category-related operations.
+ * Controller named {@link CategoryController} for handling category-related
+ * operations.
  * Exposes endpoints under "/api/categories".
  */
 @RestController
@@ -43,9 +45,9 @@ public class CategoryController {
     /**
      * Retrieves categories relevant to a specific shop.
      *
-     * @param pageSize  size of each page.
-     * @param pageNo    page number.
-     * @param shopId    ID of the shop.
+     * @param pageSize size of each page.
+     * @param pageNo   page number.
+     * @param shopId   ID of the shop.
      * @return a {@link ResponseEntity} containing relevant categories.
      */
     @GetMapping("/relevant/{id}")
@@ -61,12 +63,12 @@ public class CategoryController {
     /**
      * Retrieves all categories with pagination, sorting, and optional filters.
      *
-     * @param pageSize  size of each page.
-     * @param pageNo    page number.
-     * @param sortBy    sorting field.
-     * @param sortDir   sorting direction.
-     * @param include   optional field to include "parent" or "children".
-     * @param parentId  optional parent category ID to filter by.
+     * @param pageSize size of each page.
+     * @param pageNo   page number.
+     * @param sortBy   sorting field.
+     * @param sortDir  sorting direction.
+     * @param include  optional field to include "parent" or "children".
+     * @param parentId optional parent category ID to filter by.
      * @return a {@link ResponseEntity} containing paginated categories.
      */
     @GetMapping
@@ -78,14 +80,15 @@ public class CategoryController {
             @RequestParam(value = "include", required = false) String include,
             @RequestParam(value = "parentId", required = false) Integer parentId) {
 
-        PagingResponse<CategoryDTO> categories = cateService.getCategories(pageNo, pageSize, sortBy, sortDir, include, parentId);
+        PagingResponse<CategoryDTO> categories = cateService.getCategories(pageNo, pageSize, sortBy, sortDir, include,
+                parentId);
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
     /**
      * Retrieves a category by its ID.
      *
-     * @param id the category ID.
+     * @param id      the category ID.
      * @param include optional field to include "parent" or "children".
      * @return a {@link ResponseEntity} containing the category.
      */
@@ -101,7 +104,7 @@ public class CategoryController {
     /**
      * Retrieves a category by its slug.
      *
-     * @param slug the slug of the category.
+     * @param slug    the slug of the category.
      * @param include optional field to include "parent" or "children".
      * @return a {@link ResponseEntity} containing the category.
      */
@@ -131,7 +134,7 @@ public class CategoryController {
     /**
      * Updates a category by its ID.
      *
-     * @param id the ID of the category to update.
+     * @param id      the ID of the category to update.
      * @param request the updated category data.
      * @return a {@link ResponseEntity} containing the updated category.
      */
@@ -153,10 +156,10 @@ public class CategoryController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:category')")
-    public ResponseEntity<String> deleteCategory(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteCategory(@PathVariable("id") Integer id) {
 
         cateService.deleteCategory(id);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -169,13 +172,13 @@ public class CategoryController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:category')")
-    public ResponseEntity<String> deleteCategories(
-        @RequestParam(value = "parentId", required = false) Integer parentId,
-        @RequestParam("ids") List<Integer> ids) { 
+    public ResponseEntity<?> deleteCategories(
+            @RequestParam(value = "parentId", required = false) Integer parentId,
+            @RequestParam("ids") List<Integer> ids) {
 
         // TODO: Fix the method
         cateService.deleteCategories(ids);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -183,18 +186,18 @@ public class CategoryController {
     /**
      * Deletes categories that are NOT in the given list of IDs.
      *
-     * @param ids list of IDs to exclude from deletion.
+     * @param ids      list of IDs to exclude from deletion.
      * @param parentId optional parent category ID to filter by.
      * @return a {@link ResponseEntity} containing a success message.
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:book')")
-    public ResponseEntity<String> deleteCategoriesInverse(
+    public ResponseEntity<?> deleteCategoriesInverse(
             @RequestParam(value = "parentId", required = false) Integer parentId,
             @RequestParam("ids") List<Integer> ids) {
 
         cateService.deleteCategoriesInverse(parentId, ids);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -206,10 +209,10 @@ public class CategoryController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:category')")
-    public ResponseEntity<String> deleteAllCategories() {
+    public ResponseEntity<?> deleteAllCategories() {
 
         cateService.deleteAllCategories();
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }

@@ -4,8 +4,12 @@ import com.ring.listener.events.OnCheckoutCompletedEvent;
 import com.ring.listener.events.OnRegistrationCompleteEvent;
 import com.ring.listener.events.OnResetPasswordCompletedEvent;
 import com.ring.listener.events.OnResetTokenCreatedEvent;
+import com.ring.model.enums.PaymentType;
 import com.ring.service.EmailService;
+import com.ring.service.impl.MessageService;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -19,8 +23,8 @@ import org.thymeleaf.context.Context;
 @RequiredArgsConstructor
 public class MyEventListener {
 
-    // TODO: Localize email templates
     private final EmailService emailService;
+    private final MessageService messageService;
 
     /**
      * Sends a welcome email to the user upon successful registration.
@@ -32,7 +36,7 @@ public class MyEventListener {
     @EventListener
     public void welcomeRegistration(final OnRegistrationCompleteEvent event) {
         Context context = new Context();
-        String subject = "RING! - Đăng ký thành công!";
+        String subject = "RING! - " + messageService.getMessage("email.welcome.title");
 
         // Set variables for the template from the POST request data
         context.setVariable("username", event.getUsername());
@@ -53,7 +57,7 @@ public class MyEventListener {
     @EventListener
     public void sendResetToken(final OnResetTokenCreatedEvent event) {
         Context context = new Context();
-        String subject = "RING! - Yêu cầu thay đổi mật khẩu!";
+        String subject = "RING! - " + messageService.getMessage("email.forgot.title");
 
         // Set variables for the template from the POST request data
         context.setVariable("username", event.getUsername());
@@ -75,7 +79,7 @@ public class MyEventListener {
     @EventListener
     public void resetNotification(final OnResetPasswordCompletedEvent event) {
         Context context = new Context();
-        String subject = "RING! - Mật khẩu của bạn đã được cập nhật!";
+        String subject = "RING! - " + messageService.getMessage("email.reset.title");
 
         // Set variables for the template from the POST request data
         context.setVariable("username", event.getUsername());
@@ -97,12 +101,17 @@ public class MyEventListener {
     public void sendReceipt(final OnCheckoutCompletedEvent event) {
 
         Context context = new Context();
-        String subject = "RING! - Cảm ơn vì đã mua hàng!";
+        String subject = "RING! - " + messageService.getMessage("email.receipt.title");
+
+        String paymentMethod = PaymentType.ONLINE_PAYMENT.equals(event.getPaymentMethod())
+                ? messageService.getMessage("payment.online")
+                : messageService.getMessage("payment.cash");
 
         // Set variables for the template from the POST request data
         context.setVariable("username", event.getUsername());
         context.setVariable("productsTotal", event.getProductsTotal());
         context.setVariable("shippingFee", event.getShippingFee());
+        context.setVariable("paymentMethod", paymentMethod);
         context.setVariable("receipt", event.getReceipt());
         context.setVariable("subject", subject);
         emailService.sendTemplateMail(event.getEmail(),

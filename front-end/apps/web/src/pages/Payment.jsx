@@ -1,51 +1,37 @@
 import styled from "@emotion/styled";
-import useReCaptcha from "@ring/auth/useReCaptcha";
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
-import { usePayOS } from "@payos/payos-checkout";
 import { keyframes } from "@mui/material";
-import { enqueueSnackbar } from "notistack";
-import { Link, useNavigate, useSearchParams, useParams } from "react-router";
-import { useCreatePaymentLinkMutation } from "../features/orders/ordersApiSlice";
-import { AuthTitle, ConfirmButton } from "@ring/ui/AuthComponents";
-import { Instruction } from "@ring/ui/Components";
+import { Link, useSearchParams, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
+import { SimpleTitle, ConfirmButton, ButtonsContainer, MainContainer } from "../components/custom/SimpleComponents";
 import HighlightOff from "@mui/icons-material/HighlightOff";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import TaskAlt from "@mui/icons-material/TaskAlt";
-import SimpleNavbar from "../components/navbar/SimpleNavbar";
-
-const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
-const ReCaptcha = lazy(() => import("@ring/auth/ReCaptcha"));
+import PaymentComponent from "../components/order/PaymentComponent";
 
 //#region styled
+const rotate = keyframes`
+    from { transform: rotate(0deg) translateZ(0); }
+    to { transform: rotate(-360deg) translateZ(0); }
+`;
+
+const flowIn = keyframes`
+    from { transform: rotate(-240deg) translateZ(0); }
+    to { transform: rotate(-360deg) translateZ(0); }
+`;
+
 const pop = keyframes`
-    0% { 
-        transform: scale(0) rotate(-5deg) translateZ(0);
-    }
-    40% { 
-        transform: scale(1.1) rotate(5deg) translateZ(0);
-    }
-    100% { 
-        transform: scale(1) rotate(0deg) translateZ(0);
-    }
+  0% { transform: scale(0) rotate(-5deg) translateZ(0); }
+  40% { transform: scale(1.1) rotate(5deg) translateZ(0); }
+  100% { transform: scale(1) rotate(0deg) translateZ(0); }
 `;
 
 const Wrapper = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
   height: 100dvh;
-`;
 
-const IconContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: ${({ theme }) => theme.spacing(2)};
-  animation: ${pop} 0.5s ease-in-out;
-
-  svg {
-    font-size: 180px;
+  ${({ theme }) => theme.breakpoints.down("md")} {
+    flex-direction: column-reverse;
   }
 `;
 
@@ -54,11 +40,11 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
   width: 100%;
-  margin-top: ${({ theme }) => theme.spacing(-4)};
 
   ${({ theme }) => theme.breakpoints.down("md")} {
-    margin-top: ${({ theme }) => theme.spacing(4)};
+    margin-top: -${({ theme }) => theme.spacing(8)};
   }
 `;
 
@@ -68,45 +54,87 @@ const ContentContainer = styled.div`
   max-width: 650px;
 `;
 
-const ButtonContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  padding-top: ${({ theme }) => theme.spacing(2)};
+const CardContent = styled.div`
+  background: ${({ theme }) => theme.vars.palette.background.paper};
 `;
 
-const TitleContainer = styled.div`
+const IconContainer = styled.div`
   display: flex;
-  align-items: center;
-  gap: 8px;
-
-  svg {
-    font-size: 32px;
-  }
-`;
-
-const Content = styled.div`
-  display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-`;
+  padding: ${({ theme }) => theme.spacing(4)};
+  animation: ${pop} 0.5s ease-in-out;
 
-const Message = styled.p`
-  font-size: 16px;
-  width: 100%;
+  svg {
+    font-size: 120px;
+  }
 
-  ${({ theme }) => theme.breakpoints.down("md")} {
-    font-size: 14px;
+  ${({ theme }) => theme.breakpoints.down("sm")} {
+    svg {
+      font-size: 100px;
+    }
   }
 `;
 
-const PaymentContainer = styled.div`
-  height: 335px;
-  width: 320px;
+const Wave = styled.span`
+  position: absolute;
+  height: 100vw;
+  width: 100vw;
+  border-radius: 43%;
+  left: 0;
+  top: 14%;
+  background: hsl(from currentColor calc(h - 30) s l / 0.2);
+  animation: ${rotate} 32s infinite steps(480, end);
+  transition: all 0.2s ease;
 
-  ${({ theme }) => theme.breakpoints.down("sm")} {
-    height: 450px;
+  &:nth-of-type(2) {
+    background: hsl(from currentColor calc(h + 30) s l / 0.3);
+    animation-delay: -8s;
+    animation-duration: 24s;
+    animation-timing-function: steps(330, end);
+  }
+
+  &:nth-of-type(3) {
+    background: hsl(from currentColor h s l / 0.4);
+    animation-delay: -3s;
+    animation-duration: 28s;
+    animation-timing-function: steps(420, end);
+  }
+
+  ${({ theme }) => theme.breakpoints.down("md")} {
+    height: 100vw;
+    width: 100vw;
+    top: auto;
+    left: 0;
+    bottom: 0;
+  }
+`;
+
+const WaveContainer = styled.section`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: bottom;
+  transform: scale(1.8);
+  color: ${({ theme, color }) => theme.vars.palette[color]?.main || theme.vars.palette.primary.main};
+`;
+
+const Background = styled.div`
+  position: fixed;
+  width: 100%;
+  height: 25%;
+  bottom: -20%;
+  left: 0;
+  z-index: -1;
+  transform-origin: 50vw 100vw;
+  animation: ${flowIn} 1s ${({ theme }) => theme.transitions.easing.easOut};
+
+  ${({ theme }) => theme.breakpoints.down("md")} {
+    transform-origin: 50vw -60vw;
+    left: auto;
+    top: -7.5%;
   }
 `;
 //#endregion
@@ -114,159 +142,61 @@ const PaymentContainer = styled.div`
 function Payment() {
   const { id } = useParams();
   const { t } = useTranslation();
-
-  const initRef = useRef(false);
-  const navigate = useNavigate();
-  const [pending, setPending] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [isOpen, setIsOpen] = useState(false);
-  const [errMsg, setErrMsg] = useState("");
-  const [err, setErr] = useState(null);
-  const [createPaymentLink] = useCreatePaymentLinkMutation();
-  const [payOSConfig, setPayOSConfig] = useState({
-    RETURN_URL: window.location.origin + "/payment?state=success",
-    ELEMENT_ID: "embedded-payment-container",
-    CHECKOUT_URL: null,
-    embedded: true,
-    onSuccess: (event) => {
-      setIsOpen(false);
-      navigate("/payment?state=success", { replace: true });
-      enqueueSnackbar(t("message.success", { action: t("payment.processed") }), { variant: "success" });
-    },
-    onCancel: (event) => {
-      setIsOpen(false);
-      navigate("/payment?state=cancel", { replace: true });
-      enqueueSnackbar(t("message.error", { action: t("payment.processed") }), { variant: "error" });
-    },
-  });
-  const { open, exit } = usePayOS(payOSConfig);
-
-  // Recaptcha
-  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-  const recaptchaV3SiteKey = import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY;
-  const { reCaptchaLoaded, generateReCaptchaToken } = useReCaptcha(recaptchaV3SiteKey);
-  const [challenge, setChallenge] = useState(false); //Toggle if marked suspicious by v3
-  const [token, setToken] = useState("");
-
-  const handleGetPaymentLink = async () => {
-    if (pending || !id) return;
-    setPending(true);
-    exit();
-
-    const recaptchaToken = challenge ? token : await generateReCaptchaToken("payment");
-
-    createPaymentLink({
-      token: recaptchaToken,
-      source: challenge ? "v2" : "v3",
-      id,
-    })
-      .unwrap()
-      .then((data) => {
-        setPayOSConfig((oldConfig) => ({
-          ...oldConfig,
-          CHECKOUT_URL: data?.checkoutUrl,
-        }));
-        if (!data?.checkoutUrl) navigate("/error", { replace: true });
-        setPending(false);
-      })
-      .catch((err) => {
-        console.error(err);
-
-        setErr(err);
-        if (!err?.status) {
-          setErrMsg(t("error.server.response"));
-        } else if (err?.status === 404) {
-          navigate("/error", { replace: true });
-        } else {
-          setErrMsg(err?.data?.message);
-          if (err?.status === 412) setChallenge(true);
-        }
-
-        setPending(false);
-      });
-  };
-
-  useEffect(() => {
-    if (!reCaptchaLoaded || initRef.current) return;
-    initRef.current = true;
-    handleGetPaymentLink();
-  }, [reCaptchaLoaded]);
-
-  useEffect(() => {
-    if (payOSConfig.CHECKOUT_URL != null) {
-      open();
-      setIsOpen(true);
-    }
-  }, [payOSConfig]);
+  const [searchParams] = useSearchParams();
 
   const state = searchParams.get("state");
 
   return (
     <Wrapper>
-      {pending && (
-        <Suspense fallBack={null}>
-          <PendingModal open={pending} message={t("pending")} />
-        </Suspense>
-      )}
-      <SimpleNavbar />
       <Container>
         <ContentContainer>
           {state ? (
-            <div className="main-box">
-              <AuthTitle>
-                {state == "success"
-                  ? t("message.success", { action: t("payment.processed") })
-                  : t("message.error", { action: t("payment.processed") })}
-              </AuthTitle>
-              <Content>
-                <IconContainer key={state}>
-                  {state == "success" ? (
-                    <TaskAlt color="success" />
-                  ) : (
-                    state == "cancel" && <HighlightOff color="error" />
-                  )}
+            <CardContent>
+              <SimpleTitle>
+                {state === "success"
+                  ? t("message.success", { action: t("payment.processed", { ns: "authenticated" }) })
+                  : t("message.error", { action: t("payment.processed", { ns: "authenticated" }) })}
+              </SimpleTitle>
+              <MainContainer key={state}>
+                <IconContainer>
+                  {state === "success" ? <TaskAlt color="success" /> : <HighlightOff color="error" />}
                 </IconContainer>
-                <ButtonContainer>
-                  <Link to={id ? `/profile/order/checkout/${id}` : "/profile/order"} style={{ width: "100%" }}>
-                    <ConfirmButton
-                      variant="contained"
-                      color="primary"
-                      size="large"
-                      sx={{ width: { xs: "100%", sm: "auto" } }}
-                    >
-                      {t("order.view", { ns: "authenticated" })}
-                    </ConfirmButton>
-                  </Link>
-                </ButtonContainer>
-              </Content>
-            </div>
-          ) : (
-            <div className="main-box">
-              <TitleContainer>
-                <Link
+              </MainContainer>
+              <ButtonsContainer className={state ? "active" : ""}>
+                <ConfirmButton
+                  component={Link}
                   to={id ? `/profile/order/checkout/${id}` : "/profile/order"}
-                  style={{ display: "flex", alignItems: "center" }}
+                  variant="outlined"
+                  color="info"
+                  size="large"
                 >
-                  <KeyboardArrowLeft />
+                  {t("order.view", { ns: "authenticated" })}
+                </ConfirmButton>
+                <ConfirmButton component={Link} to={"/store"} variant="outlined" color="primary" size="large">
+                  {t("cart.continue")}
+                </ConfirmButton>
+              </ButtonsContainer>
+            </CardContent>
+          ) : (
+            <>
+              <SimpleTitle>
+                <Link to={id ? `/profile/order/checkout/${id}` : -1}>
+                  <KeyboardArrowLeft fontSize="large" />
                 </Link>
-                <AuthTitle>{t("payment.title", { ns: "authenticated" })}</AuthTitle>
-              </TitleContainer>
-              <Instruction display={errMsg ? "block" : "none"} aria-live="assertive">
-                {errMsg}
-              </Instruction>
-              {reCaptchaLoaded && challenge && (
-                <Suspense fallback={null}>
-                  <ReCaptcha onVerify={(token) => setToken(token)} recaptchaSiteKey={recaptchaSiteKey} />
-                </Suspense>
-              )}
-              <Content>
-                {isOpen && <Message>{t("order.message", { ns: "authenticated" })}</Message>}
-                <PaymentContainer id="embedded-payment-container"></PaymentContainer>
-              </Content>
-            </div>
+                {t("cart.payment")}
+              </SimpleTitle>
+              <PaymentComponent id={id} />
+            </>
           )}
         </ContentContainer>
       </Container>
+      <Background>
+        <WaveContainer color={state ? (state === "success" ? "success" : "error") : "warning"}>
+          <Wave></Wave>
+          <Wave></Wave>
+          <Wave></Wave>
+        </WaveContainer>
+      </Background>
     </Wrapper>
   );
 }

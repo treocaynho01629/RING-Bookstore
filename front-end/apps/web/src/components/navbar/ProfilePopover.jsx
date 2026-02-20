@@ -18,23 +18,14 @@ import ContrastOutlined from "@mui/icons-material/ContrastOutlined";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import LockOutlined from "@mui/icons-material/LockOutlined";
 
-const ProfilePopover = ({
-  image,
-  anchorEl,
-  setAnchorEl,
-  handleOpen,
-  handleClose,
-  handleSignOut,
-  mode,
-  setMode,
-  username,
-}) => {
+const ProfilePopover = ({ image, anchorEl, setAnchorEl, handleClose, handleSignOut, mode, setMode, username }) => {
   const { t, i18n } = useTranslation();
   const [openSetting, setOpenSetting] = useState(null);
   const open = Boolean(anchorEl);
 
   /**
    * Handle change language
+   * @param {ChangeLanguage} locale
    */
   const handleChangeLanguage = (locale) => {
     setAnchorEl(null);
@@ -44,6 +35,7 @@ const ProfilePopover = ({
 
   /**
    * Handle change theme
+   * @param {Theme} theme
    */
   const handleChangeTheme = (theme) => {
     if (setMode) setMode(theme);
@@ -53,6 +45,8 @@ const ProfilePopover = ({
 
   /**
    * Handle change setting tab
+   * @param {Event} e
+   * @param {string} setting
    */
   const handleChangeSetting = (e, setting) => {
     e.stopPropagation();

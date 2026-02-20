@@ -133,10 +133,10 @@ public class CouponController {
     /**
      * Recommends coupons based on provided shop IDs.
      *
-     * @param shopIds list of shop IDs.
-     * @param checkValue  the cart value.
+     * @param shopIds       list of shop IDs.
+     * @param checkValue    the cart value.
      * @param checkQuantity the cart quantity.
-     * @param user    the authenticated user.
+     * @param user          the authenticated user.
      * @return recommended coupons for the shops.
      */
     @GetMapping("/recommend")
@@ -211,12 +211,12 @@ public class CouponController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:coupon')")
-    public ResponseEntity<String> deleteCoupon(
-            @PathVariable("id") Long id, 
+    public ResponseEntity<?> deleteCoupon(
+            @PathVariable("id") Long id,
             @CurrentAccount Account currUser) {
 
         couponService.deleteCoupon(id, currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -230,12 +230,12 @@ public class CouponController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:coupon')")
-    public ResponseEntity<String> deleteCoupons(
+    public ResponseEntity<?> deleteCoupons(
             @RequestParam("ids") List<Long> ids,
             @CurrentAccount Account currUser) {
 
         couponService.deleteCoupons(ids, currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -258,7 +258,7 @@ public class CouponController {
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:coupon')")
-    public ResponseEntity<String> deleteCouponsInverse(
+    public ResponseEntity<?> deleteCouponsInverse(
             @RequestParam(value = "types", required = false) List<CouponType> types,
             @RequestParam(value = "criterias", required = false) List<CouponCriteria> criterias,
             @RequestParam(value = "shopId", required = false) Long shopId,
@@ -281,7 +281,7 @@ public class CouponController {
                 showExpired,
                 ids,
                 currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -295,12 +295,12 @@ public class CouponController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:coupon')")
-    public ResponseEntity<String> deleteAllCoupons(
+    public ResponseEntity<?> deleteAllCoupons(
             @RequestParam(value = "shopId", required = false) Long shopId,
             @CurrentAccount Account currUser) {
-                
+
         couponService.deleteAllCoupons(shopId, currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }

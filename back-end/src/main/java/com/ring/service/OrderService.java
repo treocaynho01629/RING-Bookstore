@@ -11,7 +11,8 @@ import com.ring.model.entity.PaymentInfo;
 import com.ring.model.enums.OrderStatus;
 import com.ring.model.enums.PaymentType;
 import jakarta.servlet.http.HttpServletRequest;
-import vn.payos.type.PaymentLinkData;
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
+import vn.payos.model.v2.paymentRequests.PaymentLink;
 
 import java.util.List;
 
@@ -34,13 +35,13 @@ public interface OrderService {
      * @return a paginated list of {@link ReceiptDTO} objects
      */
     PagingResponse<ReceiptDTO> getAllReceipts(Account user,
-                                              Long shopId,
-                                              OrderStatus status,
-                                              String keyword,
-                                              Integer pageNo,
-                                              Integer pageSize,
-                                              String sortBy,
-                                              String sortDir);
+            Long shopId,
+            OrderStatus status,
+            String keyword,
+            Integer pageNo,
+            Integer pageSize,
+            String sortBy,
+            String sortDir);
 
     /**
      * Retrieves receipt summaries with filtering options.
@@ -55,12 +56,12 @@ public interface OrderService {
      * @return a paginated list of {@link ReceiptSummaryDTO} objects
      */
     PagingResponse<ReceiptSummaryDTO> getSummariesWithFilter(Account user,
-                                                             Long shopId,
-                                                             Long bookId,
-                                                             Integer pageNo,
-                                                             Integer pageSize,
-                                                             String sortBy,
-                                                             String sortDir);
+            Long shopId,
+            Long bookId,
+            Integer pageNo,
+            Integer pageSize,
+            String sortBy,
+            String sortDir);
 
     /**
      * Retrieves orders by book ID with pagination.
@@ -73,10 +74,10 @@ public interface OrderService {
      * @return a paginated list of {@link OrderDTO} objects
      */
     PagingResponse<OrderDTO> getOrdersByBookId(Long id,
-                                               Integer pageNo,
-                                               Integer pageSize,
-                                               String sortBy,
-                                               String sortDir);
+            Integer pageNo,
+            Integer pageSize,
+            String sortBy,
+            String sortDir);
 
     /**
      * Retrieves orders by user with pagination and filtering options.
@@ -120,7 +121,7 @@ public interface OrderService {
      * @return the {@link OrderDetailDTO} object
      */
     OrderDetailDTO getOrderDetail(Long id,
-                                  Account user);
+            Account user);
 
     /**
      * Retrieves order analytics data.
@@ -147,9 +148,9 @@ public interface OrderService {
      * @param checkRequest the order request
      * @param request      the HTTP request
      * @param user         the authenticated user
-     * @return the {@link ReceiptDTO} containing checkout details
+     * @return the {@link CreatePaymentLinkResponse} containing payment link details
      */
-    ReceiptDTO checkout(OrderRequest checkRequest,
+    CreatePaymentLinkResponse checkout(OrderRequest checkRequest,
             HttpServletRequest request,
             Account user);
 
@@ -158,7 +159,7 @@ public interface OrderService {
      *
      * @param request the HTTP request
      * @param id      the order ID
-     * @return the {@link PaymentInfo} containing payment details
+     * @return the {@link CreatePaymentLinkResponse} containing payment link details
      */
     PaymentInfo createPaymentLink(HttpServletRequest request,
             Long id);
@@ -167,9 +168,9 @@ public interface OrderService {
      * Retrieves payment link data for an order.
      *
      * @param id the order ID
-     * @return the {@link PaymentLinkData} containing payment link details
+     * @return the {@link PaymentLink} containing payment link details
      */
-    PaymentLinkData getPaymentLinkData(Long id);
+    PaymentLink getPaymentLinkData(Long id);
 
     /**
      * Cancels an order.
@@ -223,13 +224,6 @@ public interface OrderService {
      */
     void confirm(Long id,
             Account user);
-
-    /**
-     * Confirms payment for an order.
-     *
-     * @param id the ID of the order
-     */
-    void confirmPayment(Long id);
 
     /**
      * Changes the status of an order.

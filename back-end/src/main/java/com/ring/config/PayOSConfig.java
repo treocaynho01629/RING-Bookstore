@@ -3,22 +3,33 @@ package com.ring.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import vn.payos.PayOS;
+import vn.payos.core.ClientOptions;
 
 @Configuration
 public class PayOSConfig {
 
-    @Value("${payos.client_id}")
+    @Value("${payos.client-id}")
     private String clientId;
 
-    @Value("${payos.api_key}")
+    @Value("${payos.api-key}")
     private String apiKey;
 
-    @Value("${payos.checksum_key}")
+    @Value("${payos.checksum-key}")
     private String checksumKey;
+
+    @Value("${payos.log-level}")
+    private String logLevel;
 
     @Bean
     public PayOS payOS() {
-        return new PayOS(clientId, apiKey, checksumKey);
+        ClientOptions options = ClientOptions.builder()
+                .clientId(clientId)
+                .apiKey(apiKey)
+                .checksumKey(checksumKey)
+                .logLevel(ClientOptions.LogLevel.valueOf(logLevel.toUpperCase()))
+                .build();
+        return new PayOS(options);
     }
 }

@@ -25,7 +25,7 @@ import com.ring.repository.*;
 import com.ring.service.CaptchaService;
 import com.ring.service.CouponService;
 import com.ring.service.OrderService;
-import com.ring.service.PayOSService;
+import com.ring.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
@@ -42,8 +42,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vn.payos.type.CheckoutResponseData;
-import vn.payos.type.PaymentLinkData;
+
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
+import vn.payos.model.v2.paymentRequests.PaymentLink;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -73,8 +74,8 @@ public class OrderServiceImpl implements OrderService {
 
     private final CouponService couponService;
     private final CaptchaService captchaService;
-    private final PayOSService payOSService;
-    private final MessageService messageSerice;
+    private final PaymentService paymentService;
+    private final MessageService messageService;
 
     private final OrderMapper orderMapper;
     private final CalculateMapper calculateMapper;
@@ -109,17 +110,19 @@ public class OrderServiceImpl implements OrderService {
         return calculateMapper.orderToDTO(calculatedReceipt);
     }
 
-    @CacheEvict(cacheNames = { AppConstants.CALCULATE, AppConstants.RECEIPTS, 
-        AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, AppConstants.SALES }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.CALCULATE, AppConstants.RECEIPTS,
+            AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, AppConstants.SALES }, allEntries = true)
     @Transactional
-    public ReceiptDTO checkout(OrderRequest checkRequest,
+    public CreatePaymentLinkResponse checkout(OrderRequest checkRequest,
             HttpServletRequest request,
             Account user) {
 
-        // Recaptcha
-        final String recaptchaToken = request.getHeader(AppConstants.HEADER_RESPONSE);
-        final String source = request.getHeader(AppConstants.HEADER_RECAPTCHA_SOURCE);
-        captchaService.validate(recaptchaToken, source, CaptchaServiceImpl.CHECKOUT_ACTION);
+        CreatePaymentLinkResponse paymentLink = null;
+
+        // Captcha validation
+        final String captchaToken = request.getHeader(AppConstants.HEADER_RESPONSE);
+        final String source = request.getHeader(AppConstants.HEADER_CAPTCHA_SOURCE);
+        captchaService.validate(captchaToken, source, CaptchaServiceImpl.CHECKOUT_ACTION);
 
         // Create address
         AddressRequest addressRequest = checkRequest.getAddress();
@@ -144,7 +147,7 @@ public class OrderServiceImpl implements OrderService {
         PaymentInfo paymentInfo = PaymentInfo.builder()
                 .paymentType(checkRequest.getPaymentMethod())
                 .status(PaymentStatus.PENDING)
-                .amount((int) Math.floor(orderReceipt.getTotal() - orderReceipt.getTotalDiscount()))
+                .amount((long) Math.floor(orderReceipt.getTotal() - orderReceipt.getTotalDiscount()))
                 .build();
 
         // Set relevant values
@@ -159,18 +162,19 @@ public class OrderServiceImpl implements OrderService {
 
         if (checkRequest.getPaymentMethod().equals(PaymentType.ONLINE_PAYMENT)) {
             try {
-                CheckoutResponseData checkoutResponse = payOSService.checkout(receiptDTO);
+                paymentLink = paymentService.checkout(receiptDTO);
 
-                paymentInfo.setCheckoutUrl(checkoutResponse.getCheckoutUrl());
-                paymentInfo.setStatus(PaymentStatus.valueOf(checkoutResponse.getStatus()));
-                paymentInfo.setAmount(checkoutResponse.getAmount());
-                paymentInfo.setDescription(checkoutResponse.getDescription());
-                paymentInfo.setExpiredAt(Instant.ofEpochSecond(checkoutResponse.getExpiredAt())
+                paymentInfo.setCheckoutUrl(paymentLink.getCheckoutUrl());
+                paymentInfo.setStatus(PaymentStatus.valueOf(paymentLink.getStatus().getValue()));
+                paymentInfo.setAmount(paymentLink.getAmount());
+                paymentInfo.setDescription(paymentLink.getDescription());
+                paymentInfo.setExpiredAt(Instant.ofEpochSecond(paymentLink.getExpiredAt())
                         .atZone(ZoneId.systemDefault())
                         .toLocalDateTime());
 
                 orderRepo.save(orderReceipt);
             } catch (PaymentException ignored) {
+                // TODO: Handle payment exception
             }
         }
 
@@ -180,42 +184,45 @@ public class OrderServiceImpl implements OrderService {
                 user.getEmail(),
                 orderReceipt.getProductsPrice(),
                 orderReceipt.getShippingFee(),
+                checkRequest.getPaymentMethod(),
                 receiptDTO));
 
-        return receiptDTO;
+        return paymentLink;
     }
 
-    @Cacheable(cacheNames = AppConstants.PAYMENT_LINK, key = "#id")
+    @Cacheable(cacheNames = AppConstants.PAYMENT, key = "#id")
     @Transactional
     public PaymentInfo createPaymentLink(HttpServletRequest request,
             Long id) {
 
-        // Recaptcha
-        final String recaptchaToken = request.getHeader(AppConstants.HEADER_RESPONSE);
-        final String source = request.getHeader(AppConstants.HEADER_RECAPTCHA_SOURCE);
-        captchaService.validate(recaptchaToken, source, CaptchaServiceImpl.PAYMENT_ACTION);
+        // Captcha validation
+        final String captchaToken = request.getHeader(AppConstants.HEADER_RESPONSE);
+        final String source = request.getHeader(AppConstants.HEADER_CAPTCHA_SOURCE);
+        captchaService.validate(captchaToken, source,
+                CaptchaServiceImpl.PAYMENT_ACTION);
 
         PaymentInfo paymentInfo = paymentRepo.findByOrder(id)
-            .orElseThrow(() -> {
-                var errorMsg = messageSerice.getMessage("exception.not.found",
-                    new Object[]{ new DefaultMessageSourceResolvable("label.order.payment") });
-                return new ResourceNotFoundException(errorMsg);
-            });
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order.payment") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
 
         if (paymentInfo.getPaymentType().equals(PaymentType.ONLINE_PAYMENT)
                 && paymentInfo.getStatus().equals(PaymentStatus.PENDING)
                 && paymentInfo.getCheckoutUrl() == null) {
             ReceiptDTO receiptDTO = this.getReceipt(id);
-            CheckoutResponseData checkoutResponse = payOSService.checkout(receiptDTO);
+            CreatePaymentLinkResponse paymentLink = paymentService.checkout(receiptDTO);
 
             LocalDateTime expiredAt = LocalDateTime.ofInstant(
-                    Instant.ofEpochSecond(checkoutResponse.getExpiredAt()),
+                    Instant.ofEpochSecond(paymentLink.getExpiredAt()),
                     ZoneId.systemDefault());
 
-            paymentInfo.setCheckoutUrl(checkoutResponse.getCheckoutUrl());
-            paymentInfo.setStatus(PaymentStatus.valueOf(checkoutResponse.getStatus()));
-            paymentInfo.setAmount(checkoutResponse.getAmount());
-            paymentInfo.setDescription(checkoutResponse.getDescription());
+            paymentInfo.setCheckoutUrl(paymentLink.getCheckoutUrl());
+            paymentInfo.setStatus(PaymentStatus.valueOf(paymentLink.getStatus().getValue()));
+            paymentInfo.setAmount(paymentLink.getAmount());
+            paymentInfo.setDescription(paymentLink.getDescription());
             paymentInfo.setExpiredAt(expiredAt);
 
             paymentRepo.save(paymentInfo);
@@ -224,9 +231,9 @@ public class OrderServiceImpl implements OrderService {
         return paymentInfo;
     }
 
-    @Cacheable(cacheNames = "payment", key = "#id")
-    public PaymentLinkData getPaymentLinkData(Long id) {
-        return payOSService.getPaymentLinkData(id);
+    @Cacheable(cacheNames = AppConstants.PAYMENT_LINK, key = "#id")
+    public PaymentLink getPaymentLinkData(Long id) {
+        return paymentService.getPaymentLinkData(id);
     }
 
     @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS }, allEntries = true)
@@ -235,8 +242,9 @@ public class OrderServiceImpl implements OrderService {
 
         OrderDetail detail = detailRepo.findDetailById(id)
                 .orElseThrow(() -> {
-                    var errorMsg = messageSerice.getMessage("exception.not.found",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.order.detail") });
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order.detail") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
@@ -244,19 +252,19 @@ public class OrderServiceImpl implements OrderService {
         OrderStatus currStatus = detail.getStatus();
         if (!OrderStatus.PENDING.equals(currStatus)) {
 
-            var errorMsg = messageSerice.getMessage("exception.invalid",
-                new Object[]{ new DefaultMessageSourceResolvable("label.order.status") });
-            throw new HttpResponseException(HttpStatus.BAD_REQUEST, 
-                AppConstants.INVALID_ARGUMENT,
-                errorMsg);
+            var errorMsg = messageService.getMessage("exception.invalid",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order.status") });
+            throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                    AppConstants.INVALID_ARGUMENT,
+                    errorMsg);
         }
 
         // Check if correct user
         OrderReceipt order = detail.getOrder();
         if (!isValidBuyer(order, user)) {
 
-            var errorMsg = messageSerice.getMessage("exception.ownership",
-                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order") });
             throw new EntityOwnershipException(errorMsg);
         }
 
@@ -272,41 +280,44 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Caching(evict = {
-            @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, 
-                AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true),
-            @CacheEvict(cacheNames = AppConstants.PAYMENT_LINK, key = "#orderId"),
-            @CacheEvict(cacheNames = AppConstants.PAYMENT, key = "#orderId") })
+            @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS,
+                    AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true),
+            @CacheEvict(cacheNames = AppConstants.PAYMENT, key = "#orderId"),
+            @CacheEvict(cacheNames = AppConstants.PAYMENT_LINK, key = "#orderId") })
     @Transactional
     public void cancelUnpaidOrder(Long orderId, String reason, Account user) {
 
         OrderReceipt order = orderRepo.findById(orderId)
                 .orElseThrow(() -> {
-                    var errorMsg = messageSerice.getMessage("exception.not.found",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
         // Check if correct user
         if (!isValidBuyer(order, user)) {
-            var errorMsg = messageSerice.getMessage("exception.ownership",
-                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order") });
             throw new EntityOwnershipException(errorMsg);
         }
 
         PaymentInfo paymentInfo = paymentRepo.findByOrder(order.getId())
-            .orElseThrow(() -> {
-                    var errorMsg = messageSerice.getMessage("exception.not.found",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.order.payment") });
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order.payment") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
         if (!PaymentStatus.PENDING.equals(paymentInfo.getStatus())) {
 
-            var errorMsg = messageSerice.getMessage("exception.invalid",
-                new Object[]{ new DefaultMessageSourceResolvable("label.order.payment.status") });
-            throw new HttpResponseException(HttpStatus.BAD_REQUEST, 
-                AppConstants.INVALID_ARGUMENT,
-                errorMsg);
+            var errorMsg = messageService.getMessage("exception.invalid",
+                    new Object[] { new DefaultMessageSourceResolvable(
+                            "label.order.payment.status") });
+            throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                    AppConstants.INVALID_ARGUMENT,
+                    errorMsg);
         }
 
         // Cancel all details
@@ -319,22 +330,22 @@ public class OrderServiceImpl implements OrderService {
         if (paymentInfo.getPaymentType().equals(PaymentType.ONLINE_PAYMENT)) {
             // Cancel payment
             try {
-                PaymentLinkData paymentData = payOSService.cancel(order.getId(), reason);
+                PaymentLink paymentData = paymentService.cancel(order.getId(), reason);
                 paymentInfo.setExpiredAt(null);
-                paymentInfo.setStatus(PaymentStatus.valueOf(paymentData.getStatus()));
+                paymentInfo.setStatus(PaymentStatus.valueOf(paymentData.getStatus().getValue()));
             } catch (Exception ignored) {
-                paymentInfo.setStatus(PaymentStatus.CANCELED);
+                paymentInfo.setStatus(PaymentStatus.CANCELLED);
             }
         } else {
-            paymentInfo.setStatus(PaymentStatus.CANCELED);
+            paymentInfo.setStatus(PaymentStatus.CANCELLED);
         }
 
         paymentRepo.save(paymentInfo);
         orderRepo.save(order);
     }
 
-    @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, 
-        AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS,
+            AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true)
     @Transactional
     public void refund(Long id,
             String reason,
@@ -342,8 +353,9 @@ public class OrderServiceImpl implements OrderService {
 
         OrderDetail detail = detailRepo.findDetailById(id)
                 .orElseThrow(() -> {
-                    var errorMsg = messageSerice.getMessage("exception.not.found",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.order.detail") });
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order.detail") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
@@ -351,30 +363,30 @@ public class OrderServiceImpl implements OrderService {
         OrderStatus currStatus = detail.getStatus();
         if (!OrderStatus.COMPLETED.equals(currStatus)) {
 
-            var errorMsg = messageSerice.getMessage("exception.invalid",
-                new Object[]{ new DefaultMessageSourceResolvable("label.order.status") });
-            throw new HttpResponseException(HttpStatus.BAD_REQUEST, 
-                AppConstants.INVALID_ARGUMENT,
-                errorMsg);
+            var errorMsg = messageService.getMessage("exception.invalid",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order.status") });
+            throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                    AppConstants.INVALID_ARGUMENT,
+                    errorMsg);
         }
 
         // Check if correct user
         OrderReceipt order = detail.getOrder();
         if (!isValidBuyer(order, user)) {
 
-            var errorMsg = messageSerice.getMessage("exception.ownership",
-                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order") });
             throw new EntityOwnershipException(errorMsg);
         }
 
         if (order.getLastModifiedDate()
                 .plus(1, ChronoUnit.WEEKS)
                 .isAfter(LocalDateTime.now())) {
-            var errorMsg = messageSerice.getMessage("exception.date.invalid",
-                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
-            throw new HttpResponseException(HttpStatus.CONFLICT, 
-                AppConstants.INVALID_DATE,
-                errorMsg);
+            var errorMsg = messageService.getMessage("exception.date.invalid",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order") });
+            throw new HttpResponseException(HttpStatus.CONFLICT,
+                    AppConstants.INVALID_DATE,
+                    errorMsg);
         }
 
         detail.setStatus(OrderStatus.PENDING_REFUND);
@@ -383,10 +395,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Caching(evict = {
-            @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, 
-                AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true),
-            @CacheEvict(cacheNames = AppConstants.PAYMENT_LINK, key = "#orderId"),
-            @CacheEvict(cacheNames = AppConstants.PAYMENT, key = "#orderId") })
+            @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS,
+                    AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true),
+            @CacheEvict(cacheNames = AppConstants.PAYMENT, key = "#orderId"),
+            @CacheEvict(cacheNames = AppConstants.PAYMENT_LINK, key = "#orderId") })
     @Transactional
     public void changePaymentMethod(Long orderId,
             PaymentType paymentMethod,
@@ -394,80 +406,86 @@ public class OrderServiceImpl implements OrderService {
 
         OrderReceipt order = orderRepo.findById(orderId)
                 .orElseThrow(() -> {
-                    var errorMsg = messageSerice.getMessage("exception.not.found",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
         // Check if correct user
         if (!isValidBuyer(order, user)) {
-            var errorMsg = messageSerice.getMessage("exception.ownership",
-                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order") });
             throw new EntityOwnershipException(errorMsg);
         }
 
         PaymentInfo paymentInfo = paymentRepo.findByOrder(order.getId())
                 .orElseThrow(() -> {
-                    var errorMsg = messageSerice.getMessage("exception.not.found",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.order.payment") });
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order.payment") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
         // Check valid status for cancel
         if (!PaymentStatus.PENDING.equals(paymentInfo.getStatus())) {
-            var errorMsg = messageSerice.getMessage("exception.invalid",
-                new Object[]{ new DefaultMessageSourceResolvable("label.order.payment.status") });
-            throw new HttpResponseException(HttpStatus.BAD_REQUEST, 
-                AppConstants.INVALID_ARGUMENT,
-                errorMsg);
+            var errorMsg = messageService.getMessage("exception.invalid",
+                    new Object[] { new DefaultMessageSourceResolvable(
+                            "label.order.payment.status") });
+            throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                    AppConstants.INVALID_ARGUMENT,
+                    errorMsg);
         }
-        
+
         paymentInfo.setPaymentType(paymentMethod);
         paymentRepo.save(paymentInfo);
     }
 
-    @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, 
-        AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS,
+            AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true)
     @Transactional
     public void confirm(Long id,
             Account user) {
 
         OrderDetail detail = detailRepo.findDetailById(id)
                 .orElseThrow(() -> {
-                    var errorMsg = messageSerice.getMessage("exception.not.found",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.order.detail") });
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order.detail") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
         // Check valid status for cancel
         OrderStatus currStatus = detail.getStatus();
         if (!OrderStatus.SHIPPING.equals(currStatus)) {
-            var errorMsg = messageSerice.getMessage("exception.invalid",
-                new Object[]{ new DefaultMessageSourceResolvable("label.order.status") });
-            throw new HttpResponseException(HttpStatus.BAD_REQUEST, 
-                AppConstants.INVALID_ARGUMENT,
-                errorMsg);
+            var errorMsg = messageService.getMessage("exception.invalid",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order.status") });
+            throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                    AppConstants.INVALID_ARGUMENT,
+                    errorMsg);
         }
 
         PaymentInfo paymentInfo = paymentRepo.findByOrder(detail.getOrder().getId())
                 .orElseThrow(() -> {
-                    var errorMsg = messageSerice.getMessage("exception.not.found",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.order.payment") });
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order.payment") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
         if (!PaymentStatus.PAID.equals(paymentInfo.getStatus())) {
-            var errorMsg = messageSerice.getMessage("exception.invalid",
-                new Object[]{ new DefaultMessageSourceResolvable("label.order.payment.status") });
-            throw new HttpResponseException(HttpStatus.BAD_REQUEST, 
-                AppConstants.INVALID_ARGUMENT,
-                errorMsg);
+            var errorMsg = messageService.getMessage("exception.invalid",
+                    new Object[] { new DefaultMessageSourceResolvable(
+                            "label.order.payment.status") });
+            throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                    AppConstants.INVALID_ARGUMENT,
+                    errorMsg);
         }
 
         // Check if correct user
         if (!isValidBuyer(detail.getOrder(), user)) {
-            var errorMsg = messageSerice.getMessage("exception.ownership",
-                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order") });
             throw new EntityOwnershipException(errorMsg);
         }
 
@@ -476,30 +494,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Caching(evict = {
-        @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, 
-                AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true),
-        @CacheEvict(cacheNames = AppConstants.PAYMENT_LINK, key = "#id"),
-        @CacheEvict(cacheNames = AppConstants.PAYMENT, key = "#id") })
-    @Transactional
-    public void confirmPayment(Long id) {
-
-        // Update payment status
-        PaymentInfo paymentInfo = paymentRepo.findByOrder(id).orElse(null);
-
-        if (paymentInfo != null) {
-            paymentInfo.setStatus(PaymentStatus.PAID);
-            paymentRepo.save(paymentInfo);
-        }
-
-        // Update details status
-        detailRepo.confirmPaymentByOrderId(id);
-    }
-
-    @Caching(evict = {
-        @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS, 
-                AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true),
-        @CacheEvict(cacheNames = AppConstants.PAYMENT_LINK, key = "#id"),
-        @CacheEvict(cacheNames = AppConstants.PAYMENT, key = "#id") })
+            @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS,
+                    AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true),
+            @CacheEvict(cacheNames = AppConstants.PAYMENT, key = "#id"),
+            @CacheEvict(cacheNames = AppConstants.PAYMENT_LINK, key = "#id") })
     @Transactional
     public void changeStatus(Long id,
             OrderStatus status,
@@ -507,16 +505,17 @@ public class OrderServiceImpl implements OrderService {
 
         OrderDetail detail = detailRepo.findDetailById(id)
                 .orElseThrow(() -> {
-                    var errorMsg = messageSerice.getMessage("exception.not.found",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.order.detail") });
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order.detail") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         OrderReceipt order = detail.getOrder();
 
         // Check if correct user
         if (!CommonUtils.isValidShopOwner(detail.getShop(), user)) {
-            var errorMsg = messageSerice.getMessage("exception.ownership",
-                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order") });
             throw new EntityOwnershipException(errorMsg);
         }
 
@@ -544,9 +543,9 @@ public class OrderServiceImpl implements OrderService {
             String sortDir) {
 
         Pageable pageable = PageRequest.of(pageNo, pageSize,
-                sortDir.equals(AppConstants.ASCENDING) 
-                ? Sort.by(sortBy).ascending() 
-                : Sort.by(sortBy).descending());
+                sortDir.equals(AppConstants.ASCENDING)
+                        ? Sort.by(sortBy).ascending()
+                        : Sort.by(sortBy).descending());
         boolean isAdmin = CommonUtils.isAuthAdmin();
 
         Page<IOrderReceipt> receipts = orderRepo.findAllBy(shopId,
@@ -582,9 +581,9 @@ public class OrderServiceImpl implements OrderService {
             String sortDir) {
 
         Pageable pageable = PageRequest.of(pageNo, pageSize,
-                sortDir.equals(AppConstants.ASCENDING) 
-                ? Sort.by(sortBy).ascending() 
-                : Sort.by(sortBy).descending());
+                sortDir.equals(AppConstants.ASCENDING)
+                        ? Sort.by(sortBy).ascending()
+                        : Sort.by(sortBy).descending());
         boolean isAdmin = CommonUtils.isAuthAdmin();
 
         Page<IReceiptSummary> summariesList = orderRepo.findAllSummaries(shopId,
@@ -593,8 +592,8 @@ public class OrderServiceImpl implements OrderService {
                 pageable);
 
         if (summariesList == null) {
-            var errorMsg = messageSerice.getMessage("exception.ownership",
-                new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order") });
             throw new EntityOwnershipException(errorMsg);
         }
 
@@ -616,9 +615,9 @@ public class OrderServiceImpl implements OrderService {
             String sortBy,
             String sortDir) {
         Pageable pageable = PageRequest.of(pageNo, pageSize,
-                sortDir.equals(AppConstants.ASCENDING) 
-                ? Sort.by(sortBy).ascending() 
-                : Sort.by(sortBy).descending());
+                sortDir.equals(AppConstants.ASCENDING)
+                        ? Sort.by(sortBy).ascending()
+                        : Sort.by(sortBy).descending());
 
         Page<IOrder> details = detailRepo.findAllByBookId(id, pageable);
         List<Long> orderIds = details.getContent().stream().map(IOrder::getId).collect(Collectors.toList());
@@ -661,8 +660,9 @@ public class OrderServiceImpl implements OrderService {
 
         OrderReceipt order = orderRepo.findById(id)
                 .orElseThrow(() -> {
-                    var errorMsg = messageSerice.getMessage("exception.not.found",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         ReceiptDTO receiptDTO = orderMapper.orderToDTO(order); // Map to DTO
@@ -675,8 +675,9 @@ public class OrderServiceImpl implements OrderService {
         boolean isAdmin = CommonUtils.isAuthAdmin();
         IOrderDetail detailProjection = detailRepo.findOrderDetail(id, isAdmin ? null : user.getId())
                 .orElseThrow(() -> {
-                    var errorMsg = messageSerice.getMessage("exception.not.found",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.order.detail") });
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order.detail") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         List<IOrderItem> items = itemRepo.findAllWithDetailIds(List.of(detailProjection.getId()));
@@ -691,8 +692,9 @@ public class OrderServiceImpl implements OrderService {
         boolean isAdmin = CommonUtils.isAuthAdmin();
         IReceiptDetail receiptProjection = orderRepo.findReceiptDetail(id, isAdmin ? null : user.getId())
                 .orElseThrow(() -> {
-                    var errorMsg = messageSerice.getMessage("exception.not.found",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.order") });
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         List<IOrder> details = detailRepo.findAllByReceiptId(id);
@@ -708,7 +710,7 @@ public class OrderServiceImpl implements OrderService {
     public StatDTO getAnalytics(Account user, Long shopId) {
 
         boolean isAdmin = CommonUtils.isAuthAdmin();
-        var label = StringUtils.capitalize(messageSerice.getMessage("label.sales"));
+        var label = StringUtils.capitalize(messageService.getMessage("label.sales"));
         return dashMapper.statToDTO(detailRepo.getSalesAnalytics(shopId, isAdmin ? null : user.getId()),
                 AppConstants.SALES,
                 label);
@@ -725,11 +727,11 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Process order from cart
      * 
-     * @param cart      Cart details
+     * @param cart          Cart details
      * @param orderCoupon   Order coupon code
      * @param address       Address
      * @param paymentMethod Payment method
-     * @param user      Current user
+     * @param user          Current user
      * @param isCheckout    Is processing checkout if no ignore exception
      * @return Processed order receipt
      */
@@ -770,7 +772,9 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toMap(Book::getId, Function.identity())); // Map to ID
         Map<String, ICoupon> coupons = couponRepo.findCouponInCodes(couponCodes)
                 .stream()
-                .collect(Collectors.toMap(coupon -> coupon.getCoupon().getCode(), Function.identity())); // Map to code
+                .collect(Collectors.toMap(coupon -> coupon.getCoupon().getCode(), Function.identity())); // Map
+                                                                                                         // to
+                                                                                                         // code
 
         // Initial values
         double totalPrice = 0.0; // Total price
@@ -804,11 +808,13 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // Apply main coupon
-        ICoupon cProjection = orderCoupon == null 
+        ICoupon cProjection = orderCoupon == null
                 ? null // Null => User not select any coupon
-                : coupons.containsKey(orderCoupon) 
-                    ? coupons.get(orderCoupon)
-                    : couponRepo.recommendCoupon(null, totalPrice - totalDealDiscount, totalQuantity, user.getId()).orElse(null);
+                : coupons.containsKey(orderCoupon)
+                        ? coupons.get(orderCoupon)
+                        : couponRepo.recommendCoupon(null, totalPrice - totalDealDiscount,
+                                totalQuantity, user.getId())
+                                .orElse(null);
 
         Coupon coupon = cProjection != null ? cProjection.getCoupon() : null;
         if (coupon != null && coupon.getShop() == null
@@ -823,12 +829,12 @@ public class OrderServiceImpl implements OrderService {
             // Apply coupon
             CouponDiscountDTO discountFromCoupon = null;
             if (couponRepo.hasUserUsedCoupon(coupon.getId(), user.getId())) {
-                
+
                 coupon.setIsUsed(true);
                 if (isCheckout) {
 
-                    var errorMsg = messageSerice.getMessage("exception.coupon.expired",
-                        new Object[]{ orderCoupon });
+                    var errorMsg = messageService.getMessage("exception.coupon.expired",
+                            new Object[] { orderCoupon });
                     throw new HttpResponseException(
                             HttpStatus.CONFLICT,
                             AppConstants.COUPON_EXPIRED,
@@ -837,20 +843,21 @@ public class OrderServiceImpl implements OrderService {
             } else {
 
                 discountFromCoupon = couponService.applyCoupon(coupon,
-                        new CartStateRequest(value, 
-                            shipping, 
-                            totalQuantity, 
-                            null),
-                            user);
+                        new CartStateRequest(value,
+                                shipping,
+                                totalQuantity,
+                                null),
+                        user);
             }
 
             if (discountFromCoupon != null) {
 
                 // Decrease usage on checkout
-                if (isCheckout) couponRepo.decreaseUsage(coupon.getId());
+                if (isCheckout)
+                    couponRepo.decreaseUsage(coupon.getId());
 
                 coupon.setIsUsable(true); // Mark usable for DTO result mapping
-                
+
                 discountValue = discountFromCoupon.discountValue();
                 shippingDiscount = discountFromCoupon.discountShipping();
 
@@ -871,8 +878,8 @@ public class OrderServiceImpl implements OrderService {
                     detail.setShippingDiscount(sDiscount + applyShippingDiscount);
                 }
             } else if (isCheckout) {
-                var errorMsg = messageSerice.getMessage("exception.coupon.invalid",
-                        new Object[]{ orderCoupon });
+                var errorMsg = messageService.getMessage("exception.coupon.invalid",
+                        new Object[] { orderCoupon });
                 throw new HttpResponseException(
                         HttpStatus.CONFLICT,
                         AppConstants.INVALID_COUPON,
@@ -908,13 +915,13 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Process detail (Shop's items)
      * 
-     * @param detail    Detail request
-     * @param shops     Shops
-     * @param books     Books
+     * @param detail        Detail request
+     * @param shops         Shops
+     * @param books         Books
      * @param coupons       Coupons
      * @param address       Address
      * @param paymentMethod Payment method
-     * @param user      Current user
+     * @param user          Current user
      * @param isCheckout    Is processing checkout if no ignore exception
      * @return Processed detail
      */
@@ -932,8 +939,8 @@ public class OrderServiceImpl implements OrderService {
         List<CartItemRequest> items = detail.getItems();
         if (shop == null || items == null || items.isEmpty()) {
             if (isCheckout) {
-                var errorMsg = messageSerice.getMessage("exception.not.found",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                var errorMsg = messageService.getMessage("exception.not.found",
+                        new Object[] { new DefaultMessageSourceResolvable("label.shop") });
                 throw new ResourceNotFoundException(errorMsg);
             }
 
@@ -975,8 +982,9 @@ public class OrderServiceImpl implements OrderService {
             if (book == null || !book.getShop().getId().equals(shop.getId())) {
 
                 if (isCheckout) {
-                    var errorMsg = messageSerice.getMessage("exception.not.found",
-                        new Object[]{ new DefaultMessageSourceResolvable("label.product") });
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.product") });
                     throw new ResourceNotFoundException(errorMsg);
                 }
 
@@ -993,7 +1001,7 @@ public class OrderServiceImpl implements OrderService {
             short quantity = item.getQuantity();
             if (quantity < 1 || quantity > book.getAmount()) {
 
-                throw new HttpResponseException(HttpStatus.CONFLICT, 
+                throw new HttpResponseException(HttpStatus.CONFLICT,
                         AppConstants.OUT_OF_STOCK,
                         "exception.invalid.quantity");
             }
@@ -1019,16 +1027,20 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // Check coupon
-        ICoupon shopCoupon = detail.getCoupon() == null 
+        ICoupon shopCoupon = detail.getCoupon() == null
                 ? null // Null => User not select any coupon
-                : coupons.containsKey(detail.getCoupon()) 
-                    ? coupons.get(detail.getCoupon())
-                    : couponRepo.recommendCoupon(shop.getId(), detailTotal - discountDeal, detailQuantity, user.getId()).orElse(null);
+                : coupons.containsKey(detail.getCoupon())
+                        ? coupons.get(detail.getCoupon())
+                        : couponRepo
+                                .recommendCoupon(shop.getId(),
+                                        detailTotal - discountDeal,
+                                        detailQuantity, user.getId())
+                                .orElse(null);
 
         // Validate + apply coupon
         if (shopCoupon != null
-            && shopCoupon.getCoupon().getShop().getId().equals(shop.getId())
-            && !couponService.isExpired(shopCoupon.getCoupon())) {
+                && shopCoupon.getCoupon().getShop().getId().equals(shop.getId())
+                && !couponService.isExpired(shopCoupon.getCoupon())) {
             CouponDiscountDTO discountFromCoupon = null;
 
             // Apply coupon
@@ -1037,8 +1049,8 @@ public class OrderServiceImpl implements OrderService {
                 shopCoupon.getCoupon().setIsUsed(true);
 
                 if (isCheckout) {
-                    var errorMsg = messageSerice.getMessage("exception.coupon.expired",
-                        new Object[]{ detail.getCoupon() });
+                    var errorMsg = messageService.getMessage("exception.coupon.expired",
+                            new Object[] { detail.getCoupon() });
                     throw new HttpResponseException(
                             HttpStatus.CONFLICT,
                             AppConstants.COUPON_EXPIRED,
@@ -1047,11 +1059,11 @@ public class OrderServiceImpl implements OrderService {
             } else {
 
                 discountFromCoupon = couponService.applyCoupon(
-                    shopCoupon.getCoupon(),
-                    new CartStateRequest(detailTotal - discountDeal, 
-                        shippingFee, 
-                        detailQuantity, 
-                        shop.getId()), 
+                        shopCoupon.getCoupon(),
+                        new CartStateRequest(detailTotal - discountDeal,
+                                shippingFee,
+                                detailQuantity,
+                                shop.getId()),
                         user);
             }
 
@@ -1059,7 +1071,8 @@ public class OrderServiceImpl implements OrderService {
             if (discountFromCoupon != null) {
 
                 // Decrease usage on checkout
-                if (isCheckout)  couponRepo.decreaseUsage(shopCoupon.getCoupon().getId());
+                if (isCheckout)
+                    couponRepo.decreaseUsage(shopCoupon.getCoupon().getId());
 
                 shopCoupon.getCoupon().setIsUsable(true); // Mark usable to map DTO result
 
@@ -1067,8 +1080,8 @@ public class OrderServiceImpl implements OrderService {
                 discountShipping = discountFromCoupon.discountShipping();
             } else if (isCheckout) {
 
-                var errorMsg = messageSerice.getMessage("exception.coupon.invalid",
-                        new Object[]{ detail.getCoupon() });
+                var errorMsg = messageService.getMessage("exception.coupon.invalid",
+                        new Object[] { detail.getCoupon() });
                 throw new HttpResponseException(
                         HttpStatus.CONFLICT,
                         AppConstants.INVALID_COUPON,
@@ -1110,7 +1123,7 @@ public class OrderServiceImpl implements OrderService {
      * 
      * @param origin      Origin address
      * @param destination Destination address
-     * @param type    Shipping type
+     * @param type        Shipping type
      * @return Shipping fee
      */
     private double calculateShippingFee(Address origin,
@@ -1118,11 +1131,12 @@ public class OrderServiceImpl implements OrderService {
             ShippingType type) {
 
         double baseFee = 1000;
-        double shippingFee = !(destination == null || origin == null) 
+        double shippingFee = !(destination == null || origin == null)
                 ? distanceCalculation(origin, destination) * baseFee
                 : 10000; // Fixed fee for now
 
-        if (type != null) shippingFee = shippingFee * type.getMultiplier().doubleValue();
+        if (type != null)
+            shippingFee = shippingFee * type.getMultiplier().doubleValue();
 
         return shippingFee;
     }

@@ -187,7 +187,6 @@ export const shopsApiSlice = apiWithEnum.injectEndpoints({
           validateStatus: (response, result) => {
             return response.status === 200 && !result?.isError;
           },
-          responseHandler: "text",
         };
       },
       invalidatesTags: (result, error) => [{ type: "Shop", id: "LIST" }],

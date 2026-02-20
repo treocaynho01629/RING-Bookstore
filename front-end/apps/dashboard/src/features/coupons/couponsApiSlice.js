@@ -9,9 +9,7 @@ export const couponsApiSlice = initialsApiSlice.injectEndpoints({
           return response.status === 200 && !result?.isError;
         },
       }),
-      providesTags: (result, error) => [
-        result ? { type: "Coupon", id: result.id } : { type: "Coupon" },
-      ],
+      providesTags: (result, error) => [result ? { type: "Coupon", id: result.id } : { type: "Coupon" }],
     }),
     getCouponAnalytics: builder.query({
       query: ({ shopId, userId }) => {
@@ -67,8 +65,7 @@ export const couponsApiSlice = initialsApiSlice.injectEndpoints({
     }),
     deleteCouponsInverse: builder.mutation({
       query: (args) => {
-        const { types, shopId, userId, byShop, showExpired, codes, code, ids } =
-          args || {};
+        const { types, shopId, userId, byShop, showExpired, codes, code, ids } = args || {};
 
         //Params
         const params = new URLSearchParams();
@@ -92,7 +89,6 @@ export const couponsApiSlice = initialsApiSlice.injectEndpoints({
       query: (shopId) => ({
         url: `/api/coupons/delete-all?shopId=${shopId}`,
         method: "DELETE",
-        responseHandler: "text",
       }),
       invalidatesTags: (result, error) => [{ type: "Coupon", id: "LIST" }],
     }),

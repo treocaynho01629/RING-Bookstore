@@ -229,21 +229,11 @@ public class ApplicationExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler(ReCaptchaInvalidException.class)
-    public ExceptionResponse handleInvalidReCaptchaException(ReCaptchaInvalidException e) {
+    @ExceptionHandler(CaptchaInvalidException.class)
+    public ExceptionResponse handleInvalidCaptchaException(CaptchaInvalidException e) {
 
         return new ExceptionResponse(
                 HttpStatus.FORBIDDEN.value(),
-                e.getError(),
-                e.getLocalizedMessage());
-    }
-
-    @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
-    @ExceptionHandler(ReCaptchaSuspiciousException.class)
-    public ExceptionResponse handleSuspiciousReCaptchaException(ReCaptchaSuspiciousException e) {
-
-        return new ExceptionResponse(
-                HttpStatus.PRECONDITION_FAILED.value(),
                 e.getError(),
                 e.getLocalizedMessage());
     }

@@ -63,7 +63,6 @@ const CancelAndUpdateOrderForm = ({ id, paymentMethod, pending, setPending, hand
           setErrMsg("");
           setValue(isUpdate ? paymentMethod : cancelOptions[0]);
           setOtherReason("");
-          setPending(false);
           handleClose();
         })
         .catch((err) => {
@@ -72,6 +71,8 @@ const CancelAndUpdateOrderForm = ({ id, paymentMethod, pending, setPending, hand
           });
           setErr(err);
           setErrMsg(t("checkout.payment.invalid", { ns: "authenticated" }));
+        })
+        .finally(() => {
           setPending(false);
         });
     } else {
@@ -85,7 +86,6 @@ const CancelAndUpdateOrderForm = ({ id, paymentMethod, pending, setPending, hand
           setErrMsg("");
           setValue(isUpdate ? paymentMethod : cancelOptions[0]);
           setOtherReason("");
-          setPending(false);
           handleClose();
         })
         .catch((err) => {
@@ -94,6 +94,8 @@ const CancelAndUpdateOrderForm = ({ id, paymentMethod, pending, setPending, hand
           });
           setErr(err);
           setErrMsg(t("order.reason.invalid", { ns: "authenticated" }));
+        })
+        .finally(() => {
           setPending(false);
         });
     }

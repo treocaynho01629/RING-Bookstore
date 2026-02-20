@@ -2,6 +2,7 @@ package com.ring.controller;
 
 import com.ring.config.CurrentAccount;
 import com.ring.dto.request.BookRequest;
+import com.ring.dto.response.GenericResponse;
 import com.ring.dto.response.PagingResponse;
 import com.ring.dto.response.books.BookDTO;
 import com.ring.dto.response.books.BookDetailDTO;
@@ -245,12 +246,12 @@ public class BookController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:book')")
-    public ResponseEntity<String> deleteBook(
+    public ResponseEntity<?> deleteBook(
             @PathVariable("id") Long id,
             @CurrentAccount Account currUser) {
 
         bookService.deleteBook(id, currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -264,12 +265,12 @@ public class BookController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:book')")
-    public ResponseEntity<String> deleteBooks(
+    public ResponseEntity<?> deleteBooks(
             @RequestParam("ids") List<Long> ids,
             @CurrentAccount Account currUser) {
 
         bookService.deleteBooks(ids, currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -293,7 +294,7 @@ public class BookController {
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:book')")
-    public ResponseEntity<String> deleteBooksInverse(
+    public ResponseEntity<?> deleteBooksInverse(
             @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam(value = "cateId", required = false) Integer cateId,
             @RequestParam(value = "pubIds", required = false) List<Integer> pubIds,
@@ -319,7 +320,7 @@ public class BookController {
                 toRange,
                 ids,
                 currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -333,12 +334,12 @@ public class BookController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('SELLER') and hasAuthority('delete:book')")
-    public ResponseEntity<String> deleteAllBooks(
+    public ResponseEntity<?> deleteAllBooks(
             @RequestParam(value = "shopId", required = false) Long shopId,
             @CurrentAccount Account currUser) {
 
         bookService.deleteAllBooks(shopId, currUser);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }

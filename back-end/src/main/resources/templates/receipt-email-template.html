@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml">
+<html th:lang="${#locale.language}" dir="auto" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-    <title th:text="${subject}"> Email Sign up Template</title>
+    <title th:text="${subject}">Email Sign up Template</title>
     <!--[if !mso]><!-->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!--<![endif]-->
@@ -178,25 +178,33 @@
                                             <tbody>
                                             <tr>
                                                 <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                                    <div style="font-family:Roboto, sans-serif;font-size:24px;font-weight:450;line-height:24px;text-align:left;color:#000000;">Cảm ơn bạn đã mua hàng</div>
+                                                    <div style="font-family:Roboto, sans-serif;font-size:24px;font-weight:450;line-height:24px;
+                                                        text-align:left;color:#000000;" th:text="#{email.receipt.title}"></div>
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                                    <div style="font-family:Roboto, sans-serif;font-size:18px;font-weight:450;line-height:24px;text-align:left;color:#000000;">Tài khoản <span th:text="${username}"></span> của bạn đã thực hiện giao dịch tại RING!</div>
+                                                    <div style="font-family:Roboto, sans-serif;font-size:18px;font-weight:450;line-height:24px;
+                                                        text-align:left;color:#000000;" th:text="#{email.receipt.body(${username})}"></div>
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                                    <div style="font-family:Roboto, sans-serif;font-size:14px;font-weight:400;line-height:24px;text-align:left;color:#000000;">RING! gửi đến quý khách hóa đơn điện tử cho đơn hàng #<span th:text="${receipt.id}"></span>, Quý khách có thể theo dõi đơn hàng tại <a style="color: #63aee3" th:src="|${clientUrl}/profile/order|">đây</a>, mã tra cứu #<span th:text="${receipt.id}"></span>.<br>
-                                                        Sản phẩm sẽ được giao đến bạn sớm nhất có thể.<br><br>
-                                                        Chúc bạn có một trải nghiệm thật vui vẻ.<br>
+                                                    <div style="font-family:Roboto, sans-serif;font-size:14px;font-weight:400;line-height:24px;
+                                                        text-align:left;color:#000000;">
+                                                        <span th:text="#{email.receipt.open(${receipt.id})}"></span>
+                                                        <span th:text="#{email.receipt.track}"></span>&nbsp;
+                                                        <a style="color: #63aee3" th:src="|${clientUrl}/profile/order|" th:text="#{here}"></a>
+                                                        <span th:text="#{email.receipt.order.id(${receipt.id})}"></span><br>
+                                                        <span th:text="#{email.receipt.promise}"></span><br><br>
+                                                        <span th:text="#{email.receipt.wish}"></span><br>
                                                     </div>
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td align="left" class="title" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                                    <div style="text-transform: uppercase; border-bottom: 0.5px solid lightgray; font-family: Roboto, sans-serif; line-height: 24px; text-align: left; font-size: 16px; font-weight: 450; color: #63e399;">Thông tin đơn hàng #<span th:text="${receipt.id}"></span></div>
+                                                    <div style="text-transform: uppercase; border-bottom: 0.5px solid lightgray; font-family: Roboto, sans-serif; 
+                                                    line-height: 24px; text-align: left; font-size: 16px; font-weight: 450; color: #63e399;" th:text="#{email.receipt.info(${receipt.id})}"></div>
                                                 </td>
                                             </tr>
                                             </tbody>
@@ -221,12 +229,12 @@
                                             <tr>
                                                 <td align="left" class="info" style="font-size:0px;padding:4px;word-break:break-word;">
                                                     <div style="font-family:Roboto, sans-serif;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#000000;">
-                                                        <div class="inner" style="padding: 0; padding-top: 8px; font-size: 16px; font-weight: bold;"> Thông tin thanh toán
+                                                        <div class="inner" style="padding: 0; padding-top: 8px; font-size: 16px; font-weight: bold;" th:text="#{email.receipt.info.payment}"></div>
                                                             <p style="margin-bottom: 0; font-weight: 400; font-size: 14px;">
-                                                                Tên: <span th:text="${receipt.name}"></span><br>
-                                                                Email: <a style="color: #63aee3" th:href="|mailto:${receipt.email}|" th:text="${receipt.email}"></a><br>
-                                                                Ngày: <span th:text="${#temporals.format(receipt.date, 'dd/MM/yyyy - hh:mm:ss')}"></span><br>
-                                                                Hình thức thanh toán: <span th:text="${paymentType}"></span>
+                                                                <span th:text="#{email.receipt.name}"></span>: <span th:text="${receipt.name}"></span><br>
+                                                                <span th:text="#{email.receipt.email}"></span>: <a style="color: #63aee3" th:href="|mailto:${receipt.email}|" th:text="${receipt.email}"></a><br>
+                                                                <span th:text="#{email.receipt.date}"></span>: <span th:text="${#temporals.format(receipt.date, 'dd/MM/yyyy - hh:mm:ss')}"></span><br>
+                                                                <span th:text="#{email.receipt.payment.method}"></span>: <span th:text="${paymentMethod}"></span>
                                                             </p>
                                                         </div>
                                                     </div>
@@ -242,7 +250,7 @@
                                             <tr>
                                                 <td align="left" class="info" style="font-size:0px;padding:4px;word-break:break-word;">
                                                     <div style="font-family:Roboto, sans-serif;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#000000;">
-                                                        <div class="inner" style="padding: 0; padding-top: 8px; font-size: 16px; font-weight: bold;"> Địa chỉ giao hàng
+                                                        <div class="inner" style="padding: 0; padding-top: 8px; font-size: 16px; font-weight: bold;" th:text="#{email.receipt.address}"></div>
                                                             <p style="margin-bottom: 0; font-weight: 400; font-size: 14px;">
                                                                 <span th:text="${receipt.address}"></span><br/>
                                                                 <span th:text="${receipt.phone}"></span>
@@ -272,15 +280,18 @@
                                             <tbody>
                                             <tr>
                                                 <td align="left" class="title" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                                    <div style="text-transform: uppercase; border-bottom: 0.5px solid lightgray; font-family: Roboto, sans-serif; line-height: 24px; text-align: left; font-size: 16px; font-weight: 450; color: #63e399;">Chi tiết đơn hàng</div>
+                                                    <div style="text-transform: uppercase; border-bottom: 0.5px solid lightgray; font-family: Roboto, sans-serif; 
+                                                        line-height: 24px; text-align: left; font-size: 16px; font-weight: 450; color: #63e399;" th:text="#{email.receipt.info.detail}"></div>
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td align="left" class="receipt-table" style="font-size:0px;padding:10px 25px;word-break:break-word;">
                                                     <table cellpadding="0" cellspacing="0" width="100%" border="0" style="background: #fff; color: #000000; font-family: Roboto, sans-serif; font-size: 13px; line-height: 22px; table-layout: auto; width: 100%; border: 0.5px solid lightgray;">
                                                         <tr>
-                                                            <th align="left" style="padding: 12px 16px; border-bottom: 0.5px solid lightgray; font-size: 14px; font-weight: 450; line-height: 14px; background-color: rgba(99, 227, 153, 0.25);" bgcolor="rgba(99, 227, 153, 0.25)">Sản phẩm</th>
-                                                            <th align="right" style="padding: 12px 16px; border-bottom: 0.5px solid lightgray; font-size: 14px; font-weight: 450; line-height: 14px; background-color: rgba(99, 227, 153, 0.25);" bgcolor="rgba(99, 227, 153, 0.25)">Tổng</th>
+                                                            <th align="left" style="padding: 12px 16px; border-bottom: 0.5px solid lightgray; font-size: 14px; font-weight: 450; line-height: 14px; 
+                                                                background-color: rgba(99, 227, 153, 0.25);" bgcolor="rgba(99, 227, 153, 0.25)" th:text="#{email.receipt.product}"></th>
+                                                            <th align="right" style="padding: 12px 16px; border-bottom: 0.5px solid lightgray; font-size: 14px; font-weight: 450; line-height: 14px; 
+                                                                background-color: rgba(99, 227, 153, 0.25);" bgcolor="rgba(99, 227, 153, 0.25)" th:text="#{email.receipt.total.price}"></th>
                                                         </tr>
                                                         <tbody th:each="detail : ${receipt.details}">
                                                             <tr th:each="item : ${detail.items}">
@@ -355,7 +366,7 @@
                                                             <td align="left" class="final-table" style="font-size:0px;padding:8px 0;word-break:break-word;">
                                                                 <table cellpadding="0" cellspacing="0" width="100%" border="0" style="color:#000000;font-family:Roboto, sans-serif;font-size:13px;line-height:22px;table-layout:auto;width:100%;border:none;">
                                                                     <tr>
-                                                                        <td align="left" style="padding: 4px 0; font-size: 14px;">Tổng tiền hàng:</td>
+                                                                        <td align="left" style="padding: 4px 0; font-size: 14px;" th:text="#{email.receipt.total.price}"></td>
                                                                         <td align="right" style="padding: 4px 0; font-size: 14px;">
                                                                             <span th:text="${#strings.replace(
                                                                             #numbers.formatDecimal(productsTotal, 0, 'COMMA', 2, 'POINT')
@@ -365,7 +376,7 @@
                                                                         </td>
                                                                     </tr>
                                                                     <tr>
-                                                                        <td align="left" style="padding: 4px 0; font-size: 14px;">Phí vận chuyển:</td>
+                                                                        <td align="left" style="padding: 4px 0; font-size: 14px;" th:text="#{email.receipt.shipping.fee}"></td>
                                                                         <td align="right" style="padding: 4px 0; font-size: 14px;">
                                                                            <span th:text="${#strings.replace(
                                                                             #numbers.formatDecimal(shippingFee, 0, 'COMMA', 2, 'POINT')
@@ -375,7 +386,7 @@
                                                                         </td>
                                                                     </tr>
                                                                     <tr>
-                                                                        <td align="left" style="padding: 4px 0; font-size: 14px;">Giảm giá:</td>
+                                                                        <td align="left" style="padding: 4px 0; font-size: 14px;" th:text="#{email.receipt.discount}"></td>
                                                                         <td align="right" style="padding: 4px 0; font-size: 14px;">
                                                                             <span th:text="${#strings.replace(
                                                                             #numbers.formatDecimal(receipt.totalDiscount, 0, 'COMMA', 2, 'POINT')
@@ -385,7 +396,7 @@
                                                                         </td>
                                                                     </tr>
                                                                     <tr style="border-top: 1px dashed lightgray;">
-                                                                        <td align="left" style="padding-top: 8px; font-size: 14px;">Tổng:</td>
+                                                                        <td align="left" style="padding-top: 8px; font-size: 14px;" th:text="#{email.receipt.total}"></td>
                                                                         <td align="right" style="padding: 4px 0; font-size: 14px;">
                                                                             <span class="total" style="font-size: 16px; font-weight: 450; color: #ef5350;">
                                                                                 <span th:text="${#strings.replace(
@@ -437,8 +448,9 @@
                                             </tr>
                                             <tr>
                                                 <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                                    <div style="font-family:Roboto, sans-serif;font-size:14px;font-weight:400;line-height:24px;text-align:left;color:gray;">Cảm ơn, <br><br>
-                                                        Đội ngũ RING!<br>
+                                                    <div style="font-family:Roboto, sans-serif;font-size:14px;font-weight:400;line-height:24px;text-align:left;color:gray;">
+                                                        <span th:text="#{email.end}"></span> <br><br>
+                                                        <span th:text="#{email.support}"></span><br>
                                                         <a style="color: #63aee3" href="mailto:support@ringdoraz.io.vn">support@ringdoraz.io.vn</a></div>
                                                 </td>
                                             </tr>

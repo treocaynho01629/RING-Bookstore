@@ -3,6 +3,7 @@ package com.ring.controller;
 import com.ring.config.CurrentAccount;
 import com.ring.dto.request.CalculateRequest;
 import com.ring.dto.request.OrderRequest;
+import com.ring.dto.response.GenericResponse;
 import com.ring.dto.response.PagingResponse;
 import com.ring.dto.response.orders.*;
 import com.ring.dto.response.dashboard.StatDTO;
@@ -27,6 +28,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
+
 /**
  * Controller named {@link OrderController} for handling order-related
  * operations.
@@ -41,7 +44,7 @@ public class OrderController {
 
     private final OrderService orderService;
     private final MessageService messageService;
-    
+
     /**
      * Calculates the total price of an order before checkout.
      *
@@ -65,16 +68,16 @@ public class OrderController {
      * @param checkRequest the order request data.
      * @param request      the HTTP servlet request.
      * @param currUser     the current authenticated user.
-     * @return a DTO representing the receipt.
+     * @return a DTO representing the payment link.
      */
     @PostMapping
     @PreAuthorize("hasRole('USER') and hasAuthority('create:order')")
-    public ResponseEntity<ReceiptDTO> checkout(
+    public ResponseEntity<CreatePaymentLinkResponse> checkout(
             HttpServletRequest request,
             @RequestBody @Valid OrderRequest checkRequest,
             @CurrentAccount Account currUser) {
 
-        ReceiptDTO result = orderService.checkout(checkRequest, request, currUser);
+        CreatePaymentLinkResponse result = orderService.checkout(checkRequest, request, currUser);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
@@ -156,7 +159,7 @@ public class OrderController {
     @GetMapping("/receipts/{id}")
     @PreAuthorize("hasAnyRole('SELLER','GUEST') and hasAuthority('read:order')")
     public ResponseEntity<ReceiptDTO> getReceipt(
-        @PathVariable("id") Long id) {
+            @PathVariable("id") Long id) {
 
         ReceiptDTO receipt = orderService.getReceipt(id);
         return new ResponseEntity<>(receipt, HttpStatus.OK);
@@ -253,44 +256,39 @@ public class OrderController {
      */
     @PutMapping("/cancel/{id}")
     @PreAuthorize("hasRole('USER') and hasAuthority('update:order')")
-    public ResponseEntity<String> cancelOrder(
+    public ResponseEntity<?> cancelOrder(
             @PathVariable("id") Long id,
-            @RequestParam(value = "reason") 
-                @NotBlank(message = "{validation.constraints.not.blank}")
-                @Size(max = 300, message = "{validation.constraints.size.max}") String reason,
+            @RequestParam(value = "reason") @NotBlank(message = "{validation.constraints.not.blank}") @Size(max = 300, message = "{validation.constraints.size.max}") String reason,
             @CurrentAccount Account currUser) {
 
         orderService.cancel(id, reason, currUser);
-        String message = messageService.getMessage("message.update.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.update.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     @PutMapping("/cancel-unpaid/{orderId}")
     @PreAuthorize("hasRole('USER') and hasAuthority('update:order')")
-    public ResponseEntity<String> cancelUnpaidOrders(
+    public ResponseEntity<?> cancelUnpaidOrders(
             @PathVariable("orderId") Long orderId,
-            @RequestParam(value = "reason") 
-                @NotBlank(message = "{validation.constraints.not.blank}")
-                @Size(max = 300, message = "{validation.constraints.size.max}") String reason,
+            @RequestParam(value = "reason") @NotBlank(message = "{validation.constraints.not.blank}") @Size(max = 300, message = "{validation.constraints.size.max}") String reason,
             @CurrentAccount Account currUser) {
 
         orderService.cancelUnpaidOrder(orderId, reason, currUser);
-        String message = messageService.getMessage("message.update.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.update.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     @PutMapping("/payment/{orderId}")
     @PreAuthorize("hasRole('USER') and hasAuthority('update:order')")
-    public ResponseEntity<String> updatePaymentMethod(
+    public ResponseEntity<?> updatePaymentMethod(
             @PathVariable("orderId") Long orderId,
-            @RequestParam(value = "paymentMethod") 
-                @NotNull(message = "{validation.constraints.not.blank}") PaymentType paymentMethod,
+            @RequestParam(value = "paymentMethod") @NotNull(message = "{validation.constraints.not.blank}") PaymentType paymentMethod,
             @CurrentAccount Account currUser) {
 
         orderService.changePaymentMethod(orderId, paymentMethod, currUser);
-        String message = messageService.getMessage("message.update.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.update.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.CREATED);
     }
@@ -305,15 +303,13 @@ public class OrderController {
      */
     @PutMapping("/refund/{id}")
     @PreAuthorize("hasRole('USER') and hasAuthority('update:order')")
-    public ResponseEntity<String> refundOrder(
+    public ResponseEntity<?> refundOrder(
             @PathVariable("id") Long id,
-            @RequestParam(value = "reason") 
-                @NotBlank(message = "{validation.constraints.not.blank}")
-                @Size(max = 300, message = "{validation.constraints.size.max}") String reason,
+            @RequestParam(value = "reason") @NotBlank(message = "{validation.constraints.not.blank}") @Size(max = 300, message = "{validation.constraints.size.max}") String reason,
             @CurrentAccount Account currUser) {
 
         orderService.refund(id, reason, currUser);
-        String message = messageService.getMessage("message.update.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.update.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.CREATED);
     }
@@ -327,12 +323,12 @@ public class OrderController {
      */
     @PutMapping("/confirm/{id}")
     @PreAuthorize("hasRole('USER') and hasAuthority('update:order')")
-    public ResponseEntity<String> confirmOrder(
+    public ResponseEntity<?> confirmOrder(
             @PathVariable("id") Long id,
             @CurrentAccount Account currUser) {
 
         orderService.confirm(id, currUser);
-        String message = messageService.getMessage("message.update.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.update.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.CREATED);
     }
@@ -347,14 +343,14 @@ public class OrderController {
      */
     @PutMapping("/status/{id}")
     @PreAuthorize("hasAnyRole('SELLER') and hasAuthority('update:order')")
-    public ResponseEntity<String> changeOrderStatus(
+    public ResponseEntity<?> changeOrderStatus(
             @PathVariable("id") Long id,
-            @RequestParam(value = "status", defaultValue =  "COMPLETED") OrderStatus status,
+            @RequestParam(value = "status", defaultValue = "COMPLETED") OrderStatus status,
             @CurrentAccount Account currUser) {
 
         orderService.changeStatus(id, status, currUser);
-        String message = messageService.getMessage("message.update.succeeded");
-        
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.update.succeeded"));
+
         return new ResponseEntity<>(message, HttpStatus.CREATED);
     }
 
@@ -372,7 +368,7 @@ public class OrderController {
             @CurrentAccount Account currUser) {
 
         StatDTO analytics = orderService.getAnalytics(currUser, shopId);
-        return new ResponseEntity<>(analytics, HttpStatus.CREATED);
+        return new ResponseEntity<StatDTO>(analytics, HttpStatus.CREATED);
     }
 
     /**
@@ -391,6 +387,6 @@ public class OrderController {
             @CurrentAccount Account currUser) {
 
         List<ChartDTO> monthlySales = orderService.getMonthlySales(currUser, shopId, year);
-        return new ResponseEntity<>(monthlySales, HttpStatus.CREATED);
+        return new ResponseEntity<List<ChartDTO>>(monthlySales, HttpStatus.CREATED);
     }
 }

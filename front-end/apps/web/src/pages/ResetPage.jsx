@@ -2,8 +2,6 @@ import styled from "@emotion/styled";
 import { useState, lazy, Suspense } from "react";
 import { useParams } from "react-router";
 import { useTranslation } from "react-i18next";
-import useReCaptcha from "@ring/auth/useReCaptcha";
-import SimpleNavbar from "../components/navbar/SimpleNavbar";
 
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
 const ForgotTab = lazy(() => import("../components/authorize/ForgotTab"));
@@ -45,10 +43,6 @@ function ResetPage() {
   const { t } = useTranslation();
   const [pending, setPending] = useState(false);
 
-  // Recaptcha
-  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_V3_SITE_KEY;
-  const { reCaptchaLoaded, generateReCaptchaToken } = useReCaptcha(recaptchaSiteKey);
-
   return (
     <Wrapper>
       {pending && (
@@ -56,29 +50,13 @@ function ResetPage() {
           <PendingModal open={pending} message={t("pending")} />
         </Suspense>
       )}
-      <SimpleNavbar />
       <Container>
         <Suspense fallback={null}>
           <ContentContainer>
             {token ? (
-              <ResetTab
-                resetToken={token}
-                {...{
-                  pending,
-                  setPending,
-                  reCaptchaLoaded,
-                  generateReCaptchaToken,
-                }}
-              />
+              <ResetTab resetToken={token} pending={pending} setPending={setPending} />
             ) : (
-              <ForgotTab
-                {...{
-                  pending,
-                  setPending,
-                  reCaptchaLoaded,
-                  generateReCaptchaToken,
-                }}
-              />
+              <ForgotTab pending={pending} setPending={setPending} />
             )}
           </ContentContainer>
         </Suspense>

@@ -33,7 +33,6 @@ export const bannersApiSlice = initialsApiSlice.injectEndpoints({
       query: (ids) => ({
         url: `/api/banners/delete-multiple?ids=${ids}`,
         method: "DELETE",
-        responseHandler: "text",
       }),
       invalidatesTags: (result, error) => [{ type: "Banner", id: "LIST" }],
     }),
@@ -53,7 +52,6 @@ export const bannersApiSlice = initialsApiSlice.injectEndpoints({
           validateStatus: (response, result) => {
             return response.status === 200 && !result?.isError;
           },
-          responseHandler: "text",
         };
       },
       invalidatesTags: (result, error) => [{ type: "Banner", id: "LIST" }],
@@ -62,7 +60,6 @@ export const bannersApiSlice = initialsApiSlice.injectEndpoints({
       query: (shopId) => ({
         url: `/api/banners/delete-all?shopId=${shopId}`,
         method: "DELETE",
-        responseHandler: "text",
       }),
       invalidatesTags: (result, error) => [{ type: "Banner", id: "LIST" }],
     }),

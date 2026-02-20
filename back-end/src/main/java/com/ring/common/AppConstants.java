@@ -8,7 +8,7 @@ public class AppConstants {
     public static final String REFRESH_TOKEN_LABEL = "refresh token";
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String HEADER_RESPONSE = "response";
-    public static final String HEADER_RECAPTCHA_SOURCE = "source";
+    public static final String HEADER_CAPTCHA_SOURCE = "source";
     public static final String HEADER_X_REFRESH_TOKEN = "X-Refresh-Token";
     public static final String DELIMITER = ",";
 
@@ -68,8 +68,8 @@ public class AppConstants {
     public static final String CALCULATE = "calculate";
     public static final String RECEIPTS = "receipts";
     public static final String SALES = "sales";
-    public static final String PAYMENT = "payment";
     public static final String PAYMENT_LINK = "paymentLink";
+    public static final String PAYMENT = "payment";
     public static final String WEBHOOK = "webhook";
     public static final String IMAGE = "image";
     public static final String TOKEN = "token";
@@ -97,10 +97,9 @@ public class AppConstants {
     // Exceptions
     public static final String NOT_FOUND = "Resource not found";
     public static final String INVALID_OWNERSHIP = "Invalid ownership";
-    public static final String INVALID_RECAPTCHA = "reCAPTCHA failed";
+    public static final String INVALID_CAPTCHA = "Turnstile verification failed";
     public static final String INVALID_DATE = "Invalid date";
     public static final String INVALID_COUPON = "Invalid coupon";
-    public static final String SUSPICIOUS_RECAPTCHA = "reCAPTCHA marked as suspicious";
     public static final String INVALID_ARGUMENT = "Invalid argument";
     public static final String MISSING_COOKIE = "Missing cookie request";
     public static final String UPLOAD_IMAGE_FAILED = "Upload image failed";

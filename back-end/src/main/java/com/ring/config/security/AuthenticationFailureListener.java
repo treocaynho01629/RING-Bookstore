@@ -44,6 +44,10 @@ public class AuthenticationFailureListener implements ApplicationListener<Authen
         }
 
         HttpServletRequest request = (HttpServletRequest) ((NativeWebRequest) attribs).getNativeRequest();
+        final String captchaToken = request.getHeader(AppConstants.HEADER_RESPONSE);
+        final String source = request.getHeader(AppConstants.HEADER_CAPTCHA_SOURCE);
+        System.out.println("captchaToken: " + captchaToken);
+        System.out.println("source: " + source);
         final String xfHeader = request.getHeader(HttpHeaders.X_FORWARDED_FOR);
 
         if (xfHeader == null || xfHeader.isEmpty() || !xfHeader.contains(request.getRemoteAddr())) {

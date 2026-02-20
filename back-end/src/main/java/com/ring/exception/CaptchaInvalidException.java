@@ -6,27 +6,28 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Exception class named {@link ReCaptchaInvalidException} thrown when the reCAPTCHA validation failed.
+ * Exception class named {@link CaptchaInvalidException} thrown when the Captcha
+ * validation failed.
  */
 @Getter
 @ResponseStatus(code = HttpStatus.FORBIDDEN)
-public final class ReCaptchaInvalidException extends RuntimeException {
+public final class CaptchaInvalidException extends RuntimeException {
 
     private final String error;
     private String message;
 
-    public ReCaptchaInvalidException() {
+    public CaptchaInvalidException() {
         super();
-        this.error = AppConstants.INVALID_RECAPTCHA;
+        this.error = AppConstants.INVALID_CAPTCHA;
     }
 
-    public ReCaptchaInvalidException(String message) {
+    public CaptchaInvalidException(String message) {
         super();
-        this.error = AppConstants.INVALID_RECAPTCHA;
+        this.error = AppConstants.INVALID_CAPTCHA;
         this.message = message;
     }
 
-    public ReCaptchaInvalidException(String error, String message) {
+    public CaptchaInvalidException(String error, String message) {
         super();
         this.error = error;
         this.message = message;

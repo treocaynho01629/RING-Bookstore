@@ -1,5 +1,6 @@
 package com.ring.controller;
 
+import com.ring.dto.response.GenericResponse;
 import com.ring.model.entity.PrivilegeGroup;
 import com.ring.model.entity.Role;
 import com.ring.model.enums.PrivilegeType;
@@ -17,7 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Controller class named {@link RoleController} for handling basic role-privilege-related operations.
+ * Controller class named {@link RoleController} for handling basic
+ * role-privilege-related operations.
  * Exposes endpoints under "/api/roles".
  */
 @RestController
@@ -58,22 +60,19 @@ public class RoleController {
     /**
      * Updates an existing role by its name.
      *
-     * @param name          the name of the role to update.
-     * @param privileges    the account update privileges.
+     * @param name       the name of the role to update.
+     * @param privileges the account update privileges.
      * @return a {@link ResponseEntity} containing the success message.
      */
     @PutMapping("/{name}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('update:role')")
-    public ResponseEntity<String> updateRole(
+    public ResponseEntity<?> updateRole(
             @PathVariable("name") UserRole name,
-            @RequestPart
-                @NotNull(message = "{validation.constraints.not.blank}")
-                @NotEmpty(message = "{validation.constraints.not.blank}")
-            List<PrivilegeType> privileges) {
+            @RequestPart @NotNull(message = "{validation.constraints.not.blank}") @NotEmpty(message = "{validation.constraints.not.blank}") List<PrivilegeType> privileges) {
 
         roleService.updateRole(privileges, name);
-        String message = messageService.getMessage("message.update.succeeded");
-        
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.update.succeeded"));
+
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 }

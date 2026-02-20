@@ -31,7 +31,9 @@ const ResetPassComponent = ({ pending, setPending, verifyRefreshToken, refreshin
   // Change pass hook
   const [changePass, { isLoading: changing }] = useChangePasswordMutation();
 
-  // Submit change pass mutation
+  /**
+   * Handle change password
+   */
   const handleChangePassword = async (e) => {
     e.preventDefault();
     if (pending || changing || refreshing) return;

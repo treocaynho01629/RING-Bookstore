@@ -61,7 +61,7 @@
   "phone": "Số điện thoại",
   "dob": "Ngày sinh",
   "from": "Từ",
-  "recaptcha": "Được bảo vệ bởi reCAPTCHA và Google thông qua",
+  "protected": "Được bảo vệ bởi Cloudflare Turnstile",
   "terms": "Điều khoản dịch vụ",
   "policy": "Chính sách bảo mật",
   "help": "Trợ giúp",

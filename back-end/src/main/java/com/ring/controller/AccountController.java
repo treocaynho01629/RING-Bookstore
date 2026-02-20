@@ -4,6 +4,7 @@ import com.ring.config.CurrentAccount;
 import com.ring.dto.request.AccountRequest;
 import com.ring.dto.request.ChangePassRequest;
 import com.ring.dto.request.ProfileRequest;
+import com.ring.dto.response.GenericResponse;
 import com.ring.dto.response.PagingResponse;
 import com.ring.dto.response.accounts.AccountDTO;
 import com.ring.dto.response.accounts.AccountDetailDTO;
@@ -148,10 +149,10 @@ public class AccountController {
      */
     @DeleteMapping("{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:user')")
-    public ResponseEntity<String> deleteAccount(@PathVariable("id") Long accountId) {
+    public ResponseEntity<?> deleteAccount(@PathVariable("id") Long accountId) {
 
         accountService.deleteAccount(accountId);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -164,10 +165,10 @@ public class AccountController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:user')")
-    public ResponseEntity<String> deleteAccounts(@RequestParam("ids") List<Long> ids) {
+    public ResponseEntity<?> deleteAccounts(@RequestParam("ids") List<Long> ids) {
 
         accountService.deleteAccounts(ids);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -183,13 +184,13 @@ public class AccountController {
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:user')")
-    public ResponseEntity<String> deleteAccountsInverse(
+    public ResponseEntity<?> deleteAccountsInverse(
             @RequestParam(value = "keyword", defaultValue = "") String keyword,
             @RequestParam(value = "role", required = false) UserRole role,
             @RequestParam("ids") List<Long> ids) {
 
         accountService.deleteAccountsInverse(keyword, role, ids);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -201,10 +202,10 @@ public class AccountController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:user')")
-    public ResponseEntity<String> deleteAllAccounts() {
+    public ResponseEntity<?> deleteAllAccounts() {
 
         accountService.deleteAllAccounts();
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -251,12 +252,12 @@ public class AccountController {
      */
     @PutMapping("/change-password")
     @PreAuthorize("hasRole('USER') and hasAuthority('update:profile')")
-    public ResponseEntity<String> changePassword(
+    public ResponseEntity<?> changePassword(
             @Valid @RequestBody ChangePassRequest request,
             @CurrentAccount Account currUser) {
 
         accountService.changePassword(request, currUser);
-        String message = messageService.getMessage("message.update.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.update.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }

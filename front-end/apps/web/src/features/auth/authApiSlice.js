@@ -10,7 +10,6 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: {
           ...user,
         },
-        responseHandler: "text",
       }),
       invalidatesTags: [{ type: "User", id: "LIST" }],
     }),
@@ -19,7 +18,6 @@ export const authApiSlice = apiSlice.injectEndpoints({
         url: `/api/auth/forgot-password?email=${email}`,
         method: "POST",
         headers: { response: token, source },
-        responseHandler: "text",
       }),
     }),
     reset: builder.mutation({
@@ -30,12 +28,10 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: {
           ...resetBody,
         },
-        responseHandler: "text",
       }),
       invalidatesTags: [{ type: "User", id: "LIST" }],
     }),
   }),
 });
 
-export const { useRegisterMutation, useForgotMutation, useResetMutation } =
-  authApiSlice;
+export const { useRegisterMutation, useForgotMutation, useResetMutation } = authApiSlice;

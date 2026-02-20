@@ -176,7 +176,6 @@ export const ordersApiSlice = apiWithEnum.injectEndpoints({
         url: `/api/orders/status/${id}?status=${status}`,
         method: "PUT",
         credentials: "include",
-        responseHandler: "text",
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "Order", id }],
     }),

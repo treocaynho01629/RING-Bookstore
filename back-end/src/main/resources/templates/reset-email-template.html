@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml">
+<html th:lang="${#locale.language}" dir="auto" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-    <title>Hello MJML</title>
+    <title th:text="${subject}">Email Reset Password Template</title>
     <!--[if !mso]><!-->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!--<![endif]-->
@@ -142,20 +142,23 @@
                             <tbody>
                             <tr>
                                 <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                    <div style="font-family:Roboto, sans-serif;font-size:24px;font-weight:450;line-height:24px;text-align:left;color:#000000;">Mật khẩu của bạn đã được cập nhật!</div>
+                                    <div style="font-family:Roboto, sans-serif;font-size:24px;font-weight:450;line-height:24px;
+                                        text-align:left;color:#000000;" th:text="#{email.reset.title}"></div>
                                 </td>
                             </tr>
                             <tr>
                                 <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                    <div style="font-family:Roboto, sans-serif;font-size:18px;font-weight:450;line-height:24px;text-align:left;color:#000000;">Tài khoản <span th:text="${username}"></span> của bạn nhận đã thay đổi mật khẩu thành công</div>
+                                    <div style="font-family:Roboto, sans-serif;font-size:18px;font-weight:450;line-height:24px;
+                                        text-align:left;color:#000000;" th:text="#{email.reset.body(${username})}"></div>
                                 </td>
                             </tr>
                             <tr>
                                 <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
                                     <div style="font-family:Roboto, sans-serif;font-size:14px;font-weight:400;line-height:24px;text-align:left;color:#000000;">
-                                        Nếu bạn không thực hiện yêu cầu thay đổi mật khẩu này hoặc bạn nghĩ email này là thông báo lỗi,
-                                        vui lòng liên lạc với <a style="color: #63aee3" href="mailto:support@ringdoraz.io.vn">Đội ngũ RING!</a> để được hỗ trợ thêm.<br/><br/>
-                                        Chúc bạn có một trải nghiệm thật vui vẻ.<br />
+                                        <span th:text="#{email.reset.question}"></span>&nbsp;
+                                        <a style="color: #63aee3" href="mailto:support@ringdoraz.io.vn" th:text="#{email.support}"></a>&nbsp;
+                                        <span th:text="#{email.reset.support}"></span><br/><br/>
+                                        <span th:text="#{email.experience}"></span>.<br />
                                     </div>
                                 </td>
                             </tr>
@@ -174,7 +177,8 @@
                             </tr>
                             <tr>
                                 <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                    <div style="font-family:Roboto, sans-serif;font-size:14px;font-weight:400;line-height:24px;text-align:left;color:gray;">Cảm ơn, <br><br> Đội ngũ RING!<br>
+                                    <div style="font-family:Roboto, sans-serif;font-size:14px;font-weight:400;line-height:24px;text-align:left;color:gray;">
+                                        <span th:text="#{email.end}"></span> <br><br> <span th:text="#{email.support}"></span><br>
                                         <a href="mailto:support@ringdoraz.io.vn" style="color: #63aee3">support@ringdoraz.io.vn</a>
                                     </div>
                                 </td>

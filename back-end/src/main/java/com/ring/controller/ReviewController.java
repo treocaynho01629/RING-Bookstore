@@ -2,6 +2,7 @@ package com.ring.controller;
 
 import com.ring.config.CurrentAccount;
 import com.ring.dto.request.ReviewRequest;
+import com.ring.dto.response.GenericResponse;
 import com.ring.dto.response.PagingResponse;
 import com.ring.dto.response.reviews.ReviewDTO;
 import com.ring.model.entity.Account;
@@ -103,11 +104,11 @@ public class ReviewController {
             @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir) {
 
-        PagingResponse<ReviewDTO> reviews = reviewService.getReviewsByBookId(bookId, 
-                rating, 
-                pageNo, 
-                pageSize, 
-                sortBy, 
+        PagingResponse<ReviewDTO> reviews = reviewService.getReviewsByBookId(bookId,
+                rating,
+                pageNo,
+                pageSize,
+                sortBy,
                 sortDir);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
@@ -133,11 +134,11 @@ public class ReviewController {
             @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir,
             @CurrentAccount Account currUser) {
 
-        PagingResponse<ReviewDTO> reviews = reviewService.getUserReviews(currUser, 
-                rating, 
-                pageNo, 
-                pageSize, 
-                sortBy, 
+        PagingResponse<ReviewDTO> reviews = reviewService.getUserReviews(currUser,
+                rating,
+                pageNo,
+                pageSize,
+                sortBy,
                 sortDir);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
@@ -188,10 +189,10 @@ public class ReviewController {
      */
     @PutMapping("/hide/{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('update:review')")
-    public ResponseEntity<String> hideReview(@PathVariable("id") Long id) {
+    public ResponseEntity<?> hideReview(@PathVariable("id") Long id) {
 
         reviewService.setReviewVisibility(id, true);
-        String message = messageService.getMessage("message.update.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.update.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -204,10 +205,10 @@ public class ReviewController {
      */
     @PutMapping("/unhide/{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('update:review')")
-    public ResponseEntity<String> unhideReview(@PathVariable("id") Long id) {
+    public ResponseEntity<?> unhideReview(@PathVariable("id") Long id) {
 
         reviewService.setReviewVisibility(id, false);
-        String message = messageService.getMessage("message.update.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.update.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.CREATED);
     }
@@ -220,10 +221,10 @@ public class ReviewController {
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:review')")
-    public ResponseEntity<String> deleteReview(@PathVariable("id") Long id) {
+    public ResponseEntity<?> deleteReview(@PathVariable("id") Long id) {
 
         reviewService.deleteReview(id);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -236,10 +237,10 @@ public class ReviewController {
      */
     @DeleteMapping("/delete-multiple")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:review')")
-    public ResponseEntity<String> deleteReviews(@RequestParam("ids") List<Long> ids) {
+    public ResponseEntity<?> deleteReviews(@RequestParam("ids") List<Long> ids) {
 
         reviewService.deleteReviews(ids);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -256,7 +257,7 @@ public class ReviewController {
      */
     @DeleteMapping("/delete-inverse")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:review')")
-    public ResponseEntity<String> deleteReviewsInverse(
+    public ResponseEntity<?> deleteReviewsInverse(
             @RequestParam(value = "bookId", required = false) Long bookId,
             @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "rating", required = false) Integer rating,
@@ -264,7 +265,7 @@ public class ReviewController {
             @RequestParam("ids") List<Long> ids) {
 
         reviewService.deleteReviewsInverse(bookId, userId, rating, keyword, ids);
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
@@ -276,10 +277,10 @@ public class ReviewController {
      */
     @DeleteMapping("/delete-all")
     @PreAuthorize("hasRole('ADMIN') and hasAuthority('delete:review')")
-    public ResponseEntity<String> deleteAllReviews() {
-        
+    public ResponseEntity<?> deleteAllReviews() {
+
         reviewService.deleteAllReviews();
-        String message = messageService.getMessage("message.delete.succeeded");
+        GenericResponse message = new GenericResponse(messageService.getMessage("message.delete.succeeded"));
 
         return new ResponseEntity<>(message, HttpStatus.OK);
     }

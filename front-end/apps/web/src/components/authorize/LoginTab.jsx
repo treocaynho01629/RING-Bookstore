@@ -1,9 +1,17 @@
-import { useState, useRef, lazy, Suspense } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router";
-import { AuthActionContainer, AuthHighlight, AuthText, AuthTitle, ConfirmButton } from "@ring/ui/AuthComponents";
+import {
+  SimpleHighlight,
+  SimpleText,
+  SimpleTitle,
+  ConfirmButton,
+  SimpleActionContainer,
+} from "../custom/SimpleComponents";
 import { useAuthenticateMutation } from "@ring/redux/authApiSlice";
 import { Instruction } from "@ring/ui/Components";
 import { useTranslation } from "react-i18next";
+import { useColorScheme, useMediaQuery } from "@mui/material";
+import Turnstile from "@ring/auth/Turnstile";
 import useAuth from "../../hooks/useAuth";
 import useLogout from "../../hooks/useLogout";
 import Stack from "@mui/material/Stack";
@@ -14,14 +22,15 @@ import TextField from "@mui/material/TextField";
 import Logout from "@mui/icons-material/Logout";
 import PasswordInput from "@ring/ui/PasswordInput";
 
-const ReCaptcha = lazy(() => import("@ring/auth/ReCaptcha"));
-
-const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken }) => {
-  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+const LoginTab = ({ pending, setPending }) => {
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
   const { persist, username: loginedUser, setPersist } = useAuth();
   const [authenticate, { isLoading, isSuccess, isUninitialized }] = useAuthenticateMutation();
   const signOut = useLogout();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { mode } = useColorScheme();
+  const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
+  const resolvedMode = mode === "system" ? (prefersDark ? "dark" : "light") : mode;
 
   // Router
   const navigate = useNavigate();
@@ -39,8 +48,7 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
   const [validName, setValidName] = useState(true);
   const [validPass, setValidPass] = useState(true);
 
-  // Recaptcha v2
-  const [challenge, setChallenge] = useState(false); //Toggle if marked suspicious by v3
+  // Turnstile
   const [token, setToken] = useState("");
 
   // Error
@@ -70,7 +78,7 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
    */
   const handleSubmitLogin = async (e) => {
     e.preventDefault();
-    if (pending || !reCaptchaLoaded) return;
+    if (pending || !token) return;
 
     // Validation
     setValidName(username ? true : false);
@@ -80,10 +88,9 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
     setPending(true);
     const { enqueueSnackbar } = await import("notistack");
 
-    const recaptchaToken = challenge ? token : await generateReCaptchaToken("login");
     authenticate({
-      token: recaptchaToken,
-      source: challenge ? "v2" : "v3",
+      token,
+      source: "turnstile",
       persist: currPersist,
       credentials: { username, pass: password },
     })
@@ -102,9 +109,6 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
         setErr(err);
         if (!err?.status) {
           setErrMsg(t("error.server.response"));
-        } else if (err?.status === 412) {
-          setChallenge(true);
-          setErrMsg(err?.data?.message);
         } else {
           setErrMsg(err?.data?.message);
         }
@@ -115,16 +119,16 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
 
   return isUninitialized && (persist || loginedUser) ? (
     <>
-      <AuthTitle>
+      <SimpleTitle>
         {t("hello")} {loginedUser}
-      </AuthTitle>
+      </SimpleTitle>
       <Button color="error" size="large" onClick={() => signOut()} startIcon={<Logout />}>
         {t("signout.end")}
       </Button>
     </>
   ) : (
     <form onSubmit={handleSubmitLogin}>
-      <AuthTitle>{t("login.title")}</AuthTitle>
+      <SimpleTitle>{t("login.title")}</SimpleTitle>
       <Instruction ref={errRef} aria-live="assertive">
         {err?.data?.errors?.username ? (
           <span>{err?.data?.errors?.username}</span>
@@ -138,7 +142,7 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
         ) : null}
         <span>{errMsg != "" ? errMsg : " "}&nbsp;</span>
       </Instruction>
-      <Stack spacing={2.5} direction="column">
+      <Stack spacing={2.25} direction="column">
         <TextField
           label={t("username")}
           type="text"
@@ -155,12 +159,16 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
           onChange={(e) => setPassword(e.target.value)}
           value={password}
         />
-        {reCaptchaLoaded && challenge && (
-          <Suspense fallback={null}>
-            <ReCaptcha onVerify={(token) => setToken(token)} recaptchaSiteKey={recaptchaSiteKey} />
-          </Suspense>
-        )}
-        <AuthActionContainer className="persistCheck">
+        <Turnstile
+          siteKey={turnstileSiteKey}
+          onSuccess={(turnstileToken) => setToken(turnstileToken)}
+          onExpire={() => setToken("")}
+          action="login"
+          size="flexible"
+          theme={resolvedMode}
+          lang={i18n.language}
+        />
+        <SimpleActionContainer className="persistCheck">
           <FormControlLabel
             control={
               <Checkbox checked={currPersist} onChange={togglePersist} disableRipple name="persist" color="primary" />
@@ -168,25 +176,24 @@ const LoginTab = ({ pending, setPending, reCaptchaLoaded, generateReCaptchaToken
             label={t("login.persist")}
           />
           <Link to={"/reset"}>
-            <AuthHighlight color="warning">{t("forgot.label")}</AuthHighlight>
+            <SimpleHighlight color="warning">{t("forgot.label")}</SimpleHighlight>
           </Link>
-        </AuthActionContainer>
+        </SimpleActionContainer>
         <ConfirmButton
-          disabled={isLoading || isSuccess || pending || !reCaptchaLoaded}
+          disabled={isLoading || isSuccess || pending || !token}
           variant="contained"
           color="primary"
           type="submit"
-          aria-label="submit login"
         >
           {t("login.label")}
         </ConfirmButton>
       </Stack>
-      <AuthText>
+      <SimpleText>
         {t("signup.suggestions")}&nbsp;
         <Link to={"/auth/register"}>
-          <AuthHighlight>{t("signup.label")}</AuthHighlight>
+          <SimpleHighlight>{t("signup.label")}</SimpleHighlight>
         </Link>
-      </AuthText>
+      </SimpleText>
     </form>
   );
 };

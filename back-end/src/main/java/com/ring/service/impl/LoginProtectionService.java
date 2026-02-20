@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 public class LoginProtectionService {
 
     public static final int MAX_ATTEMPT = 10;
-    public static final int VALID_ATTEMPT = 5;
     public static final int EXPIRE_TIME = 15;
 
     private final LoadingCache<String, Integer> attemptsCache;
@@ -38,9 +37,10 @@ public class LoginProtectionService {
                 .expireAfterWrite(EXPIRE_TIME, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, Integer>() {
                     @Override
-                    public Integer load(final String key) { return 0; }
-                }
-        );
+                    public Integer load(final String key) {
+                        return 0;
+                    }
+                });
         this.request = request;
     }
 
@@ -61,23 +61,12 @@ public class LoginProtectionService {
     }
 
     /**
-     * Checks whether the client has made enough failed login attempts to be considered suspicious.
-     *
-     * @return True if the client has made failed attempts greater than or equal to {@link #VALID_ATTEMPT}; otherwise, false.
-     */
-    public boolean isSuspicious() {
-        try {
-            return attemptsCache.get(getClientIP()) >= VALID_ATTEMPT;
-        } catch (final ExecutionException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Checks whether the client has exceeded the maximum number of allowed failed login attempts.
+     * Checks whether the client has exceeded the maximum number of allowed failed
+     * login attempts.
      * If the client is blocked, further login attempts are prevented.
      *
-     * @return True if the client has exceeded {@link #MAX_ATTEMPT} failed login attempts; otherwise, false.
+     * @return True if the client has exceeded {@link #MAX_ATTEMPT} failed login
+     *         attempts; otherwise, false.
      */
     public boolean isBlocked() {
         try {
@@ -88,7 +77,8 @@ public class LoginProtectionService {
     }
 
     /**
-     * Retrieves the client IP address from the HTTP request. First checks for the "X-Forwarded-For" header,
+     * Retrieves the client IP address from the HTTP request. First checks for the
+     * "X-Forwarded-For" header,
      * then falls back to the remote address if not available.
      *
      * @return The client's IP address.

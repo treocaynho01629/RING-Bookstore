@@ -1,18 +1,20 @@
-import { useEffect, useRef, useState, Suspense, lazy } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { Stack } from "@mui/material";
+import { Stack, useColorScheme, useMediaQuery } from "@mui/material";
 import { useResetMutation } from "../../features/auth/authApiSlice";
-import { AuthTitle, ConfirmButton } from "@ring/ui/AuthComponents";
+import { SimpleTitle, ConfirmButton } from "../custom/SimpleComponents";
 import { Instruction } from "@ring/ui/Components";
 import { useTranslation } from "react-i18next";
+import Turnstile from "@ring/auth/Turnstile";
 import PasswordInput from "@ring/ui/PasswordInput";
 import PasswordEvaluate from "../custom/PasswordEvaluate";
 
-const ReCaptcha = lazy(() => import("@ring/auth/ReCaptcha"));
-
-const ResetTab = ({ resetToken, pending, setPending, reCaptchaLoaded, generateReCaptchaToken }) => {
-  const { t } = useTranslation();
-  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+const ResetTab = ({ resetToken, pending, setPending }) => {
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+  const { t, i18n } = useTranslation();
+  const { mode } = useColorScheme();
+  const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
+  const resolvedMode = mode === "system" ? (prefersDark ? "dark" : "light") : mode;
 
   // Password validation
   const [password, setPassword] = useState("");
@@ -27,8 +29,7 @@ const ResetTab = ({ resetToken, pending, setPending, reCaptchaLoaded, generateRe
   const errRef = useRef();
   const navigate = useNavigate();
 
-  // Recaptcha v2
-  const [challenge, setChallenge] = useState(false); // Toggle if marked suspicious by v3
+  // Turnstile
   const [token, setToken] = useState("");
 
   // Reset mutation
@@ -50,15 +51,14 @@ const ResetTab = ({ resetToken, pending, setPending, reCaptchaLoaded, generateRe
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (reseting || pending) return;
+    if (reseting || pending || !token) return;
 
     setPending(true);
     const { enqueueSnackbar } = await import("notistack");
 
-    const recaptchaToken = challenge ? token : await generateReCaptchaToken("reset");
     reset({
-      token: recaptchaToken,
-      source: challenge ? "v2" : "v3",
+      token,
+      source: "turnstile",
       resetToken,
       resetBody: {
         newPass: password,
@@ -67,14 +67,12 @@ const ResetTab = ({ resetToken, pending, setPending, reCaptchaLoaded, generateRe
     })
       .unwrap()
       .then((data) => {
-        // Reset input
         setPassword("");
         setMatchPass("");
         setErr([]);
         setErrMsg("");
-        setChallenge(false);
+        setToken("");
 
-        // Queue snack
         enqueueSnackbar(t("message.success", { action: t("change.change.label") }), { variant: "success" });
         navigate("/auth/login");
         setPending(false);
@@ -86,20 +84,19 @@ const ResetTab = ({ resetToken, pending, setPending, reCaptchaLoaded, generateRe
           setErrMsg(t("error.server.response"));
         } else {
           setErrMsg(err?.data?.message);
-          if (err?.status === 412) setChallenge(true);
         }
-        errRef.current.focus();
+        errRef.current?.focus();
         setPending(false);
       });
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <AuthTitle>{t("forgot.title")}</AuthTitle>
+      <SimpleTitle>{t("forgot.title")}</SimpleTitle>
       <Instruction ref={errRef} aria-live="assertive">
         {errMsg != "" ? errMsg : " "}&nbsp;
       </Instruction>
-      <Stack spacing={2.5} direction="column">
+      <Stack spacing={2.25} direction="column">
         <PasswordInput
           label={
             passFocus && password && !validPass
@@ -132,11 +129,15 @@ const ResetTab = ({ resetToken, pending, setPending, reCaptchaLoaded, generateRe
           error={(matchPass && !validMatch) || err?.data?.errors?.newPassRe}
         />
         <PasswordEvaluate {...{ password, onValid: (value) => setValidPass(value) }} />
-        {reCaptchaLoaded && challenge && (
-          <Suspense fallback={null}>
-            <ReCaptcha onVerify={(token) => setToken(token)} recaptchaSiteKey={recaptchaSiteKey} />
-          </Suspense>
-        )}
+        <Turnstile
+          siteKey={turnstileSiteKey}
+          onSuccess={(turnstileToken) => setToken(turnstileToken)}
+          onExpire={() => setToken("")}
+          action="reset"
+          size="flexible"
+          theme={resolvedMode}
+          lang={i18n.language}
+        />
         <div style={{ width: "100%" }}>
           <ConfirmButton
             variant="contained"
@@ -145,7 +146,7 @@ const ResetTab = ({ resetToken, pending, setPending, reCaptchaLoaded, generateRe
             type="submit"
             fullWidth
             sx={{ mt: 2 }}
-            disabled={!validPass || !validMatch || !reCaptchaLoaded}
+            disabled={!validPass || !validMatch || !token}
           >
             {t("forgot.submit")}
           </ConfirmButton>

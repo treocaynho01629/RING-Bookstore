@@ -1,18 +1,17 @@
 package com.ring.service;
 
-import com.ring.exception.ReCaptchaInvalidException;
+import com.ring.exception.CaptchaInvalidException;
 
 public interface CaptchaService {
 
     /**
-     * Validate reCaptcha action.
+     * Validate Cloudflare Turnstile token.
      *
-     * @param recaptchaToken    The reCaptcha token.
-     * @param source            The version of reCaptcha.
-     * @param action            The action needed to be validated.
+     * @param token  The Turnstile token from the client-side widget.
+     * @param source The captcha source (e.g. "turnstile") - kept for API
+     *               compatibility.
+     * @param action The action to validate (e.g. "login", "register").
      */
-    void validate(final String recaptchaToken,
-                  String source,
-                  String action) throws ReCaptchaInvalidException;
+    void validate(String token, String source, String action) throws CaptchaInvalidException;
 
 }

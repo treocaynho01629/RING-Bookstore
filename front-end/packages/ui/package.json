@@ -1,13 +1,9 @@
 {
   "name": "@ring/ui",
   "version": "0.0.0",
-  "sideEffects": false,
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist/**"
-  ],
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -16,10 +12,6 @@
     "./ConfirmDialog": {
       "import": "./dist/src/components/ConfirmDialog.js",
       "require": "./dist/src/components/ConfirmDialog.cjs"
-    },
-    "./AuthComponents": {
-      "import": "./dist/src/components/AuthComponents.js",
-      "require": "./dist/src/components/AuthComponents.cjs"
     },
     "./Components": {
       "import": "./dist/src/components/Components.js",
@@ -78,25 +70,14 @@
       "require": "./dist/src/provider/ThemeContextProvider.cjs"
     }
   },
+  "files": [
+    "dist/**"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "lint": "eslint \"**/*.{ts,tsx,js,jsx}\"",
     "update-dependencies": "npx npm-check-updates -u"
-  },
-  "dependencies": {
-    "@ring/shared": "*",
-    "@mui/x-date-pickers": "^8.23.0",
-    "yet-another-react-lightbox": "^3.28.0",
-    "react-lazy-load-image-component": "^1.6.3",
-    "dayjs": "^1.11.19"
-  },
-  "devDependencies": {
-    "@ring/eslint-config": "*",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
-    "tsup": "^8.5.1",
-    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "@emotion/react": "^11.14.0",
@@ -106,5 +87,20 @@
     "notistack": "^3.0.2",
     "react": "^18.0.0 || ^19.0.0",
     "react-multi-carousel": "^2.8.6"
-  }
+  },
+  "dependencies": {
+    "@mui/x-date-pickers": "^8.23.0",
+    "@ring/shared": "*",
+    "dayjs": "^1.11.19",
+    "react-lazy-load-image-component": "^1.6.3",
+    "yet-another-react-lightbox": "^3.28.0"
+  },
+  "devDependencies": {
+    "@ring/eslint-config": "*",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  },
+  "sideEffects": false
 }

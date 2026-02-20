@@ -25,54 +25,50 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-	private final Logger log = LoggerFactory.getLogger(getClass());
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
-	private final LoginProtectionService loginProtectionService;
-	private final CaptchaService captchaService;
-	private final MessageService messageService;
+    private final LoginProtectionService loginProtectionService;
+    private final CaptchaService captchaService;
+    private final MessageService messageService;
 
-	private final AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
+    /**
+     * Performs user login based on the provided login request.
+     *
+     * @param authRequest The login request containing user credentials.
+     * @param request     The HTTP request containing Turnstile token in the header.
+     * @return The authed user entity.
+     */
+    public Account authenticate(AuthenticationRequest authRequest, HttpServletRequest request) {
 
-	/**
-	 * Performs user login based on the provided login request.
-	 *
-	 * @param authRequest 	The login request containing user credentials.
-	 * @param request 		The HTTP request containing reCAPTCHA score in the header.
-	 * @return The authed user entity.
-	 */
-	public Account authenticate(AuthenticationRequest authRequest, HttpServletRequest request) {
+        // Captcha validation
+        final String captchaToken = request.getHeader(AppConstants.HEADER_RESPONSE);
+        final String source = request.getHeader(AppConstants.HEADER_CAPTCHA_SOURCE);
+        captchaService.validate(captchaToken, source, CaptchaServiceImpl.LOGIN_ACTION);
 
-		// Recaptcha (only after x number of failed attempts)
-		if (loginProtectionService.isSuspicious()) {
-			final String recaptchaToken = request.getHeader(AppConstants.HEADER_RESPONSE);
-			final String source = request.getHeader(AppConstants.HEADER_RECAPTCHA_SOURCE);
-			captchaService.validate(recaptchaToken, source, CaptchaServiceImpl.LOGIN_ACTION);
-		}
+        if (loginProtectionService.isBlocked()) {
+            var errorMsg = messageService.getMessage("exception.login.protection");
+            throw new HttpResponseException(HttpStatus.TOO_MANY_REQUESTS,
+                    AppConstants.TOO_MANY_LOGIN_ATTEMPTS,
+                    errorMsg);
+        }
 
-		if (loginProtectionService.isBlocked()) {
-			var errorMsg = messageService.getMessage("exception.login.protection");
-			throw new HttpResponseException(HttpStatus.TOO_MANY_REQUESTS,
-					AppConstants.TOO_MANY_LOGIN_ATTEMPTS,
-					errorMsg);
-		}
+        // Validate token
+        Account user;
+        try {
+            Authentication authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(
+                            authRequest.getUsername(),
+                            authRequest.getPass()));
+            SecurityContextHolder.getContext().setAuthentication(authentication); // All good >> security context
+            user = (Account) authentication.getPrincipal();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            var errorMsg = messageService.getMessage("exception.login.invalid");
+            throw new BadCredentialsException(errorMsg);
+        }
 
-		// Validate token
-		Account user;
-		try {
-			Authentication authentication = authenticationManager
-					.authenticate(new UsernamePasswordAuthenticationToken(
-							authRequest.getUsername(),
-							authRequest.getPass())
-					);
-			SecurityContextHolder.getContext().setAuthentication(authentication); //All good >> security context
-			user = (Account) authentication.getPrincipal();
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			var errorMsg = messageService.getMessage("exception.login.invalid");
-			throw new BadCredentialsException(errorMsg);
-		}
-
-		return user;
-	}
+        return user;
+    }
 }

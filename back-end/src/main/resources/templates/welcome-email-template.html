@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml">
+<html th:lang="${#locale.language}" dir="auto" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-    <title>Hello MJML</title>
+    <title th:text="${subject}">Welcome Email Template</title>
     <!--[if !mso]><!-->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!--<![endif]-->
@@ -142,18 +142,21 @@
                             <tbody>
                             <tr>
                                 <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                    <div style="font-family:Roboto, sans-serif;font-size:24px;font-weight:450;line-height:24px;text-align:left;color:#000000;">Chào mừng đến với RING!</div>
+                                    <div style="font-family:Roboto, sans-serif;font-size:24px;font-weight:450;line-height:24px;
+                                        text-align:left;color:#000000;" th:text="#{email.welcome.title}"></div>
                                 </td>
                             </tr>
                             <tr>
                                 <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                    <div style="font-family:Roboto, sans-serif;font-size:18px;font-weight:450;line-height:24px;text-align:left;color:#000000;">Tài khoản <span th:text="${username}"></span> của bạn đã đăng ký thành công</div>
+                                    <div style="font-family:Roboto, sans-serif;font-size:18px;font-weight:450;line-height:24px;
+                                        text-align:left;color:#000000;" th:text="#{email.welcome.body(${username})}"></div>
                                 </td>
                             </tr>
                             <tr>
                                 <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                    <div style="font-family:Roboto, sans-serif;font-size:14px;font-weight:400;line-height:24px;text-align:left;color:#000000;">Chúng tôi rất hân hạnh khi bạn đã chọn dịch vụ mua bán sách tại RING! Rất mong bạn sẽ hài lòng với dịch vụ của chúng tôi.<br><br>
-                                        Chúc bạn có một trải nghiệm thật vui vẻ.<br>
+                                    <div style="font-family:Roboto, sans-serif;font-size:14px;font-weight:400;line-height:24px;text-align:left;color:#000000;">
+                                        <span th:text="#{email.welcome.message}"></span><br><br>
+                                        <span th:text="#{email.experience}"></span>.<br>
                                     </div>
                                 </td>
                             </tr>
@@ -168,7 +171,9 @@
                                         <tbody>
                                         <tr>
                                             <td align="center" bgcolor="#63e399" role="presentation" style="border:none;border-radius:0;cursor:auto;mso-padding-alt:10px 25px;background:#63e399;" valign="middle">
-                                                <a th:href="|${clientUrl}/auth/login|" style="display: inline-block; background: #63e399; color: #ffffff; font-family: Roboto, sans-serif; font-size: 14px; font-weight: 500; line-height: 120%; margin: 0; text-decoration: none; text-transform: none; padding: 10px 25px; mso-padding-alt: 0px; border-radius: 0;" target="_blank"> Đăng nhập ngay&nbsp;&rArr; </a>
+                                                <a th:href="|${clientUrl}/auth/login|" style="display: inline-block; background: #63e399; 
+                                                    color: #ffffff; font-family: Roboto, sans-serif; font-size: 14px; font-weight: 500; line-height: 120%; 
+                                                    margin: 0; text-decoration: none; text-transform: none; padding: 10px 25px; mso-padding-alt: 0px; border-radius: 0;" target="_blank" th:text="#{email.welcome.login}"></a>
                                             </td>
                                         </tr>
                                         </tbody>
@@ -190,7 +195,8 @@
                             </tr>
                             <tr>
                                 <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                                    <div style="font-family:Roboto, sans-serif;font-size:14px;font-weight:400;line-height:24px;text-align:left;color:gray;">Cảm ơn, <br><br> Đội ngũ RING!<br>
+                                    <div style="font-family:Roboto, sans-serif;font-size:14px;font-weight:400;line-height:24px;text-align:left;color:gray;">
+                                        <span th:text="#{email.end}"></span> <br><br> <span th:text="#{email.support}"></span><br>
                                         <a href="mailto:support@ringdoraz.io.vn" style="color: #63aee3">support@ringdoraz.io.vn</a>
                                     </div>
                                 </td>

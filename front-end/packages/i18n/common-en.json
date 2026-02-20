@@ -61,7 +61,7 @@
   "phone": "Phone",
   "dob": "Date of birth",
   "from": "From",
-  "recaptcha": "Protected by reCAPTCHA and Google through",
+  "protected": "Protected by Cloudflare Turnstile",
   "terms": "Terms of service",
   "policy": "Privacy policy",
   "help": "Help",
