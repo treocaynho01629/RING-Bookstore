@@ -74,6 +74,11 @@ public class AppConstants {
     public static final String IMAGE = "image";
     public static final String TOKEN = "token";
 
+    // GHN
+    public static final String PROVINCES = "provinces";
+    public static final String DISTRICTS = "districts";
+    public static final String WARDS = "wards";
+
     // Params
     public static final String PAGE = "pageNo";
     public static final String PAGE_SIZE = "pSize";
@@ -121,5 +126,6 @@ public class AppConstants {
     public static final String FILE_SIZE_EXCEED_MAXIMUM_LIMIT = "File size exceed maximum limit";
     public static final String AUTHORIZATION_FAILED = "Authorization failed";
     public static final String DUPLICATE_KEY = "Duplicate key";
+    public static final String GHN_FAILED = "GHN service failed";
 
 }

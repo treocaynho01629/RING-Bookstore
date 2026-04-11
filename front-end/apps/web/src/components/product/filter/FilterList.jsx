@@ -9,7 +9,7 @@ import {
   useGetPublishersScrollInfiniteQuery,
   useGetRelevantPublishersScrollInfiniteQuery,
 } from "../../../features/publishers/publishersApiSlice";
-import { suggestPrices } from "../../../utils/filters";
+import { SUGGEST_PRICES } from "@ring/shared/utils/filters";
 import { useTranslation } from "react-i18next";
 import { capitalize } from "lodash-es";
 import Button from "@mui/material/Button";
@@ -27,6 +27,10 @@ import Radio from "@mui/material/Radio";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import FilterAltOff from "@mui/icons-material/FilterAltOff";
+import ClassOutlined from "@mui/icons-material/ClassOutlined";
+import AttachMoneyOutlined from "@mui/icons-material/AttachMoneyOutlined";
+import StarHalf from "@mui/icons-material/StarHalf";
+import Inventory2Outlined from "@mui/icons-material/Inventory2Outlined";
 import Star from "@mui/icons-material/Star";
 import StarBorder from "@mui/icons-material/StarBorder";
 import CategoryOutlined from "@mui/icons-material/CategoryOutlined";
@@ -467,7 +471,10 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePubs, pubsRef }) => {
   return (
     <Filter ref={pubsRef}>
       <TitleContainer>
-        <FilterText>{t("publisher.title")}</FilterText>
+        <FilterText>
+          <ClassOutlined />
+          &nbsp;{t("publisher.title")}
+        </FilterText>
       </TitleContainer>
       <FormGroup sx={{ padding: 0, width: "100%" }}>
         {pubsContent}
@@ -546,10 +553,13 @@ const RangeFilter = memo(({ value, onChangeInputRange, onChangeRange, valueRef }
   return (
     <Filter ref={valueRef}>
       <TitleContainer>
-        <FilterText>{t("search.price.range")}</FilterText>
+        <FilterText>
+          <AttachMoneyOutlined />
+          &nbsp;{t("search.price.range")}
+        </FilterText>
       </TitleContainer>
       <FormGroup sx={{ padding: 0, width: "100%", mb: 1 }}>
-        {suggestPrices.map((option, index) => (
+        {SUGGEST_PRICES.map((option, index) => (
           <FormControlLabel
             key={`range-${index}`}
             control={
@@ -618,7 +628,10 @@ const TypeFilter = memo(({ types, onChangeTypes, typesRef }) => {
   return (
     <Filter ref={typesRef}>
       <TitleContainer>
-        <FilterText>{t("product.type.label")}</FilterText>
+        <FilterText>
+          <Inventory2Outlined />
+          &nbsp;{t("product.type.label")}
+        </FilterText>
       </TitleContainer>
       <FormGroup sx={{ padding: 0, width: "100%" }}>
         {bookTypeOptions.map((option, index) => (
@@ -659,7 +672,10 @@ const RateFilter = memo(({ rating, onChangeRating, rateRef }) => {
   return (
     <Filter ref={rateRef}>
       <TitleContainer>
-        <FilterText>{t("review.label")}</FilterText>
+        <FilterText>
+          <StarHalf />
+          &nbsp;{t("review.label")}
+        </FilterText>
       </TitleContainer>
       <FormGroup sx={{ padding: 0, width: "100%", mb: 1 }}>
         {[...Array(5)].map((item, index) => {

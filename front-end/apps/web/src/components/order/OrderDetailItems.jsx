@@ -65,7 +65,7 @@ const OrderDetailItems = ({ order, tabletMode }) => {
             </>
           ) : (
             <>
-              <Link to={`/shops/${order?.shopId}`}>
+              <Link to={`/shop/${order?.shopId}`}>
                 <Shop>
                   <ShopTag>{t("partner")}</ShopTag>
                   <Storefront />

@@ -25,8 +25,11 @@ public class AddressMapper {
                 address.getName(),
                 address.getCompanyName(),
                 address.getPhone(),
-                address.getCity(),
                 address.getAddress(),
+                address.getDetail(),
+                address.getProvinceId(),
+                address.getDistrictId(),
+                address.getWardCode(),
                 address.getType(),
                 projection.getIsDefault());
     }
@@ -38,13 +41,16 @@ public class AddressMapper {
      * @return the mapped {@link AddressDTO}
      */
     public AddressDTO addressToDTO(Address address) {
-        
+
         return new AddressDTO(address.getId(),
                 address.getName(),
                 address.getCompanyName(),
                 address.getPhone(),
-                address.getCity(),
                 address.getAddress(),
+                address.getDetail(),
+                address.getProvinceId(),
+                address.getDistrictId(),
+                address.getWardCode(),
                 address.getType(),
                 false);
     }

@@ -352,7 +352,7 @@ const ProfileTabsList = ({ profile, loading, tabletMode }) => {
                 </Additional>
                 <Additional>
                   <Today color="warning" />
-                  {t("profile.joined")}:
+                  {t("joined.label")}:
                   <b>
                     {new Date(profile?.joinedDate).toLocaleDateString("en-GB", {
                       year: "numeric",

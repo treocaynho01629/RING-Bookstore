@@ -1,10 +1,8 @@
 import styled from "@emotion/styled";
 import { currencyFormat } from "@ring/shared/utils/convert";
-import { ShippingType } from "@ring/shared/models/shippingType";
-import { getShippingType } from "@ring/shared/enums/shipping";
 import { useTranslation } from "react-i18next";
-import { iconList } from "@ring/shared/utils/icon";
-import { Suspense, useEffect, useState, forwardRef } from "react";
+import { useEffect, useState, forwardRef } from "react";
+import { DEFAULT_SHIPPING_TYPE, DEFAULT_SHIPPING_ESTIMATATION } from "@ring/shared/constants/appContants";
 import Button from "@mui/material/Button";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
@@ -18,6 +16,7 @@ import AllInbox from "@mui/icons-material/AllInbox";
 import Check from "@mui/icons-material/Check";
 import Close from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
+import LocalShipping from "@mui/icons-material/LocalShipping";
 
 //#region styled
 const FormContent = styled.div`
@@ -108,9 +107,6 @@ const ShippingSelectDialog = ({ open, handleClose, selectedShipping, shippingFee
     setValue(e.target.value);
   };
 
-  const shippingMeta = getShippingType(selectedShipping);
-  const baseShippingFee = shippingFee / shippingMeta?.multiplier;
-
   return (
     <Dialog
       open={open}
@@ -131,40 +127,24 @@ const ShippingSelectDialog = ({ open, handleClose, selectedShipping, shippingFee
       </DialogTitle>
       <DialogContent sx={{ padding: { xs: 1, sm: "20px 24px" } }}>
         <RadioGroup value={value} onChange={handleChange}>
-          {Object.values(ShippingType).map((item, index) => {
-            const itemMeta = getShippingType(item);
-            const Icon = iconList[itemMeta?.icon];
-            return (
-              <StyledForm
-                key={index}
-                value={item}
-                control={<Radio />}
-                label={
-                  <FormContent>
-                    <ItemContent>
-                      <ItemTitle>
-                        <Suspense fallback={null}>{Icon && <Icon color={itemMeta?.color} />}</Suspense>
-                        {t(itemMeta?.label, { ns: "authenticated" })}
-                      </ItemTitle>
-                      <PriceTag>
-                        {item === selectedShipping ? (
-                          <>
-                            {shippingDiscount > 0 && <Discount>{shippingDiscount}</Discount>}
-                            {currencyFormat.format(shippingFee - (shippingDiscount || 0))}
-                          </>
-                        ) : (
-                          currencyFormat.format(baseShippingFee * itemMeta?.multiplier)
-                        )}
-                      </PriceTag>
-                    </ItemContent>
-                    <Estimate>
-                      {t("checkout.shipping.estimate", { ns: "authenticated", date: itemMeta?.estimate })}
-                    </Estimate>
-                  </FormContent>
-                }
-              />
-            );
-          })}
+          <StyledForm
+            value={DEFAULT_SHIPPING_TYPE}
+            control={<Radio />}
+            label={
+              <FormContent>
+                <ItemContent>
+                  <ItemTitle>
+                    <LocalShipping color="primary" />
+                    {t("checkout.shipping.ghn", { ns: "authenticated" })}
+                  </ItemTitle>
+                  <PriceTag>{shippingFee ? currencyFormat.format(shippingFee) : t("unknown")}</PriceTag>
+                </ItemContent>
+                <Estimate>
+                  {t("checkout.shipping.estimate", { ns: "authenticated", date: DEFAULT_SHIPPING_ESTIMATATION })}
+                </Estimate>
+              </FormContent>
+            }
+          />
         </RadioGroup>
       </DialogContent>
       <DialogActions>

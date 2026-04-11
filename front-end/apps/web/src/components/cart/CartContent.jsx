@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { useMemo, useState, Suspense, lazy, useCallback, useRef } from "react";
+import { useMemo, useState, Suspense, lazy, useCallback, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { booksApiSlice } from "../../features/books/booksApiSlice";
 import { useCalculateMutation } from "../../features/orders/ordersApiSlice";
@@ -8,6 +8,7 @@ import { ActionTableCell, StyledTableCell, StyledTableHead } from "../custom/Tab
 import { StyledCheckbox } from "../custom/CartComponents";
 import { useTranslation } from "react-i18next";
 import { currencyFormat, idFormatter } from "@ring/shared/utils/convert";
+import { useGetMyAddressQuery } from "../../features/addresses/addressesApiSlice";
 import { getCouponType } from "@ring/shared/enums/coupon";
 import useDeepEffect from "@ring/shared/useDeepEffect";
 import useAuth from "../../hooks/useAuth";
@@ -26,6 +27,7 @@ import Search from "@mui/icons-material/Search";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import Sell from "@mui/icons-material/Sell";
 import useCart from "../../hooks/useCart";
+import useAddress from "../../hooks/useAddress";
 import CheckoutDialog from "./CheckoutDialog";
 import PropTypes from "prop-types";
 import CartDetailRow from "./CartDetailRow";
@@ -177,6 +179,7 @@ EnhancedTableHead.propTypes = {
 
 const CartContent = () => {
   const { t } = useTranslation();
+  const { defaultAddress, setDefaultAddress } = useAddress();
   const { cartProducts, removeProduct, clearCart, decreaseAmount, increaseAmount, changeAmount } = useCart();
   const { estimateCart, syncCart } = useCheckout();
   const { username } = useAuth();
@@ -209,6 +212,9 @@ const CartContent = () => {
   // For get similar
   const [getBook] = booksApiSlice.useLazyGetBookDetailQuery();
 
+  // Fetch current profile address
+  const { data: addressData, isLoading: loadAddress } = useGetMyAddressQuery({}, { skip: defaultAddress });
+
   // Estimate/calculate price
   const [estimated, setEstimated] = useState({
     deal: 0,
@@ -226,6 +232,13 @@ const CartContent = () => {
     }
     handleCartChange();
   }, [selected, cartProducts, shopCoupon, coupon]);
+
+  // Set default address
+  useEffect(() => {
+    if (!loadAddress && addressData) {
+      setDefaultAddress(addressData);
+    }
+  }, [addressData]);
 
   /**
    * Generate error message for warning dialog
@@ -277,7 +290,11 @@ const CartContent = () => {
 
           return result;
         },
-        { coupon: coupon != "" ? coupon?.code : "", cart: [] }
+        {
+          address: defaultAddress,
+          coupon: coupon != "" ? coupon?.code : "",
+          cart: [],
+        }
       );
 
       handleEstimate(selectedCart); // Estimate price

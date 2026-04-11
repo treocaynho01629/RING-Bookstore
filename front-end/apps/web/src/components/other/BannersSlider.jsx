@@ -10,7 +10,8 @@ import Grid from "@mui/material/Grid";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 
-import Carousel from "react-multi-carousel";
+import CarouselModule from "react-multi-carousel";
+const Carousel = CarouselModule?.default ?? CarouselModule;
 
 //#region styled
 const CustomDotButton = styled("span")(({ theme }) => ({
@@ -197,11 +198,13 @@ const responsive = {
   },
 };
 
-const CustomArrow = ({ onClick, className, direction }) => (
-  <CustomArrowButton className={`${className ?? ""} ${direction}`} onClick={onClick}>
-    {direction == "left" ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
-  </CustomArrowButton>
-);
+const CustomArrow = ({ onClick, className, direction }) => {
+  return (
+    <CustomArrowButton className={`${className ?? ""} ${direction}`} onClick={onClick}>
+      {direction == "left" ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+    </CustomArrowButton>
+  );
+};
 
 const CustomDot = ({ onClick, active }) => {
   return <CustomDotButton className={active ? "active" : ""} onClick={onClick} />;

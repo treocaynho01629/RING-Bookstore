@@ -5,8 +5,9 @@ import com.ring.dto.projection.images.IImage;
 import java.time.LocalDateTime;
 
 /**
- * Represents a shop slim projection as {@link IShopDisplay}, containing shop's owner details,
- * name, total reviews, products, followers,
+ * Represents a shop slim projection as {@link IShopDisplay}, containing shop's
+ * owner details,
+ * name, verified status, total reviews, products, followers,
  * join date, followed status, and image.
  */
 public interface IShopDisplay {
@@ -16,6 +17,8 @@ public interface IShopDisplay {
     Long getId();
 
     String getName();
+
+    Boolean getVerified();
 
     Integer getTotalReviews();
 

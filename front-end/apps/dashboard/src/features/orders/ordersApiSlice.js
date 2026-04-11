@@ -32,8 +32,8 @@ export const ordersApiSlice = apiWithEnum.injectEndpoints({
         if (shopId) params.append("shopId", shopId);
         if (status) params.append("status", status);
         if (keyword) params.append("keyword", keyword);
-        if (page) params.append("pageNo", page);
-        if (size) params.append("pSize", size);
+        if (page != null) params.append("pageNo", page);
+        if (size != null) params.append("pSize", size);
         if (sortBy) params.append("sortBy", sortBy);
         if (sortDir) params.append("sortDir", sortDir);
 
@@ -64,44 +64,6 @@ export const ordersApiSlice = apiWithEnum.injectEndpoints({
         } else return [{ type: "Receipt", id: "LIST" }];
       },
     }),
-    getOrdersByBookId: builder.query({
-      query: (args) => {
-        const { id, page, size, sortBy, sortDir } = args || {};
-
-        //Params
-        const params = new URLSearchParams();
-        if (page) params.append("pageNo", page);
-        if (size) params.append("pSize", size);
-        if (sortBy) params.append("sortBy", sortBy);
-        if (sortDir) params.append("sortDir", sortDir);
-
-        return {
-          url: `/api/orders/book/${id}?${params.toString()}`,
-          validateStatus: (response, result) => {
-            return response.status === 200 && !result?.isError;
-          },
-        };
-      },
-      transformResponse: (responseData) => {
-        const { content, empty, page, size, totalElements, totalPages } = responseData;
-        return ordersAdapter.setAll(
-          {
-            ...initialState,
-            empty,
-            page,
-            size,
-            totalElements,
-            totalPages,
-          },
-          content
-        );
-      },
-      providesTags: (result, error, arg) => {
-        if (result?.ids) {
-          return [{ type: "Order", id: "LIST" }, ...result.ids.map((id) => ({ type: "Order", id }))];
-        } else return [{ type: "Order", id: "LIST" }];
-      },
-    }),
     getSummaries: builder.query({
       query: (args) => {
         const { shopId, bookId, page, size, sortBy, sortDir } = args || {};
@@ -109,9 +71,9 @@ export const ordersApiSlice = apiWithEnum.injectEndpoints({
         //Params
         const params = new URLSearchParams();
         if (shopId) params.append("shopId", shopId);
-        if (page) params.append("bookId", bookId);
-        if (page) params.append("pageNo", page);
-        if (size) params.append("pSize", size);
+        if (bookId) params.append("bookId", bookId);
+        if (page != null) params.append("pageNo", page);
+        if (size != null) params.append("pSize", size);
         if (sortBy) params.append("sortBy", sortBy);
         if (sortDir) params.append("sortDir", sortDir);
 
@@ -142,25 +104,16 @@ export const ordersApiSlice = apiWithEnum.injectEndpoints({
         } else return [{ type: "Receipt", id: "LIST" }];
       },
     }),
-    getSalesAnalytics: builder.query({
-      query: (shopId) => {
-        return {
-          url: `/api/orders/analytics${shopId ? `?shopId=${shopId}` : ""}`,
-          validateStatus: (response, result) => {
-            return response.status === 200 && !result?.isError;
-          },
-        };
-      },
-      providesTags: [{ type: "Order", id: "LIST" }],
-    }),
     getSales: builder.query({
       query: (args) => {
-        const { shopId, year } = args || {};
+        const { shopId, bookId, startDate, endDate } = args || {};
 
         //Params
         const params = new URLSearchParams();
         if (shopId) params.append("shopId", shopId);
-        if (year) params.append("year", year);
+        if (bookId) params.append("bookId", bookId);
+        if (startDate) params.append("startDate", startDate);
+        if (endDate) params.append("endDate", endDate);
 
         return {
           url: `/api/orders/sales?${params.toString()}`,
@@ -185,9 +138,7 @@ export const ordersApiSlice = apiWithEnum.injectEndpoints({
 export const {
   useGetReceiptQuery,
   useGetReceiptsQuery,
-  useGetOrdersByBookIdQuery,
   useGetSummariesQuery,
-  useGetSalesAnalyticsQuery,
   useGetSalesQuery,
   useChangeOrderStatusMutation,
 } = ordersApiSlice;

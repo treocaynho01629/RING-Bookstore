@@ -101,7 +101,7 @@ const ProductDetail = () => {
   }
 
   const breadcrumbItems = [
-    { label: t("category.title"), href: "/store", end: true },
+    { label: t("product.catalog"), href: "/store", end: true },
     ...createCategoryCrumbs(data?.category),
     { label: data?.publisher?.name, href: `/store?pubs=${data?.publisher?.id}`, end: true },
     { label: data?.title, href: "#" },

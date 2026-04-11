@@ -1,5 +1,7 @@
 {
   "validation": {
+    "email": "Sai định dạng email.",
+    "phone": "Sai định dạng số điện thoại.",
     "constraints": {
       "required": "Vui lòng nhập {{field}}!",
       "blank": "{{field}} không được để trống!",

@@ -1,3 +1,4 @@
+import React from "react";
 import { render, screen } from "@testing-library/react";
 import { expect } from "vitest";
 import Product from "../../../src/components/product/Product";

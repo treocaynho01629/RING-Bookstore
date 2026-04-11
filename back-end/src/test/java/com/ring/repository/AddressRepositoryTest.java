@@ -53,7 +53,7 @@ class AddressRepositoryTest extends AbstractRepositoryTest {
                 assertNotNull(foundAddress);
 
                 // When
-                foundAddress.setCity("city");
+                foundAddress.setDetail("detail");
                 foundAddress.setName("test");
                 // foundAddress.setIsDefault(true);
 
@@ -61,7 +61,7 @@ class AddressRepositoryTest extends AbstractRepositoryTest {
 
                 // Then
                 assertNotNull(updatedAddress);
-                assertNotNull(updatedAddress.getCity());
+                assertNotNull(updatedAddress.getDetail());
                 // assertTrue(updatedAddress.getIsDefault());
                 assertEquals("test", updatedAddress.getName());
         }
@@ -101,13 +101,13 @@ class AddressRepositoryTest extends AbstractRepositoryTest {
                                 .build();
                 Address address1 = Address.builder()
                                 .profile(profile)
-                                .address("Street 1")
-                                .city("City 1")
+                                .address("Province/City/District/Ward/Village 1")
+                                .detail("Detail 1")
                                 .build();
                 Address address2 = Address.builder()
                                 .profile(profile)
-                                .address("Street 2")
-                                .city("City 2")
+                                .address("Province/City/District/Ward/Village 2")
+                                .detail("Detail 2")
                                 .build();
 
                 profileRepo.save(profile);
@@ -126,8 +126,8 @@ class AddressRepositoryTest extends AbstractRepositoryTest {
 
                 // Given
                 Address address = Address.builder()
-                                .address("Main Street")
-                                .city("Main City")
+                                .address("Province/City/District/Ward/Village")
+                                .detail("Main Detail")
                                 .build();
                 Account account = Account.builder()
                                 .username("username")

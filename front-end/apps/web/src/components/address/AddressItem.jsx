@@ -138,13 +138,9 @@ const AddressItem = ({ onCheck, addressInfo, handleOpen, handleClick, selectedVa
   const isValid = () => {
     if (!addressInfo) return false;
 
-    const { name, phone, address, city } = addressInfo;
-    let addressSplit = city?.split(", ");
-    let ward = addressSplit[addressSplit.length - 1];
-    let currCity = "";
-    if (addressSplit.length > 1) currCity = addressSplit[0];
+    const { name, phone, address, detail } = addressInfo;
 
-    const result = !(!name || !phone || !address || !currCity || !ward || !PHONE_REGEX.test(phone));
+    const result = !(!name || !phone || !address || !detail || !PHONE_REGEX.test(phone));
     return result;
   };
   const isNotValid = !isValid();
@@ -186,7 +182,7 @@ const AddressItem = ({ onCheck, addressInfo, handleOpen, handleClick, selectedVa
                 {addressInfo?.companyName || addressInfo?.name}&nbsp;
                 {addressInfo?.phone && `(+84) ${addressInfo?.phone}`}
               </UserInfo>
-              <UserAddress>{[addressInfo?.city, addressInfo?.address].join(", ")}</UserAddress>
+              <UserAddress>{[addressInfo?.address, addressInfo?.detail].join(", ")}</UserAddress>
             </>
           )}
         </Box>

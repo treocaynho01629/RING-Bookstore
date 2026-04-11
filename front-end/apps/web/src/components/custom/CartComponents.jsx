@@ -76,7 +76,7 @@ export const CheckoutStack = styled.div`
   align-items: center;
   justify-content: space-between;
 
-  &:first-of-type {
+  &:first-of-type:not(:last-of-type) {
     border-bottom: 0.5px dashed ${({ theme }) => theme.vars.palette.divider};
     margin-bottom: ${({ theme }) => theme.spacing(1)};
     padding-bottom: ${({ theme }) => theme.spacing(1)};
@@ -86,7 +86,7 @@ export const CheckoutStack = styled.div`
     width: 100%;
     height: 50px;
 
-    &:first-of-type {
+    &:first-of-type:not(:last-of-type) {
       margin-bottom: 0;
       padding: 0 5px;
     }
@@ -164,6 +164,10 @@ export const CheckoutPrice = styled.span`
   b {
     font-size: 14px;
     color: ${({ theme }) => theme.vars.palette.text.primary};
+
+    &.total {
+      line-height: 24px;
+    }
   }
 
   ${({ theme }) => theme.breakpoints.down("md_lg")} {
@@ -192,7 +196,7 @@ export const DetailContainer = styled.div`
   border-bottom: 0.5px dashed ${({ theme }) => theme.vars.palette.divider};
 `;
 
-export const CouponButton = styled.b`
+export const StepperButton = styled.b`
   font-size: 15px;
   white-space: nowrap;
   display: flex;

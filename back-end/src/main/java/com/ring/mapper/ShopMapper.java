@@ -10,7 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
- * A mapper for {@link IShopDisplay}, {@link IShop}, {@link IShopPreview}, {@link IShopInfo}, {@link IShopDisplayDetail}, {@link IShopDetail}.
+ * A mapper for {@link IShopDisplay}, {@link IShop}, {@link IShopPreview},
+ * {@link IShopInfo}, {@link IShopDisplayDetail}, {@link IShopDetail}.
  */
 @RequiredArgsConstructor
 @Service
@@ -28,7 +29,7 @@ public class ShopMapper {
     public ShopDisplayDTO displayToDTO(IShopDisplay shop) {
 
         IImage image = shop.getImage();
-        String imageUrl = image != null 
+        String imageUrl = image != null
                 ? cloudinary.url()
                         .transformation(CloudinaryTransformations.AVATAR_TRANSFORMATION)
                         .secure(true)
@@ -38,6 +39,7 @@ public class ShopMapper {
         return new ShopDisplayDTO(shop.getOwnerId(),
                 shop.getId(),
                 shop.getName(),
+                shop.getVerified(),
                 imageUrl,
                 shop.getJoinedDate(),
                 shop.getTotalReviews(),
@@ -55,9 +57,8 @@ public class ShopMapper {
     public ShopDTO shopToDTO(IShop shop) {
 
         IImage image = shop.getImage();
-        String imageUrl = image != null 
-                ? cloudinary.url().
-                        transformation(CloudinaryTransformations.AVATAR_TRANSFORMATION)
+        String imageUrl = image != null
+                ? cloudinary.url().transformation(CloudinaryTransformations.AVATAR_TRANSFORMATION)
                         .secure(true)
                         .generate(image.getPublicId())
                 : null;
@@ -66,9 +67,13 @@ public class ShopMapper {
                 shop.getOwnerId(),
                 shop.getId(),
                 shop.getName(),
+                shop.getVerified(),
                 imageUrl,
                 shop.getSales(),
-                shop.getTotalSold(),
+                shop.getTotalOrders(),
+                shop.getTotalProducts(),
+                shop.getCanceledRate(),
+                shop.getTotalReviews(),
                 shop.getTotalFollowers(),
                 shop.getJoinedDate());
     }
@@ -82,7 +87,7 @@ public class ShopMapper {
     public ShopPreviewDTO previewToDTO(IShopPreview shop) {
 
         IImage image = shop.getImage();
-        String imageUrl = image != null 
+        String imageUrl = image != null
                 ? cloudinary.url()
                         .transformation(CloudinaryTransformations.PREVIEW_CATEGORY_TRANSFORMATION)
                         .secure(true)
@@ -103,7 +108,7 @@ public class ShopMapper {
     public ShopInfoDTO infoToDTO(IShopInfo shop) {
 
         IImage image = shop.getImage();
-        String imageUrl = image != null 
+        String imageUrl = image != null
                 ? cloudinary.url()
                         .transformation(CloudinaryTransformations.SHOP_TRANSFORMATION)
                         .secure(true)
@@ -114,6 +119,7 @@ public class ShopMapper {
                 shop.getOwnerId(),
                 shop.getId(),
                 shop.getName(),
+                shop.getVerified(),
                 imageUrl,
                 shop.getJoinedDate(),
                 shop.getTotalReviews(),
@@ -132,7 +138,7 @@ public class ShopMapper {
 
         IImage image = shop.getImage();
         Address address = shop.getAddress();
-        String imageUrl = image != null 
+        String imageUrl = image != null
                 ? cloudinary.url()
                         .transformation(CloudinaryTransformations.SHOP_TRANSFORMATION)
                         .secure(true)
@@ -143,6 +149,7 @@ public class ShopMapper {
                 shop.getOwnerId(),
                 shop.getId(),
                 shop.getName(),
+                shop.getVerified(),
                 shop.getDescription(),
                 imageUrl,
                 address != null ? addressMapper.addressToDTO(address) : null,
@@ -166,17 +173,17 @@ public class ShopMapper {
 
         IImage image = shop.getImage();
         Address address = shop.getAddress();
-        String imageUrl = image != null ?
-                cloudinary.url()
-                        .transformation(CloudinaryTransformations.SHOP_TRANSFORMATION)
-                        .secure(true)
-                        .generate(image.getPublicId())
+        String imageUrl = image != null ? cloudinary.url()
+                .transformation(CloudinaryTransformations.SHOP_TRANSFORMATION)
+                .secure(true)
+                .generate(image.getPublicId())
                 : null;
 
         return new ShopDetailDTO(shop.getUsername(),
                 shop.getOwnerId(),
                 shop.getId(),
                 shop.getName(),
+                shop.getVerified(),
                 shop.getDescription(),
                 imageUrl,
                 address != null ? addressMapper.addressToDTO(address) : null,

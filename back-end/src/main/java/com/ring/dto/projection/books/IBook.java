@@ -1,5 +1,6 @@
 package com.ring.dto.projection.books;
 
+import com.ring.dto.projection.images.IImage;
 import com.ring.model.enums.BookLanguage;
 import com.ring.model.enums.BookType;
 
@@ -9,7 +10,8 @@ import java.util.List;
 
 /**
  * Represents a book projection as {@link IBook}, containing the book's ID,
- * slug, price, discount, title, description, type, author, amount, image, publisher details, category details, shop details, and more.
+ * slug, price, discount, title, description, type, author, amount, image,
+ * publisher details, category details, shop details, and more.
  */
 public interface IBook {
 
@@ -31,8 +33,6 @@ public interface IBook {
 
     Short getAmount();
 
-    Long getImage();
-
     Integer getPubId();
 
     String getPubName();
@@ -45,7 +45,11 @@ public interface IBook {
 
     String getShopName();
 
-    String getSize();
+    Short getLength();
+
+    Short getWidth();
+
+    Short getHeight();
 
     Integer getPages();
 
@@ -53,7 +57,15 @@ public interface IBook {
 
     BookLanguage getLanguage();
 
-    Double getWeight();
+    Short getWeight();
 
-    List<Long> getPreviews();
+    IImage getImage();
+
+    List<IImage> getPreviews();
+
+    Integer getTotalOrders();
+
+    Double getRating();
+
+    Integer getTotalRates();
 }

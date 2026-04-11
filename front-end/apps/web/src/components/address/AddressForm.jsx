@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Instruction } from "@ring/ui/Components";
 import { PHONE_REGEX } from "@ring/shared/utils/regex";
 import { addressTypeOptions } from "@ring/shared/enums/address";
-import { location } from "@ring/shared/utils/location";
 import { useTranslation } from "react-i18next";
 import { PatternFormat } from "react-number-format";
+import { ghnApiSlice } from "../../features/ghn/ghnApiSlice";
+import { capitalize } from "lodash";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -13,46 +14,16 @@ import TextField from "@mui/material/TextField";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextareaAutosize from "@mui/material/TextareaAutosize";
 import Grid from "@mui/material/Grid";
+import Autocomplete from "@mui/material/Autocomplete";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import Check from "@mui/icons-material/Check";
 import PersonIcon from "@mui/icons-material/Person";
 import PhoneIcon from "@mui/icons-material/Phone";
-import HomeIcon from "@mui/icons-material/Home";
 import CloseIcon from "@mui/icons-material/Close";
 import Delete from "@mui/icons-material/Delete";
 import Apartment from "@mui/icons-material/Apartment";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
-
-/**
- * Split the address into city, ward, and address
- * @param {Object} addressInfo - The address information
- * @returns {Object} - The split address
- */
-const splitAddress = (addressInfo) => {
-  let city = "";
-  let ward = "";
-  let address = "";
-
-  if (addressInfo?.address) {
-    // Split address
-    address = addressInfo?.address;
-    let addressSplit = addressInfo?.city?.split(", ");
-    ward = addressSplit[addressSplit.length - 1];
-    if (addressSplit.length > 1) city = addressSplit[0];
-  }
-
-  return {
-    id: addressInfo?.id || "",
-    name: addressInfo?.name || "",
-    companyName: addressInfo?.companyName || "",
-    type: addressInfo?.type || null,
-    phone: addressInfo?.phone || "",
-    city,
-    ward,
-    address,
-  };
-};
 
 const AddressForm = ({
   handleClose,
@@ -70,8 +41,31 @@ const AddressForm = ({
 }) => {
   const { t } = useTranslation();
   const [validPhone, setValidPhone] = useState(PHONE_REGEX.test(addressInfo?.phone) || true);
-  const [currAddress, setCurrAddress] = useState(splitAddress(addressInfo));
+  const [currAddress, setCurrAddress] = useState({
+    id: addressInfo?.id || "",
+    name: addressInfo?.name || "",
+    companyName: addressInfo?.companyName || "",
+    type: addressInfo?.type || null,
+    phone: addressInfo?.phone || "",
+    address: addressInfo?.address || "",
+    provinceId: addressInfo?.provinceId ?? null,
+    districtId: addressInfo?.districtId ?? null,
+    wardCode: addressInfo?.wardCode ?? null,
+    detail: addressInfo?.detail || "",
+  });
   const [setting, setSetting] = useState(() => [addressInfo && addressInfo?.isDefault == null ? "temp" : null]);
+  const [selectedGhn, setSelectedGhn] = useState({
+    province: addressInfo?.provinceId ?? null,
+    district: addressInfo?.districtId ?? null,
+    ward: addressInfo?.wardCode ?? null,
+  });
+
+  const [getProvinces, { data: provinces, isLoading: loadingProvinces }] = ghnApiSlice.useLazyGetProvincesQuery();
+  const provinceList = provinces?.ids?.map((id) => provinces?.entities[id]).filter(Boolean) ?? [];
+  const [getDistricts, { data: districts, isLoading: loadingDistricts }] = ghnApiSlice.useLazyGetDistrictsQuery();
+  const districtList = districts?.ids?.map((id) => districts?.entities[id]).filter(Boolean) ?? [];
+  const [getWards, { data: wards, isLoading: loadingWards }] = ghnApiSlice.useLazyGetWardsQuery();
+  const wardList = wards?.ids?.map((id) => wards?.entities[id]).filter(Boolean) ?? [];
 
   // Error message reset when reinput stuff
   useEffect(() => {
@@ -95,12 +89,7 @@ const AddressForm = ({
 
     // Validation
     const isNotValid =
-      !currAddress?.name ||
-      !currAddress?.phone ||
-      !currAddress?.address ||
-      !currAddress?.city ||
-      !currAddress?.ward ||
-      !validPhone;
+      !currAddress?.name || !currAddress?.phone || !currAddress?.address || !currAddress?.detail || !validPhone;
     if (isNotValid) {
       setErrMsg(t("validation.error.form.required", { ns: "validation" }));
       return;
@@ -111,8 +100,11 @@ const AddressForm = ({
       name: currAddress.name,
       companyName: currAddress.companyName,
       phone: currAddress.phone,
-      city: currAddress.city + ", " + currAddress.ward,
       address: currAddress.address,
+      detail: currAddress.detail,
+      provinceId: currAddress.provinceId,
+      districtId: currAddress.districtId,
+      wardCode: currAddress.wardCode,
       type: currAddress.type,
       isDefault: addressInfo?.isDefault,
     };
@@ -149,84 +141,159 @@ const AddressForm = ({
     setSetting(newValue);
   };
 
+  const step = !selectedGhn.province
+    ? "province"
+    : !selectedGhn.district
+      ? "district"
+      : !selectedGhn.ward
+        ? "ward"
+        : "done";
+
   /**
-   * Get the selected city
-   * @returns {object} - The selected city
+   * Return the options for the autocomplete
+   * @returns {array} - The options for the autocomplete
    */
-  const selectedCity = location.filter((city) => {
-    return city.name == currAddress?.city;
-  });
+  const options = useMemo(() => {
+    if (step === "province") return provinceList;
+    if (step === "district") return districtList;
+    if (step === "ward") return wardList;
+    return [];
+  }, [districtList, provinceList, step, wardList]);
 
-  // Render the select wards
-  let selectWards;
+  /**
+   * Return the label for the step
+   * @param {object} opt - The option for the autocomplete
+   * @returns {string} - The label for the step
+   */
+  const getLabelForStep = useCallback(
+    (opt) => {
+      if (typeof opt !== "object" || !opt) return "";
+      if (step === "province") return opt?.ProvinceName ?? "";
+      if (step === "district") return opt?.DistrictName ?? "";
+      if (step === "ward") return opt?.WardName ?? "";
+      return "";
+    },
+    [step]
+  );
 
-  if (!selectedCity) {
-    selectWards = (
-      <TextField
-        label={t("address.ward", { ns: "authenticated" })}
-        select
-        error={(errMsg != "" || addressInfo) && !currAddress?.ward}
-        defaultValue=""
-        fullWidth
-        size="small"
-        slotProps={{
-          select: {
-            MenuProps: {
-              slotProps: {
-                paper: {
-                  style: {
-                    maxHeight: 250,
-                  },
-                },
-              },
-            },
-          },
-        }}
-      >
-        <MenuItem disabled value="">
-          <em>--{t("address.ward", { ns: "authenticated" })}--</em>
-        </MenuItem>
-      </TextField>
-    );
-  } else {
-    selectWards = (
-      <TextField
-        label={t("address.ward", { ns: "authenticated" })}
-        required
-        value={currAddress?.ward || ""}
-        onChange={(e) => setCurrAddress({ ...currAddress, ward: e.target.value })}
-        select
-        error={(errMsg != "" || addressInfo) && !currAddress?.ward}
-        defaultValue=""
-        fullWidth
-        size="small"
-        slotProps={{
-          select: {
-            MenuProps: {
-              slotProps: {
-                paper: {
-                  style: {
-                    maxHeight: 250,
-                  },
-                },
-              },
-            },
-          },
-        }}
-      >
-        <MenuItem disabled value="">
-          <em>--{t("address.ward", { ns: "authenticated" })}--</em>
-        </MenuItem>
-        {selectedCity[0]?.wards?.map((ward) => (
-          <MenuItem key={ward} value={ward}>
-            {ward}
-          </MenuItem>
-        ))}
-      </TextField>
-    );
-  }
+  /**
+   * Handle the clear event for the autocomplete
+   * @returns {void}
+   */
+  const handleClear = useCallback(() => {
+    setSelectedGhn({ province: null, district: null, ward: null });
+    setCurrAddress((prev) => ({ ...prev, provinceId: null, districtId: null, wardCode: null, address: "" }));
+  }, []);
+
+  const value = useMemo(() => {
+    const arr = [];
+    if (selectedGhn.province) arr.push(selectedGhn.province);
+    if (selectedGhn.district) arr.push(selectedGhn.district);
+    if (selectedGhn.ward) arr.push(selectedGhn.ward);
+    return arr;
+  }, [selectedGhn.district, selectedGhn.province, selectedGhn.ward]);
+
+  const getLabelForIndex = useCallback((opt, index) => {
+    if (!opt || typeof opt !== "object") return "";
+    if (index === 0) return opt?.ProvinceName ?? "";
+    if (index === 1) return opt?.DistrictName ?? "";
+    if (index === 2) return opt?.WardName ?? "";
+    return "";
+  }, []);
+
+  const isOptionEqualToValue = useCallback((opt, val) => {
+    if (!opt || !val) return false;
+    if (opt?.WardCode != null || val?.WardCode != null)
+      return String(opt?.WardCode ?? opt?.id) === String(val?.WardCode ?? val?.id);
+    if (opt?.DistrictID != null || val?.DistrictID != null)
+      return Number(opt?.DistrictID ?? opt?.id) === Number(val?.DistrictID ?? val?.id);
+    return Number(opt?.ProvinceID ?? opt?.id) === Number(val?.ProvinceID ?? val?.id);
+  }, []);
+
+  /**
+   * Handle the open event for the autocomplete
+   * @returns {void}
+   */
+  const handleOpenAddress = useCallback(() => {
+    if (step === "done") return;
+    if (step === "province" && !provinces) {
+      getProvinces()
+        .unwrap()
+        .catch((rejected) => console.error(rejected));
+    }
+  }, [getProvinces, provinces, step]);
+
+  /**
+   * Handle the change event for the autocomplete
+   * @param {object} e - Event object contains the target of the change
+   * @param {array} newValue - The new value of the autocomplete
+   * @returns {void}
+   */
+  const handleChangeAddress = useCallback(
+    (e, newValue) => {
+      const newArr = Array.isArray(newValue) ? newValue : [];
+
+      // Clear the selected values
+      if (newArr.length === 0) {
+        handleClear();
+        return;
+      }
+
+      // Fetch districts
+      if (newArr.length === 1) {
+        const province = newArr[0];
+        setSelectedGhn({ province, district: null, ward: null });
+        const provinceId = province?.ProvinceID ?? province?.id ?? null;
+        setCurrAddress((prev) => ({ ...prev, provinceId, districtId: null, wardCode: null }));
+        if (provinceId != null) {
+          getDistricts(provinceId)
+            .unwrap()
+            .catch((rejected) => console.error(rejected));
+        }
+        return;
+      }
+
+      // Fetch wards
+      if (newArr.length === 2) {
+        const province = newArr[0];
+        const district = newArr[1];
+        setSelectedGhn({ province, district, ward: null });
+        const provinceId = province?.ProvinceID ?? province?.id ?? null;
+        const districtId = district?.DistrictID ?? district?.id ?? null;
+        setCurrAddress((prev) => ({ ...prev, provinceId, districtId, wardCode: null }));
+        if (districtId != null) {
+          getWards(districtId)
+            .unwrap()
+            .catch((rejected) => console.error(rejected));
+        }
+        return;
+      }
+
+      // Set the selected values
+      if (newArr.length >= 3) {
+        const province = newArr[0];
+        const district = newArr[1];
+        const ward = newArr[2];
+        const address = `${ward?.WardName ?? ""}, ${district?.DistrictName ?? ""}, ${province?.ProvinceName ?? ""}`;
+        setSelectedGhn({ province, district, ward });
+        setCurrAddress((prev) => ({
+          ...prev,
+          provinceId: province?.id ?? null,
+          districtId: district?.id ?? null,
+          wardCode: ward?.id ?? null,
+          address,
+        }));
+      }
+    },
+    [getDistricts, getWards, handleClear]
+  );
 
   const isSelected = selectedValue != null && selectedValue == addressInfo?.id;
+  const loadingAddress = loadingProvinces || loadingDistricts || loadingWards;
+  const stepLabel = useMemo(() => {
+    if (step === "done" || options.length === 0) return "";
+    return `[${capitalize(t("address.selecting", { ns: "authenticated", item: t(`address.${step}`, { ns: "authenticated" }) }))}]`;
+  }, [step, options]);
 
   return (
     <>
@@ -263,10 +330,10 @@ const AddressForm = ({
                 label={
                   currAddress.phone && !validPhone
                     ? t("validation.constraint.invalid", {
-                        field: t("address.phone", { ns: "authenticated" }),
+                        field: t("phone", { ns: "authenticated" }),
                         ns: "validation",
                       })
-                    : (err?.data?.errors?.phone ?? t("address.phone", { ns: "authenticated" }))
+                    : (err?.data?.errors?.phone ?? t("phone", { ns: "authenticated" }))
                 }
                 id="phone"
                 required
@@ -331,57 +398,55 @@ const AddressForm = ({
                 ))}
               </TextField>
             </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                label={err?.data?.errors?.city ?? t("address.city", { ns: "authenticated" })}
-                required
-                value={currAddress?.city || ""}
-                onChange={(e) =>
-                  setCurrAddress({
-                    ...currAddress,
-                    city: e.target.value,
-                    ward: "",
-                  })
-                }
-                select
-                defaultValue=""
-                error={((errMsg != "" || addressInfo) && !currAddress?.city) || err?.data?.errors?.city}
-                fullWidth
+            <Grid size={12}>
+              <Autocomplete
                 size="small"
-                slotProps={{
-                  select: {
-                    MenuProps: {
-                      slotProps: {
-                        paper: {
-                          style: {
-                            maxHeight: 250,
-                          },
-                        },
+                id="address-autocomplete"
+                multiple
+                clearOnEscape
+                openOnFocus
+                disableCloseOnSelect
+                freeSolo
+                inputValue={currAddress?.address}
+                loading={loadingAddress}
+                options={options}
+                value={value}
+                onOpen={handleOpenAddress}
+                onChange={handleChangeAddress}
+                filterOptions={(opts) => opts}
+                isOptionEqualToValue={isOptionEqualToValue}
+                getOptionLabel={getLabelForStep}
+                renderValue={(tagValue) =>
+                  tagValue
+                    .map((opt, idx) => getLabelForIndex(opt, idx))
+                    .filter(Boolean)
+                    .join(", ")
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    id="address-autocomplete-input"
+                    sx={{
+                      "& .MuiInputBase-root": {
+                        paddingLeft: "14px !important",
                       },
-                    },
-                  },
-                }}
-              >
-                <MenuItem disabled value="">
-                  <em>--{t("address.city", { ns: "authenticated" })}--</em>
-                </MenuItem>
-                {location.map((city) => (
-                  <MenuItem key={city.name} value={city.name}>
-                    {city.name}
-                  </MenuItem>
-                ))}
-              </TextField>
+                    }}
+                    placeholder={stepLabel}
+                    label={t("address.input", { ns: "authenticated" })}
+                  />
+                )}
+              />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>{selectWards}</Grid>
             <Grid size={12}>
               <TextField
-                label={err?.data?.errors?.address ?? t("address.detail", { ns: "authenticated" })}
+                label={err?.data?.errors?.detail ?? t("address.detail", { ns: "authenticated" })}
                 type="text"
                 autoComplete="on"
                 required
-                onChange={(e) => setCurrAddress({ ...currAddress, address: e.target.value })}
-                value={currAddress?.address}
-                error={((errMsg != "" || addressInfo) && !currAddress?.address) || err?.data?.errors?.address}
+                onChange={(e) => setCurrAddress({ ...currAddress, detail: e.target.value })}
+                value={currAddress?.detail}
+                error={((errMsg != "" || addressInfo) && !currAddress?.detail) || err?.data?.errors?.detail}
                 fullWidth
                 size="small"
                 multiline
@@ -389,11 +454,9 @@ const AddressForm = ({
                 slotProps={{
                   inputComponent: TextareaAutosize,
                   inputProps: {
+                    id: "address-detail-input",
                     minRows: 4,
                     style: { resize: "auto" },
-                  },
-                  input: {
-                    endAdornment: <HomeIcon style={{ color: "gray" }} />,
                   },
                 }}
               />

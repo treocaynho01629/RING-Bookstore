@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import Carousel from "react-multi-carousel";
+import CarouselModule from "react-multi-carousel";
 import ProductSimple from "./ProductSimple";
 import { trackWindowScroll } from "react-lazy-load-image-component";
 import { Message } from "@ring/ui/Components";
@@ -9,6 +9,8 @@ import { useTranslation } from "react-i18next";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import Progress from "@ring/ui/Progress";
+
+const Carousel = CarouselModule?.default ?? CarouselModule;
 
 //#region styled
 const Container = styled.div`

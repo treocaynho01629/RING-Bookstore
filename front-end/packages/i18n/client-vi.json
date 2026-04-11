@@ -28,7 +28,7 @@
     "coupon.apply": "Áp dụng mã giảm giá",
     "saved": "Tiết kiệm {{discount}}",
     "vat.included": "Đã bao gồm VAT nếu có",
-    "total": "Tổng thanh toán: ({{quantity}} Sản phẩm)",
+    "total": "Tổng thanh toán: ({{count}} Sản phẩm)",
     "subtotal": "Tiền hàng",
     "shipping.fee": "Phí vận chuyển",
     "shipping.discount": "Khuyến mãi vận chuyển",
@@ -139,7 +139,6 @@
   },
   "profile": {
     "following": "Theo dõi",
-    "joined": "Tham gia",
     "orders": "Đơn giao",
     "edit": "Sửa hồ sơ"
   },
@@ -149,12 +148,14 @@
     "following": "Đang theo dõi",
     "follow": "Theo dõi",
     "explore": "Duyệt cửa hàng",
-    "follower": "Theo dõi",
-    "canceled.rate": "Tỉ lệ huỷ hàng",
     "owner": "Chủ sở hữu",
-    "joined": "Tham gia",
     "view": "Xem cửa hàng",
     "related": "Cửa hàng liên quan đến"
+  },
+  "address": {
+    "add": "Thêm địa chỉ",
+    "from": "Giao từ",
+    "to": "Giao tới"
   },
   "required.login": "Vui lòng đăng nhập để {{action}}",
   "required.select": "Vui lòng chọn sản phẩm trong giỏ",

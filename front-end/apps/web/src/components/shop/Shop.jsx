@@ -29,9 +29,14 @@ const Wrapper = styled.div`
 
 const Container = styled.div`
   width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
   }
 `;
@@ -165,12 +170,14 @@ const Shop = ({ shop, onClickFollow }) => {
             </Avatar>
             <Box display="flex" alignItems="center" flexDirection="column" justifyContent="center">
               <ShopName>{shop?.name}</ShopName>
-              <Verified>
-                <VerifiedIcon sx={{ fontSize: "16px", marginRight: 1 }} color="primary" />
-                {t("official")}
-              </Verified>
+              {shop?.verified && (
+                <Verified>
+                  <VerifiedIcon sx={{ fontSize: "16px", marginRight: 1 }} color="primary" />
+                  {t("official")}
+                </Verified>
+              )}
               <DateText>
-                {t("shop.joined")}:&nbsp;
+                {t("joined.label")}:&nbsp;
                 <b>{dateFormatter(date, i18n.language)}</b>
               </DateText>
             </Box>
@@ -207,7 +214,7 @@ const Shop = ({ shop, onClickFollow }) => {
           </Stats>
         </ShopDetail>
         <ShopDetail>
-          {t("shop.following")}:
+          {t("follower")}:
           <Stats>
             <PersonAddAlt1 color="warning" />
             <b>{numFormat.format(shop?.totalFollowers)}</b>

@@ -2,7 +2,6 @@ import { createEntityAdapter } from "@reduxjs/toolkit";
 import apiSlice from "@ring/redux/apiSlice";
 
 const ordersAdapter = createEntityAdapter({});
-const ordersSelector = ordersAdapter.getSelectors();
 const initialState = ordersAdapter.getInitialState({
   empty: false,
   page: 0,
@@ -11,18 +10,18 @@ const initialState = ordersAdapter.getInitialState({
   totalPages: 0,
 });
 
-const apiWithEnum = apiSlice.enhanceEndpoints({ addTagTypes: ["Order", "Receipt"] });
+const apiWithEnum = apiSlice.enhanceEndpoints({ addTagTypes: ["Order", "Checkout"] });
 
 export const ordersApiSlice = apiWithEnum.injectEndpoints({
   endpoints: (builder) => ({
-    getReceiptDetail: builder.query({
+    getCheckoutDetail: builder.query({
       query: (id) => ({
-        url: `/api/orders/receipts/detail/${id}`,
+        url: `/api/orders/checkout/detail/${id}`,
         validateStatus: (response, result) => {
           return response.status === 200 && !result?.isError;
         },
       }),
-      providesTags: (result, error, id) => [{ type: "Receipt", id }],
+      providesTags: (result, error, id) => [{ type: "Checkout", id }],
     }),
     getOrderDetail: builder.query({
       query: (id) => ({
@@ -130,6 +129,14 @@ export const ordersApiSlice = apiWithEnum.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Order", id: "LIST" }],
     }),
+    calculateShippingFee: builder.mutation({
+      query: (request) => ({
+        url: "/api/orders/shipping-fee",
+        method: "POST",
+        credentials: "include",
+        body: { ...request },
+      }),
+    }),
     cancelOrder: builder.mutation({
       query: ({ id, reason }) => ({
         url: `/api/orders/cancel/${id}?reason=${reason}`,
@@ -191,9 +198,10 @@ export const {
   useGetOrderDetailQuery,
   useGetOrdersByUserQuery,
   useGetOrdersByUserScrollInfiniteQuery,
-  useGetReceiptDetailQuery,
+  useGetCheckoutDetailQuery,
   useCalculateMutation,
   useCheckoutMutation,
+  useCalculateShippingFeeMutation,
   useCancelOrderMutation,
   useCancelUnpaidOrdersMutation,
   useChangePaymentMethodMutation,

@@ -25,8 +25,6 @@ body {
 
 a {
   font-weight: 500;
-  color: inherit;
-  text-decoration: inherit;
 }
 
 h1 {
@@ -51,4 +49,8 @@ img {
 .yarl__thumbnails_thumbnail:not(.yarl__thumbnails_thumbnail_active) {
   opacity: 0.5;
   border-color: transparent !important;
+}
+
+.gradient-loader {
+  background-image: linear-gradient(to right, #63e399, #63e399 80%, #6de363) !important;
 }

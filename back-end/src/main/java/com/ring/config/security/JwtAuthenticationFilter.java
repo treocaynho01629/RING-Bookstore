@@ -30,8 +30,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
     private final UserDetailsService userDetailsService;
     private final RequestMatcher proceedUrlPatterns = new OrRequestMatcher(
-            new AntPathRequestMatcher("/api/books/analytics", "GET")
-    );
+            new AntPathRequestMatcher("/api/books/analytics", "GET"),
+            new AntPathRequestMatcher("/api/books/detail/**", "GET"));
     private final RequestMatcher excludeUrlPatterns = new OrRequestMatcher(
             new AntPathRequestMatcher("/api/auth/**"),
             new AntPathRequestMatcher("/api/books/**", "GET"),
@@ -39,16 +39,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             new AntPathRequestMatcher("/api/categories", "GET"),
             new AntPathRequestMatcher("/api/reviews/books", "GET"),
             new AntPathRequestMatcher("/api/banners", "GET"),
-            new AntPathRequestMatcher("/api/v1/**", "GET")
-    );
+            new AntPathRequestMatcher("/api/v1/**", "GET"));
 
     /**
-     * Processes the HTTP request and performs bearer token authentication if a valid bearer token is present.
+     * Processes the HTTP request and performs bearer token authentication if a
+     * valid bearer token is present.
      *
-     * @param request  the HTTP request.
-     * @param response the HTTP response.
-     * @param filterChain         the filter chain.
-     * @throws ServletException if an exception occurs that interferes with the filter chain's operation.
+     * @param request     the HTTP request.
+     * @param response    the HTTP response.
+     * @param filterChain the filter chain.
+     * @throws ServletException if an exception occurs that interferes with the
+     *                          filter chain's operation.
      * @throws IOException      if an I/O error occurs during processing.
      */
     @Override
@@ -77,7 +78,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        //Set authentication
+        // Set authentication
         final String username = tokenService.extractUsername(jwt);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -85,14 +86,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
             // Check valid JWT
-            if (tokenService.isTokenValid(jwt, userDetails)) { 
-                
+            if (tokenService.isTokenValid(jwt, userDetails)) {
+
                 // Create auth token
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
-                        userDetails.getAuthorities()
-                );
+                        userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 // Add created auth token to Security context
@@ -113,7 +113,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String parseJwt(HttpServletRequest request) {
 
         String headerAuth = request.getHeader(Constants.AUTHORIZATION_HEADER_NAME);
-        
+
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith(AppConstants.TOKEN_PREFIX)) {
             return headerAuth.substring(AppConstants.TOKEN_PREFIX.length());
         }

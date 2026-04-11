@@ -3,7 +3,6 @@ package com.ring.dto.projection.orders;
 import com.ring.model.enums.OrderStatus;
 import com.ring.model.enums.PaymentStatus;
 import com.ring.model.enums.PaymentType;
-import com.ring.model.enums.ShippingType;
 
 import java.time.LocalDateTime;
 
@@ -22,7 +21,7 @@ public interface IOrderDetail {
 
     String getPhone();
 
-    String getCity();
+    String getDetail();
 
     String getAddress();
 
@@ -40,7 +39,11 @@ public interface IOrderDetail {
 
     Double getDiscount();
 
-    ShippingType getShippingType();
+    Integer getServiceTypeId();
+
+    Integer getServiceId();
+
+    String getServiceName();
 
     PaymentType getPaymentType();
 

@@ -9,9 +9,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Represents a detailed book projection as {@link IBookDetail}, containing the book's ID,
+ * Represents a detailed book projection as {@link IBookDetail}, containing the
+ * book's ID,
  * slug, price, discount, title, description, type, author, amount,
- * publisher information, category, shop information, book size, publication date,
+ * publisher information, category, shop information, book size, publication
+ * date,
  * language, weight, preview images, and ratings.
  */
 public interface IBookDetail {
@@ -58,7 +60,11 @@ public interface IBookDetail {
 
     String getShopName();
 
-    String getSize();
+    Short getLength();
+
+    Short getWidth();
+
+    Short getHeight();
 
     Integer getPages();
 
@@ -66,7 +72,7 @@ public interface IBookDetail {
 
     BookLanguage getLanguage();
 
-    Double getWeight();
+    Short getWeight();
 
     List<IImage> getPreviews();
 

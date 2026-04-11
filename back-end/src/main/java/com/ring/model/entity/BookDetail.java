@@ -24,11 +24,17 @@ public class BookDetail {
     @JsonIgnore
     private Long id;
 
-    @Column
-    private Double bWeight;
+    @Column(nullable = false)
+    private Short bWeight;
 
-    @Column(length = 50)
-    private String size;
+    @Column(nullable = false)
+    private Short bLength;
+
+    @Column(nullable = false)
+    private Short bWidth;
+
+    @Column(nullable = false)
+    private Short bHeight;
 
     @Column
     private Integer pages;
@@ -47,10 +53,7 @@ public class BookDetail {
     @EqualsAndHashCode.Exclude
     private Book book;
 
-    @OneToMany(cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            mappedBy = "detail",
-            fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "detail", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Image> previewImages;
 

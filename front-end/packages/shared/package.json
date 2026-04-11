@@ -33,10 +33,6 @@
       "import": "./dist/src/enums/payment.js",
       "require": "./dist/src/enums/payment.cjs"
     },
-    "./enums/shipping": {
-      "import": "./dist/src/enums/shipping.js",
-      "require": "./dist/src/enums/shipping.cjs"
-    },
     "./enums/image": {
       "import": "./dist/src/enums/image.js",
       "require": "./dist/src/enums/image.cjs"
@@ -53,13 +49,21 @@
       "import": "./dist/src/utils/convert.js",
       "require": "./dist/src/utils/convert.cjs"
     },
-    "./utils/location": {
-      "import": "./dist/src/utils/location.js",
-      "require": "./dist/src/utils/location.cjs"
-    },
     "./utils/regex": {
       "import": "./dist/src/utils/regex.js",
       "require": "./dist/src/utils/regex.cjs"
+    },
+    "./utils/filters": {
+      "import": "./dist/src/utils/filters.js",
+      "require": "./dist/src/utils/filters.cjs"
+    },
+    "./utils/canvas": {
+      "import": "./dist/src/utils/canvas.js",
+      "require": "./dist/src/utils/canvas.cjs"
+    },
+    "./constants/appContants": {
+      "import": "./dist/src/constants/appContants.js",
+      "require": "./dist/src/constants/appContants.cjs"
     },
     "./useConfirm": {
       "import": "./dist/src/hooks/useConfirm.js",
@@ -69,17 +73,13 @@
       "import": "./dist/src/hooks/useDeepEffect.js",
       "require": "./dist/src/hooks/useDeepEffect.cjs"
     },
-    "./useReachable": {
-      "import": "./dist/src/hooks/useReachable.js",
-      "require": "./dist/src/hooks/useReachable.cjs"
-    },
-    "./useGetEnums": {
-      "import": "./dist/src/hooks/useGetEnums.js",
-      "require": "./dist/src/hooks/useGetEnums.cjs"
-    },
     "./useTitle": {
       "import": "./dist/src/hooks/useTitle.js",
       "require": "./dist/src/hooks/useTitle.cjs"
+    },
+    "./useOnView": {
+      "import": "./dist/src/hooks/useOnView.js",
+      "require": "./dist/src/hooks/useOnView.cjs"
     },
     "./models": {
       "import": "./dist/src/models/index.js",
@@ -99,7 +99,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "gen:types": "orval --config ./orval.config.ts",
+    "gen:types": "node ./scripts/prepare-openapi.mjs && orval --config ./orval.config.ts",
     "lint": "eslint \"**/*.{ts,tsx,js,jsx}\"",
     "update-dependencies": "npx npm-check-updates -u"
   },
@@ -112,11 +112,11 @@
   },
   "devDependencies": {
     "@ring/eslint-config": "*",
-    "@types/react": "^19.2.7",
+    "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "orval": "^7.17.2",
+    "orval": "^8.6.2",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   },
   "sideEffects": false
 }

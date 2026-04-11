@@ -72,8 +72,8 @@ export const shopsApiSlice = apiWithEnum.injectEndpoints({
 
         // Params
         const params = new URLSearchParams();
-        if (page) params.append("pageNo", page.toString());
-        if (size) params.append("pSize", size.toString());
+        if (page != null) params.append("pageNo", page.toString());
+        if (size != null) params.append("pSize", size.toString());
         if (sortBy) params.append("sortBy", sortBy);
         if (sortDir) params.append("sortDir", sortDir);
         if (keyword) params.append("keyword", keyword);
@@ -203,6 +203,7 @@ export const shopsApiSlice = apiWithEnum.injectEndpoints({
 
 export const {
   useGetShopQuery,
+  useLazyGetShopQuery,
   useGetShopsQuery,
   useGetPreviewShopsQuery,
   useGetShopAnalyticsQuery,

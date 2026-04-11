@@ -113,9 +113,9 @@ const ProductSimple = ({ book, scrollPosition }) => {
 
   /**
    * Handle add to cart
-   * @param {Book} book
    */
-  const handleAddToCart = (book) => {
+  const handleAddToCart = () => {
+    console.log(book);
     addProduct(book, 1);
   };
 
@@ -161,7 +161,7 @@ const ProductSimple = ({ book, scrollPosition }) => {
         size="small"
         variant="outlined"
         color="secondary"
-        onClick={() => handleAddToCart(book)}
+        onClick={handleAddToCart}
         sx={{
           marginBottom: "10px",
           marginTop: "10px",

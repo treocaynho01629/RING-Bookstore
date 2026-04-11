@@ -28,7 +28,7 @@
     "coupon.applied": "Applied",
     "saved": "Saved {{discount}}",
     "vat.included": "VAT included if applicable",
-    "total": "Total payment: ({{quantity}} Products)",
+    "total": "Total payment: ({{count}} Products)",
     "subtotal": "Subtotal",
     "shipping.fee": "Shipping fee",
     "shipping.discount": "Shipping discount",
@@ -139,7 +139,6 @@
   },
   "profile": {
     "following": "Following",
-    "joined": "Joined",
     "orders": "Orders tracking",
     "edit": "Edit profile"
   },
@@ -149,12 +148,14 @@
     "following": "Following",
     "follow": "Follow",
     "explore": "Explore",
-    "follower": "Followers",
-    "canceled.rate": "Cancellation rate",
     "owner": "Owner",
-    "joined": "Joined",
     "view": "View shop",
     "related": "Shops related to"
+  },
+  "address": {
+    "add": "New address",
+    "from": "Deliver from",
+    "to": "Deliver to"
   },
   "required.login": "Please login to {{action}}",
   "required.select": "Please select any items in cart",

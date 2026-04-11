@@ -1,6 +1,5 @@
 package com.ring.dto.request;
 
-import com.ring.model.enums.ShippingType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -28,7 +27,7 @@ public class CartDetailRequest {
     private String note;
 
     @NotNull(message = "{validation.constraints.not.blank}")
-    private ShippingType shippingType;
+    private Integer shippingType;
 
     @NotNull(message = "{validation.constraints.not.blank}")
     private List<CartItemRequest> items;

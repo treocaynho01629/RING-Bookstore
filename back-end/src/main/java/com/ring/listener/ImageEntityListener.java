@@ -16,9 +16,9 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class ImageEntityListener {
-    
+
     private final ApplicationEventPublisher eventPublisher;
-    
+
     /**
      * Publishes an {@link OnImageDeletedEvent} when an image entity is removed.
      * 

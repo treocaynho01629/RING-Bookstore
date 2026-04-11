@@ -13,9 +13,6 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,md}\"",
     "update-dependencies": "turbo update-dependencies && npx npm-check-updates -u"
   },
-  "dependencies": {
-    "@vitejs/plugin-react": "^5.1.2"
-  },
   "devDependencies": {
     "@ring/vitest-config": "*",
     "prettier": "^3.7.4",

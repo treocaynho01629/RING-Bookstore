@@ -210,11 +210,11 @@ const StatusText = styled.div`
 `;
 //#endregion
 
-function getStepContent(receipt) {
-  const date = new Date(receipt?.date);
-  const expiredDate = receipt?.expiredAt ? new Date(receipt?.expiredAt) : null;
+function getStepContent(checkout) {
+  const date = new Date(checkout?.date);
+  const expiredDate = checkout?.expiredAt ? new Date(checkout?.expiredAt) : null;
 
-  switch (receipt?.paymentStatus) {
+  switch (checkout?.paymentStatus) {
     case PaymentStatus.PENDING:
       return {
         summary: "checkout.pending.label",
@@ -246,13 +246,13 @@ const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="left" ref={ref} {...props} />;
 });
 
-const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mobileMode }) => {
+const CheckoutDetailComponent = ({ checkout, pending, setPending, tabletMode, mobileMode }) => {
   const { t, i18n } = useTranslation();
   const [openCancel, setOpenCancel] = useState(undefined);
   const [openUpdate, setOpenUpdate] = useState(undefined);
   const open = Boolean(openCancel || openUpdate);
-  const paymentMeta = getPaymentStatus(receipt?.paymentStatus);
-  const stepContent = getStepContent(receipt);
+  const paymentMeta = getPaymentStatus(checkout?.paymentStatus);
+  const stepContent = getStepContent(checkout);
 
   /**
    * Cancel order
@@ -276,7 +276,7 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
     setOpenUpdate(false);
   };
 
-  const date = new Date(receipt?.date);
+  const date = new Date(checkout?.date);
 
   return (
     <>
@@ -287,21 +287,21 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
           </Link>
           <ReceiptIcon />
           &nbsp;{t("order.id", { ns: "authenticated" })}&nbsp;
-          {!receipt ? <Skeleton variant="text" width={100} /> : idFormatter(receipt?.id)}
+          {!checkout ? <Skeleton variant="text" width={100} /> : idFormatter(checkout?.id)}
           &emsp;
-          {!receipt ? (
+          {!checkout ? (
             <StatusTag color="secondary">{t("loading")}</StatusTag>
           ) : (
             <StatusTag color={paymentMeta?.color}>{t(paymentMeta?.label, { ns: "authenticated" })}</StatusTag>
           )}
         </TitleContainer>
         <SubTitle>
-          {!receipt ? <Skeleton variant="text" width={130} /> : `${timeFormatter(date)} ${dateFormatter(date)}`}
+          {!checkout ? <Skeleton variant="text" width={130} /> : `${timeFormatter(date)} ${dateFormatter(date)}`}
         </SubTitle>
       </StyledDialogTitle>
       <DialogContent sx={{ px: { xs: "0 !important", sm: 2, md: 0 }, mt: { xs: 1, md: 0 } }}>
         <>
-          {!receipt ? (
+          {!checkout ? (
             <Skeleton
               variant="rectangular"
               sx={{
@@ -333,7 +333,7 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
             <Box display="flex" justifyContent="space-between">
               <Box>
                 <SubText>
-                  {!receipt ? (
+                  {!checkout ? (
                     <Skeleton variant="text" width={280} />
                   ) : (
                     t(stepContent?.summary, {
@@ -345,12 +345,12 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
                 </SubText>
               </Box>
               <Box>
-                {!receipt ? (
+                {!checkout ? (
                   <MainButton disabled variant="contained" color="secondary" size="large" fullWidth>
                     {t("loading")}
                   </MainButton>
                 ) : (
-                  receipt?.paymentStatus == PaymentStatus.PENDING && (
+                  checkout?.paymentStatus == PaymentStatus.PENDING && (
                     <>
                       <MainButton
                         variant="outlined"
@@ -372,8 +372,8 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
                       >
                         {t("checkout.payment.update", { ns: "authenticated" })}
                       </MainButton>
-                      {receipt?.paymentType == PaymentType.ONLINE_PAYMENT && (
-                        <Link to={`/payment/${receipt?.id}`}>
+                      {checkout?.paymentType == PaymentType.ONLINE_PAYMENT && (
+                        <Link to={`/payment/${checkout?.id}`}>
                           <MainButton variant="contained" color="info" size="large" fullWidth sx={{ mt: 1 }}>
                             {t("order.pay", { ns: "authenticated" })}
                           </MainButton>
@@ -394,18 +394,18 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
           <InfoContainer>
             <div>
               <Name>
-                {!receipt ? <Skeleton variant="text" width={150} /> : (receipt?.companyName ?? receipt?.name) + " "}
+                {!checkout ? <Skeleton variant="text" width={150} /> : (checkout?.companyName ?? checkout?.name) + " "}
               </Name>
-              <InfoText>{!receipt ? <Skeleton variant="text" width={140} /> : `(+84) ${receipt?.phone}`}</InfoText>
+              <InfoText>{!checkout ? <Skeleton variant="text" width={140} /> : `(+84) ${checkout?.phone}`}</InfoText>
             </div>
             <InfoText>
-              {!receipt ? (
+              {!checkout ? (
                 <Box width="100%">
                   <Skeleton variant="text" width="100%" />
                   <Skeleton variant="text" width="30%" />
                 </Box>
               ) : (
-                (receipt?.address ?? t("unknown"))
+                (checkout?.address ?? t("unknown"))
               )}
             </InfoText>
           </InfoContainer>
@@ -414,8 +414,8 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
           <InboxIcon />
           &nbsp;{t("order.package", { ns: "authenticated" })}
         </Title>
-        <OrderReceiptDetails {...{ receipt, tabletMode }} />
-        {!receipt ? (
+        <OrderReceiptDetails {...{ receipt: checkout, tabletMode }} />
+        {!checkout ? (
           <ButtonContainer>
             <MobileButton>
               <Skeleton variant="text" width={150} />
@@ -425,7 +425,7 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
             </MobileButton>
           </ButtonContainer>
         ) : (
-          receipt?.paymentStatus == PaymentStatus.PENDING && (
+          checkout?.paymentStatus == PaymentStatus.PENDING && (
             <ButtonContainer>
               <MobileButton onClick={handleCancelOrder}>
                 <span>
@@ -449,16 +449,16 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
           )
         )}
         {tabletMode &&
-          (!receipt ? (
+          (!checkout ? (
             <MainButtonContainer>
               <MainButton disabled variant="contained" color="secondary" size="large" fullWidth>
                 {t("loading")}
               </MainButton>
             </MainButtonContainer>
           ) : (
-            receipt?.paymentStatus == PaymentStatus.PENDING &&
-            receipt?.paymentType == PaymentType.ONLINE_PAYMENT && (
-              <Link to={`/payment/${receipt?.id}`}>
+            checkout?.paymentStatus == PaymentStatus.PENDING &&
+            checkout?.paymentType == PaymentType.ONLINE_PAYMENT && (
+              <Link to={`/payment/${checkout?.id}`}>
                 <MainButtonContainer>
                   <MainButton variant="contained" color="info" size="large" fullWidth>
                     {t("order.pay", { ns: "authenticated" })}
@@ -486,10 +486,10 @@ const CheckoutDetailComponent = ({ receipt, pending, setPending, tabletMode, mob
               {...{
                 pending,
                 setPending,
-                id: receipt?.id,
+                id: checkout?.id,
                 handleClose,
                 isRefund: openUpdate,
-                paymentMethod: receipt?.paymentType,
+                paymentMethod: checkout?.paymentType,
               }}
             />
           </Suspense>

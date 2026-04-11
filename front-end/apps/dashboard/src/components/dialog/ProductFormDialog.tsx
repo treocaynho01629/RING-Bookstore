@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, forwardRef, useEffect, type FormEvent, type ChangeEvent } from "react";
+import { useState, forwardRef, useEffect, useMemo, type FormEvent, type ChangeEvent } from "react";
 import {
   TextField,
+  Autocomplete,
   Dialog,
   DialogActions,
   DialogContent,
@@ -14,25 +15,36 @@ import {
   Grid,
 } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import { Check, Add, Close as CloseIcon, AutoStories as AutoStoriesIcon } from "@mui/icons-material";
+import {
+  Check,
+  Close as CloseIcon,
+  AutoStories as AutoStoriesIcon,
+  Info as InfoIcon,
+  PermMedia as ImagesIcon,
+  ShoppingCart as SaleInfoIcon,
+  MenuBook as DetailIcon,
+} from "@mui/icons-material";
 import { getBookType, getBookLanguage } from "@ring/shared/enums/book";
 import { BookLanguage } from "@ring/shared/models/bookLanguage";
 import { BookType } from "@ring/shared/models/bookType";
-import { Title } from "../custom/Components";
+import { Title, TitleContainer } from "../custom/Components";
 import { publishersApiSlice } from "../../features/publishers/publishersApiSlice";
 import { categoriesApiSlice } from "../../features/categories/categoriesApiSlice";
 import { useGetPreviewShopsQuery } from "../../features/shops/shopsApiSlice";
 import { currencyFormat } from "@ring/shared";
+import { getImageSrc } from "@ring/shared/enums/image";
 import { NumberFormatBase, NumericFormat, PatternFormat } from "react-number-format";
 import { useCreateBookMutation, useUpdateBookMutation } from "../../features/books/booksApiSlice";
 import { Instruction, DatePicker } from "@ring/ui";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import usePendingModal from "@/hooks/usePendingModal";
 
 import type { Dayjs } from "dayjs";
 import type { BookDTO } from "@ring/shared/models/bookDTO";
 import type { BookLanguageMeta, BookTypeMeta } from "@ring/shared/enums/book";
+import type { BookRequest } from "@ring/shared/models/bookRequest";
 
-import CustomDropZone from "../custom/CustomDropZone";
+import CustomDropZone, { type ExistingImage } from "../custom/CustomDropZone";
 import dayjs from "dayjs";
 
 /**
@@ -67,26 +79,20 @@ const DEFAULT_FORM = {
   publisher: "",
   category: "",
   shop: "",
-  thumbnailId: null,
-  remove: [],
+  thumbnailPublicId: undefined,
+  removePublicIds: [],
   files: [],
 };
-
-const DEFAULT_PAGINATION = {
-  number: 0,
-  totalPages: 0,
-  totalElements: 0,
-};
-
-interface PaginationState {
-  number: number;
-  totalPages: number;
-  totalElements: number;
-}
 
 interface PriceState {
   price: number;
   discount: number;
+}
+
+interface SelectOption {
+  id: number;
+  name: string;
+  parentId?: number | null;
 }
 
 interface NumericFormatCustomProps {
@@ -125,8 +131,8 @@ export interface ProductFormDialogProps {
   open: boolean;
   handleClose: () => void;
   shop?: string | number;
-  pending: boolean;
-  setPending: (value: boolean) => void;
+  initialSection?: string;
+  onSubmitSuccess?: () => Promise<void> | void;
 }
 
 const ProductFormDialog = ({
@@ -134,15 +140,18 @@ const ProductFormDialog = ({
   open,
   handleClose,
   shop,
-  pending,
-  setPending,
+  initialSection = "basic",
+  onSubmitSuccess,
 }: ProductFormDialogProps) => {
   //#region construct
   const t = useTranslations();
+  const locale = useLocale();
+  const { open: pending, showPending, hidePending } = usePendingModal();
   const fullScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
+  const [images, setImages] = useState<ExistingImage[]>([]);
   const [files, setFiles] = useState<File[]>(DEFAULT_FORM.files);
-  const [thumbnailId, setThumbnailId] = useState<number | null>(DEFAULT_FORM.thumbnailId);
-  const [remove, setRemove] = useState<number[]>(DEFAULT_FORM.remove);
+  const [thumbnailPublicId, setThumbnailPublicId] = useState<string | undefined>(DEFAULT_FORM.thumbnailPublicId);
+  const [removePublicIds, setRemovePublicIds] = useState<string[]>(DEFAULT_FORM.removePublicIds);
   const [title, setTitle] = useState(DEFAULT_FORM.title);
   const [description, setDescription] = useState(DEFAULT_FORM.description);
   const [weight, setWeight] = useState<number>(DEFAULT_FORM.weight);
@@ -156,6 +165,8 @@ const ProductFormDialog = ({
   const [price, setPrice] = useState<PriceState>(DEFAULT_FORM.price);
   const [pub, setPub] = useState(DEFAULT_FORM.publisher);
   const [cate, setCate] = useState(DEFAULT_FORM.category);
+  const [openPub, setOpenPub] = useState(false);
+  const [openCate, setOpenCate] = useState(false);
   const [language, setLanguage] = useState<string>(DEFAULT_FORM.language);
   const [type, setType] = useState<string>(DEFAULT_FORM.type);
   const [err, setErr] = useState<{
@@ -163,27 +174,16 @@ const ProductFormDialog = ({
     data?: { message?: string; errors?: Record<string, string> };
   } | null>(null);
   const [errMsg, setErrMsg] = useState("");
-  const [pubsPagination, setPubsPagination] = useState<PaginationState>({
-    number: DEFAULT_PAGINATION.number,
-    totalPages: DEFAULT_PAGINATION.totalPages,
-    totalElements: DEFAULT_PAGINATION.totalElements,
-  });
-  const [catesPagination, setCatesPagination] = useState<PaginationState>({
-    number: DEFAULT_PAGINATION.number,
-    totalPages: DEFAULT_PAGINATION.totalPages,
-    totalElements: DEFAULT_PAGINATION.totalElements,
-  });
-
   // Fetch shops data
   const { data: shops, isLoading: loadShops } = useGetPreviewShopsQuery(undefined, {
     skip: product != null || (!currShop && !openShop),
   });
 
   // Fetch publishers data
-  const [getPublishers, { data: pubs }] = publishersApiSlice.useLazyGetPublishersQuery();
+  const [getPublishers, { data: pubs, isLoading: loadingPubs }] = publishersApiSlice.useLazyGetPublishersQuery();
 
   // Fetch categories data
-  const [getCategories, { data: cates }] = categoriesApiSlice.useLazyGetCategoriesQuery();
+  const [getCategories, { data: cates, isLoading: loadingCates }] = categoriesApiSlice.useLazyGetCategoriesQuery();
 
   // Create book mutation
   const [createBook, { isLoading: creating }] = useCreateBookMutation();
@@ -191,8 +191,38 @@ const ProductFormDialog = ({
   // Update book mutation
   const [updateBook, { isLoading: updating }] = useUpdateBookMutation();
 
+  const existingImages: ExistingImage[] = useMemo(() => {
+    if (!product) return [];
+    const imageSets = product.srcSet ?? [];
+    const publicIds = product.imagePublicIds ?? [];
+
+    return (
+      imageSets?.map((srcSet, index) => {
+        const publicId = publicIds[index];
+        const image: ExistingImage = {
+          publicId,
+          name: `image-${publicId}`,
+          url: getImageSrc(srcSet as Record<number, string>, 120) ?? "",
+        };
+        return image;
+      }) ?? []
+    );
+  }, [product]);
+
+  // Scroll to section when dialog opens
+  useEffect(() => {
+    if (open && initialSection) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`section-${initialSection}`);
+        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [open, initialSection]);
+
   useEffect(() => {
     if (product) {
+      setImages(existingImages);
       setTitle(product?.title ?? DEFAULT_FORM.title);
       setDescription(product?.description ?? DEFAULT_FORM.description);
       setWeight(product?.weight ?? DEFAULT_FORM.weight);
@@ -210,8 +240,8 @@ const ProductFormDialog = ({
       setPub(product?.publisher?.id?.toString() ?? DEFAULT_FORM.publisher);
       setCate(product?.category?.id?.toString() ?? DEFAULT_FORM.category);
       setCurrShop(product?.shopId ?? DEFAULT_FORM.shop);
-      setThumbnailId(product?.image?.id ?? DEFAULT_FORM.thumbnailId);
-      setRemove(DEFAULT_FORM.remove);
+      setThumbnailPublicId(product?.imagePublicIds?.[0] ?? DEFAULT_FORM.thumbnailPublicId);
+      setRemovePublicIds(DEFAULT_FORM.removePublicIds);
       setErr(null);
       setErrMsg("");
     } else {
@@ -223,6 +253,7 @@ const ProductFormDialog = ({
    * Clear input
    */
   const clearInput = () => {
+    setImages([]);
     setTitle(DEFAULT_FORM.title);
     setDescription(DEFAULT_FORM.description);
     setWeight(DEFAULT_FORM.weight);
@@ -240,8 +271,8 @@ const ProductFormDialog = ({
     setPub(DEFAULT_FORM.publisher);
     setCate(DEFAULT_FORM.category);
     setCurrShop(currShop);
-    setThumbnailId(DEFAULT_FORM.thumbnailId);
-    setRemove(DEFAULT_FORM.remove);
+    setThumbnailPublicId(DEFAULT_FORM.thumbnailPublicId);
+    setRemovePublicIds(DEFAULT_FORM.removePublicIds);
     setErr(null);
     setErrMsg("");
   };
@@ -251,8 +282,10 @@ const ProductFormDialog = ({
    */
   const handleCloseDialog = () => {
     setFiles(DEFAULT_FORM.files);
-    setRemove(DEFAULT_FORM.remove);
-    setThumbnailId(product ? (product.image?.id ?? DEFAULT_FORM.thumbnailId) : DEFAULT_FORM.thumbnailId);
+    setRemovePublicIds(DEFAULT_FORM.removePublicIds);
+    setThumbnailPublicId(
+      product ? (product?.imagePublicIds?.[0] ?? DEFAULT_FORM.thumbnailPublicId) : DEFAULT_FORM.thumbnailPublicId
+    );
     handleClose();
   };
 
@@ -260,45 +293,39 @@ const ProductFormDialog = ({
    * Handle open publishers
    */
   const handleOpenPubs = () => {
+    setOpenPub(true);
     if (!pubs) {
       getPublishers({
-        page: pubsPagination?.number,
-        loadMore: true,
+        page: 0,
+        size: 100,
       })
         .unwrap()
-        .then((data) => {
-          setPubsPagination({
-            ...pubsPagination,
-            number: data.page,
-            totalPages: data.totalPages,
-            totalElements: data.totalElements,
-          });
-        })
         .catch((rejected) => console.error(rejected));
     }
+  };
+
+  const handleClosePubs = () => {
+    setOpenPub(false);
   };
 
   /**
    * Handle open categories
    */
   const handleOpenCates = () => {
+    setOpenCate(true);
     if (!cates) {
       getCategories({
         include: "children",
-        page: catesPagination?.number,
-        loadMore: true,
+        page: 0,
+        size: 999,
       })
         .unwrap()
-        .then((data) => {
-          setCatesPagination({
-            ...catesPagination,
-            number: data.page,
-            totalPages: data.totalPages,
-            totalElements: data.totalElements,
-          });
-        })
         .catch((rejected) => console.error(rejected));
     }
+  };
+
+  const handleCloseCates = () => {
+    setOpenCate(false);
   };
 
   /**
@@ -308,51 +335,8 @@ const ProductFormDialog = ({
     setOpenShop(true);
   };
 
-  /**
-   * Handle show more publishers
-   */
-  const handleShowMorePubs = () => {
-    const currPage = (pubsPagination?.number ?? 0) + 1;
-    if (currPage < (pubsPagination?.totalPages ?? 0)) {
-      getPublishers({
-        page: currPage,
-        loadMore: true,
-      })
-        .unwrap()
-        .then((data) => {
-          setPubsPagination({
-            ...pubsPagination,
-            number: data.page,
-            totalPages: data.totalPages,
-            totalElements: data.totalElements,
-          });
-        })
-        .catch((rejected) => console.error(rejected));
-    }
-  };
-
-  /**
-   * Handle show more categories
-   */
-  const handleShowMoreCates = () => {
-    const currPage = (catesPagination?.number ?? 0) + 1;
-    if (currPage < (catesPagination?.totalPages ?? 0)) {
-      getCategories({
-        include: "children",
-        page: currPage,
-        loadMore: true,
-      })
-        .unwrap()
-        .then((data) => {
-          setCatesPagination({
-            ...catesPagination,
-            number: data.page,
-            totalPages: data.totalPages,
-            totalElements: data.totalElements,
-          });
-        })
-        .catch((rejected) => console.error(rejected));
-    }
+  const handleCloseShops = () => {
+    setOpenShop(false);
   };
 
   /**
@@ -398,37 +382,39 @@ const ProductFormDialog = ({
     e.preventDefault();
     if (creating || updating || pending) return;
 
-    setPending(true);
+    showPending();
     const { enqueueSnackbar } = await import("notistack");
 
     // Set data
     const formData = new FormData();
-    const json = JSON.stringify({
+    const request: BookRequest = {
       price: price.price,
       discount: price.discount,
       amount,
       title,
       description,
-      type,
+      type: type as BookType,
       author,
-      pubId: pub,
-      cateId: cate,
+      pubId: Number(pub),
+      cateId: Number(cate),
       weight,
       size,
       pages,
       date: date.format("YYYY-MM-DD"),
-      language,
-      shopId: product ? product?.shopId : typeof currShop === "string" ? Number(currShop) : currShop,
-      thumbnailId: product ? thumbnailId : null,
-      removeIds: product ? remove : null,
-    });
+      language: language as BookLanguage,
+      shopId: product ? Number(product?.shopId) : Number(currShop),
+      thumbnailPublicId: product ? thumbnailPublicId : undefined,
+      removePublicIds: product ? removePublicIds : undefined,
+    };
+    const json = JSON.stringify(request);
     const blob = new Blob([json], { type: "application/json" });
 
     formData.append("request", blob);
     if (files) {
       if (product) {
-        //Update
-        if (!thumbnailId) {
+        // Update
+        // If remove original thumbnail, set new thumbnail
+        if (!thumbnailPublicId) {
           formData.append("thumbnail", files[0]);
           if (files.length > 1) {
             files.slice(1).forEach((file) => formData.append("images", file));
@@ -439,7 +425,7 @@ const ProductFormDialog = ({
           });
         }
       } else {
-        //Create
+        // Create
         formData.append("thumbnail", files[0]);
         if (files.length > 1) {
           files.slice(1).forEach((file) => formData.append("images", file));
@@ -448,16 +434,19 @@ const ProductFormDialog = ({
     }
 
     if (product) {
-      //Update
+      // Update
       updateBook({ id: product?.id, updatedBook: formData })
         .unwrap()
-        .then(() => {
+        .then(async () => {
+          if (product?.id != null) {
+            await onSubmitSuccess?.();
+          }
           setErrMsg("");
           setErr(null);
           enqueueSnackbar("Chỉnh sửa sản phẩm thành công!", {
             variant: "success",
           });
-          setPending(false);
+          hidePending();
           handleCloseDialog();
         })
         .catch((err: { status?: number; data?: { message?: string; errors?: Record<string, string> } }) => {
@@ -477,10 +466,10 @@ const ProductFormDialog = ({
             setErrMsg("Chỉnh sửa sản phẩm thất bại!");
           }
           enqueueSnackbar("Chỉnh sửa sản phẩm thất bại!", { variant: "error" });
-          setPending(false);
+          hidePending();
         });
     } else {
-      //Create
+      // Create
       createBook(formData)
         .unwrap()
         .then(() => {
@@ -488,7 +477,7 @@ const ProductFormDialog = ({
           setErrMsg("");
           setErr(null);
           enqueueSnackbar("Thêm sản phẩm thành công!", { variant: "success" });
-          setPending(false);
+          hidePending();
         })
         .catch((err: { status?: number; data?: { message?: string; errors?: Record<string, string> } }) => {
           console.error(err);
@@ -507,11 +496,70 @@ const ProductFormDialog = ({
             setErrMsg("Thêm sản phẩm thất bại!");
           }
           enqueueSnackbar("Thêm sản phẩm thất bại!", { variant: "error" });
-          setPending(false);
+          hidePending();
         });
     }
   };
   //#endregion
+
+  const categoryOptions = useMemo<SelectOption[]>(() => {
+    const options: SelectOption[] =
+      cates?.ids?.flatMap((id) => {
+        const parent = cates?.entities[id];
+        if (!parent) return [];
+
+        const parentOption: SelectOption = { id: Number(parent.id), name: parent.name ?? "", parentId: null };
+        const childOptions: SelectOption[] =
+          parent.children?.map((child) => ({
+            id: Number(child.id),
+            name: child.name ?? "",
+            parentId: Number(parent.id),
+          })) ?? [];
+
+        return [parentOption, ...childOptions];
+      }) ?? [];
+
+    if (product?.category?.id && product?.category?.name) {
+      const exists = options.some((item) => Number(item.id) === Number(product.category?.id));
+      if (!exists) options.unshift({ id: Number(product.category.id), name: product.category.name, parentId: null });
+    }
+
+    return options;
+  }, [cates, product?.category?.id, product?.category?.name]);
+
+  const publisherOptions = useMemo<SelectOption[]>(() => {
+    const options: SelectOption[] =
+      pubs?.ids
+        ?.map((id) => pubs?.entities[id])
+        .filter(Boolean)
+        .map((item) => ({ id: Number(item.id), name: item.name ?? "" })) ?? [];
+
+    if (product?.publisher?.id && product?.publisher?.name) {
+      const exists = options.some((item) => Number(item.id) === Number(product.publisher?.id));
+      if (!exists) options.unshift({ id: Number(product.publisher.id), name: product.publisher.name });
+    }
+
+    return options;
+  }, [pubs, product?.publisher?.id, product?.publisher?.name]);
+
+  const shopOptions = useMemo<SelectOption[]>(() => {
+    const options: SelectOption[] =
+      shops?.ids
+        ?.map((id) => shops?.entities[id])
+        .filter(Boolean)
+        .map((item) => ({ id: Number(item.id), name: item.name ?? "" })) ?? [];
+
+    if (product?.shopId && product?.shopName) {
+      const exists = options.some((item) => Number(item.id) === Number(product.shopId));
+      if (!exists) options.unshift({ id: Number(product.shopId), name: product.shopName });
+    }
+
+    return options;
+  }, [shops, product?.shopId, product?.shopName]);
+
+  const selectedCategory = categoryOptions.find((item) => Number(item.id) === Number(cate)) ?? null;
+  const selectedPublisher = publisherOptions.find((item) => Number(item.id) === Number(pub)) ?? null;
+  const selectedShop = shopOptions.find((item) => Number(item.id) === Number(currShop)) ?? null;
 
   return (
     <Dialog
@@ -529,14 +577,17 @@ const ProductFormDialog = ({
         &nbsp;{product ? t("product.edit") : t("product.add")}
       </DialogTitle>
       <DialogContent dividers={true}>
-        <form onSubmit={handleSubmit}>
+        <form id="product-form-dialog" onSubmit={handleSubmit}>
           <Instruction style={{ display: errMsg ? "block" : "none" }}>{errMsg}</Instruction>
           <Grid container size="grow" spacing={1}>
-            <Title>{t("product.info")}</Title>
+            <TitleContainer id="section-basic">
+              <InfoIcon fontSize="small" />
+              <Title>{t("basic")}</Title>
+            </TitleContainer>
             <TextField
               required
               id="title"
-              label={t("product.title")}
+              label={t("title")}
               fullWidth
               variant="outlined"
               value={title}
@@ -547,7 +598,7 @@ const ProductFormDialog = ({
             <TextField
               required
               id="description"
-              label={t("product.description")}
+              label={t("description")}
               fullWidth
               multiline
               minRows={6}
@@ -558,187 +609,105 @@ const ProductFormDialog = ({
               helperText={err?.data?.errors?.description}
             />
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <TextField
-                label={t("category.label")}
-                value={cate || ""}
-                onChange={(e) => setCate(e.target.value)}
-                select
-                defaultValue=""
-                fullWidth
-                error={!!err?.data?.errors?.cateId}
-                helperText={err?.data?.errors?.cateId}
-                slotProps={{
-                  select: {
-                    onOpen: handleOpenCates,
-                    MenuProps: {
-                      slotProps: {
-                        paper: {
-                          style: {
-                            maxHeight: 250,
-                          },
-                        },
-                      },
-                    },
-                  },
-                }}
-              >
-                <MenuItem value="">
-                  <em>--{t("all.label")}--</em>
-                </MenuItem>
-                {product && !cates && (
-                  <MenuItem key={`cate-${product?.category?.id}`} value={product?.category?.id}>
-                    {product?.category?.name}
-                  </MenuItem>
+              <Autocomplete<SelectOption, false, false, false>
+                options={categoryOptions}
+                open={openCate}
+                loading={loadingCates}
+                onOpen={handleOpenCates}
+                onClose={handleCloseCates}
+                value={selectedCategory}
+                getOptionLabel={(opt) => (typeof opt === "object" && opt?.name ? opt.name : "")}
+                isOptionEqualToValue={(opt, val) => Number(opt?.id) === Number(val?.id)}
+                onChange={(_, newValue) => setCate(newValue?.id ? String(newValue.id) : "")}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={t("category.label")}
+                    fullWidth
+                    error={!!err?.data?.errors?.cateId}
+                    helperText={err?.data?.errors?.cateId}
+                  />
                 )}
-                {cates?.ids?.map((id, index) => {
-                  const cate = cates?.entities[id];
-                  const cateList = [];
-
-                  cateList.push(
-                    <MenuItem key={`cate-${id}-${index}`} value={id}>
-                      {cate?.name}
-                    </MenuItem>
+                renderOption={(props, option) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                    <li key={key} {...optionProps} style={{ marginLeft: option.parentId ? 16 : 0 }}>
+                      {option.name}
+                    </li>
                   );
-                  {
-                    cate?.children?.map((child, childIndex) => {
-                      cateList.push(
-                        <MenuItem
-                          sx={{ pl: 3, fontSize: 15 }}
-                          key={`child-cate-${child?.id}-${childIndex}`}
-                          value={child?.id}
-                        >
-                          {child?.name}
-                        </MenuItem>
-                      );
-                    });
-                  }
-
-                  return cateList;
-                })}
-                {catesPagination?.totalPages > catesPagination?.number + 1 && (
-                  <Box display="flex" justifyContent="center">
-                    <Button onClick={handleShowMoreCates} endIcon={<Add />} fullWidth>
-                      Tải thêm
-                    </Button>
-                  </Box>
-                )}
-              </TextField>
+                }}
+              />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <TextField
-                label={t("publisher.label")}
-                value={pub || ""}
-                onChange={(e) => setPub(e.target.value)}
-                select
-                defaultValue=""
-                fullWidth
-                error={!!err?.data?.errors?.pubId}
-                helperText={err?.data?.errors?.pubId}
-                slotProps={{
-                  select: {
-                    onOpen: handleOpenPubs,
-                    MenuProps: {
-                      slotProps: {
-                        paper: {
-                          style: {
-                            maxHeight: 250,
-                          },
-                        },
-                      },
-                    },
-                  },
-                }}
-              >
-                {product && !pubs && (
-                  <MenuItem key={`pub-${product?.publisher?.id}`} value={product?.publisher?.id}>
-                    {product?.publisher?.name}
-                  </MenuItem>
+              <Autocomplete<SelectOption, false, false, false>
+                options={publisherOptions}
+                open={openPub}
+                loading={loadingPubs}
+                onOpen={handleOpenPubs}
+                onClose={handleClosePubs}
+                value={selectedPublisher}
+                getOptionLabel={(opt) => (typeof opt === "object" && opt?.name ? opt.name : "")}
+                isOptionEqualToValue={(opt, val) => Number(opt?.id) === Number(val?.id)}
+                onChange={(_, newValue) => setPub(newValue?.id ? String(newValue.id) : "")}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={t("publisher.label")}
+                    fullWidth
+                    error={!!err?.data?.errors?.pubId}
+                    helperText={err?.data?.errors?.pubId}
+                  />
                 )}
-                {pubs?.ids?.map((id, index) => {
-                  const pub = pubs?.entities[id];
-
-                  return (
-                    <MenuItem key={`pub-${id}-${index}`} value={id}>
-                      {pub?.name}
-                    </MenuItem>
-                  );
-                })}
-                {pubsPagination?.totalPages > pubsPagination?.number + 1 && (
-                  <Box display="flex" justifyContent="center">
-                    <Button onClick={handleShowMorePubs} endIcon={<Add />} fullWidth>
-                      Tải thêm
-                    </Button>
-                  </Box>
-                )}
-              </TextField>
+              />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <TextField
-                label={t("store")}
-                value={currShop || ""}
-                onChange={(e) => setCurrShop(e.target.value)}
-                select
-                fullWidth
+              <Autocomplete<SelectOption, false, false, false>
+                options={shopOptions}
+                open={openShop}
+                loading={loadShops}
+                onOpen={handleOpenShops}
+                onClose={handleCloseShops}
+                value={selectedShop}
                 disabled={product != null}
-                error={!!err?.data?.errors?.shopId}
-                helperText={err?.data?.errors?.shopId}
-                slotProps={{
-                  select: {
-                    onOpen: handleOpenShops,
-                    MenuProps: {
-                      slotProps: {
-                        paper: {
-                          style: {
-                            maxHeight: 250,
-                          },
-                        },
-                      },
-                    },
-                  },
-                }}
-              >
-                <MenuItem disabled>
-                  <em>--{t("store")}--</em>
-                </MenuItem>
-                {product && (
-                  <MenuItem key={`shop-${product?.shopId}`} value={product?.shopId}>
-                    {product?.shopName}
-                  </MenuItem>
+                getOptionLabel={(opt) => (typeof opt === "object" && opt?.name ? opt.name : "")}
+                isOptionEqualToValue={(opt, val) => Number(opt?.id) === Number(val?.id)}
+                onChange={(_, newValue) => setCurrShop(newValue?.id ?? "")}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={t("store")}
+                    fullWidth
+                    error={!!err?.data?.errors?.shopId}
+                    helperText={err?.data?.errors?.shopId}
+                  />
                 )}
-                {shops?.ids?.map((id, index) => {
-                  const shop = shops?.entities[id];
-
-                  return (
-                    <MenuItem key={`shop-${id}-${index}`} value={id}>
-                      {shop?.name}
-                    </MenuItem>
-                  );
-                })}
-              </TextField>
+              />
             </Grid>
-            <Title>{t("product.images")}</Title>
+            <TitleContainer id="section-images">
+              <ImagesIcon fontSize="small" />
+              <Title>{t("images")}</Title>
+            </TitleContainer>
             <CustomDropZone
               {...{
                 files,
                 setFiles,
-                thumbnailId,
-                setThumbnailId,
-                remove,
-                setRemove,
-                isMissing: !(files.length > 0) && err?.data?.errors?.thumbnail,
-                images: product
-                  ? product?.previews
-                    ? [product?.image].concat(product?.previews)
-                    : [product?.image]
-                  : null,
+                images,
+                setImages,
+                thumbnailPublicId,
+                setThumbnailPublicId,
+                removePublicIds,
+                setRemovePublicIds,
               }}
             />
-            <Title>{t("product.detail")}</Title>
+            <TitleContainer id="section-sale">
+              <SaleInfoIcon fontSize="small" />
+              <Title>{t("product.sale.info")}</Title>
+            </TitleContainer>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <NumericFormat
                 required
                 id="weight"
-                label={t("product.weight")}
+                label={t("product.sale.weight")}
                 suffix="g"
                 fullWidth
                 variant="outlined"
@@ -754,7 +723,7 @@ const ProductFormDialog = ({
               <PatternFormat
                 required
                 id="size"
-                label={t("product.size")}
+                label={t("product.sale.size")}
                 format="### x ### x ###"
                 fullWidth
                 variant="outlined"
@@ -766,72 +735,6 @@ const ProductFormDialog = ({
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <NumericFormat
-                required
-                id="pages"
-                label={t("product.pages")}
-                fullWidth
-                variant="outlined"
-                value={pages}
-                onValueChange={(values) => setPages(Number(values.value) || 0)}
-                error={!!err?.data?.errors?.pages}
-                helperText={err?.data?.errors?.pages}
-                customInput={TextField}
-                allowNegative={false}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <DatePicker
-                required
-                label={t("product.date")}
-                value={date}
-                className="custom-date-picker"
-                onChange={(newValue: Dayjs | null) => setDate(newValue ?? dayjs("2001-01-01"))}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    required: true,
-                    error: !!err?.data?.errors?.date,
-                    helperText: err?.data?.errors?.date,
-                  },
-                }}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <TextField
-                label={t("language.label")}
-                select
-                required
-                fullWidth
-                id="language"
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-              >
-                {bookLanguageOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <TextField
-                label={t("product.type.label")}
-                select
-                required
-                fullWidth
-                id="type"
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-              >
-                {bookTypeOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
               <NumericFormat
                 required
                 id="amount"
@@ -846,25 +749,11 @@ const ProductFormDialog = ({
                 allowNegative={false}
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                required
-                id="author"
-                label={t("product.author")}
-                fullWidth
-                variant="outlined"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                error={!!err?.data?.errors?.author}
-                helperText={err?.data?.errors?.author}
-              />
-            </Grid>
-            <Title>{t("product.price.label")}</Title>
             <Grid size={{ xs: 12, md: 4 }}>
               <TextField
                 required
                 id="price"
-                label={t("product.price.label")}
+                label={t("product.price.original")}
                 fullWidth
                 value={price.price}
                 onChange={handleInputChange}
@@ -905,6 +794,90 @@ const ProductFormDialog = ({
                 allowNegative={false}
               />
             </Grid>
+            <TitleContainer id="section-detail">
+              <DetailIcon fontSize="small" />
+              <Title>{t("product.detail")}</Title>
+            </TitleContainer>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <DatePicker
+                locale={locale}
+                required
+                label={t("product.date")}
+                value={date}
+                className="custom-date-picker"
+                onChange={(newValue: Dayjs | null) => setDate(newValue ?? dayjs("2001-01-01"))}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    required: true,
+                    error: !!err?.data?.errors?.date,
+                    helperText: err?.data?.errors?.date,
+                  },
+                }}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <TextField
+                label={t("language.label")}
+                select
+                required
+                fullWidth
+                id="language"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+              >
+                {bookLanguageOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {t(option.label)}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <TextField
+                label={t("product.type.label")}
+                select
+                required
+                fullWidth
+                id="type"
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+              >
+                {bookTypeOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {t(option.label)}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <NumericFormat
+                required
+                id="pages"
+                label={t("product.pages")}
+                fullWidth
+                variant="outlined"
+                value={pages}
+                onValueChange={(values) => setPages(Number(values.value) || 0)}
+                error={!!err?.data?.errors?.pages}
+                helperText={err?.data?.errors?.pages}
+                customInput={TextField}
+                allowNegative={false}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                required
+                id="author"
+                label={t("product.author")}
+                fullWidth
+                variant="outlined"
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                error={!!err?.data?.errors?.author}
+                helperText={err?.data?.errors?.author}
+              />
+            </Grid>
           </Grid>
         </form>
       </DialogContent>
@@ -916,7 +889,8 @@ const ProductFormDialog = ({
           variant="contained"
           color="primary"
           size="large"
-          onClick={() => handleSubmit({ preventDefault: () => {} } as FormEvent<HTMLFormElement>)}
+          type="submit"
+          form="product-form-dialog"
           startIcon={<Check />}
         >
           {t("apply")}

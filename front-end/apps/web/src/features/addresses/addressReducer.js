@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = { addresses: [] };
+const initialState = { addresses: [], defaultAddress: null };
 
 export const addressSlice = createSlice({
   name: "address",
@@ -29,10 +29,18 @@ export const addressSlice = createSlice({
     removeStateAddress: (state, action) => {
       state.addresses = state.addresses.filter((item) => item.id !== action.payload);
     },
+    clearStateDefaultAddress: (state) => {
+      state.defaultAddress = null;
+    },
+    setStateDefaultAddress: (state, action) => {
+      state.defaultAddress = action.payload;
+    },
   },
 });
 
-export const { addAddress, removeStateAddress } = addressSlice.actions;
+export const { addAddress, removeStateAddress, clearStateDefaultAddress, setStateDefaultAddress } =
+  addressSlice.actions;
 export const selectAddresses = (state) => state.address.addresses;
+export const selectDefaultAddress = (state) => state.address.defaultAddress;
 
 export default addressSlice.reducer;

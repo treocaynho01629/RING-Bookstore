@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
-import { getCroppedImg } from "../../utils/canvas";
+import { getCroppedImg } from "@ring/shared/utils/canvas";
 import { useTranslation } from "react-i18next";
 import Cropper from "react-easy-crop";
 import Slider from "@mui/material/Slider";

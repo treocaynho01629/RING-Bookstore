@@ -11,20 +11,21 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * Represents a calculation request as {@link CalculateRequest} to calculate cart value.
+ * Represents a calculation request as {@link CalculateRequest} to calculate
+ * cart value.
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class CalculateRequest {
-	
-	@NotNull(message = "{validation.constraints.not.blank}")
-	@NotEmpty(message = "{validation.constraints.not.blank}")
-	private List<CartDetailRequest> cart;
 
-	private String coupon;
+    @NotNull(message = "{validation.constraints.not.blank}")
+    @NotEmpty(message = "{validation.constraints.not.blank}")
+    private List<CartDetailRequest> cart;
 
-	@Valid
-	private AddressRequest address;
+    private String coupon;
+
+    @Valid
+    private AddressRequest address;
 }

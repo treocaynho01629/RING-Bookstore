@@ -2,11 +2,13 @@ import { useTranslations } from "next-intl";
 import { Shop } from "@/hooks/useShop";
 import { PreviewResponse, PreviewsState } from "@/features/shops/shopsApiSlice";
 import Avatar from "@mui/material/Avatar";
+import Divider from "@mui/material/Divider";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import Store from "@mui/icons-material/Store";
-import Link from "next/link";
+import Add from "@mui/icons-material/Add";
+import { Link } from "@/i18n/navigation";
 
 interface ShopSelectProps {
   open: boolean;
@@ -52,11 +54,7 @@ const ShopSelect = ({ open, anchorEl, handleClose, shop, setShop, clearShop, dat
           </MenuItem>
         );
       })
-    ) : (
-      <Link href={"/shop"}>
-        <MenuItem sx={{ px: 1, fontSize: 14 }}>{t("shop.add")}</MenuItem>
-      </Link>
-    );
+    ) : null;
   }
 
   return (
@@ -105,6 +103,18 @@ const ShopSelect = ({ open, anchorEl, handleClose, shop, setShop, clearShop, dat
         {t("all.shop")}
       </MenuItem>
       {shopsContent}
+      <Divider />
+      <MenuItem
+        component={Link}
+        href="/shop?add=true"
+        sx={{ px: 1, fontSize: 14 }}
+        onClick={handleClose}
+      >
+        <Avatar sx={{ width: 22, height: 22, mr: 1 }}>
+          <Add fontSize="small" />
+        </Avatar>
+        {t("shop.add")}
+      </MenuItem>
     </Menu>
   );
 };

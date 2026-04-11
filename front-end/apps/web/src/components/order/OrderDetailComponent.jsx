@@ -2,8 +2,6 @@ import styled from "@emotion/styled";
 import { Suspense, lazy, useState, forwardRef } from "react";
 import { StyledDialogTitle } from "../custom/ProfileComponents";
 import { currencyFormat, dateFormatter, idFormatter, timeFormatter } from "@ring/shared/utils/convert";
-import { getShippingType } from "@ring/shared/enums/shipping";
-import { iconList } from "@ring/shared/utils/icon";
 import { Link } from "react-router";
 import { booksApiSlice } from "../../features/books/booksApiSlice";
 import { MobileExtendButton } from "@ring/ui/Components";
@@ -374,8 +372,6 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
   const orderedDate = new Date(order?.orderedDate);
   const date = new Date(order?.date);
   const isRefundable = Math.abs(new Date() - date) / (1000 * 60 * 60 * 24) <= 7;
-  const shippingMeta = getShippingType(order?.shippingType);
-  const Icon = iconList[shippingMeta?.icon];
 
   return (
     <>
@@ -574,19 +570,7 @@ const OrderDetailComponent = ({ order, pending, setPending, tabletMode, mobileMo
               <InfoContainer>
                 <Box mb={1}>
                   <Name>{t("order.shipping", { ns: "authenticated" })}:</Name>
-                  <InfoText>
-                    {!order ? (
-                      <Skeleton variant="text" width={200} />
-                    ) : (
-                      <Suspense fallback={null}>
-                        <ShippingTag color={shippingMeta?.color}>
-                          {Icon && <Icon color={shippingMeta?.color} />}
-                          &nbsp;{t(shippingMeta?.label)}:
-                        </ShippingTag>
-                        &nbsp;{t("shipping.estimate", { date: shippingMeta?.estimate })}
-                      </Suspense>
-                    )}
-                  </InfoText>
+                  <InfoText>{t("checkout.shipping.ghn", { ns: "authenticated" })}</InfoText>
                   <InfoText className="price">
                     {!order ? (
                       <Skeleton variant="text" width={190} />

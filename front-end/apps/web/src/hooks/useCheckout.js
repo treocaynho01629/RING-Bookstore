@@ -1,7 +1,6 @@
 import { isEqual } from "lodash-es";
+import { FALLBACK_SHIPPING_FEE } from "@ring/shared/constants/appContants";
 import useCart from "./useCart";
-
-const tempShippingFee = 10000;
 
 const useCheckout = () => {
   const { cartProducts, replaceProduct, removeProduct, removeShopProduct } = useCart();
@@ -20,7 +19,7 @@ const useCheckout = () => {
       let totalDeal = 0;
       let subTotal = 0;
       let totalQuantity = 0;
-      const shipping = tempShippingFee * (cart?.cart?.length || 0);
+      const shipping = FALLBACK_SHIPPING_FEE * (cart?.cart?.length || 0);
 
       // Loop through cart and calculate
       cart?.cart?.forEach((detail) => {

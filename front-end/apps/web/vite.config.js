@@ -1,10 +1,12 @@
 import { defineConfig, loadEnv } from "vite";
 import { visualizer } from "rollup-plugin-visualizer";
-import react from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
+import process from "node:process";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(({ mode }) => {
   // Load environment variables based on the current mode
   const env = loadEnv(mode, process.cwd(), "");
   const baseUrl = env.VITE_API_URL;
@@ -13,9 +15,10 @@ export default defineConfig(({ command, mode }) => {
     plugins: [
       react({
         jsxImportSource: "@emotion/react",
-        babel: {
-          plugins: [["babel-plugin-react-compiler"], "@emotion/babel-plugin"],
-        },
+      }),
+      babel({
+        presets: [reactCompilerPreset()],
+        plugins: ["@emotion/babel-plugin"],
       }),
       svgr({
         svgrOptions: {
@@ -37,11 +40,7 @@ export default defineConfig(({ command, mode }) => {
                 return "mui-date-pickers";
               }
 
-              return id
-                .toString()
-                .split("node_modules/")[1]
-                .split("/")[0]
-                .toString();
+              return id.toString().split("node_modules/")[1].split("/")[0].toString();
             }
           },
         },
@@ -57,18 +56,10 @@ export default defineConfig(({ command, mode }) => {
               console.error("Proxy Error:", err);
             });
             proxy.on("proxyReq", (proxyReq, req, _res) => {
-              console.info(
-                "Sending Request to the Target:",
-                req.method,
-                req.url
-              );
+              console.info("Sending Request to the Target:", req.method, req.url);
             });
             proxy.on("proxyRes", (proxyRes, req, _res) => {
-              console.info(
-                "Received Response from the Target:",
-                proxyRes.statusCode,
-                req.url
-              );
+              console.info("Received Response from the Target:", proxyRes.statusCode, req.url);
             });
           },
         },

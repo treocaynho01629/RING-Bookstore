@@ -110,11 +110,13 @@ const ShopDisplay = ({ shop, name }) => {
               >
                 <Link to={`/shop/${shop?.id}`}>
                   <Box mb={{ xs: 0, md: 1 }}>
-                    <ShopName>{shop?.name}</ShopName>
-                    <Verified>
-                      <VerifiedIcon sx={{ fontSize: "16px", marginRight: 1 }} color="primary" />
-                      {t("official")}
-                    </Verified>
+                    <ShopName className={shop?.verified ? "" : "unverified"}>{shop?.name}</ShopName>
+                    {shop?.verified && (
+                      <Verified>
+                        <VerifiedIcon sx={{ fontSize: "16px", marginRight: 1 }} color="primary" />
+                        {t("official")}
+                      </Verified>
+                    )}
                   </Box>
                 </Link>
                 <Button
@@ -142,7 +144,7 @@ const ShopDisplay = ({ shop, name }) => {
           <Stack spacing={2} direction="row" useFlexGap sx={{ flexWrap: "wrap", width: "100%" }}>
             {!shop ? (
               <>
-                <ShopDetail>
+                <ShopDetail className="compact">
                   <Skeleton
                     variant="text"
                     sx={{
@@ -151,7 +153,7 @@ const ShopDisplay = ({ shop, name }) => {
                     }}
                   />
                 </ShopDetail>
-                <ShopDetail>
+                <ShopDetail className="compact">
                   <Skeleton
                     variant="text"
                     sx={{
@@ -160,7 +162,7 @@ const ShopDisplay = ({ shop, name }) => {
                     }}
                   />
                 </ShopDetail>
-                <ShopDetail>
+                <ShopDetail className="compact">
                   <Skeleton
                     variant="text"
                     sx={{
@@ -169,27 +171,27 @@ const ShopDisplay = ({ shop, name }) => {
                     }}
                   />
                 </ShopDetail>
-                <ShopDetail className="hide-on-mobile">
+                <ShopDetail className="compact hide-on-mobile">
                   <Skeleton variant="text" sx={{ fontSize: { xs: "12px", md: "14px" } }} width={170} />
                 </ShopDetail>
               </>
             ) : (
               <>
-                <ShopDetail>
+                <ShopDetail className="compact">
                   <LocalActivity />
                   {t("review.label")}:<b>{numFormat.format(shop?.totalReviews)}</b>
                 </ShopDetail>
-                <ShopDetail>
+                <ShopDetail className="compact">
                   <AutoStories />
                   {t("product.label")}:<b>{numFormat.format(shop?.totalProducts)}</b>
                 </ShopDetail>
-                <ShopDetail>
+                <ShopDetail className="compact">
                   <PersonAddAlt1 />
-                  {t("shop.follower")}:<b>{numFormat.format(shop?.totalFollowers)}</b>
+                  {t("follower")}:<b>{numFormat.format(shop?.totalFollowers)}</b>
                 </ShopDetail>
-                <ShopDetail className="hide-on-mobile">
+                <ShopDetail className="compact hide-on-mobile">
                   <Today />
-                  {t("shop.joined")}:<b>{dateFormatter(date, i18n.language)}</b>
+                  {t("joined.label")}:<b>{dateFormatter(date, i18n.language)}</b>
                 </ShopDetail>
               </>
             )}

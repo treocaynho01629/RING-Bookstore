@@ -55,6 +55,12 @@ class ShopRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private OrderDetailRepository orderDetailRepo;
 
+    @Autowired
+    private OrderReceiptRepository orderReceiptRepo;
+
+    @Autowired
+    private OrderItemRepository orderItemRepo;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -257,6 +263,48 @@ class ShopRepositoryTest extends AbstractRepositoryTest {
         // Then
         assertNotNull(foundShops);
         assertEquals(2, foundShops.getContent().size());
+    }
+
+    @Test
+    public void whenFindShops_withDuplicateLineQuantities_thenTotalOrdersSumsAllLines() {
+
+        Address address = Address.builder().address("find-shops-agg").build();
+        addressRepo.save(address);
+
+        OrderReceipt receipt = OrderReceipt.builder()
+                .user(account)
+                .address(address)
+                .total(100.0)
+                .totalDiscount(10.0)
+                .build();
+        receipt.setCreatedDate(LocalDateTime.now());
+        orderReceiptRepo.save(receipt);
+
+        OrderDetail completed = OrderDetail.builder()
+                .order(receipt)
+                .shop(shop)
+                .status(OrderStatus.COMPLETED)
+                .build();
+        completed.setCreatedDate(LocalDateTime.now());
+        orderDetailRepo.save(completed);
+
+        OrderItem line1 = OrderItem.builder().detail(completed).book(book).quantity((short) 2).build();
+        OrderItem line2 = OrderItem.builder().detail(completed).book(book).quantity((short) 2).build();
+        orderItemRepo.saveAll(List.of(line1, line2));
+
+        entityManager.flush();
+        entityManager.clear();
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<IShop> foundShops = shopRepo.findShops("", account.getId(), pageable);
+        IShop row = foundShops.getContent().stream()
+                .filter(s -> s.getId().equals(shop.getId()))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(4, row.getTotalOrders());
+        assertEquals(90.0, row.getSales(), 0.001);
+        assertEquals(0.0, row.getCanceledRate(), 0.001);
     }
 
     @Test

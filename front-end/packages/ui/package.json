@@ -45,9 +45,9 @@
       "import": "./dist/src/components/Snackbar.js",
       "require": "./dist/src/components/Snackbar.cjs"
     },
-    "./ProductImages": {
-      "import": "./dist/src/components/ProductImages.js",
-      "require": "./dist/src/components/ProductImages.cjs"
+    "./CustomSlider": {
+      "import": "./dist/src/components/CustomSlider.js",
+      "require": "./dist/src/components/CustomSlider.cjs"
     },
     "./FallbackLogo": {
       "import": "./dist/src/layout/FallbackLogo.js",
@@ -58,8 +58,8 @@
       "require": "./dist/src/layout/PendingModal.cjs"
     },
     "./theme": {
-      "import": "./dist/src/theme/theme.js",
-      "require": "./dist/src/theme/theme.cjs"
+      "import": "./dist/src/lib/theme.js",
+      "require": "./dist/src/lib/theme.cjs"
     },
     "./SnackbarProvider": {
       "import": "./dist/src/provider/SnackbarProvider.js",
@@ -89,18 +89,18 @@
     "react-multi-carousel": "^2.8.6"
   },
   "dependencies": {
-    "@mui/x-date-pickers": "^8.23.0",
+    "@mui/x-date-pickers": "^8.27.2",
     "@ring/shared": "*",
-    "dayjs": "^1.11.19",
+    "dayjs": "^1.11.20",
     "react-lazy-load-image-component": "^1.6.3",
-    "yet-another-react-lightbox": "^3.28.0"
+    "yet-another-react-lightbox": "^3.29.2"
   },
   "devDependencies": {
     "@ring/eslint-config": "*",
-    "@types/react": "^19.2.7",
+    "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   },
   "sideEffects": false
 }

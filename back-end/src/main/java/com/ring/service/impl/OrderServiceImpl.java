@@ -2,14 +2,16 @@ package com.ring.service.impl;
 
 import com.ring.common.AppConstants;
 import com.ring.common.CommonUtils;
+import com.ring.dto.projection.books.IBookItem;
 import com.ring.dto.projection.coupons.ICoupon;
 import com.ring.dto.projection.orders.*;
 import com.ring.dto.request.*;
 import com.ring.dto.response.PagingResponse;
+import com.ring.dto.response.accounts.AddressDTO;
 import com.ring.dto.response.coupons.CouponDiscountDTO;
-import com.ring.dto.response.dashboard.ChartDTO;
-import com.ring.dto.response.dashboard.StatDTO;
 import com.ring.dto.response.orders.*;
+import com.ring.dto.request.ghn.GHNSwitchStatusRequest;
+import com.ring.dto.request.ghn.GHNUpdateOrderRequest;
 import com.ring.exception.EntityOwnershipException;
 import com.ring.exception.HttpResponseException;
 import com.ring.exception.PaymentException;
@@ -17,19 +19,23 @@ import com.ring.exception.ResourceNotFoundException;
 import com.ring.listener.events.OnCheckoutCompletedEvent;
 import com.ring.mapper.CalculateMapper;
 import com.ring.mapper.CouponMapper;
-import com.ring.mapper.DashboardMapper;
 import com.ring.mapper.OrderMapper;
 import com.ring.model.entity.*;
 import com.ring.model.enums.*;
 import com.ring.repository.*;
 import com.ring.service.CaptchaService;
 import com.ring.service.CouponService;
+import com.ring.service.GHNService;
+import com.ring.service.AddressService;
 import com.ring.service.OrderService;
 import com.ring.service.PaymentService;
+import com.ring.dto.request.ghn.GHNFeeRequest;
+import com.ring.dto.response.ghn.GHNFeeResponse;
+import com.ring.dto.response.ghn.GHNSwitchStatusResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -46,7 +52,9 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
 import vn.payos.model.v2.paymentRequests.PaymentLink;
 
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -75,30 +83,55 @@ public class OrderServiceImpl implements OrderService {
     private final CouponService couponService;
     private final CaptchaService captchaService;
     private final PaymentService paymentService;
+    private final AddressService addressService;
+    private final GHNService ghnService;
     private final MessageService messageService;
 
     private final OrderMapper orderMapper;
     private final CalculateMapper calculateMapper;
-    private final DashboardMapper dashMapper;
     private final CouponMapper couponMapper;
 
     private final ApplicationEventPublisher eventPublisher;
+    private final GHNOrderIntegrationService ghnOrderIntegrationService;
+
+    @Value("${ghn.default.service-type-id}")
+    private Integer ghnDefaultServiceTypeId;
+
+    @Value("${ghn.default.weight-grams}")
+    private Integer ghnDefaultWeightGrams;
+
+    @Value("${ghn.default.length-cm}")
+    private Integer ghnDefaultLengthCm;
+
+    @Value("${ghn.default.width-cm}")
+    private Integer ghnDefaultWidthCm;
+
+    @Value("${ghn.default.height-cm}")
+    private Integer ghnDefaultHeightCm;
+
+    @Value("${ghn.default.fallback-fee}")
+    private Double ghnDefaultFallbackFee;
 
     @Cacheable(cacheNames = AppConstants.CALCULATE)
     public CalculateDTO calculate(CalculateRequest request, Account user) {
 
-        // Create address
+        // Get address for calculation
         AddressRequest addressRequest = request.getAddress();
-        var address = addressRequest != null
-                ? Address.builder()
-                        .name(addressRequest.getName())
-                        .companyName(addressRequest.getCompanyName())
-                        .phone(addressRequest.getPhone())
-                        .city(addressRequest.getCity())
-                        .address(addressRequest.getAddress())
-                        .type(addressRequest.getType())
-                        .build()
-                : null;
+        Address address = null;
+        if (addressRequest != null) {
+            address = Address.builder()
+                    .districtId(addressRequest.getDistrictId())
+                    .wardCode(addressRequest.getWardCode())
+                    .build();
+        } else {
+            AddressDTO addressDTO = addressService.getMyAddress(user);
+            if (addressDTO != null) {
+                address = Address.builder()
+                        .districtId(addressDTO.districtId())
+                        .wardCode(addressDTO.wardCode())
+                        .build();
+            }
+        }
 
         OrderReceipt calculatedReceipt = processOrder(request.getCart(),
                 request.getCoupon(),
@@ -124,14 +157,21 @@ public class OrderServiceImpl implements OrderService {
         final String source = request.getHeader(AppConstants.HEADER_CAPTCHA_SOURCE);
         captchaService.validate(captchaToken, source, CaptchaServiceImpl.CHECKOUT_ACTION);
 
-        // Create address
+        // Create new address
         AddressRequest addressRequest = checkRequest.getAddress();
         var address = Address.builder()
                 .name(addressRequest.getName())
                 .companyName(addressRequest.getCompanyName())
                 .phone(addressRequest.getPhone())
-                .city(addressRequest.getCity())
+                .detail(addressRequest.getDetail())
                 .address(addressRequest.getAddress())
+                .provinceId(addressRequest.getProvinceId() != null
+                        ? addressRequest.getProvinceId().intValue()
+                        : null)
+                .districtId(addressRequest.getDistrictId() != null
+                        ? addressRequest.getDistrictId().intValue()
+                        : null)
+                .wardCode(addressRequest.getWardCode())
                 .type(addressRequest.getType())
                 .build();
         Address savedAddress = addressRepo.save(address);
@@ -176,6 +216,9 @@ public class OrderServiceImpl implements OrderService {
             } catch (PaymentException ignored) {
                 // TODO: Handle payment exception
             }
+        } else if (checkRequest.getPaymentMethod().equals(PaymentType.CASH)) {
+            // Create GHN orders immediately for cash checkout
+            ghnOrderIntegrationService.createGhnOrdersForReceipt(orderReceipt.getId(), PaymentType.CASH);
         }
 
         // Trigger email event
@@ -266,6 +309,17 @@ public class OrderServiceImpl implements OrderService {
             var errorMsg = messageService.getMessage("exception.ownership",
                     new Object[] { new DefaultMessageSourceResolvable("label.order") });
             throw new EntityOwnershipException(errorMsg);
+        }
+
+        // Cancel on GHN if created
+        if (StringUtils.isNotBlank(detail.getOrderCode())) {
+            GHNSwitchStatusResponse ghnRes = ghnService.cancelOrders(GHNSwitchStatusRequest.builder()
+                    .orderCodes(List.of(detail.getOrderCode()))
+                    .build());
+            if (ghnRes == null || ghnRes.getCode() == null || ghnRes.getCode() != HttpStatus.OK.value()) {
+                throw new HttpResponseException(HttpStatus.BAD_GATEWAY, AppConstants.GHN_FAILED,
+                        "GHN cancel order failed");
+            }
         }
 
         detail.setStatus(OrderStatus.CANCELED);
@@ -493,6 +547,87 @@ public class OrderServiceImpl implements OrderService {
         detailRepo.save(detail);
     }
 
+    @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS,
+            AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true)
+    @Transactional
+    public void requestReturn(Long id, String reason, Account user) {
+
+        OrderDetail detail = detailRepo.findDetailById(id)
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order.detail") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
+
+        // Check if correct user
+        OrderReceipt order = detail.getOrder();
+        if (!isValidBuyer(order, user)) {
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order") });
+            throw new EntityOwnershipException(errorMsg);
+        }
+
+        // Only allow return request for shipping/completed orders
+        OrderStatus currStatus = detail.getStatus();
+        if (!(OrderStatus.SHIPPING.equals(currStatus) || OrderStatus.COMPLETED.equals(currStatus))) {
+            var errorMsg = messageService.getMessage("exception.invalid",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order.status") });
+            throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                    AppConstants.INVALID_ARGUMENT,
+                    errorMsg);
+        }
+
+        // Switch GHN status to return if GHN order exists
+        if (StringUtils.isNotBlank(detail.getOrderCode())) {
+            GHNSwitchStatusResponse ghnRes = ghnService.returnOrders(GHNSwitchStatusRequest.builder()
+                    .orderCodes(List.of(detail.getOrderCode()))
+                    .build());
+            if (ghnRes == null || ghnRes.getCode() == null || ghnRes.getCode() != HttpStatus.OK.value()) {
+                throw new HttpResponseException(HttpStatus.BAD_GATEWAY, AppConstants.GHN_FAILED,
+                        "GHN return order failed");
+            }
+        }
+
+        detail.setStatus(OrderStatus.PENDING_RETURN);
+        detail.setNote(reason);
+        detailRepo.save(detail);
+    }
+
+    @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS,
+            AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true)
+    @Transactional
+    public void updateShippingNote(Long id, String note, Account user) {
+
+        OrderDetail detail = detailRepo.findDetailById(id)
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable(
+                                    "label.order.detail") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
+
+        if (!CommonUtils.isValidShopOwner(detail.getShop(), user)) {
+            var errorMsg = messageService.getMessage("exception.ownership",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order") });
+            throw new EntityOwnershipException(errorMsg);
+        }
+
+        if (StringUtils.isBlank(detail.getOrderCode())) {
+            var errorMsg = messageService.getMessage("exception.invalid",
+                    new Object[] { new DefaultMessageSourceResolvable("label.order") });
+            throw new HttpResponseException(HttpStatus.CONFLICT, AppConstants.INVALID_ARGUMENT, errorMsg);
+        }
+
+        ghnService.updateOrder(GHNUpdateOrderRequest.builder()
+                .orderCode(detail.getOrderCode())
+                .note(note)
+                .build());
+
+        detail.setNote(note);
+        detailRepo.save(detail);
+    }
+
     @Caching(evict = {
             @CacheEvict(cacheNames = { AppConstants.ORDERS, AppConstants.ORDER_ANALYTICS,
                     AppConstants.RECEIPTS, AppConstants.SALES }, allEntries = true),
@@ -572,7 +707,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Cacheable(cacheNames = AppConstants.RECEIPTS)
     @Transactional
-    public PagingResponse<ReceiptSummaryDTO> getSummariesWithFilter(Account user,
+    public PagingResponse<OrderSummaryDTO> getSummariesWithFilter(Account user,
             Long shopId,
             Long bookId,
             Integer pageNo,
@@ -586,7 +721,7 @@ public class OrderServiceImpl implements OrderService {
                         : Sort.by(sortBy).descending());
         boolean isAdmin = CommonUtils.isAuthAdmin();
 
-        Page<IReceiptSummary> summariesList = orderRepo.findAllSummaries(shopId,
+        Page<IOrderSummary> summariesList = orderRepo.findAllSummaries(shopId,
                 isAdmin ? null : user.getId(),
                 bookId,
                 pageable);
@@ -597,7 +732,7 @@ public class OrderServiceImpl implements OrderService {
             throw new EntityOwnershipException(errorMsg);
         }
 
-        List<ReceiptSummaryDTO> summariesDTOS = summariesList.map(orderMapper::summaryToDTO).toList();
+        List<OrderSummaryDTO> summariesDTOS = summariesList.map(orderMapper::summaryToDTO).toList();
         return new PagingResponse<>(
                 summariesDTOS,
                 summariesList.getTotalPages(),
@@ -605,31 +740,6 @@ public class OrderServiceImpl implements OrderService {
                 summariesList.getSize(),
                 summariesList.getNumber(),
                 summariesList.isEmpty());
-    }
-
-    @Cacheable(cacheNames = AppConstants.ORDERS)
-    @Override
-    public PagingResponse<OrderDTO> getOrdersByBookId(Long id,
-            Integer pageNo,
-            Integer pageSize,
-            String sortBy,
-            String sortDir) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize,
-                sortDir.equals(AppConstants.ASCENDING)
-                        ? Sort.by(sortBy).ascending()
-                        : Sort.by(sortBy).descending());
-
-        Page<IOrder> details = detailRepo.findAllByBookId(id, pageable);
-        List<Long> orderIds = details.getContent().stream().map(IOrder::getId).collect(Collectors.toList());
-        List<IOrderItem> items = itemRepo.findAllWithDetailIds(orderIds);
-        List<OrderDTO> ordersList = orderMapper.ordersAndItemsProjectionToDTOS(details.getContent(), items);
-        return new PagingResponse<>(
-                ordersList,
-                details.getTotalPages(),
-                details.getTotalElements(),
-                details.getSize(),
-                details.getNumber(),
-                details.isEmpty());
     }
 
     @Cacheable(cacheNames = AppConstants.ORDERS)
@@ -656,6 +766,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Cacheable(cacheNames = AppConstants.RECEIPTS, key = "#id")
+    @Transactional
     public ReceiptDTO getReceipt(Long id) {
 
         OrderReceipt order = orderRepo.findById(id)
@@ -687,10 +798,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Transactional
-    public ReceiptDetailDTO getReceiptDetail(Long id, Account user) {
+    public CheckoutDetailDTO getCheckoutDetail(Long id, Account user) {
 
         boolean isAdmin = CommonUtils.isAuthAdmin();
-        IReceiptDetail receiptProjection = orderRepo.findReceiptDetail(id, isAdmin ? null : user.getId())
+        ICheckoutDetail checkoutProjection = orderRepo.findCheckoutDetail(id, isAdmin ? null : user.getId())
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
                             new Object[] { new DefaultMessageSourceResolvable(
@@ -701,39 +812,52 @@ public class OrderServiceImpl implements OrderService {
         List<Long> orderIds = details.stream().map(IOrder::getId).collect(Collectors.toList());
         List<IOrderItem> items = itemRepo.findAllWithDetailIds(orderIds);
         List<OrderDTO> ordersList = orderMapper.ordersAndItemsProjectionToDTOS(details, items);
-        ReceiptDetailDTO orderDTO = orderMapper.receiptDetailAndDetailsDTOToReceiptDetailDTO(receiptProjection,
+        CheckoutDetailDTO checkoutDTO = orderMapper.checkoutDetailAndDetailsDTOToCheckoutDetailDTO(
+                checkoutProjection,
                 ordersList); // Map to DTO
-        return orderDTO;
-    }
-
-    @Cacheable(cacheNames = AppConstants.ORDER_ANALYTICS)
-    public StatDTO getAnalytics(Account user, Long shopId) {
-
-        boolean isAdmin = CommonUtils.isAuthAdmin();
-        var label = StringUtils.capitalize(messageService.getMessage("label.sales"));
-        return dashMapper.statToDTO(detailRepo.getSalesAnalytics(shopId, isAdmin ? null : user.getId()),
-                AppConstants.SALES,
-                label);
+        return checkoutDTO;
     }
 
     @Cacheable(cacheNames = AppConstants.SALES)
-    public List<ChartDTO> getMonthlySales(Account user, Long shopId, Integer year) {
+    public SalesInfoDTO getSales(Account user, Long shopId, Long bookId, LocalDate startDate, LocalDate endDate) {
 
         boolean isAdmin = CommonUtils.isAuthAdmin();
-        List<Map<String, Object>> data = orderRepo.getMonthlySales(shopId, isAdmin ? null : user.getId(), year);
-        return data.stream().map(dashMapper::dataToChartDTO).collect(Collectors.toList()); // Return chart data
+
+        // Dates validation
+        LocalDateTime startDateTime = startDate == null ? LocalDateTime.now() : startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate == null ? LocalDateTime.now() : endDate.atStartOfDay();
+        if (startDateTime.isAfter(endDateTime)) {
+            var errorMsg = messageService.getMessage("exception.invalid",
+                    new Object[] { new DefaultMessageSourceResolvable("label.date") });
+            throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                    AppConstants.INVALID_ARGUMENT,
+                    errorMsg);
+        }
+
+        // Get range start and end
+        List<Map<String, Object>> data = orderRepo.getSales(shopId,
+                isAdmin ? null : user.getId(),
+                bookId,
+                startDateTime,
+                endDateTime);
+
+        SalesInfoDTO salesInfoDTO = orderMapper.salesDataToDTO(data, startDate, endDate);
+        return salesInfoDTO;
     }
 
     /**
-     * Process order from cart
-     * 
-     * @param cart          Cart details
-     * @param orderCoupon   Order coupon code
-     * @param address       Address
-     * @param paymentMethod Payment method
-     * @param user          Current user
-     * @param isCheckout    Is processing checkout if no ignore exception
-     * @return Processed order receipt
+     * Build an order receipt from cart details and apply optional global coupon.
+     *
+     * @param cart          cart details grouped by shop
+     * @param orderCoupon   global (order-level) coupon code
+     * @param address       shipping address
+     * @param paymentMethod selected payment method
+     * @param user          current user
+     * @param isCheckout    true to enforce strict validation and persist side
+     *                      effects;
+     *                      false to generate preview values without destructive
+     *                      updates
+     * @return processed order receipt
      */
     private OrderReceipt processOrder(List<CartDetailRequest> cart,
             String orderCoupon,
@@ -742,49 +866,56 @@ public class OrderServiceImpl implements OrderService {
             Account user,
             boolean isCheckout) {
 
-        // Create receipt
+        // Initialize receipt container.
         var orderReceipt = OrderReceipt.builder()
                 .details(new ArrayList<>())
                 .build();
 
-        // Get books, shops, coupons IDS for prefetch
+        // Collect ids/codes for batched prefetch.
         List<Long> bookIds = cart.stream()
-                .flatMap(detail -> detail.getItems().stream().map(CartItemRequest::getId))
+                .flatMap(detail -> detail.getItems() == null
+                        ? java.util.stream.Stream.<CartItemRequest>empty()
+                        : detail.getItems().stream())
+                .map(CartItemRequest::getId)
+                .filter(id -> id != null)
+                .distinct()
                 .collect(Collectors.toList());
         List<Long> shopIds = cart.stream()
                 .map(CartDetailRequest::getShopId)
+                .filter(id -> id != null)
+                .distinct()
                 .collect(Collectors.toList());
         List<String> couponCodes = cart.stream()
                 .map(CartDetailRequest::getCoupon)
+                .filter(StringUtils::isNotBlank)
+                .distinct()
                 .collect(Collectors.toList());
 
-        // Add base order coupon
-        if (orderCoupon != null) {
+        // Include global coupon code in prefetch set.
+        if (StringUtils.isNotBlank(orderCoupon) && !couponCodes.contains(orderCoupon)) {
             couponCodes.add(orderCoupon);
         }
 
-        // Fetch shops, books, coupons
+        // Fetch maps for O(1) lookup during detail processing.
         Map<Long, Shop> shops = shopRepo.findShopsInIds(shopIds)
                 .stream()
-                .collect(Collectors.toMap(Shop::getId, Function.identity())); // Map to ID
-        Map<Long, Book> books = bookRepo.findBooksInIds(bookIds)
+                .collect(Collectors.toMap(Shop::getId, Function.identity()));
+        Map<Long, IBookItem> books = bookRepo.findBookItemsInIds(bookIds)
                 .stream()
-                .collect(Collectors.toMap(Book::getId, Function.identity())); // Map to ID
+                .collect(Collectors.toMap(IBookItem::getId, Function.identity()));
         Map<String, ICoupon> coupons = couponRepo.findCouponInCodes(couponCodes)
                 .stream()
-                .collect(Collectors.toMap(coupon -> coupon.getCoupon().getCode(), Function.identity())); // Map
-                                                                                                         // to
-                                                                                                         // code
+                .collect(Collectors.toMap(coupon -> coupon.getCoupon().getCode(), Function.identity()));
 
-        // Initial values
-        double totalPrice = 0.0; // Total price
-        double totalShippingFee = 0.0; // Total shipping fee
-        double totalDealDiscount = 0.0; // Total deal discount
-        double totalCouponDiscount = 0.0; // Total coupon discount
-        double totalShippingDiscount = 0.0; // Total shipping discount
-        int totalQuantity = 0; // Total quantity
+        // Running totals across all shop details.
+        double totalPrice = 0.0;
+        double totalShippingFee = 0.0;
+        double totalDealDiscount = 0.0;
+        double totalCouponDiscount = 0.0;
+        double totalShippingDiscount = 0.0;
+        int totalQuantity = 0;
 
-        // Process each detail in the cart order
+        // Process each shop detail and aggregate totals.
         for (CartDetailRequest detail : cart) {
             OrderDetail orderDetail = processOrderDetail(detail,
                     shops,
@@ -795,19 +926,22 @@ public class OrderServiceImpl implements OrderService {
                     user,
                     isCheckout);
 
-            // Add detail to order
             orderReceipt.addOrderDetail(orderDetail);
 
-            // Add value
-            totalPrice += orderDetail.getTotalPrice();
-            totalQuantity += orderDetail.getTotalQuantity();
-            totalShippingFee += orderDetail.getShippingFee();
-            totalCouponDiscount += orderDetail.getCouponDiscount();
-            totalShippingDiscount += orderDetail.getShippingDiscount();
-            totalDealDiscount += orderDetail.getDealDiscount();
+            totalPrice += orderDetail.getTotalPrice() != null ? orderDetail.getTotalPrice() : 0.0;
+            totalQuantity += orderDetail.getTotalQuantity() != null ? orderDetail.getTotalQuantity() : 0;
+            totalShippingFee += orderDetail.getShippingFee() != null ? orderDetail.getShippingFee() : 0.0;
+            totalCouponDiscount += orderDetail.getCouponDiscount() != null ? orderDetail.getCouponDiscount()
+                    : 0.0;
+            totalShippingDiscount += orderDetail.getShippingDiscount() != null
+                    ? orderDetail.getShippingDiscount()
+                    : 0.0;
+            totalDealDiscount += orderDetail.getDealDiscount() != null ? orderDetail.getDealDiscount()
+                    : 0.0;
         }
 
-        // Apply main coupon
+        // If user provided a coupon code, it must resolve from preloaded coupon map.
+        // Else give recommend coupon if not exists.
         ICoupon cProjection = orderCoupon == null
                 ? null // Null => User not select any coupon
                 : coupons.containsKey(orderCoupon)
@@ -820,13 +954,12 @@ public class OrderServiceImpl implements OrderService {
         if (coupon != null && coupon.getShop() == null
                 && !couponService.isExpired(coupon)) {
 
-            // Initial value
+            // Global coupon values before distributing to details.
             double discountValue = 0.0;
             double shippingDiscount = 0.0;
             double value = totalPrice - totalDealDiscount - totalCouponDiscount;
             double shipping = totalShippingFee - totalShippingDiscount;
 
-            // Apply coupon
             CouponDiscountDTO discountFromCoupon = null;
             if (couponRepo.hasUserUsedCoupon(coupon.getId(), user.getId())) {
 
@@ -840,7 +973,7 @@ public class OrderServiceImpl implements OrderService {
                             AppConstants.COUPON_EXPIRED,
                             errorMsg);
                 }
-            } else {
+            } else if (value > 0 && totalQuantity > 0) {
 
                 discountFromCoupon = couponService.applyCoupon(coupon,
                         new CartStateRequest(value,
@@ -852,7 +985,7 @@ public class OrderServiceImpl implements OrderService {
 
             if (discountFromCoupon != null) {
 
-                // Decrease usage on checkout
+                // Consume usage only during checkout.
                 if (isCheckout)
                     couponRepo.decreaseUsage(coupon.getId());
 
@@ -861,21 +994,85 @@ public class OrderServiceImpl implements OrderService {
                 discountValue = discountFromCoupon.discountValue();
                 shippingDiscount = discountFromCoupon.discountShipping();
 
-                // Split discount for each detail
-                double discountRatio = discountValue / value;
-                double shippingDiscountRatio = shippingDiscount / shipping;
+                // Distribute product coupon discount across details and force exact sum.
+                if (discountValue > 0 && value > 0) {
+                    double discountRatio = discountValue / value;
+                    int discountableDetails = 0;
+                    for (OrderDetail detail : orderReceipt.getDetails()) {
+                        double currentDiscount = detail.getDiscount() != null
+                                ? detail.getDiscount()
+                                : 0.0;
+                        double detailValueBase = Math.max(0.0,
+                                detail.getTotalPrice() - currentDiscount);
+                        if (detailValueBase > 0) {
+                            discountableDetails++;
+                        }
+                    }
 
-                for (OrderDetail detail : orderReceipt.getDetails()) {
-                    double pDiscount = detail.getDiscount() != null ? detail.getDiscount() : 0;
-                    double sDiscount = detail.getShippingDiscount() != null
-                            ? detail.getShippingDiscount()
-                            : 0;
-                    double applyDiscount = (detail.getTotalPrice() - pDiscount) * discountRatio;
-                    double applyShippingDiscount = (detail.getShippingFee() - sDiscount)
-                            * shippingDiscountRatio;
+                    if (discountableDetails > 0) {
+                        double allocatedDiscount = 0.0;
+                        int detailIndex = 0;
+                        for (OrderDetail detail : orderReceipt.getDetails()) {
+                            double currentDiscount = detail.getDiscount() != null
+                                    ? detail.getDiscount()
+                                    : 0.0;
+                            double detailValueBase = Math.max(0.0,
+                                    detail.getTotalPrice() - currentDiscount);
+                            if (detailValueBase <= 0) {
+                                continue;
+                            }
 
-                    detail.setDiscount(pDiscount + applyDiscount);
-                    detail.setShippingDiscount(sDiscount + applyShippingDiscount);
+                            detailIndex++;
+                            double applyDiscount = detailIndex == discountableDetails
+                                    ? Math.max(0.0, discountValue
+                                            - allocatedDiscount)
+                                    : detailValueBase * discountRatio;
+                            allocatedDiscount += applyDiscount;
+                            detail.setDiscount(currentDiscount + applyDiscount);
+                        }
+                    }
+                }
+
+                // Distribute shipping coupon discount across details and force exact sum.
+                if (shippingDiscount > 0 && shipping > 0) {
+                    double shippingDiscountRatio = shippingDiscount / shipping;
+                    int shippingDiscountableDetails = 0;
+                    for (OrderDetail detail : orderReceipt.getDetails()) {
+                        double currentShippingDiscount = detail.getShippingDiscount() != null
+                                ? detail.getShippingDiscount()
+                                : 0.0;
+                        double detailShippingBase = Math.max(0.0,
+                                detail.getShippingFee() - currentShippingDiscount);
+                        if (detailShippingBase > 0) {
+                            shippingDiscountableDetails++;
+                        }
+                    }
+
+                    if (shippingDiscountableDetails > 0) {
+                        double allocatedShippingDiscount = 0.0;
+                        int detailIndex = 0;
+                        for (OrderDetail detail : orderReceipt.getDetails()) {
+                            double currentShippingDiscount = detail
+                                    .getShippingDiscount() != null
+                                            ? detail.getShippingDiscount()
+                                            : 0.0;
+                            double detailShippingBase = Math.max(0.0,
+                                    detail.getShippingFee()
+                                            - currentShippingDiscount);
+                            if (detailShippingBase <= 0) {
+                                continue;
+                            }
+
+                            detailIndex++;
+                            double applyShippingDiscount = detailIndex == shippingDiscountableDetails
+                                    ? Math.max(0.0, shippingDiscount
+                                            - allocatedShippingDiscount)
+                                    : detailShippingBase * shippingDiscountRatio;
+                            allocatedShippingDiscount += applyShippingDiscount;
+                            detail.setShippingDiscount(currentShippingDiscount
+                                    + applyShippingDiscount);
+                        }
+                    }
                 }
             } else if (isCheckout) {
                 var errorMsg = messageService.getMessage("exception.coupon.invalid",
@@ -886,15 +1083,15 @@ public class OrderServiceImpl implements OrderService {
                         errorMsg);
             }
 
-            // Add to total
+            // Add order-level coupon values into receipt-level totals.
             totalCouponDiscount += discountValue;
             totalShippingDiscount += shippingDiscount;
         }
 
-        // Total discount
+        // Receipt discount = deal + coupon + shipping discounts.
         double totalDiscount = totalCouponDiscount + totalDealDiscount + totalShippingDiscount;
 
-        // Set value
+        // Populate receipt summary fields.
         orderReceipt.setTotal(totalPrice + totalShippingFee);
         orderReceipt.setProductsPrice(totalPrice);
         orderReceipt.setShippingFee(totalShippingFee);
@@ -913,28 +1110,32 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * Process detail (Shop's items)
-     * 
-     * @param detail        Detail request
-     * @param shops         Shops
-     * @param books         Books
-     * @param coupons       Coupons
-     * @param address       Address
-     * @param paymentMethod Payment method
-     * @param user          Current user
-     * @param isCheckout    Is processing checkout if no ignore exception
-     * @return Processed detail
+     * Process one cart detail (items from a single shop).
+     *
+     * @param detail        cart detail request
+     * @param shops         preloaded shops keyed by shop id
+     * @param bookItems     preloaded book items keyed by book id
+     * @param coupons       preloaded coupons keyed by coupon code
+     * @param address       shipping address
+     * @param paymentMethod selected payment method
+     * @param user          current user
+     * @param isCheckout    true to enforce strict validation and persist
+     *                      stock/coupon updates;
+     *                      false to build a preview result without destructive
+     *                      updates
+     * @return processed order detail
      */
     private OrderDetail processOrderDetail(CartDetailRequest detail,
             Map<Long, Shop> shops,
-            Map<Long, Book> books,
+            Map<Long, IBookItem> bookItems,
             Map<String, ICoupon> coupons,
             Address address,
             PaymentType paymentMethod,
             Account user,
             boolean isCheckout) {
 
-        // Shop validation
+        // Reject missing shop/items on checkout; keep a lightweight placeholder for
+        // preview.
         Shop shop = shops.get(detail.getShopId());
         List<CartItemRequest> items = detail.getItems();
         if (shop == null || items == null || items.isEmpty()) {
@@ -955,8 +1156,7 @@ public class OrderServiceImpl implements OrderService {
                     .items(new ArrayList<>()).build();
         }
 
-        // New detail
-        // Set status depends on payment
+        // Payment lifecycle: cash can go straight to pending, online waits for payment.
         OrderStatus status = paymentMethod == PaymentType.CASH
                 ? OrderStatus.PENDING
                 : OrderStatus.PENDING_PAYMENT;
@@ -965,21 +1165,25 @@ public class OrderServiceImpl implements OrderService {
                 .shop(shop)
                 .items(new ArrayList<>()).build();
 
-        // Initial value
-        double shippingFee = calculateShippingFee(shop.getAddress(), address, detail.getShippingType());
+        // Accumulators for pricing and discounts in this shop detail.
         double detailTotal = 0.0;
         double discountDeal = 0.0;
         double discountCoupon = 0.0;
         double discountValue = 0.0;
         double discountShipping = 0.0;
+        int weightGrams = 0;
+        int lengthCm = 0;
+        int widthCm = 0;
+        int heightCm = 0;
         int detailQuantity = 0;
 
         // Process each item in detail
         for (CartItemRequest item : items) {
 
-            // Book validation
-            Book book = books.get(item.getId());
-            if (book == null || !book.getShop().getId().equals(shop.getId())) {
+            // Validate book existence and ownership by current shop.
+            IBookItem bookItem = bookItems.get(item.getId());
+            Book book = bookItem.getBook();
+            if (book == null || book.getShop() == null || !book.getShop().getId().equals(shop.getId())) {
 
                 if (isCheckout) {
                     var errorMsg = messageService.getMessage("exception.not.found",
@@ -988,29 +1192,46 @@ public class OrderServiceImpl implements OrderService {
                     throw new ResourceNotFoundException(errorMsg);
                 }
 
-                // Create temp item
+                // Preview path: keep placeholder item so client can map invalid rows.
                 var orderItem = OrderItem.builder()
                         .book(Book.builder().id(item.getId()).build())
                         .build();
 
                 orderDetail.addOrderItem(orderItem);
-                continue; // Skip other steps
+                continue;
             }
 
-            // Stocks validation
+            // Reject invalid quantity on checkout, keep placeholder in preview mode.
             short quantity = item.getQuantity();
             if (quantity < 1 || quantity > book.getAmount()) {
+                if (!isCheckout) {
+                    orderDetail.addOrderItem(OrderItem.builder()
+                            .book(Book.builder().id(item.getId()).build())
+                            .quantity(quantity)
+                            .build());
+                    continue;
+                }
 
                 throw new HttpResponseException(HttpStatus.CONFLICT,
                         AppConstants.OUT_OF_STOCK,
                         "exception.invalid.quantity");
             }
 
-            // Calculate deal (for DTO result only ~ ~)
-            double deal = book.getPrice() * book.getDiscount().doubleValue();
+            // Book-level deal savings participate in coupon base and final totals.
+            BigDecimal bookDiscount = book.getDiscount() != null ? book.getDiscount() : BigDecimal.ZERO;
+            double deal = book.getPrice() * bookDiscount.doubleValue();
             detailQuantity += quantity;
             detailTotal += book.getPrice() * quantity;
             discountDeal += deal * quantity;
+
+            // Aggregate package dimensions for this shop shipment:
+            // - weight: sum(item's weight * quantity)
+            // - height: sum(item's height * quantity)
+            // - length/width: max(item's length/width * quantity)
+            weightGrams += (int) (bookItem.getWeight() * quantity);
+            heightCm += (int) (bookItem.getHeight() * quantity);
+            lengthCm = Math.max(lengthCm, (int) bookItem.getLength());
+            widthCm = Math.max(widthCm, (int) bookItem.getWidth());
 
             // Decrease stock on checkout
             if (isCheckout) {
@@ -1020,13 +1241,35 @@ public class OrderServiceImpl implements OrderService {
             // Add item into new detail
             orderDetail.addOrderItem(OrderItem.builder()
                     .price(book.getPrice())
-                    .discount(book.getDiscount())
+                    .discount(bookDiscount)
                     .book(book)
                     .quantity(quantity)
                     .build());
         }
 
-        // Check coupon
+        // Persist package attributes used for GHN fee calculation (fallback to defaults
+        // when missing/zero)
+        weightGrams = weightGrams > 0 ? weightGrams : ghnDefaultWeightGrams;
+        lengthCm = lengthCm > 0 ? lengthCm : ghnDefaultLengthCm;
+        widthCm = widthCm > 0 ? widthCm : ghnDefaultWidthCm;
+        heightCm = heightCm > 0 ? heightCm : ghnDefaultHeightCm;
+
+        Address origin = shop.getAddress();
+        double shippingFee = calculateShippingFee(
+                origin.getDistrictId(),
+                origin.getWardCode(),
+                address.getDistrictId(),
+                address.getWardCode(),
+                detail.getShippingType() != null ? detail.getShippingType() : ghnDefaultServiceTypeId,
+                null, // TODO: get GHN shop ID from shop
+                (int) detailTotal,
+                weightGrams,
+                lengthCm,
+                widthCm,
+                heightCm);
+
+        // If user provided a coupon code, it must resolve from preloaded coupon map.
+        // Else give recommend coupon if not exists.
         ICoupon shopCoupon = detail.getCoupon() == null
                 ? null // Null => User not select any coupon
                 : coupons.containsKey(detail.getCoupon())
@@ -1037,13 +1280,14 @@ public class OrderServiceImpl implements OrderService {
                                         detailQuantity, user.getId())
                                 .orElse(null);
 
-        // Validate + apply coupon
+        // Validate and apply shop coupon only when it belongs to this shop and is not
+        // expired.
         if (shopCoupon != null
                 && shopCoupon.getCoupon().getShop().getId().equals(shop.getId())
                 && !couponService.isExpired(shopCoupon.getCoupon())) {
             CouponDiscountDTO discountFromCoupon = null;
 
-            // Apply coupon
+            // Block reused coupons for this user.
             if (couponRepo.hasUserUsedCoupon(shopCoupon.getCoupon().getId(), user.getId())) {
 
                 shopCoupon.getCoupon().setIsUsed(true);
@@ -1056,7 +1300,7 @@ public class OrderServiceImpl implements OrderService {
                             AppConstants.COUPON_EXPIRED,
                             errorMsg);
                 }
-            } else {
+            } else if (detailTotal > 0 && detailQuantity > 0) {
 
                 discountFromCoupon = couponService.applyCoupon(
                         shopCoupon.getCoupon(),
@@ -1067,7 +1311,7 @@ public class OrderServiceImpl implements OrderService {
                         user);
             }
 
-            // Appliable coupon
+            // Coupon is applicable; update usage on checkout and distribute discount.
             if (discountFromCoupon != null) {
 
                 // Decrease usage on checkout
@@ -1078,6 +1322,28 @@ public class OrderServiceImpl implements OrderService {
 
                 discountCoupon = discountFromCoupon.discountValue();
                 discountShipping = discountFromCoupon.discountShipping();
+
+                // Split coupon discount across priced items and keep sum exactly equal
+                // to detail-level coupon discount.
+                int totalItems = orderDetail.getItems().size();
+                if (discountCoupon > 0 && detailTotal > 0 && totalItems > 0) {
+                    double discountRatio = discountCoupon / detailTotal;
+                    double allocatedDiscount = 0.0;
+
+                    for (int i = 0; i < totalItems; i++) {
+                        OrderItem item = orderDetail.getItems().get(i);
+                        if (item.getPrice() == null || item.getQuantity() == null) {
+                            continue;
+                        }
+
+                        double itemDiscount = i == totalItems - 1
+                                ? Math.max(0.0, discountCoupon - allocatedDiscount)
+                                : Math.round(item.getPrice() * item.getQuantity()
+                                        * discountRatio);
+                        allocatedDiscount += itemDiscount;
+                        item.setCouponDiscount(itemDiscount);
+                    }
+                }
             } else if (isCheckout) {
 
                 var errorMsg = messageService.getMessage("exception.coupon.invalid",
@@ -1089,16 +1355,16 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        // Add discount deal & discount coupon
-        discountValue += (discountDeal + discountCoupon);
+        // Detail discount is book deals plus coupon discount.
+        discountValue += discountDeal + discountCoupon;
 
-        // Free
+        // Never allow discount values to exceed payable amounts.
         if (discountValue >= detailTotal)
             discountValue = detailTotal;
         if (discountShipping >= shippingFee)
             discountShipping = shippingFee;
 
-        // Set detail value
+        // Assign computed totals and request metadata to detail.
         orderDetail.setTotalPrice(detailTotal);
         orderDetail.setShippingFee(shippingFee);
         orderDetail.setDealDiscount(discountDeal);
@@ -1121,50 +1387,56 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Calculate shipping fee
      * 
-     * @param origin      Origin address
-     * @param destination Destination address
-     * @param type        Shipping type
-     * @return Shipping fee
+     * @param fromDistrictId Origin district ID
+     * @param fromWardCode   Origin ward code
+     * @param toDistrictId   Destination district ID
+     * @param toWardCode     Destination ward code
+     * @param serviceTypeId  Service type ID
+     * @param ghnShopId      GHN shop ID
+     * @param insuranceValue Insurance value in VND
+     * @param weight         Weight in grams
+     * @param length         Length in centimeters
+     * @param width          Width in centimeters
+     * @param height         Height in centimeters
+     * @return Shipping fee in VND
      */
-    private double calculateShippingFee(Address origin,
-            Address destination,
-            ShippingType type) {
+    public double calculateShippingFee(
+            Integer fromDistrictId,
+            String fromWardCode,
+            Integer toDistrictId,
+            String toWardCode,
+            Integer serviceTypeId,
+            Integer ghnShopId,
+            Integer insuranceValue,
+            Integer weight,
+            Integer length,
+            Integer width,
+            Integer height) {
 
-        double baseFee = 1000;
-        double shippingFee = !(destination == null || origin == null)
-                ? distanceCalculation(origin, destination) * baseFee
-                : 10000; // Fixed fee for now
+        double fee = ghnDefaultFallbackFee;
 
-        if (type != null)
-            shippingFee = shippingFee * type.getMultiplier().doubleValue();
+        // Destination validation
+        if (toDistrictId == null || toWardCode == null) {
+            return fee;
+        }
 
-        return shippingFee;
-    }
+        GHNFeeRequest feeRequest = GHNFeeRequest.builder()
+                .serviceTypeId(serviceTypeId != null ? serviceTypeId : ghnDefaultServiceTypeId)
+                .fromDistrictId(fromDistrictId)
+                .fromWardCode(fromWardCode)
+                .toDistrictId(toDistrictId)
+                .toWardCode(toWardCode)
+                .weight(weight)
+                .length(length)
+                .width(width)
+                .height(height)
+                .insuranceValue(insuranceValue)
+                .build();
 
-    /**
-     * Calculate distance between origin and destination
-     * 
-     * @param origin      Origin address
-     * @param destination Destination address
-     * @return Distance
-     */
-    private double distanceCalculation(Address origin,
-            Address destination) {
+        GHNFeeResponse response = ghnService.calculateFee(feeRequest, null);
+        fee = response.getData().getTotal().doubleValue();
 
-        double distance = 10.0; // Fixed 10 meters for now
-        return distance;
-        // if (destination == null) return baseFee;
-        //
-        // // Mock shipping fee calculation based on address hash codes
-        // // Using hash codes ensures consistent results for same addresses
-        // int originHash = origin.hashCode();
-        // int destHash = destination.hashCode();
-        //
-        // // Add variation based on address differences
-        // double distanceFactor = Math.abs(originHash - destHash) % 50000;
-        //
-        // // Ensure minimum fee of 20000 and maximum of 100000
-        // return Math.min(100000, Math.max(baseFee, baseFee + distanceFactor));
+        return fee;
     }
 
     /**

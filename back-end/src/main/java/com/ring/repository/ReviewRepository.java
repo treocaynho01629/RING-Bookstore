@@ -1,6 +1,7 @@
 package com.ring.repository;
 
 import com.ring.dto.projection.reviews.IReview;
+import com.ring.dto.projection.reviews.IReviewAnalytics;
 import com.ring.model.entity.Review;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -138,4 +139,30 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 		WHERE r.user.id = :userId AND b.id = :bookId
 	""")
 	Optional<IReview> findUserBookReview(Long bookId, Long userId);
+
+	/**
+	 * Retrieves review analytics with optional shop/book/user ownership filters.
+	 *
+	 * @param shopId optional shop ID.
+	 * @param userId optional shop owner ID (null for admin scope).
+	 * @param bookId optional book ID.
+	 * @return review analytics projection.
+	 */
+	@Query("""
+		SELECT
+			COALESCE(AVG(r.rating), 0) AS rating,
+			COUNT(r.id) AS totalRates,
+			COALESCE(SUM(CASE WHEN r.rating = 5 THEN 1 ELSE 0 END), 0) AS rate5,
+			COALESCE(SUM(CASE WHEN r.rating = 4 THEN 1 ELSE 0 END), 0) AS rate4,
+			COALESCE(SUM(CASE WHEN r.rating = 3 THEN 1 ELSE 0 END), 0) AS rate3,
+			COALESCE(SUM(CASE WHEN r.rating = 2 THEN 1 ELSE 0 END), 0) AS rate2,
+			COALESCE(SUM(CASE WHEN r.rating = 1 THEN 1 ELSE 0 END), 0) AS rate1
+		FROM Review r
+		JOIN r.book b
+		LEFT JOIN b.shop s
+		WHERE (COALESCE(:shopId) IS NULL OR s.id = :shopId)
+		AND (COALESCE(:userId) IS NULL OR s.owner.id = :userId)
+		AND (COALESCE(:bookId) IS NULL OR b.id = :bookId)
+	""")
+	IReviewAnalytics getReviewAnalytics(Long shopId, Long userId, Long bookId);
 }

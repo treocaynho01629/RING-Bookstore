@@ -18,45 +18,46 @@ import org.hibernate.annotations.Nationalized;
 @EqualsAndHashCode
 public class Address {
 
-	@Id
+    @Id
     @Column(nullable = false, updatable = false)
-    @SequenceGenerator(
-            name = "primary_sequence",
-            sequenceName = "primary_sequence",
-            allocationSize = 1,
-            initialValue = 10000
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "primary_sequence"
-    )
+    @SequenceGenerator(name = "primary_sequence", sequenceName = "primary_sequence", allocationSize = 1, initialValue = 10000)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "primary_sequence")
     private Long id;
 
-	@Column(length = 250)
-	@Nationalized
-	private String name;
+    @Column(length = 250)
+    @Nationalized
+    private String name;
 
-	@Column(length = 250)
-	@Nationalized
-	private String companyName;
+    @Column(length = 250)
+    @Nationalized
+    private String companyName;
 
-	@Column(length = 15)
-	private String phone;
+    @Column(length = 15)
+    private String phone;
 
-	@Column(length = 200)
-	@Nationalized
-	private String city;
+    @Column(length = 200)
+    @Nationalized
+    private String address;
 
-	@Column(length = 300)
-	@Nationalized
-	private String address;
+    @Column(length = 300)
+    @Nationalized
+    private String detail;
 
-	@Enumerated(EnumType.STRING)
-	@Column(length = 30)
-	private AddressType type;
+    @Column
+    private Integer provinceId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "profile_id")
-	@JsonIgnore
-	private AccountProfile profile;
+    @Column
+    private Integer districtId;
+
+    @Column
+    private String wardCode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private AddressType type;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_id")
+    @JsonIgnore
+    private AccountProfile profile;
 }

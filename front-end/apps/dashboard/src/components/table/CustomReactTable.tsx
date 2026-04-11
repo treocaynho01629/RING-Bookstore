@@ -1,3 +1,5 @@
+"use client";
+
 import { useMemo } from "react";
 import { MaterialReactTable, useMaterialReactTable, MRT_ColumnDef } from "material-react-table";
 import { useTheme, useColorScheme, alpha, useMediaQuery } from "@mui/material";
@@ -19,7 +21,7 @@ export default function CustomReactTable({ data = [], columns = [], tableOptions
   const theme = useTheme();
   const { mode } = useColorScheme();
   const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
-  const resolvedMode = mode === "system" ? (prefersDark ? "dark" : "light") : mode;
+  const resolvedMode = mode ? (mode === "system" ? (prefersDark ? "dark" : "light") : mode) : "light";
 
   // Memoize data to prevent unnecessary re-renders
   const memoizedData = useMemo(() => data, [data]);
@@ -32,7 +34,8 @@ export default function CustomReactTable({ data = [], columns = [], tableOptions
     data: memoizedData,
     columns: memoizedColumns,
     muiTablePaperProps: {
-      elevation: 3,
+      elevation: 0,
+      variant: "outlined",
       sx: {
         height: "100%",
       },
@@ -51,7 +54,8 @@ export default function CustomReactTable({ data = [], columns = [], tableOptions
     },
     muiTableHeadCellProps: {
       sx: {
-        "backgroundColor": theme?.vars?.palette?.action?.hover,
+        "backgroundImage": `linear-gradient(to bottom, ${theme?.vars?.palette?.action?.hover})`,
+        "backgroundColor": theme?.vars?.palette?.background?.default,
         "borderBottom": `1px solid ${theme?.vars?.palette?.divider}`,
 
         "& .MuiTableSortLabel-root .MuiTableSortLabel-icon": {
@@ -65,7 +69,10 @@ export default function CustomReactTable({ data = [], columns = [], tableOptions
       },
     },
     mrtTheme: {
-      baseBackgroundColor: resolvedMode == "dark" ? "#1c211c" : "#fff",
+      baseBackgroundColor: alpha(
+        theme?.colorSchemes[resolvedMode as "light" | "dark"]?.palette?.background?.default,
+        0
+      ),
       pinnedRowBackgroundColor: alpha(theme?.palette?.primary?.main, 0.1),
       selectedRowBackgroundColor: alpha(theme?.palette?.primary?.main, 0.2),
     },

@@ -112,11 +112,13 @@ const ShopDetailComponent = ({ shop, name }) => {
               >
                 <Link to={`/shop/${shop?.id}`}>
                   <Box mb={{ xs: 0, md: 1 }}>
-                    <ShopName>{shop?.name}</ShopName>
-                    <Verified>
-                      <VerifiedIcon sx={{ fontSize: "16px", marginRight: 1 }} color="primary" />
-                      {t("official")}
-                    </Verified>
+                    <ShopName className={shop?.verified ? "" : "unverified"}>{shop?.name}</ShopName>
+                    {shop?.verified && (
+                      <Verified>
+                        <VerifiedIcon sx={{ fontSize: "16px", marginRight: 1 }} color="primary" />
+                        {t("official")}
+                      </Verified>
+                    )}
                   </Box>
                 </Link>
                 <Button
@@ -141,7 +143,7 @@ const ShopDetailComponent = ({ shop, name }) => {
           justifyContent="center"
           padding={{ xs: 0, md: "0 25px" }}
         >
-          <Stack spacing={2} direction="row" useFlexGap sx={{ flexWrap: "wrap", width: "100%" }}>
+          <Stack spacing={{ xs: 1, md: 2 }} direction="row" useFlexGap sx={{ flexWrap: "wrap", width: "100%" }}>
             {!shop ? (
               <>
                 <ShopDetail>
@@ -171,8 +173,32 @@ const ShopDetailComponent = ({ shop, name }) => {
                     }}
                   />
                 </ShopDetail>
-                <ShopDetail className="hide-on-mobile">
-                  <Skeleton variant="text" sx={{ fontSize: { xs: "12px", md: "14px" } }} width={170} />
+                <ShopDetail>
+                  <Skeleton
+                    variant="text"
+                    sx={{
+                      fontSize: { xs: "12px", md: "14px" },
+                      width: { xs: 95, md: 100 },
+                    }}
+                  />
+                </ShopDetail>
+                <ShopDetail>
+                  <Skeleton
+                    variant="text"
+                    sx={{
+                      fontSize: { xs: "12px", md: "14px" },
+                      width: { xs: 95, md: 110 },
+                    }}
+                  />
+                </ShopDetail>
+                <ShopDetail>
+                  <Skeleton
+                    variant="text"
+                    sx={{
+                      fontSize: { xs: "12px", md: "14px" },
+                      width: { xs: 95, md: 150 },
+                    }}
+                  />
                 </ShopDetail>
               </>
             ) : (
@@ -180,7 +206,7 @@ const ShopDetailComponent = ({ shop, name }) => {
                 <ShopDetail>
                   <LocalActivity />
                   {t("review.label")}:
-                  <b>{`${(shop?.rating ?? 0).toFixed(1)} (${numFormat.format(shop?.totalReviews)} ${t("review.label")})`}</b>
+                  <b>{`${(shop?.rating ?? 0).toFixed(1)} (${numFormat.format(shop?.totalReviews)})`}</b>
                 </ShopDetail>
                 <ShopDetail>
                   <AutoStories />
@@ -188,19 +214,19 @@ const ShopDetailComponent = ({ shop, name }) => {
                 </ShopDetail>
                 <ShopDetail>
                   <PersonAddAlt1 />
-                  {t("shop.follower")}:<b>{numFormat.format(shop?.totalFollowers)}</b>
+                  {t("follower")}:<b>{numFormat.format(shop?.totalFollowers)}</b>
                 </ShopDetail>
-                <ShopDetail className="hide-on-mobile">
+                <ShopDetail>
                   <Block />
-                  {t("shop.canceled.rate")}:<b>{shop?.canceledRate * 100}%</b>
+                  {t("shop.rate")}:<b>{shop?.canceledRate * 100}%</b>
                 </ShopDetail>
-                <ShopDetail className="hide-on-mobile">
+                <ShopDetail>
                   <Person4 />
                   {t("shop.owner")}:<b>{shop?.username}</b>
                 </ShopDetail>
-                <ShopDetail className="hide-on-mobile">
+                <ShopDetail>
                   <Today />
-                  {t("shop.joined")}:<b>{dateFormatter(date, i18n.language)}</b>
+                  {t("joined.label")}:<b>{dateFormatter(date, i18n.language)}</b>
                 </ShopDetail>
               </>
             )}

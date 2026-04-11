@@ -25,18 +25,18 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class ProfileRequest {
 
-	@Size(max = 150, message = "{validation.constraints.size.max}")
-	private String name;
+    @Size(max = 150, message = "{validation.constraints.size.max}")
+    private String name;
 
-	@Pattern(regexp = "\\(?([0-9]{3})\\)?([ .-]?)([0-9]{3})\\2([0-9]{3})", message = "{validation.constraints.pattern}")
-	private String phone;
+    @Pattern(regexp = "\\(?([0-9]{3})\\)?([ .-]?)([0-9]{3})\\2([0-9]{3})", message = "{validation.constraints.pattern}")
+    private String phone;
 
-	@Past(message = "{validation.constraints.date.past}")
-	@DateTimeFormat(pattern = "dd-MM-yyyy")
-	private LocalDate dob;
+    @Past(message = "{validation.constraints.date.past}")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private LocalDate dob;
 
-	private Gender gender;
+    private Gender gender;
 
-	@Default
-	private Boolean removeImage = false;
+    @Default
+    private Boolean removeImage = false;
 }

@@ -1,8 +1,7 @@
 import { createEntityAdapter } from "@reduxjs/toolkit";
-import { ReviewDTO } from "@ring/shared/models/reviewDTO";
 import apiSlice from "@ring/redux/apiSlice";
 
-const reviewsAdapter = createEntityAdapter<ReviewDTO>();
+const reviewsAdapter = createEntityAdapter({});
 const initialState = reviewsAdapter.getInitialState({
   empty: false,
   page: 0,
@@ -11,7 +10,9 @@ const initialState = reviewsAdapter.getInitialState({
   totalPages: 0,
 });
 
-export const reviewsApiSlice = apiSlice.injectEndpoints({
+const apiWithEnum = apiSlice.enhanceEndpoints({ addTagTypes: ["Review"] });
+
+export const reviewsApiSlice = apiWithEnum.injectEndpoints({
   endpoints: (builder) => ({
     getReviews: builder.query({
       query: (args) => {
@@ -19,8 +20,8 @@ export const reviewsApiSlice = apiSlice.injectEndpoints({
 
         // Params
         const params = new URLSearchParams();
-        if (page) params.append("pageNo", page.toString());
-        if (size) params.append("pSize", size.toString());
+        if (page != null) params.append("pageNo", page.toString());
+        if (size != null) params.append("pSize", size.toString());
         if (sortBy) params.append("sortBy", sortBy);
         if (sortDir) params.append("sortDir", sortDir);
         if (rating) params.append("rating", rating.toString());
@@ -53,6 +54,23 @@ export const reviewsApiSlice = apiSlice.injectEndpoints({
         result
           ? [...result.ids.map((id) => ({ type: "Review", id })), { type: "Review", id: "LIST" }]
           : [{ type: "Review", id: "LIST" }],
+    }),
+    getReviewsAnalytics: builder.query({
+      query: (args) => {
+        const { shopId, bookId } = args || {};
+
+        const params = new URLSearchParams();
+        if (shopId) params.append("shopId", shopId.toString());
+        if (bookId) params.append("bookId", bookId.toString());
+
+        return {
+          url: `/api/reviews/analytics?${params.toString()}`,
+          validateStatus: (response, result) => {
+            return response.status === 200 && !result?.isError;
+          },
+        };
+      },
+      providesTags: [{ type: "Review", id: "LIST" }],
     }),
     deleteReview: builder.mutation({
       query: (id) => ({
@@ -102,6 +120,7 @@ export const reviewsApiSlice = apiSlice.injectEndpoints({
 
 export const {
   useGetReviewsQuery,
+  useGetReviewsAnalyticsQuery,
   useDeleteReviewMutation,
   useDeleteReviewsMutation,
   useDeleteReviewsInverseMutation,

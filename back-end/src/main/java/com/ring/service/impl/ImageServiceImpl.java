@@ -213,7 +213,16 @@ public class ImageServiceImpl implements ImageService {
     }
 
     public void deleteImages(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
 
-        imageRepo.deleteAllByIdInBatch(ids);
+        // Use entity removal instead of batch delete so JPA lifecycle callbacks
+        // (ImageEntityListener @PostRemove) are fired for each image.
+        List<Image> images = imageRepo.findAllById(ids);
+        if (images.isEmpty()) {
+            return;
+        }
+        imageRepo.deleteAll(images);
     }
 }

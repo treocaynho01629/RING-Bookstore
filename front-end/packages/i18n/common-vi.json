@@ -70,6 +70,7 @@
   "home": "Trang chủ",
   "breadcrumbs": "Đường dẫn",
   "store": "Cửa hàng",
+  "follower": "Theo dõi",
   "saved": "Đã lưu",
   "items": "sản phẩm",
   "image": "Ảnh",
@@ -106,6 +107,10 @@
   "edit": "Thay đổi",
   "update": "Chỉnh sửa",
   "select": "Chọn",
+  "joined": {
+    "label": "Tham gia",
+    "date": "Ngày tham gia"
+  },
   "show": {
     "more": "Xem thêm",
     "less": "Ẩn bớt",
@@ -170,6 +175,7 @@
     "pages": "Số trang",
     "description": "Mô tả sản phẩm",
     "other": "Sản phẩm khác",
+    "catalog": "Danh mục sản phẩm",
     "type": {
       "label": "Hình thức bìa",
       "hard": "Bìa cứng",
@@ -178,9 +184,12 @@
       "slip": "Bìa rời"
     }
   },
+  "shop": {
+    "label": "Cửa hàng",
+    "rate": "Tỉ lệ huỷ hàng"
+  },
   "category": {
-    "label": "Danh mục",
-    "title": "Danh mục sản phẩm"
+    "label": "Danh mục"
   },
   "publisher": {
     "label": "Nhà xuất bản",
@@ -258,8 +267,7 @@
       "favorite": "Yêu thích",
       "price": "Giá bán",
       "in-stock": "Còn hàng",
-      "featured": "Nổi bật",
-      "joined": "Mới tham gia"
+      "featured": "Nổi bật"
     }
   },
   "pagination": {
@@ -294,10 +302,9 @@
   },
   "shipping": {
     "label": "Vận chuyển",
+    "service": "Dịch vụ",
     "estimate": "{{date}} ngày giao hàng",
-    "economy": "Tiết kiệm",
-    "standard": "Tiêu chuẩn",
-    "express": "Hoả tốc"
+    "standard": "Tiêu chuẩn"
   },
   "change": {
     "label": "Đổi mật khẩu",

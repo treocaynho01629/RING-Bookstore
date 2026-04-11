@@ -3,6 +3,7 @@ package com.ring.service;
 import com.ring.dto.request.ReviewRequest;
 import com.ring.dto.response.PagingResponse;
 import com.ring.dto.response.reviews.ReviewDTO;
+import com.ring.dto.response.reviews.ReviewsInfoDTO;
 import com.ring.model.entity.Account;
 import com.ring.model.entity.Review;
 
@@ -146,5 +147,15 @@ public interface ReviewService {
      * @param isHidden the visibility to set
      */
     void setReviewVisibility(Long id, boolean isHidden);
+
+    /**
+     * Retrieves review analytics for current user scope and optional filters.
+     *
+     * @param user current authenticated user
+     * @param shopId optional shop ID
+     * @param bookId optional book ID
+     * @return analytics DTO with average rating, total reviews and star buckets
+     */
+    ReviewsInfoDTO getAnalytics(Account user, Long shopId, Long bookId);
 
 }

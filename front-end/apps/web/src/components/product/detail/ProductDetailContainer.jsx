@@ -172,6 +172,7 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
   let details;
   const typeMeta = getBookType(book?.type);
   const languageMeta = getBookLanguage(book?.language);
+  const bookSize = `${book?.length} x ${book?.width} x ${book?.height} cm`;
 
   if (!loading && book) {
     details = (
@@ -234,7 +235,7 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
               <InfoText className="secondary">{t("product.size")}: </InfoText>
             </InfoTitle>
             <InfoStack>
-              <InfoText>{book?.size ? `${book.size} cm` : t("product.updating")}</InfoText>
+              <InfoText>{bookSize.length > 9 ? bookSize : t("product.updating")}</InfoText>
             </InfoStack>
           </tr>
           <tr>

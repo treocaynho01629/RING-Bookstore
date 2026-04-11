@@ -29,7 +29,7 @@ export const usersApiSlice = apiWithEnum.injectEndpoints({
 
         //Params
         const params = new URLSearchParams();
-        if (page) params.append("pageNo", page);
+        if (page != null && page !== undefined) params.append("pageNo", page);
         if (size) params.append("pSize", size);
         if (sortBy) params.append("sortBy", sortBy);
         if (sortDir) params.append("sortDir", sortDir);

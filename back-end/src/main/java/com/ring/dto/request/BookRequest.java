@@ -21,61 +21,61 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BookRequest {
-	
-	@NotNull(message = "{validation.constraints.not.blank}")
-	@Min(value = 1000, message = "{validation.constraints.min}")
-	@Max(value = 10000000, message = "{validation.constraints.max}")
-	private Double price;
 
-	@DecimalMin(value = "0.0", inclusive = true)
-	@Digits(integer = 1, fraction = 4)
-	private BigDecimal discount;
+    @NotNull(message = "{validation.constraints.not.blank}")
+    @Min(value = 1000, message = "{validation.constraints.min}")
+    @Max(value = 10000000, message = "{validation.constraints.max}")
+    private Double price;
 
-	@NotNull(message = "{validation.constraints.not.blank}")
-	@Min(value = 1, message = "{validation.constraints.min}")
-	@Max(value = 10000, message = "{validation.constraints.max}")
-	private Short amount;
-	
-	@NotBlank(message = "{validation.constraints.not.blank}")
-	private String title;
-	
-	@NotBlank(message = "{validation.constraints.not.blank}")
-	private String description;
-	
-	@NotNull(message = "{validation.constraints.not.blank}")
-	private BookType type;
-	
-	@NotNull(message = "{validation.constraints.not.blank}")
-	private String author;
-	
-	@NotNull(message = "{validation.constraints.not.blank}")
-	private Integer pubId;
-	
-	@NotNull(message = "{validation.constraints.not.blank}")
-	private Integer cateId;
-	
-	@NotNull(message = "{validation.constraints.not.blank}")
-	@Min(value = 1, message = "{validation.constraints.min}")
-	private Double weight;
-	
-	@NotBlank(message = "{validation.constraints.not.blank}")
-	private String size;
-	
-	@NotNull(message = "{validation.constraints.not.blank}")
-	@Min(value = 1, message = "{validation.constraints.min}")
-	private Integer pages;
-	
-	@Past(message = "{validation.constraints.date.past}")
-	@DateTimeFormat(pattern = "dd-MM-yyyy")
-	private LocalDate date;
+    @DecimalMin(value = "0.0", inclusive = true)
+    @Digits(integer = 1, fraction = 4)
+    private BigDecimal discount;
 
-	@NotNull(message = "{validation.constraints.not.blank}")
-	private BookLanguage language;
+    @NotNull(message = "{validation.constraints.not.blank}")
+    @Min(value = 1, message = "{validation.constraints.min}")
+    @Max(value = 10000, message = "{validation.constraints.max}")
+    private Short amount;
 
-	@NotNull(message = "{validation.constraints.not.blank}")
-	private Long shopId;
+    @NotBlank(message = "{validation.constraints.not.blank}")
+    private String title;
 
-	private Long thumbnailId;
+    @NotBlank(message = "{validation.constraints.not.blank}")
+    private String description;
 
-	private List<Long> removeIds;
+    @NotNull(message = "{validation.constraints.not.blank}")
+    private BookType type;
+
+    @NotNull(message = "{validation.constraints.not.blank}")
+    private String author;
+
+    @NotNull(message = "{validation.constraints.not.blank}")
+    private Integer pubId;
+
+    @NotNull(message = "{validation.constraints.not.blank}")
+    private Integer cateId;
+
+    @NotNull(message = "{validation.constraints.not.blank}")
+    @Min(value = 1, message = "{validation.constraints.min}")
+    private Double weight;
+
+    @NotBlank(message = "{validation.constraints.not.blank}")
+    private String size;
+
+    @NotNull(message = "{validation.constraints.not.blank}")
+    @Min(value = 1, message = "{validation.constraints.min}")
+    private Integer pages;
+
+    @Past(message = "{validation.constraints.date.past}")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    private LocalDate date;
+
+    @NotNull(message = "{validation.constraints.not.blank}")
+    private BookLanguage language;
+
+    @NotNull(message = "{validation.constraints.not.blank}")
+    private Long shopId;
+
+    private String thumbnailPublicId;
+
+    private List<String> removePublicIds;
 }

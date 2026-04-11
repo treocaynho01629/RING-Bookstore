@@ -37,7 +37,7 @@ export const suggest = [
   {
     icon: <Store />,
     color: "#8fb2c6",
-    label: "store",
+    label: "shop.label",
     url: "/shop",
   },
   {

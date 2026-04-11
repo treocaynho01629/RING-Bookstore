@@ -1,6 +1,6 @@
 import { Suspense, useRef } from "react";
 import { Box } from "@mui/material";
-import useOnView from "../../hooks/useOnView";
+import useOnView from "@ring/shared/useOnView";
 
 const LazyLoadComponent = ({
   children,
@@ -15,11 +15,7 @@ const LazyLoadComponent = ({
 
   return (
     <Box ref={ref}>
-      {entered ? (
-        <Suspense fallback={placeholder}>{children}</Suspense>
-      ) : (
-        <Box {...otherProps}></Box>
-      )}
+      {entered ? <Suspense fallback={placeholder}>{children}</Suspense> : <Box {...otherProps}></Box>}
     </Box>
   );
 };

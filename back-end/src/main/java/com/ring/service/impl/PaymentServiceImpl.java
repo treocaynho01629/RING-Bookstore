@@ -7,6 +7,7 @@ import com.ring.repository.OrderDetailRepository;
 import com.ring.repository.PaymentInfoRepository;
 import com.ring.model.entity.PaymentInfo;
 import com.ring.model.enums.PaymentStatus;
+import com.ring.model.enums.PaymentType;
 import com.ring.common.AppConstants;
 import com.ring.dto.response.orders.OrderDTO;
 import com.ring.dto.response.orders.OrderItemDTO;
@@ -53,6 +54,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final OrderDetailRepository detailRepo;
     private final PaymentInfoRepository paymentRepo;
+    private final GHNOrderIntegrationService ghnOrderIntegrationService;
 
     private final MessageService messageService;
 
@@ -195,5 +197,8 @@ public class PaymentServiceImpl implements PaymentService {
 
         // Update details status
         detailRepo.confirmPaymentByOrderId(id);
+
+        // Create GHN orders after successful online payment
+        ghnOrderIntegrationService.createGhnOrdersForReceipt(id, PaymentType.ONLINE_PAYMENT);
     }
 }

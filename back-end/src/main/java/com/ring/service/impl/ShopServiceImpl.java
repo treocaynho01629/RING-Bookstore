@@ -53,17 +53,17 @@ public class ShopServiceImpl implements ShopService {
 
     @Cacheable(cacheNames = AppConstants.SHOPS)
     public PagingResponse<ShopDisplayDTO> getDisplayShops(Integer pageNo,
-                                                          Integer pageSize,
-                                                          String sortBy,
-                                                          String sortDir,
-                                                          String keyword,
-                                                          Boolean followed,
-                                                          Account user) {
+            Integer pageSize,
+            String sortBy,
+            String sortDir,
+            String keyword,
+            Boolean followed,
+            Account user) {
 
         Pageable pageable = PageRequest.of(pageNo, pageSize,
-                sortDir.equals(AppConstants.ASCENDING) 
-                ? Sort.by(sortBy).ascending() 
-                : Sort.by(sortBy).descending());
+                sortDir.equals(AppConstants.ASCENDING)
+                        ? Sort.by(sortBy).ascending()
+                        : Sort.by(sortBy).descending());
         Long userId = user != null ? user.getId() : null;
 
         // Fetch from database
@@ -80,23 +80,23 @@ public class ShopServiceImpl implements ShopService {
 
     @Cacheable(cacheNames = AppConstants.SHOPS)
     public PagingResponse<ShopDTO> getShops(Integer pageNo,
-                                            Integer pageSize,
-                                            String sortBy,
-                                            String sortDir,
-                                            String keyword,
-                                            Long userId,
-                                            Account user) {
+            Integer pageSize,
+            String sortBy,
+            String sortDir,
+            String keyword,
+            Long userId,
+            Account user) {
 
         Pageable pageable = PageRequest.of(pageNo, pageSize,
-                sortDir.equals(AppConstants.ASCENDING) 
-                ? Sort.by(sortBy).ascending() 
-                : Sort.by(sortBy).descending());
+                sortDir.equals(AppConstants.ASCENDING)
+                        ? Sort.by(sortBy).ascending()
+                        : Sort.by(sortBy).descending());
         boolean isAdmin = CommonUtils.isAuthAdmin();
 
         Page<IShop> shopsList = shopRepo.findShops(keyword,
-                userId != null 
-                    ? isAdmin ? userId : null
-                    : isAdmin ? null : user.getId(),
+                userId != null
+                        ? isAdmin ? userId : null
+                        : isAdmin ? null : user.getId(),
                 pageable);
         List<ShopDTO> shopDTOS = shopsList.map(shopMapper::shopToDTO).toList();
         return new PagingResponse<>(
@@ -123,7 +123,7 @@ public class ShopServiceImpl implements ShopService {
         IShopInfo shop = shopRepo.findShopInfoById(id, userId)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.shop") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         ShopInfoDTO shopDTO = shopMapper.infoToDTO(shop); // Map to DTO
@@ -137,7 +137,7 @@ public class ShopServiceImpl implements ShopService {
         IShopDisplayDetail shop = shopRepo.findShopDisplayDetailById(id, userId)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.shop") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         ShopDisplayDetailDTO shopDTO = shopMapper.displayDetailToDTO(shop); // Map to DTO
@@ -150,7 +150,7 @@ public class ShopServiceImpl implements ShopService {
         IShopDetail shop = shopRepo.findShopDetailById(id, CommonUtils.isAuthAdmin() ? null : user.getId())
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.shop") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         ShopDetailDTO shopDTO = shopMapper.detailToDTO(shop); // Map to DTO
@@ -174,7 +174,7 @@ public class ShopServiceImpl implements ShopService {
         Shop shop = shopRepo.findById(id)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.shop") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         shop.addFollower(user);
@@ -188,7 +188,7 @@ public class ShopServiceImpl implements ShopService {
         Shop shop = shopRepo.findById(id)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.shop") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         shop.removeFollower(user);
@@ -207,7 +207,7 @@ public class ShopServiceImpl implements ShopService {
                 .name(addressRequest.getName())
                 .companyName(addressRequest.getCompanyName())
                 .phone(addressRequest.getPhone())
-                .city(addressRequest.getCity())
+                .detail(addressRequest.getDetail())
                 .address(addressRequest.getAddress())
                 .type(addressRequest.getType())
                 .build();
@@ -229,19 +229,19 @@ public class ShopServiceImpl implements ShopService {
         return addedShop;
     }
 
-    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL, 
-        AppConstants.SHOP, AppConstants.SHOPS }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL,
+            AppConstants.SHOP, AppConstants.SHOPS }, allEntries = true)
     @Transactional
-    public Shop updateShop(Long id, 
-        ShopRequest request,
-        MultipartFile file, 
-        Account user) {
+    public Shop updateShop(Long id,
+            ShopRequest request,
+            MultipartFile file,
+            Account user) {
 
         // Get original shop
         Shop shop = shopRepo.findById(id)
-                    .orElseThrow(() -> {
+                .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.shop") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
@@ -249,7 +249,7 @@ public class ShopServiceImpl implements ShopService {
         if (!CommonUtils.isValidShopOwner(shop, user)) {
 
             var errorMsg = messageService.getMessage("exception.ownership",
-                    new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                    new Object[] { new DefaultMessageSourceResolvable("label.shop") });
             throw new EntityOwnershipException(errorMsg);
         }
 
@@ -263,7 +263,7 @@ public class ShopServiceImpl implements ShopService {
         address.setName(addressRequest.getName());
         address.setCompanyName(addressRequest.getCompanyName());
         address.setPhone(addressRequest.getPhone());
-        address.setCity(addressRequest.getCity());
+        address.setDetail(addressRequest.getDetail());
         address.setAddress(addressRequest.getAddress());
         address.setType(addressRequest.getType());
 
@@ -281,21 +281,21 @@ public class ShopServiceImpl implements ShopService {
         return updatedShop;
     }
 
-    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL, 
-        AppConstants.SHOP, AppConstants.SHOPS, AppConstants.SHOP_ANALYTICS }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL,
+            AppConstants.SHOP, AppConstants.SHOPS, AppConstants.SHOP_ANALYTICS }, allEntries = true)
     public Shop deleteShop(Long id, Account user) {
 
         Shop shop = shopRepo.findById(id)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.shop") });
                     return new ResourceNotFoundException(errorMsg);
                 });
         // Check if correct seller or admin
         if (!CommonUtils.isValidShopOwner(shop, user)) {
 
             var errorMsg = messageService.getMessage("exception.ownership",
-                    new Object[]{ new DefaultMessageSourceResolvable("label.shop") });
+                    new Object[] { new DefaultMessageSourceResolvable("label.shop") });
             throw new EntityOwnershipException(errorMsg);
         }
 
@@ -303,19 +303,19 @@ public class ShopServiceImpl implements ShopService {
         return shop;
     }
 
-    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL, 
-        AppConstants.SHOP, AppConstants.SHOPS, AppConstants.SHOP_ANALYTICS }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL,
+            AppConstants.SHOP, AppConstants.SHOPS, AppConstants.SHOP_ANALYTICS }, allEntries = true)
     @Transactional
     public void deleteShops(List<Long> ids, Account user) {
 
         List<Long> deleteIds = CommonUtils.isAuthAdmin()
-            ? ids 
-            : shopRepo.findShopIdsByInIdsAndOwner(ids, user.getId());
+                ? ids
+                : shopRepo.findShopIdsByInIdsAndOwner(ids, user.getId());
         shopRepo.deleteAllById(deleteIds);
     }
 
-    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL, 
-        AppConstants.SHOP, AppConstants.SHOPS, AppConstants.SHOP_ANALYTICS }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL,
+            AppConstants.SHOP, AppConstants.SHOPS, AppConstants.SHOP_ANALYTICS }, allEntries = true)
     @Transactional
     public void deleteShopsInverse(String keyword,
             Long userId,
@@ -329,8 +329,8 @@ public class ShopServiceImpl implements ShopService {
         shopRepo.deleteAllById(deleteIds);
     }
 
-    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL, 
-        AppConstants.SHOP, AppConstants.SHOPS, AppConstants.SHOP_ANALYTICS }, allEntries = true)
+    @CacheEvict(cacheNames = { AppConstants.SHOP_INFO, AppConstants.SHOP_DETAIL,
+            AppConstants.SHOP, AppConstants.SHOPS, AppConstants.SHOP_ANALYTICS }, allEntries = true)
     @Override
     public void deleteAllShops(Account user) {
 
@@ -341,27 +341,27 @@ public class ShopServiceImpl implements ShopService {
         }
     }
 
-     /**
-      * Updates the shop picture. This method allows uploading a new shop picture,
-      * replacing an existing one, or removing the shop picture.
-      *
-      * @param file    the new image file to be uploaded as the shop picture, can be
-      *                null for removing the image
-      * @param image   the identifier of the image, used for determining if an image
-      *                should be removed, can be null
-      * @param shop    the shop to be updated
-      * @return the updated shop with the modified shop picture
-      */
+    /**
+     * Updates the shop picture. This method allows uploading a new shop picture,
+     * replacing an existing one, or removing the shop picture.
+     *
+     * @param file  the new image file to be uploaded as the shop picture, can be
+     *              null for removing the image
+     * @param image the identifier of the image, used for determining if an image
+     *              should be removed, can be null
+     * @param shop  the shop to be updated
+     * @return the updated shop with the modified shop picture
+     */
     protected Shop changeShopPic(MultipartFile file, String image, Shop shop) {
 
         // Contain new image >> upload/replace
-        if (file != null) { 
+        if (file != null) {
             if (shop.getImage() != null)
                 imageService.deleteImage(shop.getImage().getId()); // Delete old image
             Image savedImage = imageService.upload(file, FileUploadUtil.SHOP_FOLDER); // Upload new image
             shop.setImage(savedImage); // Set new image
-        // Remove image
-        } else if (image == null) { 
+            // Remove image
+        } else if (image == null) {
             if (shop.getImage() != null)
                 imageService.deleteImage(shop.getImage().getId()); // Delete old image
             shop.setImage(null);

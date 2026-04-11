@@ -127,13 +127,15 @@ public class BookController {
     /**
      * Retrieves a book by its ID.
      *
-     * @param bookId the ID of the book.
+     * @param bookId   the ID of the book.
+     * @param currUser the currently authenticated user.
      * @return a {@link ResponseEntity} containing the book.
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<BookDTO> getBook(@PathVariable("id") Long bookId) {
+    @GetMapping("/detail/{id}")
+    @PreAuthorize("hasAnyRole('SELLER','GUEST') and hasAuthority('read:book')")
+    public ResponseEntity<BookDTO> getBook(@PathVariable("id") Long bookId, @CurrentAccount Account currUser) {
 
-        BookDTO book = bookService.getBook(bookId);
+        BookDTO book = bookService.getBook(bookId, currUser);
         return new ResponseEntity<>(book, HttpStatus.OK);
     }
 
@@ -143,7 +145,7 @@ public class BookController {
      * @param bookId the ID of the book.
      * @return a {@link ResponseEntity} containing the book details.
      */
-    @GetMapping("/detail/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<BookDetailDTO> getBookDetailById(@PathVariable("id") Long bookId) {
 
         BookDetailDTO book = bookService.getBookDetail(bookId);

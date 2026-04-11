@@ -2,42 +2,221 @@
   "dashboard": {
     "label": "Dashboard",
     "overview": "Tổng quan",
-    "management": "Quản lý"
+    "management": "Quản lý",
+    "guest": "bạn",
+    "welcomeSubtitle": "Dưới đây là tổng quan nhanh về hiệu suất cửa hàng hôm nay.",
+    "viewOrders": "Xem đơn hàng",
+    "quickStats": "Thao tác nhanh",
+    "sales": "Doanh thu",
+    "productsSold": "Sản phẩm đã bán",
+    "totalUsers": "Tổng người dùng",
+    "yearlySales": "Doanh thu theo năm",
+    "recentOrders": "Đơn hàng gần đây",
+    "noRecentOrders": "Chưa có đơn hàng gần đây",
+    "topProducts": "Sản phẩm bán chạy"
   },
   "general": {
     "add": "Thêm",
     "view": "Xem chi tiết",
     "id": "ID",
-    "filter": "Bộ lọc nâng cao"
+    "filter": "Bộ lọc nâng cao",
+    "actions": "Thao tác",
+    "loadMore": "Tải thêm"
+  },
+  "dropzone": {
+    "dragOrSelect": "Kéo thả hoặc chọn file ảnh",
+    "maxImages": "Tối đa 10 ảnh (2MB)",
+    "thumbnail": "Ảnh đại diện",
+    "uploadImage": "Tải ảnh",
+    "removeImage": "Gỡ ảnh",
+    "clearAll": "Xoá tất cả",
+    "fileTooLarge": "File quá lớn",
+    "instruction": "Kéo thả hoặc bấm để chọn ảnh",
+    "info": "(Tối đa 10 ảnh, mỗi ảnh tối đa 2MB, ảnh đầu tiên sẽ là ảnh đại diện)",
+    "uploaded": "Đã tải lên",
+    "remove": "Gỡ ảnh",
+    "clear": "Xóa ảnh",
+    "errors": {
+      "fileTooLarge": "File vượt quá dung lượng 2MB",
+      "invalidType": "Định dạng file không hợp lệ (chỉ nhận ảnh)",
+      "tooManyFiles": "Quá nhiều file (tối đa 10 ảnh)",
+      "unknown": "Không thể tải file này"
+    }
   },
   "all": {
     "shop": "Tổng thể"
   },
+  "search": {
+    "keyword": {
+      "label": "Từ khóa"
+    },
+    "filter": {
+      "clear": "Xóa bộ lọc"
+    }
+  },
   "shop": {
-    "add": "Thêm cửa hàng"
+    "label": "Cửa hàng",
+    "add": "Thêm cửa hàng",
+    "management": "Quản lý cửa hàng",
+    "name": "Tên cửa hàng",
+    "description": "Mô tả",
+    "basic": "Thông tin cơ bản",
+    "address": "Địa chỉ",
+    "image": "Hình ảnh",
+    "edit": "Chỉnh sửa cửa hàng",
+    "editImage": "Chỉnh sửa ảnh",
+    "detail": "Chi tiết cửa hàng",
+    "owner": "Chủ sở hữu",
+    "followers": "Người theo dõi",
+    "stats": "Thống kê",
+    "addressName": "Tên người nhận",
+    "companyName": "Tên công ty",
+    "city": "Thành phố",
+    "addressLine": "Địa chỉ đường",
+    "addressType": {
+      "label": "Loại địa chỉ",
+      "home": "Nhà",
+      "office": "Văn phòng"
+    },
+    "sales": "Đơn hàng",
+    "totalSold": "Đã bán",
+    "canceledRate": "Tỷ lệ hủy",
+    "totalProducts": "Sản phẩm",
+    "totalFollowers": "Tổng người theo dõi",
+    "followers": "Người theo dõi",
+    "joinedDate": "Ngày tham gia",
+    "form": {
+      "recipientName": "Tên người nhận",
+      "companyName": "Tên công ty",
+      "phone": "Số điện thoại",
+      "city": "Thành phố",
+      "address": "Địa chỉ"
+    }
+  },
+  "message": {
+    "success": {
+      "update": "Cập nhật thành công",
+      "create": "Tạo mới thành công"
+    },
+    "error": {
+      "update": "Cập nhật thất bại",
+      "create": "Tạo mới thất bại"
+    },
+    "confirmDelete": "Xóa các mục đã chọn?"
   },
   "product": {
     "management": "Quản lý sản phẩm",
     "title": "Tiêu đề",
     "orders": "Lượt mua",
-    "shop": "Tên Shop",
+    "shop": "Cửa hàng",
     "price": {
-      "label": "Giá",
       "original": "Giá gốc",
       "sale": "Giá giảm",
       "discount": "Giảm giá"
     },
-    "info": "Thông tin sản phẩm",
+    "sale": {
+      "info": "Thông tin bán hàng",
+      "weight": "Cân nặng (gr)",
+      "size": "Kích thước (cm)"
+    },
+    "detail": "Thông tin chi tiết",
     "basic": "Thông tin cơ bản",
     "inventory": "Giá và tồn kho",
     "add": "Thêm sản phẩm",
     "edit": "Chỉnh sửa sản phẩm",
     "images": "Hình ảnh",
-    "date": "Ngày xuất bản"
+    "date": "Ngày xuất bản",
+    "recentOrders": "5 đơn hàng gần nhất",
+    "recentOrdersEmpty": "Chưa có đơn hàng gần đây",
+    "recentReviews": "5 đánh giá gần nhất",
+    "recentReviewsEmpty": "Chưa có đánh giá gần đây",
+    "analytics": {
+      "ordersLine": "Xu hướng đơn hàng",
+      "reviewsPie": "Phân bổ đánh giá",
+      "currentYear": "Năm hiện tại ({year})",
+      "month": "Tháng",
+      "starSuffix": " sao",
+      "reviewCount": "{count} đánh giá"
+    }
+  },
+  "review": {
+    "management": "Quản lý đánh giá",
+    "content": "Nội dung",
+    "date": "Ngày",
+    "user": "Người dùng",
+    "book": "Sản phẩm",
+    "rating": "Đánh giá"
+  },
+  "order": {
+    "management": "Quản lý đơn hàng",
+    "detail": "Chi tiết đơn hàng",
+    "id": "Mã đơn",
+    "customer": "Khách hàng",
+    "email": "Email",
+    "phone": "Số điện thoại",
+    "address": "Địa chỉ",
+    "date": "Ngày",
+    "total": "Tổng tiền",
+    "discount": "Giảm giá",
+    "status": "Trạng thái",
+    "items": "Sản phẩm",
+    "quantity": "Số lượng",
+    "price": "Giá",
+    "shop": "Cửa hàng",
+    "paymentStatus": "Trạng thái thanh toán",
+    "statuses": {
+      "PENDING_PAYMENT": "Chờ thanh toán",
+      "PENDING": "Chờ xử lý",
+      "SHIPPING": "Đang giao",
+      "COMPLETED": "Hoàn tất",
+      "CANCELED": "Đã hủy",
+      "PENDING_RETURN": "Chờ trả hàng",
+      "PENDING_REFUND": "Chờ hoàn tiền",
+      "REFUNDED": "Đã hoàn tiền"
+    }
+  },
+  "role": {
+    "user": "Người dùng"
+  },
+  "coupon": {
+    "ring": "RING!",
+    "management": "Quản lý mã giảm giá",
+    "code": "Mã",
+    "shipping": { "label": "Vận chuyển" },
+    "product": { "label": "Sản phẩm" },
+    "type": "Thể loại",
+    "discount": "Giảm giá",
+    "maxDiscount": "Giảm tối đa",
+    "usage": "Số lượt dùng",
+    "expDate": "Hạn sử dụng",
+    "shop": "Cửa hàng",
+    "status": "Trạng thái",
+    "isUsable": "Đang hoạt động",
+    "isUsed": "Đã dùng",
+    "owner": "Sở hữu",
+    "activeOnly": "Chỉ còn hạn",
+    "includeExpired": "Bao gồm hết hạn",
+    "add": "Thêm mã giảm giá",
+    "edit": "Chỉnh sửa mã giảm giá"
   },
   "user": {
     "member": "Thành viên",
-    "privilege": "Quyền"
+    "privilege": "Quyền",
+    "management": "Quản lý người dùng",
+    "add": "Thêm người dùng",
+    "edit": "Chỉnh sửa người dùng",
+    "detail": "Chi tiết người dùng",
+    "username": "Tên đăng nhập",
+    "name": "Họ và tên",
+    "email": "Email",
+    "phone": "Số điện thoại",
+    "roles": "Quyền",
+    "role": "Quyền",
+    "gender": "Giới tính",
+    "dob": "Ngày sinh",
+    "joinedDate": "Ngày tham gia",
+    "image": "Ảnh đại diện",
+    "password": "Mật khẩu"
   },
   "statistics": {
     "label": "Thống kê"

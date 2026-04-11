@@ -10,6 +10,7 @@ import Skeleton from "@mui/material/Skeleton";
 import Paper from "@mui/material/Paper";
 import Storefront from "@mui/icons-material/Storefront";
 import useCoupon from "../../hooks/useCoupon";
+import QuestionMark from "@mui/icons-material/QuestionMark";
 
 //#region styled
 const Wrapper = styled.div`
@@ -417,7 +418,7 @@ const CouponItem = ({ coupon, selectMode, onClickApply, className, scrollPositio
     coupon?.isSaved ? removeCoupon(coupon?.code) : addCoupon(coupon?.code);
   };
 
-  const Icon = iconList[coupon?.meta?.icon];
+  const Icon = iconList[coupon?.meta?.icon] ?? <QuestionMark />;
   let shopIcon = coupon ? (
     <CouponIcon color={coupon?.meta?.color}>
       {coupon?.shopImage ? (
@@ -428,7 +429,9 @@ const CouponItem = ({ coupon, selectMode, onClickApply, className, scrollPositio
           placeholder={<Storefront />}
         />
       ) : (
-        <Icon />
+        <Suspense fallback={<QuestionMark />}>
+          <Icon />
+        </Suspense>
       )}
       {coupon?.shopName && <ShopName>{coupon?.shopName}</ShopName>}
     </CouponIcon>

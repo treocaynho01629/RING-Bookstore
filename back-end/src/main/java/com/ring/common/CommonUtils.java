@@ -13,6 +13,7 @@ public class CommonUtils {
 
     /**
      * Check if current user Admin or not
+     * 
      * @return true if is Admin
      */
     public static boolean isAuthAdmin() {

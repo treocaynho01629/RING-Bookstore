@@ -3,10 +3,8 @@ import { LazyLoadImage } from "react-lazy-load-image-component";
 import { StyledItemTableRow, StyledTableRow, SpaceTableRow, StyledTableCell } from "../custom/TableComponents";
 import { currencyFormat } from "@ring/shared/utils/convert";
 import { getImageSrc } from "@ring/shared/enums/image";
-import { getShippingType } from "@ring/shared/enums/shipping";
-import { ShippingType } from "@ring/shared/models/shippingType";
-import { iconList } from "@ring/shared/utils/icon";
 import { useTranslation } from "react-i18next";
+import { DEFAULT_SHIPPING_ESTIMATATION } from "@ring/shared/constants/appContants";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import TextField from "@mui/material/TextField";
@@ -297,8 +295,6 @@ const PreviewDetailRow = ({
   // Calculated price for display
   let total = 0;
   let totalQuantity = 0;
-  const shippingMeta = getShippingType(shipping || Object.keys(ShippingType)[0]);
-  const Icon = iconList[shippingMeta?.icon];
 
   for (const product of shop?.products) {
     total += product.quantity * product.price * (1 - (product?.discount || 0));
@@ -330,7 +326,7 @@ const PreviewDetailRow = ({
         <StyledTableCell className="preview" align="left" colSpan={5} component="th" scope="row">
           <Shop>
             <Inventory />
-            &nbsp;{t("address.from", { ns: "authenticated" })} {shop.shopName}
+            &nbsp;{t("address.from")}: {shop.shopName}
           </Shop>
         </StyledTableCell>
       </StyledTableRow>
@@ -368,17 +364,17 @@ const PreviewDetailRow = ({
             <ShippingContainer onClick={() => handleOpenShippingDialog(shop?.id)}>
               <OptionButton>
                 <ButtonLabel>
-                  &nbsp;{t("shipping.label")}:&emsp;
-                  <Icon color="primary" />
+                  &nbsp;{t("shipping.service")}:&emsp;
+                  {t("shipping.standard")}
                   &nbsp;
                   <span className="hide-on-mobile">&emsp;{t("edit")}</span>
                 </ButtonLabel>
                 <KeyboardArrowRight fontSize="small" />
               </OptionButton>
-              <Box display="flex" justifyContent="space-between">
-                <p>&nbsp;{t(shippingMeta?.label)}&emsp;</p>
+              <Box display="flex" justifyContent="space-between" sx={{ whiteSpace: "nowrap" }}>
+                <p>&nbsp;{t("checkout.shipping.ghn", { ns: "authenticated" })}&emsp;</p>
                 <span>
-                  <ShippingInfo>{t("shipping.estimate", { date: shippingMeta?.estimate })}</ShippingInfo>
+                  <ShippingInfo>{t("shipping.estimate", { date: DEFAULT_SHIPPING_ESTIMATATION })}</ShippingInfo>
                   <Box display="flex" alignItems="center" justifyContent="flex-end">
                     <Discount>{shippingDiscount > 0 ? currencyFormat.format(shippingDiscount) : ""}</Discount>
                     <Price className="shipping">{currencyFormat.format(shippingFee - (shippingDiscount || 0))}</Price>

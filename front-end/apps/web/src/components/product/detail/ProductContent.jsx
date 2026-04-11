@@ -1,12 +1,10 @@
 import styled from "@emotion/styled";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense } from "react";
 import { Link } from "react-router";
 import { currencyFormat, numFormat } from "@ring/shared/utils/convert";
 import { getBookType } from "@ring/shared/enums/book";
 import { useTranslation } from "react-i18next";
-import { useGetMyAddressQuery } from "../../../features/addresses/addressesApiSlice";
 import { capitalize } from "lodash-es";
-import useAuth from "../../../hooks/useAuth";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import Skeleton from "@mui/material/Skeleton";
@@ -16,12 +14,11 @@ import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 
-import ProductImages from "@ring/ui/ProductImages";
+import ProductImages from "./ProductImages";
 import ProductAction from "./ProductAction";
 
 const CouponPreview = lazy(() => import("../../coupon/CouponPreview"));
 const AddressPreview = lazy(() => import("../../address/AddressPreview"));
-const AddressSelectDialog = lazy(() => import("../../address/AddressSelectDialog"));
 const ProductPolicies = lazy(() => import("./ProductPolicies"));
 
 //#region styled
@@ -272,18 +269,7 @@ const policiesPlaceholder = (
 //#endregion
 
 const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
-  const { username } = useAuth();
   const { t } = useTranslation();
-  const [addressInfo, setAddressInfo] = useState({
-    name: "",
-    phone: "",
-    city: "",
-    address: "",
-  });
-  const [openDialog, setOpenDialog] = useState(false);
-
-  // Fetch address
-  const { data: address, isLoading: loadAddress } = useGetMyAddressQuery({}, { skip: !username });
 
   /**
    * Navigate to review tab
@@ -292,29 +278,14 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
     if (handleToggleReview) handleToggleReview(value);
   };
 
-  /**
-   * Open address select dialog
-   */
-  const handleOpenDialog = () => {
-    setOpenDialog(true);
-  };
-
-  /**
-   * Close address select dialog
-   */
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
-
   // Images
-  const srcSetList = book?.previewsSrcSet ? [].concat(book?.srcSet, book?.previewsSrcSet) : [].concat(book?.srcSet);
   const typeMeta = getBookType(book?.type);
 
   return (
     <Grid container size="grow" spacing={{ xs: 0, md: 1, lg: 2 }} position="relative">
       <Grid size={{ xs: 12, md: 5.5, lg: 5 }} position="relative">
         <ImageContainer>
-          {!book ? <ProductImages loadingLabel={t("loading")} /> : <ProductImages srcSetList={srcSetList} />}
+          {!book ? <ProductImages loadingLabel={t("loading")} /> : <ProductImages srcSetList={book?.srcSet ?? []} />}
         </ImageContainer>
       </Grid>
       <Grid size={{ xs: 12, md: 6.5, lg: 7 }}>
@@ -461,28 +432,13 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
             <Divider sx={{ my: 1, display: { xs: "block", md: "none" } }} />
             {book ? (
               <Suspense fallback={addressPlaceholder}>
-                {book && (
-                  <>
-                    <AddressPreview
-                      {...{
-                        addressInfo,
-                        handleOpen: handleOpenDialog,
-                        loadAddress,
-                      }}
-                    />
-                    <AddressSelectDialog
-                      {...{
-                        address,
-                        loggedIn: username != null,
-                        pending,
-                        setPending,
-                        setAddressInfo,
-                        openDialog,
-                        handleCloseDialog,
-                      }}
-                    />
-                  </>
-                )}
+                <AddressPreview
+                  {...{
+                    product: book,
+                    pending,
+                    setPending,
+                  }}
+                />
               </Suspense>
             ) : (
               addressPlaceholder

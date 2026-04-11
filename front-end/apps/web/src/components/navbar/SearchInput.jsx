@@ -355,7 +355,7 @@ const AutocompleteComponent = ({
         if (option.inputValue) {
           return option.inputValue;
         }
-        // Groupt
+        // Group
         if (option.groups?.length) {
           return "group";
         }

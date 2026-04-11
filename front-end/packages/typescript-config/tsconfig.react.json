@@ -3,8 +3,9 @@
   "display": "React Library",
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
     "jsx": "react-jsx",
-    "lib": ["ES2015", "dom"],
+    "lib": ["ES2021", "ES2020.Intl", "dom"],
     "module": "ESNext",
     "target": "es6"
   }

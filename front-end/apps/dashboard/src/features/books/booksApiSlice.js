@@ -4,7 +4,7 @@ export const booksApiSlice = initialsApiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getBook: builder.query({
       query: (id) => ({
-        url: `/api/books/${id}`,
+        url: `/api/books/detail/${id}`,
         validateStatus: (response, result) => {
           return response.status === 200 && !result?.isError;
         },
@@ -102,6 +102,7 @@ export const booksApiSlice = initialsApiSlice.injectEndpoints({
 
 export const {
   useGetBookQuery,
+  useLazyGetBookQuery,
   useGetBooksQuery,
   useGetBookAnalyticsQuery,
   useCreateBookMutation,

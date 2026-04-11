@@ -9,7 +9,7 @@ import {
   useGetPublishersScrollInfiniteQuery,
   useGetRelevantPublishersScrollInfiniteQuery,
 } from "../../../features/publishers/publishersApiSlice";
-import { suggestPrices } from "../../../utils/filters";
+import { SUGGEST_PRICES } from "@ring/shared/utils/filters";
 import { useTranslation } from "react-i18next";
 import { capitalize } from "lodash-es";
 import Button from "@mui/material/Button";
@@ -23,6 +23,10 @@ import Collapse from "@mui/material/Collapse";
 import Badge from "@mui/material/Badge";
 import Check from "@mui/icons-material/Check";
 import FilterAltOff from "@mui/icons-material/FilterAltOff";
+import ClassOutlined from "@mui/icons-material/ClassOutlined";
+import AttachMoneyOutlined from "@mui/icons-material/AttachMoneyOutlined";
+import StarHalf from "@mui/icons-material/StarHalf";
+import Inventory2Outlined from "@mui/icons-material/Inventory2Outlined";
 import CategoryOutlined from "@mui/icons-material/CategoryOutlined";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -76,7 +80,6 @@ const ContentText = styled.span`
 
 const SliderContainer = styled.div`
   width: 100%;
-  padding: 0 8px;
 `;
 
 const StyledButton = styled.span`
@@ -460,7 +463,11 @@ const PublisherFilter = memo(({ pubs, cateId, onChangePub }) => {
   return (
     <Filter>
       <TitleContainer>
-        <FilterText>{t("publisher.title")}</FilterText>
+        <FilterText>
+          {" "}
+          <ClassOutlined />
+          &nbsp;{t("publisher.title")}
+        </FilterText>
       </TitleContainer>
       <Stack spacing={{ xs: 1 }} direction="row" useFlexGap flexWrap="wrap">
         {pubsContent}
@@ -525,16 +532,19 @@ const RangeFilter = memo(({ value, onChangeRange }) => {
   return (
     <Filter>
       <TitleContainer>
-        <FilterText>{t("search.price.range")}</FilterText>
+        <FilterText>
+          <AttachMoneyOutlined />
+          &nbsp;{t("search.price.range")}
+        </FilterText>
       </TitleContainer>
       <Stack spacing={{ xs: 1 }} direction="row" useFlexGap flexWrap="wrap">
-        {suggestPrices.map((option, index) => {
+        {SUGGEST_PRICES.map((option, index) => {
           const isItemSelected = isSelected(option.value);
 
           return (
             <StyledButton
               key={`range-${index}`}
-              className={`${isItemSelected ? "active" : ""}${index + 1 == suggestPrices.length ? " filled" : ""}`}
+              className={`${isItemSelected ? "active" : ""}${index + 1 == SUGGEST_PRICES.length ? " filled" : ""}`}
               onClick={() => handleChangeRange(option.value)}
             >
               <ContentText>{option.label}</ContentText>
@@ -593,7 +603,10 @@ const TypeFilter = memo(({ types, onChangeType }) => {
   return (
     <Filter>
       <TitleContainer>
-        <FilterText>{t("product.type.label")}</FilterText>
+        <FilterText>
+          <Inventory2Outlined />
+          &nbsp;{t("product.type.label")}
+        </FilterText>
       </TitleContainer>
       <Stack spacing={{ xs: 1 }} direction="row" useFlexGap flexWrap="wrap">
         {bookTypeOptions.map((option, index) => {
@@ -623,7 +636,10 @@ const RateFilter = memo(({ rating, onChangeRate }) => {
   return (
     <Filter>
       <TitleContainer>
-        <FilterText>{t("review.label")}</FilterText>
+        <FilterText>
+          <StarHalf />
+          &nbsp;{t("review.label")}
+        </FilterText>
       </TitleContainer>
       <Stack spacing={{ xs: 1 }} direction="row" useFlexGap flexWrap="wrap">
         {[...Array(5)].map((item, index) => {
@@ -635,7 +651,9 @@ const RateFilter = memo(({ rating, onChangeRate }) => {
               className={isItemSelected ? "active" : ""}
               onClick={() => handleChangeRate(index + 1)}
             >
-              <ContentText>{`${index < 4 ? t("from") : ""} ${index + 1} ${index == 0 ? t("review.star") : t("review.stars")}`}</ContentText>
+              <ContentText>
+                {`${index + 1}★`} {index < 4 && t("above")}
+              </ContentText>
             </StyledButton>
           );
         })}

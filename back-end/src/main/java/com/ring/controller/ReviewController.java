@@ -5,6 +5,7 @@ import com.ring.dto.request.ReviewRequest;
 import com.ring.dto.response.GenericResponse;
 import com.ring.dto.response.PagingResponse;
 import com.ring.dto.response.reviews.ReviewDTO;
+import com.ring.dto.response.reviews.ReviewsInfoDTO;
 import com.ring.model.entity.Account;
 import com.ring.model.entity.Review;
 import com.ring.service.ReviewService;
@@ -141,6 +142,25 @@ public class ReviewController {
                 sortBy,
                 sortDir);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
+    }
+
+    /**
+     * Gets review analytics for current user scope and optional shop/book filters.
+     *
+     * @param shopId   optional shop ID.
+     * @param bookId   optional book ID.
+     * @param currUser current authenticated seller.
+     * @return rating analytics.
+     */
+    @GetMapping("/analytics")
+    @PreAuthorize("hasAnyRole('SELLER','GUEST') and hasAuthority('read:review')")
+    public ResponseEntity<ReviewsInfoDTO> getAnalytics(
+            @RequestParam(value = "shopId", required = false) Long shopId,
+            @RequestParam(value = "bookId", required = false) Long bookId,
+            @CurrentAccount Account currUser) {
+
+        ReviewsInfoDTO analytics = reviewService.getAnalytics(currUser, shopId, bookId);
+        return new ResponseEntity<>(analytics, HttpStatus.OK);
     }
 
     /**

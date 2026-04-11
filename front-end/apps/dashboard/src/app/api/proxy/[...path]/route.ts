@@ -47,10 +47,10 @@ async function proxyRequest(request: NextRequest, pathSegments: string[], method
     const searchParams = request.nextUrl.searchParams;
     const queryString = searchParams.toString();
     const fullUrl = queryString ? `${targetUrl}?${queryString}` : targetUrl;
+    const incomingContentType = request.headers.get("content-type");
 
     // Prepare headers
     const headers: HeadersInit = {
-      "Content-Type": "application/json",
       // "Accept-Language": request.nextUrl.locale ?? defaultLocale,
       "Authorization": `Bearer ${accessToken}`,
     };
@@ -69,13 +69,21 @@ async function proxyRequest(request: NextRequest, pathSegments: string[], method
     });
 
     // Get request body for methods that support it
-    let body: string | undefined;
+    let body: BodyInit | undefined;
+    let proxiedContentType: string | null = null;
     if (["POST", "PUT", "PATCH"].includes(method)) {
       try {
-        body = await request.text();
+        // Pass request body through as raw bytes to avoid multipart parsing/rebuild
+        // issues in the proxy layer.
+        const buffer = await request.arrayBuffer();
+        body = buffer.byteLength > 0 ? buffer : undefined;
+        proxiedContentType = incomingContentType ?? "application/json";
       } catch (error) {
         console.warn("Failed to read request body:", error);
       }
+    }
+    if (proxiedContentType) {
+      headers["Content-Type"] = proxiedContentType;
     }
 
     // Make the proxied request

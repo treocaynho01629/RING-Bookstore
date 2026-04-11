@@ -20,16 +20,8 @@ public class OrderItem {
 
     @Id
     @Column(nullable = false, updatable = false)
-    @SequenceGenerator(
-            name = "primary_sequence",
-            sequenceName = "primary_sequence",
-            allocationSize = 1,
-            initialValue = 10000
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "primary_sequence"
-    )
+    @SequenceGenerator(name = "primary_sequence", sequenceName = "primary_sequence", allocationSize = 1, initialValue = 10000)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "primary_sequence")
     private Long id;
 
     @Column
@@ -40,6 +32,9 @@ public class OrderItem {
 
     @Column(precision = 5, scale = 4)
     private BigDecimal discount;
+
+    @Column
+    private Double couponDiscount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "detail_id")
@@ -52,5 +47,5 @@ public class OrderItem {
     private Book book;
 
     @Transient
-    private Short amount; //From book's stock
+    private Short amount; // From book's stock
 }

@@ -555,7 +555,7 @@ const Home = () => {
         <TitleContainer>
           <ContainerTitle>
             <Category color="warning" />
-            &nbsp;{t("category.title")}
+            &nbsp;{t("product.catalog")}
           </ContainerTitle>
         </TitleContainer>
         <Loadable height={118} key={"cates"}>

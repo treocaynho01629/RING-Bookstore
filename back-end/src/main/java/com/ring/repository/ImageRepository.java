@@ -13,46 +13,56 @@ import java.util.Optional;
 public interface ImageRepository extends JpaRepository<Image, Long> {
 
     @Query("""
-        SELECT i.publicId 
-        FROM Image i
-        WHERE i.id IN :imageIds
-    """)
+                SELECT i.publicId
+                FROM Image i
+                WHERE i.id IN :imageIds
+            """)
     List<String> findPublicIds(List<Long> imageIds);
 
     @Query("""
-        SELECT i 
-        FROM Image i
-        WHERE i.id IN :imageIds
-    """)
+                SELECT i
+                FROM Image i
+                WHERE i.id IN :imageIds
+            """)
     List<Image> findImages(List<Long> imageIds);
 
     @Query("""
-        SELECT i.publicId AS publicId, 
-            i.url AS url
-        FROM AccountProfile p
-        JOIN p.image i
-        WHERE p.id = :id
-    """)
+                SELECT i.publicId AS publicId,
+                    i.url AS url
+                FROM Image i
+                JOIN i.detail d
+                WHERE d.book.id = :bookId
+                ORDER BY i.id
+            """)
+    List<IImage> findPreviewByBookId(Long bookId);
+
+    @Query("""
+                SELECT i.publicId AS publicId,
+                    i.url AS url
+                FROM AccountProfile p
+                JOIN p.image i
+                WHERE p.id = :id
+            """)
     Optional<IImage> findByProfile(Long id);
 
     @Query("""
-        SELECT i 
-        FROM Image i
-        LEFT JOIN Book b ON b.image.id = i.id
-        LEFT JOIN i.detail d
-        WHERE (b.id = :bookId OR d.id = :bookId)
-        AND i.id = :imageId
-    """)
-    Optional<Image> findBookImage(Long bookId, Long imageId);
+                SELECT i
+                FROM Image i
+                LEFT JOIN Book b ON b.image.id = i.id
+                LEFT JOIN i.detail d
+                WHERE (b.id = :bookId OR d.id = :bookId)
+                AND i.publicId = :publicId
+            """)
+    Optional<Image> findBookImage(Long bookId, String publicId);
 
     @Query("""
-        SELECT i.id 
-        FROM Image i
-        LEFT JOIN Book b ON b.image.id = i.id
-        LEFT JOIN i.detail d
-        WHERE (b.id = :bookId OR d.book.id = :bookId)
-        AND i.id IN :imageIds
-    """)
-    List<Long> findBookImageIds(Long bookId, List<Long> imageIds);
+                SELECT i.id
+                FROM Image i
+                LEFT JOIN Book b ON b.image.id = i.id
+                LEFT JOIN i.detail d
+                WHERE (b.id = :bookId OR d.book.id = :bookId)
+                AND i.publicId IN :publicIds
+            """)
+    List<Long> findBookImageIds(Long bookId, List<String> publicIds);
 
 }

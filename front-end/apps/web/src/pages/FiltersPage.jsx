@@ -470,7 +470,7 @@ const FiltersPage = () => {
       : (data?.totalPages ?? 0);
   const isLastPage = pagination.mode === "scroll" && totalPages == pagination.number + 1;
   const breadcrumbItems = [
-    { label: t("category.title"), href: "/store", end: true },
+    { label: t("product.catalog"), href: "/store", end: true },
     ...createCategoryCrumbs(currCate),
     filters?.keyword && { label: t("search.results", { keyword: filters?.keyword }), href: "#" },
   ].filter(Boolean);
@@ -523,7 +523,7 @@ const FiltersPage = () => {
           sx={(theme) => ({ scrollMargin: theme.mixins.toolbar.minHeight })}
           position="relative"
         >
-          <CustomDivider sx={{ display: { xs: "none", md: "flex" } }}>{t("category.title")}</CustomDivider>
+          <CustomDivider sx={{ display: { xs: "none", md: "flex" } }}>{t("product.catalog")}</CustomDivider>
           {filters.keyword && (
             <NavLink to={`/shop?q=${filters.keyword}`}>
               <StoreSuggest>

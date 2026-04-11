@@ -5,19 +5,18 @@
     "empty": "No addresses found",
     "recipient": "Shipping address",
     "place": "Deliver to this address",
-    "from": "Deliver from",
-    "to": "Deliver to",
-    "add": "New address",
     "edit": "Edit address",
     "temp": "Temporary",
     "suggestion": "Create a temporary address?",
-    "name": "Name",
-    "phone": "Phone",
+    "name": "Recipient name",
     "company": "Company",
-    "city": "City",
-    "ward": "Ward",
+    "input": "Province/City/District/Ward",
     "detail": "Address detail",
     "settings": "Additional settings",
+    "province": "Province",
+    "district": "District",
+    "ward": "Ward",
+    "selecting": "Select {{item}}",
     "type": {
       "label": "Address type",
       "home": "Home",
@@ -63,6 +62,7 @@
     "shipping": {
       "label": "Shipping",
       "select": "Select shipping method",
+      "ghn": "GHN - Express",
       "estimate": "Estimated delivery time around {{date}} days"
     }
   },
@@ -98,7 +98,7 @@
     "refunded": "Refunded",
     "again": "Buy again",
     "note": "Note",
-    "shipping": "Shipping type",
+    "shipping": "Shipping info",
     "package": "Package",
     "processing": "Processing order...",
     "pending": {

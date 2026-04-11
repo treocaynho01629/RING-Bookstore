@@ -1,10 +1,11 @@
-import Link from "next/link";
 import { styled } from "@mui/material/styles";
-import { Breadcrumbs } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { Link as MuiLink } from "@mui/material";
 import { Home } from "@mui/icons-material";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Skeleton from "@mui/material/Skeleton";
+import MuiLink from "@mui/material/Link";
+import { locales } from "@ring/shared/enums/locales";
 
 //#region styled
 const StyledBreadcrumbs = styled(Breadcrumbs)`
@@ -25,11 +26,26 @@ const StyledBreadcrumbs = styled(Breadcrumbs)`
 
 interface CustomBreadcrumbsProps {
   items: { label: string; href: string }[];
+  loading?: boolean;
 }
 
-export default function CustomBreadcrumbs({ items }: CustomBreadcrumbsProps) {
+/**
+ * Get pathname without locale prefix for matching hrefs.
+ * next-intl adds locale prefix (e.g. /en/product/1, /vi/product/1) but hrefs use /product/1
+ */
+function getPathWithoutLocale(pathname: string): string {
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length > 0 && locales.includes(segments[0])) {
+    const withoutLocale = segments.slice(1).join("/");
+    return withoutLocale ? `/${withoutLocale}` : "/";
+  }
+  return pathname;
+}
+
+export default function CustomBreadcrumbs({ items, loading = false }: CustomBreadcrumbsProps) {
   const t = useTranslations();
   const pathname = usePathname();
+  const pathWithoutLocale = getPathWithoutLocale(pathname);
 
   return (
     <StyledBreadcrumbs separator="." aria-label="breadcrumb" maxItems={4}>
@@ -44,19 +60,23 @@ export default function CustomBreadcrumbs({ items }: CustomBreadcrumbsProps) {
         <Home sx={{ mr: 0.5 }} fontSize="inherit" />
         {t("home")}
       </MuiLink>
-      {items.map((item) => (
-        <MuiLink
-          key={item.href}
-          component={Link}
-          href={item.href}
-          title={item.label}
-          underline="hover"
-          color="inherit"
-          className={pathname === item.href ? "active" : ""}
-        >
-          {item.label}
-        </MuiLink>
-      ))}
+      {loading ? (
+        <Skeleton variant="text" width={100} height={24} />
+      ) : (
+        items.map((item) => (
+          <MuiLink
+            key={item.href}
+            component={Link}
+            href={item.href}
+            title={item.label}
+            underline="hover"
+            color="inherit"
+            className={pathWithoutLocale === item.href ? "active" : ""}
+          >
+            {item.label}
+          </MuiLink>
+        ))
+      )}
     </StyledBreadcrumbs>
   );
 }

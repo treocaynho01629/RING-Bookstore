@@ -57,23 +57,20 @@ public class AddressServiceImpl implements AddressService {
         return addressRepo.findById(id)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.user.address") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.user.address") });
                     return new ResourceNotFoundException(errorMsg);
                 });
     }
 
     @Caching(evict = { @CacheEvict(cacheNames = { AppConstants.ADDRESSES,
-                AppConstants.USER_ADDRESS },
-                key = "#user.id") },
-                put = { @CachePut(cacheNames = AppConstants.ADDRESS,
-                            key = "#result.id",
-                            condition = "#result != null") })
+            AppConstants.USER_ADDRESS }, key = "#user.id") }, put = {
+                    @CachePut(cacheNames = AppConstants.ADDRESS, key = "#result.id", condition = "#result != null") })
     @Transactional
     public Address addAddress(AddressRequest request, Account user) {
         AccountProfile profile = profileRepo.findById(user.getProfile().getId())
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.user.profile") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.user.profile") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
@@ -81,10 +78,8 @@ public class AddressServiceImpl implements AddressService {
         int currSize = profile.getAddresses() != null ? profile.getAddresses().size() : 0;
         if (currSize >= AppConstants.MAX_ADDRESSES_SIZE) {
             var errorMsg = messageService.getMessage("exception.address.size",
-                    new Object[]{ AppConstants.MAX_ADDRESSES_SIZE });
-            throw new HttpResponseException(HttpStatus.CONFLICT
-                    , AppConstants.ADDRESS_SIZE_LIMIT
-                    , errorMsg);
+                    new Object[] { AppConstants.MAX_ADDRESSES_SIZE });
+            throw new HttpResponseException(HttpStatus.CONFLICT, AppConstants.ADDRESS_SIZE_LIMIT, errorMsg);
         }
 
         // Create address
@@ -92,8 +87,11 @@ public class AddressServiceImpl implements AddressService {
                 .name(request.getName())
                 .companyName(request.getCompanyName())
                 .phone(request.getPhone())
-                .city(request.getCity())
+                .detail(request.getDetail())
                 .address(request.getAddress())
+                .provinceId(request.getProvinceId())
+                .districtId(request.getDistrictId())
+                .wardCode(request.getWardCode())
                 .type(request.getType())
                 .profile(profile)
                 .build();
@@ -109,16 +107,16 @@ public class AddressServiceImpl implements AddressService {
         return savedAddress;
     }
 
-    @Caching(
-        evict = { @CacheEvict(cacheNames = { AppConstants.ADDRESSES, AppConstants.USER_ADDRESS }, key = "#user.id") },
-        put = { @CachePut(cacheNames = AppConstants.ADDRESS, key = "#id", condition = "#result != null") })
+    @Caching(evict = {
+            @CacheEvict(cacheNames = { AppConstants.ADDRESSES, AppConstants.USER_ADDRESS }, key = "#user.id") }, put = {
+                    @CachePut(cacheNames = AppConstants.ADDRESS, key = "#id", condition = "#result != null") })
     @Transactional
     public Address updateAddress(AddressRequest request, Long id, Account user) {
 
         Address address = addressRepo.findById(id)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.user.address") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.user.address") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
@@ -126,7 +124,7 @@ public class AddressServiceImpl implements AddressService {
         AccountProfile profile = user.getProfile();
         if (profile == null || !addressProfile.getId().equals(profile.getId())) {
             var errorMsg = messageService.getMessage("exception.ownership",
-                    new Object[]{ new DefaultMessageSourceResolvable("label.user.profile") });
+                    new Object[] { new DefaultMessageSourceResolvable("label.user.profile") });
             throw new EntityOwnershipException(errorMsg);
         }
 
@@ -134,16 +132,19 @@ public class AddressServiceImpl implements AddressService {
         address.setName(request.getName());
         address.setCompanyName(request.getCompanyName());
         address.setPhone(request.getPhone());
-        address.setCity(request.getCity());
+        address.setDetail(request.getDetail());
         address.setAddress(request.getAddress());
+        address.setProvinceId(request.getProvinceId());
+        address.setDistrictId(request.getDistrictId());
+        address.setWardCode(request.getWardCode());
         address.setType(request.getType());
 
         // Save
         Address updatedAddress = addressRepo.save(address);
 
         // Default address
-        if (request.getIsDefault() 
-            && address.getId() != addressProfile.getAddress().getId()) {
+        if (request.getIsDefault()
+                && address.getId() != addressProfile.getAddress().getId()) {
 
             // Move to address list
             addressProfile.addAddress(addressProfile.getAddress());
@@ -152,7 +153,7 @@ public class AddressServiceImpl implements AddressService {
             addressProfile.setAddress(address);
 
             // Save profile
-            profileRepo.save(addressProfile); 
+            profileRepo.save(addressProfile);
         }
 
         return updatedAddress;
@@ -166,13 +167,13 @@ public class AddressServiceImpl implements AddressService {
         Address address = addressRepo.findById(id)
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
-                            new Object[]{ new DefaultMessageSourceResolvable("label.user.address") });
+                            new Object[] { new DefaultMessageSourceResolvable("label.user.address") });
                     return new ResourceNotFoundException(errorMsg);
                 });
 
         if (!address.getProfile().getId().equals(user.getProfile().getId())) {
             var errorMsg = messageService.getMessage("exception.ownership",
-                    new Object[]{ new DefaultMessageSourceResolvable("label.user.address") });
+                    new Object[] { new DefaultMessageSourceResolvable("label.user.address") });
             throw new EntityOwnershipException(errorMsg);
         }
 

@@ -11,12 +11,14 @@ export async function login(
   source: string,
   token: string
 ): Promise<Response> {
-  const body = { username, pass, persist, source, token };
+  const body = { username, pass, persist };
 
   const response = await fetch(`${API_URL}/api/auth/authenticate`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "response": token,
+      source,
     },
     body: JSON.stringify(body),
   });
@@ -35,12 +37,9 @@ export async function login(
 
   // Forward the refresh token cookie from Spring Boot
   if (cookieString) {
-    const cookieObject = setCookie.parse(
-      setCookie.splitCookiesString(cookieString),
-      {
-        map: true,
-      }
-    );
+    const cookieObject = setCookie.parse(setCookie.splitCookiesString(cookieString), {
+      map: true,
+    });
     const refreshCookie = cookieObject["refreshToken"];
     refreshToken = refreshCookie.value;
   }
@@ -60,12 +59,9 @@ export async function login(
 }
 
 export async function refresh(token: string): Promise<Response> {
-  const response = await fetch(
-    `${API_URL}/api/auth/refresh-token?refreshToken=${token}`,
-    {
-      method: "GET",
-    }
-  );
+  const response = await fetch(`${API_URL}/api/auth/refresh-token?refreshToken=${token}`, {
+    method: "GET",
+  });
 
   if (!response.ok) {
     console.error("Refresh token failed");

@@ -4,9 +4,9 @@ import { sharedConfig } from "@ring/vitest-config";
 
 export default defineConfig({
   ...sharedConfig,
+  plugins: [react()],
   test: {
     ...sharedConfig.test,
-    plugins: [react()],
     environment: "jsdom",
     css: true,
   },

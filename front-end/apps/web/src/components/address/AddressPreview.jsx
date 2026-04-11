@@ -1,13 +1,20 @@
 import styled from "@emotion/styled";
 import { useLocation, useNavigate } from "react-router";
+import { lazy, useState, Suspense, useEffect } from "react";
 import { MobileExtendButton } from "@ring/ui/Components";
 import { useTranslation } from "react-i18next";
 import { currencyFormat } from "@ring/shared/utils/convert";
+import { useGetMyAddressQuery } from "../../features/addresses/addressesApiSlice";
+import { useCalculateShippingFeeMutation } from "../../features/orders/ordersApiSlice";
 import useAuth from "../../hooks/useAuth";
+import useAddress from "../../hooks/useAddress";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LocalShippingOutlined from "@mui/icons-material/LocalShippingOutlined";
 import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
+
+const AddressSelectDialog = lazy(() => import("./AddressSelectDialog"));
 
 //#region styled
 const PreviewWrapper = styled.div`
@@ -63,14 +70,51 @@ const AddressInfo = styled.span`
 `;
 //#endregion
 
-const AddressPreview = ({ addressInfo, handleOpen, loadAddress }) => {
+const AddressPreview = ({ product, pending, setPending }) => {
   const { username } = useAuth();
+  const { defaultAddress, setDefaultAddress } = useAddress();
   const { t } = useTranslation();
-
   const navigate = useNavigate();
   const location = useLocation();
+  const [openDialog, setOpenDialog] = useState(false);
+  const [shippingFee, setShippingFee] = useState(null);
 
-  const fullAddress = [addressInfo?.city, addressInfo?.address].join(", ");
+  // Fetch address when not loaded
+  const { data: addressData, isLoading: loadAddress } = useGetMyAddressQuery({}, { skip: !username || defaultAddress });
+  const [calculateFee, { isLoading: isCalculating }] = useCalculateShippingFeeMutation();
+
+  const fullAddress = [defaultAddress?.address, defaultAddress?.detail].join(", ");
+
+  // Set default address when address data loaded
+  useEffect(() => {
+    if (!loadAddress && addressData) {
+      setDefaultAddress(addressData);
+    }
+  }, [addressData]);
+
+  // Calculate shipping fee when product and default address changed
+  // This will run twice in dev mode
+  useEffect(() => {
+    if (product && defaultAddress && !isCalculating) {
+      calculateFee({
+        toDistrictId: defaultAddress?.districtId,
+        toWardCode: defaultAddress?.wardCode,
+        ghnShopId: product?.ghnShopId,
+        weight: product?.weight,
+        length: product?.length,
+        width: product?.width,
+        height: product?.height,
+        insuranceValue: product?.price,
+      })
+        .then((res) => {
+          setShippingFee(res.data);
+        })
+        .catch((err) => {
+          console.error(err);
+          setShippingFee(-1);
+        });
+    }
+  }, [product, defaultAddress]);
 
   /**
    * Handle click open address dialog
@@ -78,9 +122,23 @@ const AddressPreview = ({ addressInfo, handleOpen, loadAddress }) => {
   const handleClickOpen = () => {
     if (!username) {
       navigate("/auth/login", { state: { from: location } });
-    } else if (handleOpen) {
-      handleOpen();
+    } else if (handleOpenDialog) {
+      handleOpenDialog();
     }
+  };
+
+  /**
+   * Open address select dialog
+   */
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  /**
+   * Close address select dialog
+   */
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
   };
 
   return (
@@ -88,32 +146,50 @@ const AddressPreview = ({ addressInfo, handleOpen, loadAddress }) => {
       <DetailTitle>{t("shipping.label")}:</DetailTitle>
       <PreviewContainer>
         <Box display="flex" flexDirection={"column"} position="relative" width="100%">
-          {!addressInfo && loadAddress ? (
+          {!defaultAddress && loadAddress ? (
             <Box>{t("updating")}</Box>
           ) : (
             <Box display="flex" width={{ xs: "95%", md: "100%" }}>
               <LocalShippingOutlined />
               <Box overflow="hidden">
                 <AddressInfo aria-label="toggle address dialog" disabled={loadAddress} onClick={handleClickOpen}>
-                  &nbsp;{t("shipping.label")}:&emsp;
-                  <Address>
-                    {/* TODO: Do something with this */}
-                    {fullAddress.length > 2 ? fullAddress : t("unknown")}
-                  </Address>
+                  &nbsp;{t("address.to")}:&emsp;
+                  <Address>{fullAddress.length > 2 ? fullAddress : t("address.add")}</Address>
                   <KeyboardArrowDown sx={{ display: { xs: "none", md: "block" } }} />
                 </AddressInfo>
                 <AddressInfo className="hide-on-mobile">
                   &nbsp;{t("cart.shipping.fee")}:&emsp;
-                  <Address>{currencyFormat.format(10000)}</Address>
+                  <Address>
+                    {isCalculating ? (
+                      <Skeleton animation="wave" width={100} height={20} />
+                    ) : shippingFee >= 0 ? (
+                      currencyFormat.format(shippingFee)
+                    ) : (
+                      t("unknown")
+                    )}
+                  </Address>
                 </AddressInfo>
               </Box>
             </Box>
           )}
         </Box>
-        <MobileExtendButton disabled={loadAddress} onClick={handleOpen}>
+        <MobileExtendButton disabled={loadAddress} onClick={handleClickOpen}>
           <KeyboardArrowRight fontSize="small" />
         </MobileExtendButton>
       </PreviewContainer>
+      <Suspense fallback={null}>
+        <AddressSelectDialog
+          {...{
+            address: defaultAddress,
+            loggedIn: username != null,
+            pending,
+            setPending,
+            setAddress: setDefaultAddress,
+            openDialog,
+            handleCloseDialog,
+          }}
+        />
+      </Suspense>
     </PreviewWrapper>
   );
 };

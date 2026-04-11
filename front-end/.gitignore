@@ -15,6 +15,7 @@ lerna-debug.log*
 .env
 .turbo
 .cache
+.agents
 .DS_Store
 *.suo
 *.ntvs*
@@ -31,6 +32,8 @@ public/dist
 *.local
 analyse.html
 .vercel
+skills-lock.json
 
 # Orval generated models
 shared/src/models/*
+.orval/

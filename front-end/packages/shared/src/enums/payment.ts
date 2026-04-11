@@ -75,9 +75,9 @@ export const getPaymentStatus = (paymentStatus: PaymentStatus): PaymentStatusMet
         label: "payment.status.paid",
         color: "success",
       };
-    case PaymentStatus.CANCELED:
+    case PaymentStatus.CANCELLED:
       return {
-        value: PaymentStatus.CANCELED,
+        value: PaymentStatus.CANCELLED,
         label: "payment.status.canceled",
         color: "error",
       };

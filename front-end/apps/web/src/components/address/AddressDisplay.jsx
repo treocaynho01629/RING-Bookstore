@@ -73,17 +73,17 @@ const AddressTag = styled.span`
 
 const AddressType = getAddressType();
 
-const AddressDisplay = ({ addressInfo, handleOpen, isValid, loadAddress }) => {
+const AddressDisplay = ({ address, handleOpen, isValid, loadAddress }) => {
   const { t } = useTranslation();
-  const fullAddress = [addressInfo?.city, addressInfo?.address].join(", ");
-  const address = addressInfo?.type ? AddressType[addressInfo.type] : null;
+  const fullAddress = [address?.address, address?.detail].join(", ");
+  const addressType = address?.type ? AddressType[address.type] : null;
 
   return (
     <>
-      <Title>{t("address.to", { ns: "authenticated" })}</Title>
-      <AddressDisplayContainer className={!loadAddress && isValid ? "" : !addressInfo ? "" : "error"}>
+      <Title>{t("address.to")}:</Title>
+      <AddressDisplayContainer className={!loadAddress && isValid ? "" : !address ? "" : "error"}>
         <AddressContainer>
-          {!addressInfo && loadAddress ? (
+          {!address && loadAddress ? (
             <>
               <AddressContent>
                 <UserInfo>
@@ -97,11 +97,11 @@ const AddressDisplay = ({ addressInfo, handleOpen, isValid, loadAddress }) => {
           ) : (
             <>
               <AddressContent>
-                <UserInfo>{addressInfo?.companyName ?? addressInfo?.name}&nbsp;</UserInfo>
-                {addressInfo?.phone && <UserInfo>{`(+84) ${addressInfo.phone}`}</UserInfo>}
+                <UserInfo>{address?.companyName ?? address?.name}&nbsp;</UserInfo>
+                {address?.phone && <UserInfo>{`(+84) ${address.phone}`}</UserInfo>}
               </AddressContent>
               <Address>
-                {address && <AddressTag className={address.color}>{address.label}</AddressTag>}
+                {addressType && <AddressTag className={addressType.color}>{addressType.label}</AddressTag>}
                 {fullAddress}
               </Address>
             </>
@@ -111,7 +111,7 @@ const AddressDisplay = ({ addressInfo, handleOpen, isValid, loadAddress }) => {
           sx={{ display: { xs: "none", sm: "flex" }, whiteSpace: "nowrap" }}
           aria-label="toggle address dialog"
           variant="outlined"
-          color={!loadAddress && isValid ? "primary" : !addressInfo ? "primary" : "error"}
+          color={!loadAddress && isValid ? "primary" : !address ? "primary" : "error"}
           disabled={loadAddress}
           onClick={handleOpen}
         >
@@ -121,7 +121,7 @@ const AddressDisplay = ({ addressInfo, handleOpen, isValid, loadAddress }) => {
           sx={{ mr: -1, display: { xs: "flex", sm: "none" } }}
           aria-label="mobile toggle address dialog"
           onClick={handleOpen}
-          color={!loadAddress && isValid ? "primary" : !addressInfo ? "primary" : "error"}
+          color={!loadAddress && isValid ? "primary" : !address ? "primary" : "error"}
           disabled={loadAddress}
           edge="end"
         >

@@ -6,7 +6,8 @@ import java.time.LocalDateTime;
 
 /**
  * Represents a shop projection as {@link IShop}, containing owner's username,
- * owner information, sales, total sold items, followers, join date, and image.
+ * owner information, sales, total products, total orders, total followers,
+ * canceled rate, verified status, join date, and image.
  */
 public interface IShop {
 
@@ -18,13 +19,21 @@ public interface IShop {
 
     String getName();
 
+    Boolean getVerified();
+
     Double getSales();
 
-    Integer getTotalSold();
+    Double getCanceledRate();
+
+    Integer getTotalReviews();
+
+    Integer getTotalOrders();
+
+    Integer getTotalProducts();
 
     Integer getTotalFollowers();
 
-    LocalDateTime getJoinedDate();
-
     IImage getImage();
+
+    LocalDateTime getJoinedDate();
 }

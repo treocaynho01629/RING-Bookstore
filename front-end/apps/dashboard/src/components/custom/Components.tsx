@@ -1,6 +1,20 @@
 import { styled } from "@mui/material/styles";
 import { LinearProgress } from "@mui/material";
 
+export const DrawerContainer = styled("div")`
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  max-width: 400px;
+`;
+
+export const FilterText = styled("span")`
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: ${({ theme }) => theme.spacing(1)};
+  display: block;
+`;
+
 export const ItemTitle = styled("p")`
   font-size: 12px;
   margin: 5px 0;
@@ -63,6 +77,16 @@ export const Title = styled("span")`
   margin: ${({ theme }) => theme.spacing(1.5)} 0;
 `;
 
+export const TitleContainer = styled("div")`
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  svg {
+    margin-right: ${({ theme }) => theme.spacing(1)};
+  }
+`;
+
 export const Label = styled("p")`
   font-weight: 450;
 
@@ -86,5 +110,28 @@ export const LinkButton = styled("span")`
 export const InfoTable = styled("table")`
   td {
     width: 50%;
+  }
+`;
+
+export const SectionTitle = styled("div")`
+  font-size: 16px;
+  font-weight: 550;
+  line-height: 1.9rem;
+  padding-bottom: ${({ theme }) => theme.spacing(2)};
+  margin-bottom: ${({ theme }) => theme.spacing(2)};
+  border-bottom: 0.5px solid ${({ theme }) => theme.palette.primary.main};
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(1)};
+`;
+
+export const SectionCard = styled("div")`
+  padding: ${({ theme }) => theme.spacing(2.5)};
+  height: 100%;
+  border: 0.5px solid ${({ theme }) => theme.vars?.palette?.divider};
+  background-color: ${({ theme }) => theme.vars?.palette?.background?.paper};
+
+  ${({ theme }) => theme.breakpoints.down("md")} {
+    padding: 0 12px;
   }
 `;

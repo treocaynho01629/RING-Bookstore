@@ -252,9 +252,8 @@ const Product = ({ book, scrollPosition }) => {
 
   /**
    * Handle add to cart
-   * @param {Book} book
    */
-  const handleAddToCart = (book) => {
+  const handleAddToCart = () => {
     addProduct(book, 1);
   };
 
@@ -344,7 +343,7 @@ const Product = ({ book, scrollPosition }) => {
       </Container>
       <Info className="extra">
         <Divider />
-        <AddToCart onClick={() => handleAddToCart(book)} className={book ? "" : "disabled"}>
+        <AddToCart onClick={handleAddToCart} className={book ? "" : "disabled"}>
           <ShoppingCartIcon style={{ fontSize: 14 }} />
           &nbsp;
           {t("cart.add")}

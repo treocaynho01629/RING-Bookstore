@@ -5,19 +5,18 @@
     "empty": "Chưa có địa chỉ nào",
     "recipient": "Địa chỉ người nhận",
     "place": "Vận chuyển đến địa chỉ này",
-    "from": "Giao từ",
-    "to": "Giao tới",
-    "add": "Thêm địa chỉ",
     "edit": "Sửa địa chỉ",
     "temp": "Tạm thời",
     "suggestion": "Tạo địa chỉ tạm thời?",
-    "name": "Họ và tên",
-    "phone": "Số điện thoại",
+    "name": "Tên người nhận",
     "company": "Tên công ty",
-    "city": "Tỉnh/Thành phố",
-    "ward": "Phường/Xã",
-    "detail": "Địa chỉ nhận hàng",
+    "input": "Tỉnh/Thành phố/Quận/Huyện/Phường/Xã",
+    "detail": "Địa chỉ cụ thể",
     "settings": "Cài đặt khác",
+    "province": "Tỉnh/Thành phố",
+    "district": "Quận/Huyện",
+    "ward": "Phường/Xã",
+    "selecting": "Chọn {{item}}",
     "type": {
       "label": "Loại địa chỉ",
       "home": "Nhà riêng",
@@ -63,6 +62,7 @@
     "shipping": {
       "label": "Giao hàng",
       "select": "Chọn hình thức giao hàng",
+      "ghn": "GHN - Express",
       "estimate": "Đảm bảo nhận hàng từ {{date}} ngày"
     }
   },
@@ -96,7 +96,7 @@
     "refunded": "Hoàn tiền",
     "again": "Mua lại",
     "note": "Ghi chú",
-    "shipping": "Hình thức giao hàng",
+    "shipping": "Thông tin giao hàng",
     "package": "Kiện hàng",
     "processing": "Đang xử lý đơn hàng...",
     "pending": {

@@ -17,7 +17,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 
 /**
- * A mapper for {@link IAccount}, {@link IAccountDetail}, and {@link IProfile} to {@link AccountDTO}, {@link AccountDetailDTO}, and {@link ProfileDTO}.
+ * A mapper for {@link IAccount}, {@link IAccountDetail}, and {@link IProfile}
+ * to {@link AccountDTO}, {@link AccountDetailDTO}, and {@link ProfileDTO}.
  */
 @RequiredArgsConstructor
 @Service
@@ -34,7 +35,7 @@ public class AccountMapper {
     public AccountDTO projectionToDTO(IAccount projection) {
 
         IImage image = projection.getImage();
-        String imageUrl = image != null 
+        String imageUrl = image != null
                 ? cloudinary.url()
                         .transformation(CloudinaryTransformations.AVATAR_TRANSFORMATION)
                         .secure(true)
@@ -60,7 +61,7 @@ public class AccountMapper {
 
         LocalDate dob = (dob = projection.getDob()) != null ? dob : AppConstants.DEFAULT_DATE;
         IImage image = projection.getImage();
-        String imageUrl = image != null 
+        String imageUrl = image != null
                 ? cloudinary.url()
                         .transformation(CloudinaryTransformations.PROFILE_TRANSFORMATION)
                         .secure(true)
@@ -91,12 +92,12 @@ public class AccountMapper {
 
         LocalDate dob = (dob = projection.getDob()) != null ? dob : AppConstants.DEFAULT_DATE;
         IImage image = projection.getImage();
-        String imageUrl = image != null 
-        ? cloudinary.url()
-                .transformation(CloudinaryTransformations.PROFILE_TRANSFORMATION)
-                .secure(true)
-                .generate(image.getPublicId())
-        : null;
+        String imageUrl = image != null
+                ? cloudinary.url()
+                        .transformation(CloudinaryTransformations.PROFILE_TRANSFORMATION)
+                        .secure(true)
+                        .generate(image.getPublicId())
+                : null;
 
         return new ProfileDTO(imageUrl,
                 projection.getName(),

@@ -81,13 +81,13 @@ const AddressSelectDialog = ({
   loggedIn = true,
   pending,
   setPending,
-  setAddressInfo,
+  setAddress,
   openDialog,
   handleCloseDialog,
 }) => {
   const { t } = useTranslation();
   const { addresses: storeAddresses, addNewAddress, removeAddress } = useAddress();
-  const [openForm, setOpenForm] = useState(false); //Dialog open state
+  const [openForm, setOpenForm] = useState(false); // Dialog open state
   const [err, setErr] = useState("");
   const [errMsg, setErrMsg] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
@@ -98,7 +98,7 @@ const AddressSelectDialog = ({
   const { confirm, ConfirmationDialog } = useConfirm(ConfirmDialog);
 
   // Fetch addresses
-  const { data, isLoading, isSuccess, isError, error } = useGetMyAddressesQuery({}, { skip: !loggedIn });
+  const { data, isLoading, isSuccess, isError, error } = useGetMyAddressesQuery({}, { skip: !loggedIn || !openDialog });
 
   // Update address
   const [createAddress, { isLoading: creating }] = useCreateAddressMutation();
@@ -266,6 +266,10 @@ const AddressSelectDialog = ({
           phone: address.phone,
           city: address.city,
           address: address.address,
+          detail: address.detail,
+          provinceId: address.provinceId,
+          districtId: address.districtId,
+          wardCode: address.wardCode,
           type: address.type,
           isDefault,
         };
@@ -315,6 +319,10 @@ const AddressSelectDialog = ({
             phone: address.phone,
             city: address.city,
             address: address.address,
+            detail: address.detail,
+            provinceId: address.provinceId,
+            districtId: address.districtId,
+            wardCode: address.wardCode,
             type: address.type,
             isDefault,
           },
@@ -384,6 +392,10 @@ const AddressSelectDialog = ({
           phone: address.phone,
           city: address.city,
           address: address.address,
+          detail: address.detail,
+          provinceId: address.provinceId,
+          districtId: address.districtId,
+          wardCode: address.wardCode,
           type: address.type,
           isDefault: false,
         };
@@ -419,6 +431,10 @@ const AddressSelectDialog = ({
           phone: address.phone,
           city: address.city,
           address: address.address,
+          detail: address.detail,
+          provinceId: address.provinceId,
+          districtId: address.districtId,
+          wardCode: address.wardCode,
           type: address.type,
           isDefault: true,
         };
@@ -455,12 +471,12 @@ const AddressSelectDialog = ({
    * @returns {void}
    */
   const handleSetAddress = (address) => {
-    if (address) {
-      setAddressInfo(address);
+    if (address && setAddress) {
+      setAddress(address);
     } else if (`${selectedValue}`.startsWith("s-")) {
-      setAddressInfo(storeAddresses.filter((item) => item.id == selectedValue)[0]);
+      setAddress(storeAddresses.filter((item) => item.id == selectedValue)[0]);
     } else if (data?.ids?.length) {
-      setAddressInfo(data?.entities[selectedValue]);
+      setAddress(data?.entities[selectedValue]);
     }
   };
 
@@ -573,17 +589,19 @@ const AddressSelectDialog = ({
             <StyledSimpleBar>
               {addressesContent}
               {storedContent}
-              <Button
-                variant="outlined"
-                size="large"
-                color="primary"
-                fullWidth
-                onClick={() => handleOpen()}
-                aria-label="Add address button"
-              >
-                <AddHome />
-                &nbsp;{t("address.add", { ns: "authenticated" })}
-              </Button>
+              {!isError && !isLoading && (
+                <Button
+                  variant="outlined"
+                  size="large"
+                  color="primary"
+                  fullWidth
+                  onClick={() => handleOpen()}
+                  aria-label={t("address.add")}
+                >
+                  <AddHome />
+                  &nbsp;{t("address.add")}
+                </Button>
+              )}
               {!isLoading && !isError && !data?.ids?.length && !storeAddresses?.length && (
                 <MessageContainer>
                   <Message>

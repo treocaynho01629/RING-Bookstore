@@ -70,6 +70,7 @@
   "home": "Home",
   "breadcrumbs": "Breadcrumbs",
   "store": "Store",
+  "follower": "Followers",
   "saved": "Saved",
   "items": "items",
   "image": "Image",
@@ -106,6 +107,10 @@
   "edit": "Edit",
   "update": "Update",
   "select": "Select",
+  "joined": {
+    "label": "Joined",
+    "date": "Joined date"
+  },
   "show": {
     "more": "Show more",
     "less": "Show less",
@@ -170,6 +175,7 @@
     "pages": "Pages",
     "description": "Product description",
     "other": "Other products",
+    "catalog": "Product catalog",
     "type": {
       "label": "Cover type",
       "hard": "Hard cover",
@@ -178,9 +184,12 @@
       "slip": "Slip cover"
     }
   },
+  "shop": {
+    "label": "Shops",
+    "rate": "Cancellation rate"
+  },
   "category": {
-    "label": "Categories",
-    "title": "Product categories"
+    "label": "Categories"
   },
   "publisher": {
     "label": "Publisher",
@@ -258,8 +267,7 @@
       "favorite": "Favorite",
       "price": "Price",
       "in-stock": "In stock",
-      "featured": "Featured",
-      "joined": "Joined date"
+      "featured": "Featured"
     }
   },
   "pagination": {
@@ -294,10 +302,9 @@
   },
   "shipping": {
     "label": "Delivery",
+    "service": "Delivery service",
     "estimate": "{{date}} delivery days",
-    "economy": "Economy",
-    "standard": "Standard",
-    "express": "Express"
+    "standard": "Standard"
   },
   "change": {
     "label": "Change password",

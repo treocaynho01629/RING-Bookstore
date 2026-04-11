@@ -1,5 +1,7 @@
 {
   "validation": {
+    "email": "Invalid email format.",
+    "phone": "Invalid phone format.",
     "constraints": {
       "required": "Please enter {{field}}!",
       "blank": "{{field}} cannot be blank!",

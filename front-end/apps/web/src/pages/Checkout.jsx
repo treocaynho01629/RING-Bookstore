@@ -5,10 +5,10 @@ import { useGetMyAddressQuery } from "../features/addresses/addressesApiSlice";
 import { useCalculateMutation, useCheckoutMutation } from "../features/orders/ordersApiSlice";
 import { debounce, isEqual } from "lodash-es";
 import { PHONE_REGEX } from "@ring/shared/utils/regex";
-import { ShippingType } from "@ring/shared/models/shippingType";
 import { PaymentType } from "@ring/shared/models/paymentType";
 import { useTranslation } from "react-i18next";
 import { useColorScheme, useMediaQuery } from "@mui/material";
+import { DEFAULT_SHIPPING_TYPE } from "@ring/shared/constants/appContants";
 import useDeepEffect from "@ring/shared/useDeepEffect";
 import useAuth from "../hooks/useAuth";
 import Button from "@mui/material/Button";
@@ -34,6 +34,7 @@ import PreviewDetailRow from "../components/cart/PreviewDetailRow";
 import FinalCheckoutDialog from "../components/cart/FinalCheckoutDialog";
 import useCart from "../hooks/useCart";
 import useCheckout from "../hooks/useCheckout";
+import useAddress from "../hooks/useAddress";
 
 const PendingModal = lazy(() => import("@ring/ui/PendingModal"));
 const Turnstile = lazy(() => import("@ring/auth/Turnstile"));
@@ -44,6 +45,13 @@ const ConfirmDialog = lazy(() => import("@ring/ui/ConfirmDialog"));
 
 //#region styled
 const Wrapper = styled.div``;
+
+const TurnstileContainer = styled.div`
+  ${({ theme }) => theme.breakpoints.down("md_lg")} {
+    display: flex;
+    justify-content: center;
+  }
+`;
 
 const CheckoutContainer = styled.div`
   display: flex;
@@ -80,11 +88,15 @@ const SemiTitle = styled.h4`
       display: none;
     }
   }
-`;
 
-const MiniTitle = styled.h4`
-  margin: ${({ theme }) => theme.spacing(1.5, 1)};
-  font-weight: 420;
+  ${({ theme }) => theme.breakpoints.down("sm")} {
+    font-size: 15px;
+    font-weight: 450;
+
+    svg {
+      font-size: 21px;
+    }
+  }
 `;
 
 const StyledStepper = styled(Stepper)(({ theme }) => ({
@@ -128,6 +140,7 @@ const MAX_STEPS = 3;
 const Checkout = () => {
   //#region construct
   const { username } = useAuth();
+  const { defaultAddress, setDefaultAddress } = useAddress();
   const { t, i18n } = useTranslation();
   const { mode } = useColorScheme();
   const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
@@ -148,6 +161,7 @@ const Checkout = () => {
   const location = useLocation();
   const checkoutState = location.state?.checkoutState;
   const selected = checkoutState?.selected;
+  const totalSelected = selected?.length;
 
   // Coupon
   const [contextShop, setContextShop] = useState(null);
@@ -167,7 +181,6 @@ const Checkout = () => {
 
   // Address
   const [openAddress, setOpenAddress] = useState(false);
-  const [addressInfo, setAddressInfo] = useState(null);
   const [errMsg, setErrMsg] = useState("");
   const [err, setErr] = useState([]);
 
@@ -189,21 +202,28 @@ const Checkout = () => {
   const [checkout, { isLoading }] = useCheckoutMutation();
 
   // Fetch current profile address
-  const { data: address, isLoading: loadAddress } = useGetMyAddressQuery();
+  const { data: addressData, isLoading: loadAddress } = useGetMyAddressQuery({}, { skip: defaultAddress });
 
   // Other
   const navigate = useNavigate();
 
   useDeepEffect(() => {
-    if (calculating || !cartProducts?.length || cartProducts.length == 0) {
+    if (calculating || !cartProducts?.length || cartProducts.length == 0 || activeStep == 0) {
       handleCalculate.cancel();
     }
     handleCartChange();
-  }, [cartProducts, shopCoupon, coupon, addressInfo, shopShipping]);
+  }, [cartProducts, shopCoupon, coupon, defaultAddress, shopShipping, activeStep]);
 
   useEffect(() => {
     scrollToTop();
   }, [activeStep]);
+
+  // Set default address
+  useEffect(() => {
+    if (!loadAddress && addressData) {
+      setDefaultAddress(addressData);
+    }
+  }, [addressData]);
 
   /**
    * Handle cart change
@@ -247,7 +267,7 @@ const Checkout = () => {
                 shopId,
                 items: [],
                 note: shopNote[shopId],
-                shippingType: shopShipping[shopId] || Object.keys(ShippingType)[0],
+                shippingType: shopShipping[shopId] || DEFAULT_SHIPPING_TYPE,
                 coupon: coupon?.isUsable ? coupon?.code : null,
               };
               result.cart.push(detail);
@@ -260,16 +280,7 @@ const Checkout = () => {
           return result;
         },
         {
-          address: addressInfo
-            ? {
-                name: addressInfo.name,
-                companyName: addressInfo.companyName,
-                phone: addressInfo.phone,
-                city: addressInfo.city + ", " + addressInfo.ward,
-                address: addressInfo.address,
-                type: addressInfo.type,
-              }
-            : null,
+          address: defaultAddress,
           paymentMethod: payment,
           coupon: coupon?.isUsable ? coupon?.code : null,
           cart: [],
@@ -302,9 +313,9 @@ const Checkout = () => {
       const skipCalculate =
         calculating ||
         cart == null ||
-        address == null ||
-        addressInfo == null ||
-        isEqual(prevPayload.current, cart) ||
+        activeStep == 0 ||
+        defaultAddress == null ||
+        (activeStep > 0 && isEqual(prevPayload.current, cart)) ||
         calCount.current == 3;
       if (skipCalculate) return;
 
@@ -325,7 +336,7 @@ const Checkout = () => {
           }
         });
     }, 500),
-    [addressInfo]
+    [defaultAddress, activeStep]
   );
 
   /**
@@ -381,13 +392,6 @@ const Checkout = () => {
   };
 
   /**
-   * Handle back to first step
-   */
-  const backFirstStep = () => {
-    setActiveStep(0);
-  };
-
-  /**
    * Handle open address dialog
    */
   const handleOpenDialog = () => {
@@ -399,6 +403,14 @@ const Checkout = () => {
    */
   const handleCloseDialog = () => {
     setOpenAddress(false);
+  };
+
+  /**
+   * Handle back to first step
+   */
+  const editAddress = () => {
+    setActiveStep(0);
+    handleOpenDialog();
   };
 
   /**
@@ -485,12 +497,14 @@ const Checkout = () => {
     setOpenWarning(false);
   };
 
-  const validAddressInfo = [
-    addressInfo?.name,
-    addressInfo?.phone,
-    addressInfo?.city,
-    addressInfo?.address,
-    PHONE_REGEX.test(addressInfo?.phone),
+  const validAddress = [
+    defaultAddress?.name,
+    defaultAddress?.phone,
+    defaultAddress?.provinceId,
+    defaultAddress?.districtId,
+    defaultAddress?.wardCode,
+    defaultAddress?.detail,
+    PHONE_REGEX.test(defaultAddress?.phone),
     !loadAddress,
   ].every(Boolean);
 
@@ -504,12 +518,20 @@ const Checkout = () => {
     setPending(true);
 
     // Validation
-    const valid = PHONE_REGEX.test(addressInfo?.phone);
+    const valid = PHONE_REGEX.test(defaultAddress?.phone);
 
-    if (!valid && addressInfo?.phone) {
+    if (!valid && defaultAddress?.phone) {
       setErrMsg(capitalize("validation.constraints.pattern", { ns: "validation", field: t("phone") }));
       return;
-    } else if (!addressInfo?.name || !addressInfo?.phone || !addressInfo?.city || !addressInfo?.address) {
+    } else if (
+      !defaultAddress?.name ||
+      !defaultAddress?.phone ||
+      !defaultAddress?.detail ||
+      !defaultAddress?.address ||
+      !addressInfo?.provinceId ||
+      !defaultAddress?.districtId ||
+      !defaultAddress?.wardCode
+    ) {
       setErrMsg(capitalize("validation.constraints.required", { ns: "validation", field: t("address") }));
       return;
     }
@@ -593,25 +615,25 @@ const Checkout = () => {
                   <StyledStepContent>
                     <AddressDisplay
                       {...{
-                        addressInfo,
-                        isValid: validAddressInfo,
+                        address: defaultAddress,
+                        isValid: validAddress,
                         handleOpen: handleOpenDialog,
                         loadAddress,
                       }}
                     />
                     <AddressSelectDialog
                       {...{
-                        address,
+                        address: defaultAddress,
                         pending,
                         setPending,
-                        setAddressInfo,
+                        setAddress: setDefaultAddress,
                         openDialog: openAddress,
                         handleCloseDialog,
                         err,
                       }}
                     />
                     <Button
-                      disabled={!validAddressInfo}
+                      disabled={!validAddress}
                       variant="contained"
                       color="primary"
                       onClick={handleNext}
@@ -636,7 +658,7 @@ const Checkout = () => {
                   >
                     <SemiTitle
                       onClick={() => {
-                        if (validAddressInfo && activeStep > 1) setActiveStep(1);
+                        if (validAddress && activeStep > 1) setActiveStep(1);
                       }}
                     >
                       <ProductionQuantityLimits />
@@ -650,7 +672,10 @@ const Checkout = () => {
                           {Object.keys(reducedCart).map((shopId, index) => {
                             const shop = reducedCart[shopId];
                             const calculatedShop = calculated?.details?.find((detail) => detail?.shopId == shopId);
-                            const shippingFee = calculatedShop?.shippingFee ?? estimated?.shipping;
+                            const estimatedShippingFee =
+                              estimated?.shipping /
+                              (checkState?.details ? Object.keys(checkState?.details).length || 1 : 1);
+                            const shippingFee = calculatedShop?.shippingFee ?? estimatedShippingFee;
                             const shippingDiscount = calculatedShop?.shippingDiscount ?? 0;
 
                             return (
@@ -675,7 +700,7 @@ const Checkout = () => {
                       </Table>
                     </TableContainer>
                     <Button
-                      disabled={!validAddressInfo || calculating}
+                      disabled={!validAddress}
                       variant="contained"
                       color="primary"
                       onClick={handleNext}
@@ -690,7 +715,7 @@ const Checkout = () => {
                           {...{
                             open: openShipping,
                             handleClose: handleCloseShippingDialog,
-                            selectedShipping: shopShipping[contextShop] || Object.keys(ShippingType)[0],
+                            selectedShipping: shopShipping[contextShop] || DEFAULT_SHIPPING_TYPE,
                             shippingFee: calculatedContextShop?.shippingFee,
                             shippingDiscount: calculatedContextShop?.shippingDiscount,
                             onSubmit: handleChangeShipping,
@@ -730,15 +755,17 @@ const Checkout = () => {
                     </Suspense>
                     {activeStep === 2 && (
                       <Suspense fallback={null}>
-                        <Turnstile
-                          siteKey={turnstileSiteKey}
-                          onSuccess={(turnstileToken) => setToken(turnstileToken)}
-                          onExpire={() => setToken("")}
-                          action="checkout"
-                          size="normal"
-                          theme={resolvedMode}
-                          lang={i18n.language}
-                        />
+                        <TurnstileContainer>
+                          <Turnstile
+                            siteKey={turnstileSiteKey}
+                            onSuccess={(turnstileToken) => setToken(turnstileToken)}
+                            onExpire={() => setToken("")}
+                            action="checkout"
+                            size="normal"
+                            theme={resolvedMode}
+                            lang={i18n.language}
+                          />
+                        </TurnstileContainer>
                       </Suspense>
                     )}
                   </StyledStepContent>
@@ -751,20 +778,22 @@ const Checkout = () => {
               </Box>
               <FinalCheckoutDialog
                 {...{
+                  totalSelected,
                   coupon,
                   shopCoupon,
                   discount,
                   calculating,
                   displayInfo,
-                  isValid: validAddressInfo,
+                  isValid: validAddress,
                   activeStep,
                   maxSteps: MAX_STEPS,
-                  handleOpenDialog: handleOpenCouponDialog,
-                  addressInfo,
-                  backFirstStep,
+                  changeCoupon: handleOpenCouponDialog,
+                  address: defaultAddress,
+                  editAddress,
                   handleNext,
                   handleSubmit,
                   token,
+                  disableContinue: activeStep > 0 && !calculated,
                 }}
               />
             </Grid>

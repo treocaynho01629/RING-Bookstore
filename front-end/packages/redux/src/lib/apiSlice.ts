@@ -25,10 +25,13 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {
   api,
   extraOptions
 ) => {
-  let baseQueryParams: FetchBaseQueryArgs = {};
+  const baseQueryParams: FetchBaseQueryArgs = {};
 
   // Get base url
   if (baseUrl) baseQueryParams.baseUrl = baseUrl;
+  const isFormDataRequest =
+    typeof args !== "string" &&
+    (args.body instanceof FormData || Boolean((args as FetchArgs & { formData?: boolean }).formData));
 
   baseQueryParams.prepareHeaders = (headers) => {
     // Accept-Language header with current language
@@ -36,7 +39,12 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {
     if (language) headers.set("Accept-Language", language);
 
     // Common headers
-    headers.set("Content-Type", "application/json");
+    if (isFormDataRequest) {
+      // Let browser set multipart boundary automatically for FormData.
+      headers.delete("Content-Type");
+    } else {
+      headers.set("Content-Type", "application/json");
+    }
 
     // Authorization Bearer token
     const token = (api.getState() as RootState).auth.token;

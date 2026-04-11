@@ -10,31 +10,31 @@ import storage from "redux-persist/lib/storage";
 const appPersistConfig = {
   key: "app",
   version: 1,
-  storage,
+  storage: storage.default,
 };
 
 const authPersistConfig = {
   key: "auth",
   version: 1,
-  storage,
+  storage: storage.default,
 };
 
 const cartPersistConfig = {
   key: "cart",
   version: 1,
-  storage,
+  storage: storage.default,
 };
 
 const addressPersistConfig = {
   key: "address",
   version: 1,
-  storage,
+  storage: storage.default,
 };
 
 const couponPersistConfig = {
   key: "coupon",
   version: 1,
-  storage,
+  storage: storage.default,
 };
 
 // Web reducers

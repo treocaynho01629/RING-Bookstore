@@ -4,7 +4,7 @@ import { currencyFormat } from "@ring/shared/utils/convert";
 import { iconList } from "@ring/shared/utils/icon";
 import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
-
+import QuestionMark from "@mui/icons-material/QuestionMark";
 //#region styled
 const CouponContainer = styled.div`
   position: relative;
@@ -148,12 +148,12 @@ const CouponDesc = styled.b`
 const CouponDisplay = ({ coupon }) => {
   const { t } = useTranslation();
   const meta = getCouponType(coupon?.type);
-  const Icon = iconList[meta?.icon];
+  const Icon = iconList[meta?.icon] ?? <QuestionMark />;
 
   return (
     <CouponContainer>
       <CouponIcon color={meta?.color} className={coupon?.isUsable ? "" : "disabled"}>
-        <Suspense fallback={null}>
+        <Suspense fallback={<QuestionMark />}>
           <Icon />
         </Suspense>
       </CouponIcon>

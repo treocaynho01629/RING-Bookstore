@@ -190,19 +190,17 @@ export const ActionButtons = ({ book, outlined = false }) => {
 
   /**
    * Handle add to cart
-   * @param {Object} book - Book object
    */
-  const handleAddToCart = (book) => {
+  const handleAddToCart = () => {
     handleClose();
-    addProduct(book, amountIndex);
+    addProduct({ ...book, srcSet: book?.srcSet[0] }, amountIndex);
   };
 
   /**
    * Handle buy now
-   * @param {Object} book - Book object
    */
-  const handleBuyNow = (book) => {
-    handleAddToCart(book);
+  const handleBuyNow = () => {
+    handleAddToCart();
     navigate("/cart");
   };
 
@@ -302,7 +300,7 @@ export const ActionButtons = ({ book, outlined = false }) => {
                   color={openNow ? "warning" : "primary"}
                   size="large"
                   fullWidth
-                  onClick={openNow ? () => handleBuyNow(book) : () => handleAddToCart(book)}
+                  onClick={openNow ? handleBuyNow : handleAddToCart}
                 >
                   {!book
                     ? t("loading")
@@ -352,7 +350,7 @@ export const ActionButtons = ({ book, outlined = false }) => {
             fullWidth
             sx={{ maxWidth: "40%", marginRight: 1 }}
             disabled={!book || book?.amount == 0}
-            onClick={() => handleBuyNow(book)}
+            onClick={handleBuyNow}
           >
             {t("product.buy.now")}
           </BuyButton>
@@ -362,7 +360,7 @@ export const ActionButtons = ({ book, outlined = false }) => {
             size="large"
             fullWidth
             disabled={!book || book?.amount == 0}
-            onClick={() => handleAddToCart(book)}
+            onClick={handleAddToCart}
             startIcon={<AddShoppingCart fontSize="small" />}
           >
             {!book

@@ -136,19 +136,16 @@ public class BookServiceImpl implements BookService {
     }
 
     @Cacheable(cacheNames = AppConstants.BOOK, key = "#id")
-    public BookDTO getBook(Long id) {
-        IBook book = detailRepo.findBook(id)
+    public BookDTO getBook(Long id, Account currUser) {
+        boolean isAdmin = CommonUtils.isAuthAdmin();
+        IBook book = detailRepo.findBook(id, isAdmin ? null : currUser.getId())
                 .orElseThrow(() -> {
                     var errorMsg = messageService.getMessage("exception.not.found",
                             new Object[] { new DefaultMessageSourceResolvable(
                                     "label.product") });
                     return new ResourceNotFoundException(errorMsg);
                 });
-        List<Long> imageIds = book.getPreviews() != null ? book.getPreviews() : new ArrayList<>();
-        imageIds.add(book.getImage());
-
-        List<Image> images = imageRepo.findImages(imageIds);
-        return bookMapper.projectionToDTO(book, images); // Map to DTO
+        return bookMapper.projectionToDTO(book, imageRepo.findPreviewByBookId(book.getId())); // Map to DTO
     }
 
     @Cacheable(cacheNames = AppConstants.BOOK_DETAIL, key = "#id")
@@ -160,7 +157,7 @@ public class BookServiceImpl implements BookService {
                                     "label.product") });
                     return new ResourceNotFoundException(errorMsg);
                 });
-        return bookMapper.detailToDTO(book); // Map to DTO
+        return bookMapper.detailToDTO(book, imageRepo.findPreviewByBookId(book.getId())); // Map to DTO
     }
 
     @Cacheable(cacheNames = AppConstants.BOOK_DETAIL, key = "#slug")
@@ -172,7 +169,7 @@ public class BookServiceImpl implements BookService {
                                     "label.product") });
                     return new ResourceNotFoundException(errorMsg);
                 });
-        return bookMapper.detailToDTO(book); // Map to DTO
+        return bookMapper.detailToDTO(book, imageRepo.findPreviewByBookId(book.getId())); // Map to DTO
     }
 
     @Cacheable(cacheNames = AppConstants.BOOK_SUGGESTIONS, key = "#keyword")
@@ -302,8 +299,8 @@ public class BookServiceImpl implements BookService {
                     return new ResourceNotFoundException(errorMsg);
                 });
         BookDetail currDetail = book.getDetail();
-        List<Long> removeImageIds = request.getRemoveIds();
-        boolean isRemove = removeImageIds != null && !removeImageIds.isEmpty();
+        List<String> removePublicIds = request.getRemovePublicIds();
+        boolean isRemove = removePublicIds != null && !removePublicIds.isEmpty();
 
         // Check if correct ownership
         if (!CommonUtils.isValidShopOwner(book.getShop(), user)) {
@@ -320,12 +317,12 @@ public class BookServiceImpl implements BookService {
             Image savedImage = imageService.upload(thumbnail,
                     FileUploadUtil.PRODUCT_FOLDER); // Upload new image
             book.setImage(savedImage); // Set new thumbnail
-            currDetail.addImage(oldImage); // Put old thumbnail to preview
-        } else if (request.getThumbnailId() != null
-                && !request.getThumbnailId().equals(book.getImage().getId())) {
+            currDetail.removeImage(oldImage); // Remove old thumbnail from preview images
+        } else if (request.getThumbnailPublicId() != null
+                && !request.getThumbnailPublicId().equals(book.getImage().getPublicId())) {
 
             Image oldImage = book.getImage();
-            Image newImage = imageRepo.findBookImage(id, request.getThumbnailId())
+            Image newImage = imageRepo.findBookImage(id, request.getThumbnailPublicId())
                     .orElseThrow(() -> {
                         var errorMsg = messageService.getMessage("exception.not.found",
                                 new Object[] { new DefaultMessageSourceResolvable(
@@ -334,7 +331,8 @@ public class BookServiceImpl implements BookService {
                     });
 
             book.setImage(newImage); // Set new image
-            currDetail.addImage(oldImage);
+            newImage.setDetail(null); // Remove new image from preview images
+            currDetail.addImage(oldImage); // Add old image to preview images
         }
 
         // Set new details info
@@ -370,7 +368,7 @@ public class BookServiceImpl implements BookService {
 
         // Delete images
         if (isRemove)
-            imageService.deleteImages(imageRepo.findBookImageIds(id, removeImageIds));
+            imageService.deleteImages(imageRepo.findBookImageIds(id, removePublicIds));
 
         return bookMapper.bookToResponseDTO(updatedBook);
     }

@@ -28,6 +28,10 @@ export const ShopName = styled.h3`
   margin: 0;
   white-space: nowrap;
 
+  &.unverified {
+    line-height: 3rem;
+  }
+
   ${({ theme }) => theme.breakpoints.down("md")} {
     font-size: 15px;
   }
@@ -60,11 +64,14 @@ export const ShopDetail = styled.span`
 
   ${({ theme }) => theme.breakpoints.down("md")} {
     font-size: 12px;
-    width: auto;
-    justify-content: center;
 
     b {
       margin-left: 5px;
+    }
+
+    &.compact {
+      width: auto;
+      justify-content: center;
     }
 
     &.hide-on-mobile {

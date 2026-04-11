@@ -3,7 +3,6 @@ package com.ring.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ring.dto.response.coupons.CouponDTO;
 import com.ring.model.enums.OrderStatus;
-import com.ring.model.enums.ShippingType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
@@ -32,14 +31,17 @@ public class OrderDetail extends Auditable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "primary_sequence")
     private Long id;
 
+    @Column(length = 100)
+    private String orderCode;
+
     @Column
     private Double totalPrice; // Product's price
 
     @Column
-    private Double shippingFee;
+    private Double shippingFee; // Shipping fee
 
     @Column
-    private Double shippingDiscount;
+    private Double shippingDiscount; // Shipping discount
 
     @Column
     private Double discount; // Coupon discount + deal
@@ -48,9 +50,8 @@ public class OrderDetail extends Auditable {
     @Column(nullable = false, length = 30)
     private OrderStatus status;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 30)
-    private ShippingType shippingType;
+    @Column
+    private Integer shippingType;
 
     @Column(length = 300)
     @Nationalized

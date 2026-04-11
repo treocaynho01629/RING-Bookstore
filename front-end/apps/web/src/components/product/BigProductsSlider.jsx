@@ -8,8 +8,10 @@ import Skeleton from "@mui/material/Skeleton";
 import Grid from "@mui/material/Grid";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
-import Carousel from "react-multi-carousel";
+import CarouselModule from "react-multi-carousel";
 import useCart from "../../hooks/useCart";
+
+const Carousel = CarouselModule?.default ?? CarouselModule;
 
 //#region styled
 const ImgContainer = styled.div`

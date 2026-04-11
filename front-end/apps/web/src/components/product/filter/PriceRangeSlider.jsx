@@ -3,9 +3,11 @@ import { Button, TextField, Box } from "@mui/material";
 import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { NumberFormatBase } from "react-number-format";
 import { currencyFormat } from "@ring/shared/utils/convert";
-import { marks } from "../../../utils/filters";
+import { PRICE_MARKS, MAX_PRICE } from "@ring/shared/utils/filters";
 import { useTranslation } from "react-i18next";
-import CustomSlider from "../../custom/CustomSlider";
+import CustomSlider from "@ring/ui/CustomSlider";
+
+const MAX_STEP = 13.3;
 
 const NumericFormatCustom = forwardRef(function NumericFormatCustom(props, ref) {
   const { onChange, ...other } = props;
@@ -21,9 +23,9 @@ const NumericFormatCustom = forwardRef(function NumericFormatCustom(props, ref) 
       getInputRef={ref}
       onValueChange={(values, sourceInfo) => {
         let newValue = values.floatValue;
-        //Threshold
+        // Threshold
         if (newValue < 0) newValue = 0;
-        if (newValue > 10000000) newValue = 10000000;
+        if (newValue > MAX_PRICE) newValue = MAX_PRICE;
 
         onChange({
           target: { value: newValue },
@@ -31,7 +33,7 @@ const NumericFormatCustom = forwardRef(function NumericFormatCustom(props, ref) 
       }}
       isAllowed={(values) => {
         const { floatValue } = values;
-        return floatValue >= 0 && floatValue <= 99999999;
+        return floatValue >= 0 && floatValue <= 999999999;
       }}
       format={format}
     />
@@ -40,31 +42,45 @@ const NumericFormatCustom = forwardRef(function NumericFormatCustom(props, ref) 
 
 NumericFormatCustom.propTypes = { onChange: PropTypes.func.isRequired };
 
-// Scale calculate function
+/**
+ * Scale calculate function
+ * @param {number} value
+ * @returns {number}
+ */
 function calculateValue(value) {
   const result = Math.round((2 ** value * 1000) / 1000) * 1000;
 
   // Threshold
   if (result <= 1000) return 0;
-  if (result > 10000000) return 10000000;
+  if (result > MAX_PRICE) return MAX_PRICE;
 
   return result;
 }
 
+/**
+ * Reverse scale calculate from scale function
+ * @param {number} value
+ * @returns {number}
+ */
 function reverseCalculateValue(value) {
   const result = Math.log(value / 1000) / Math.log(2);
 
   // Threshold
   if (result < 0) return 0;
-  if (result > 13) return 13.3;
+  if (result > Math.floor(MAX_STEP)) return MAX_STEP;
 
   return result;
 }
 
-function valuetext(value) {
+/**
+ * Format value text from scale function
+ * @param {number} value
+ * @returns {string}
+ */
+function valueText(value) {
   let scaledValue = value;
-  if (scaledValue >= 10000000) {
-    scaledValue = 10000000;
+  if (scaledValue >= MAX_PRICE) {
+    scaledValue = MAX_PRICE;
   }
   return currencyFormat.format(scaledValue);
 }
@@ -107,7 +123,7 @@ const PriceRangeSlider = ({ value, onChange, disabledLabel }) => {
 
     // Threshold
     if (newInputFrom < 0) newInputFrom = 0;
-    if (newInputFrom > 10000000) newInputFrom = 10000000;
+    if (newInputFrom > MAX_PRICE) newInputFrom = MAX_PRICE;
     newValue[0] = newInputFrom;
 
     // Range
@@ -150,9 +166,9 @@ const PriceRangeSlider = ({ value, onChange, disabledLabel }) => {
    * Handle reset
    */
   const handleReset = () => {
-    const defaultValue = [0, 10000000];
+    const defaultValue = [0, MAX_PRICE];
     inputValue.current = defaultValue;
-    onChange(defaultValue);
+    if (onChange) onChange(defaultValue);
   };
 
   return (
@@ -193,12 +209,12 @@ const PriceRangeSlider = ({ value, onChange, disabledLabel }) => {
             value={rangeValue}
             min={0}
             step={0.1}
-            max={13.3}
+            max={MAX_STEP}
             scale={calculateValue}
-            marks={marks}
+            marks={PRICE_MARKS}
             valueLabelDisplay={disabledLabel ? "off" : "auto"}
-            getAriaValueText={valuetext}
-            valueLabelFormat={valuetext}
+            getAriaValueText={valueText}
+            valueLabelFormat={valueText}
             onChange={handleChangeRange}
             onChangeCommitted={handleChange}
           />

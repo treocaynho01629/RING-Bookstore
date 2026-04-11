@@ -1,6 +1,7 @@
 package com.ring.repository;
 
 import com.ring.dto.projection.books.IBookDisplay;
+import com.ring.dto.projection.books.IBookItem;
 import com.ring.dto.projection.dashboard.IStat;
 import com.ring.model.entity.Account;
 import com.ring.model.entity.Book;
@@ -218,10 +219,18 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      * @return a list of Book entities matching the provided IDs
      */
     @Query("""
-                SELECT b FROM Book b
+                SELECT b.id AS id,
+                    b AS book,
+                    d.bLength AS length,
+                    d.bWidth AS width,
+                    d.bHeight AS height,
+                    d.bWeight AS weight
+                FROM Book b
+                LEFT JOIN BookDetail d
+                ON b.id = d.id
                 WHERE b.id IN :ids
             """)
-    List<Book> findBooksInIds(List<Long> ids);
+    List<IBookItem> findBookItemsInIds(List<Long> ids);
 
     /**
      * Finds and retrieves a list of book IDs from the database that match the given

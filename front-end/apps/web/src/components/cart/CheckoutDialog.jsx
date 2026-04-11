@@ -10,7 +10,7 @@ import {
   CheckoutStack,
   CheckoutText,
   CheckoutTitle,
-  CouponButton,
+  StepperButton,
   MiniCouponContainer,
   PriceContainer,
   SavePrice,
@@ -107,7 +107,7 @@ const CheckoutDialog = ({
         {mobileMode ? (
           <div ref={overlapRef}>
             <CheckoutStack>
-              <CouponButton onClick={() => handleOpenDialog()}>
+              <StepperButton onClick={() => handleOpenDialog()}>
                 <span>
                   <LocalActivityOutlined color="error" />
                   &nbsp;
@@ -117,7 +117,7 @@ const CheckoutDialog = ({
                   <Suspense fallback={null}>{coupon && numSelected > 0 && <CouponDisplay coupon={coupon} />}</Suspense>
                   <KeyboardArrowRight fontSize="small" />
                 </MiniCouponContainer>
-              </CouponButton>
+              </StepperButton>
             </CheckoutStack>
             <CheckoutStack>
               <AltCheckoutBox onClick={() => toggleDrawer(true)}>
@@ -165,7 +165,7 @@ const CheckoutDialog = ({
         ) : tabletMode ? (
           <CheckoutBox className="sticky" ref={overlapRef}>
             <CheckoutStack>
-              <CouponButton onClick={() => handleOpenDialog()}>
+              <StepperButton onClick={() => handleOpenDialog()}>
                 <span>
                   <LocalActivityOutlined color="error" />
                   &nbsp;
@@ -175,12 +175,12 @@ const CheckoutDialog = ({
                   <Suspense fallback={null}>{coupon && numSelected > 0 && <CouponDisplay coupon={coupon} />}</Suspense>
                   <KeyboardArrowRight fontSize="small" />
                 </MiniCouponContainer>
-              </CouponButton>
+              </StepperButton>
             </CheckoutStack>
             <CheckoutStack>
               <CheckoutPriceContainer onClick={() => toggleDrawer(true)}>
                 <PriceContainer className="row">
-                  <CheckoutText>{t("cart.total", { quantity: numSelected })}&emsp;</CheckoutText>
+                  <CheckoutText>{t("cart.total", { count: numSelected })}&emsp;</CheckoutText>
                   {numSelected > 0 && <SubText>{t("cart.vat.included")}</SubText>}
                 </PriceContainer>
                 <PriceContainer className="row">
@@ -233,14 +233,14 @@ const CheckoutDialog = ({
                   <CouponDisplay coupon={coupon} />
                 </Collapse>
               </CheckoutRow>
-              <CouponButton onClick={() => handleOpenDialog()}>
+              <StepperButton onClick={() => handleOpenDialog()}>
                 <span>
                   <LocalActivityOutlined color="error" />
                   &nbsp;
                   {couponText}
                 </span>
                 <KeyboardArrowRight fontSize="small" />
-              </CouponButton>
+              </StepperButton>
             </CheckoutBox>
             <CheckoutBox className="sticky">
               <CheckoutTitle>{t("cart.checkout")}</CheckoutTitle>

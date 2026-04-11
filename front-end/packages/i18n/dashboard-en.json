@@ -1,43 +1,190 @@
 {
-  "dashboard": {
-    "label": "Dashboard",
-    "overview": "Overview",
-    "management": "Management"
+  "title": "Title",
+  "add": "Add",
+  "view": "View",
+  "id": "ID",
+  "filter": "Advanced Filter",
+  "actions": "Actions",
+  "basic": "Basic Information",
+  "images": "Images",
+  "description": "Description",
+  "name": "Name",
+  "overview": "Overview",
+  "guest": "Guest",
+  "sales": "Sales revenue",
+  "address": "Address",
+  "welcome": {
+    "title": "Welcome back",
+    "message": "Here is a quick overview of your store performance today."
   },
-  "general": {
-    "add": "Add",
-    "view": "View",
-    "id": "ID",
-    "filter": "Advanced Filter"
+  "management": {
+    "label": "Management",
+    "title": "Management {label}"
+  },
+  "dashboard": {
+    "label": "Dashboard"
+  },
+  "dropzone": {
+    "instruction": "Drag and drop, or click to select files",
+    "info": "(Maxinum number of images: {count}, File size limit: {size}, The first image will be used as the main product image)",
+    "thumbnail": "Thumbnail",
+    "upload": "Upload",
+    "remove": "Remove image",
+    "restore": "Restore image",
+    "clear": "Clear images"
   },
   "all": {
     "shop": "All shops"
   },
-  "shop": {
-    "add": "Add new shop"
-  },
   "product": {
-    "management": "Manage products",
-    "title": "Title",
-    "orders": "Orders",
-    "shop": "Shop Name",
     "price": {
-      "label": "Price",
       "original": "Original Price",
       "sale": "Sale Price",
       "discount": "Discount"
     },
-    "info": "Product Information",
-    "basic": "Basic Information",
+    "sale": {
+      "info": "Sale Information",
+      "weight": "Weight (g)",
+      "size": "Size (cm)"
+    },
+    "detail": "Product Details",
     "inventory": "Price and Inventory",
     "add": "Add product",
     "edit": "Edit product",
-    "images": "Images",
-    "date": "Publication Date"
+    "date": "Publication Date",
+    "recent": {
+      "orders": {
+        "label": "Recent orders",
+        "empty": "No recent orders",
+        "out": "No more orders"
+      },
+      "reviews": {
+        "label": "Recent reviews",
+        "empty": "No recent reviews",
+        "out": "No more reviews"
+      }
+    }
+  },
+  "shop": {
+    "verified": "Verified",
+    "unverified": "Unverified",
+    "details": "Shop details",
+    "image": "Image",
+    "add": "Add new shop",
+    "edit": "Edit shop",
+    "editImage": "Edit image",
+    "detail": "Shop detail",
+    "owner": "Owner",
+    "sales": "Sales",
+    "stats": "Statistics",
+    "addressName": "Recipient name",
+    "companyName": "Company name",
+    "city": "City",
+    "addressLine": "Street address",
+    "addressType": {
+      "label": "Address type",
+      "home": "Home",
+      "office": "Office"
+    },
+    "form": {
+      "recipientName": "Recipient name",
+      "companyName": "Company name",
+      "phone": "Phone",
+      "city": "City",
+      "address": "Street address"
+    }
+  },
+  "message": {
+    "success": {
+      "update": "Update succeeded",
+      "create": "Create succeeded"
+    },
+    "error": {
+      "update": "Update failed",
+      "create": "Create failed"
+    },
+    "confirmDelete": "Delete selected items?"
+  },
+  "analytics": {
+    "sales": "Sales trend",
+    "rating": "Rating distribution"
+  },
+  "review": {
+    "management": "Manage reviews",
+    "content": "Content",
+    "date": "Date",
+    "user": "User",
+    "book": "Book",
+    "rating": "Rating"
+  },
+  "order": {
+    "management": "Manage orders",
+    "detail": "Order detail",
+    "id": "Order ID",
+    "customer": "Customer",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "date": "Date",
+    "total": "Total",
+    "discount": "Discount",
+    "status": "Status",
+    "items": "Items",
+    "quantity": "Quantity",
+    "price": "Price",
+    "shop": "Shop",
+    "paymentStatus": "Payment status",
+    "statuses": {
+      "PENDING_PAYMENT": "Pending payment",
+      "PENDING": "Pending",
+      "SHIPPING": "Shipping",
+      "COMPLETED": "Completed",
+      "CANCELED": "Canceled",
+      "PENDING_RETURN": "Pending return",
+      "PENDING_REFUND": "Pending refund",
+      "REFUNDED": "Refunded"
+    }
+  },
+  "role": {
+    "user": "User"
+  },
+  "coupon": {
+    "ring": "RING!",
+    "product": { "label": "Product" },
+    "management": "Manage coupons",
+    "code": "Code",
+    "type": "Type",
+    "discount": "Discount",
+    "maxDiscount": "Max discount",
+    "usage": "Usage limit",
+    "expDate": "Expiry date",
+    "shop": "Shop",
+    "status": "Status",
+    "isUsable": "Active",
+    "isUsed": "Used",
+    "owner": "Owner",
+    "activeOnly": "Active only",
+    "includeExpired": "Include expired",
+    "add": "Add coupon",
+    "edit": "Edit coupon"
   },
   "user": {
     "member": "Members",
-    "privilege": "Privilege"
+    "privilege": "Privilege",
+    "management": "Manage users",
+    "add": "Add user",
+    "edit": "Edit user",
+    "detail": "User detail",
+    "username": "Username",
+    "name": "Full name",
+    "email": "Email",
+    "phone": "Phone",
+    "roles": "Roles",
+    "role": "Role",
+    "gender": "Gender",
+    "dob": "Date of birth",
+    "image": "Avatar",
+    "password": "Password"
   },
   "statistics": {
     "label": "Statistics"
@@ -45,5 +192,16 @@
   "event": {
     "label": "Events"
   },
-  "misc": "Misc"
+  "general": {
+    "shop": "Shop"
+  },
+  "misc": "Misc",
+  "error": {
+    "upload": {
+      "limit": "File exceeds the {size} limit",
+      "type": "Invalid file type (images only)",
+      "count": "Too many files (max {count} images)",
+      "general": "Unable to upload this file"
+    }
+  }
 }

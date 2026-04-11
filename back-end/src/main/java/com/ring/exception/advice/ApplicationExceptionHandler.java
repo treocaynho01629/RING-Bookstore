@@ -143,6 +143,17 @@ public class ApplicationExceptionHandler {
                 e.getLocalizedMessage());
     }
 
+    @ExceptionHandler(GHNException.class)
+    public ResponseEntity<ExceptionResponse> handleGHNException(GHNException e) {
+
+        ExceptionResponse response = new ExceptionResponse(
+                e.getStatus().value(),
+                e.getError(),
+                e.getLocalizedMessage());
+
+        return new ResponseEntity<>(response, e.getStatus());
+    }
+
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(EntityOwnershipException.class)
     public ExceptionResponse handleEntityOwnershipException(EntityOwnershipException e) {

@@ -1,5 +1,3 @@
-"use client";
-
 import { createTheme } from "@mui/material/styles";
 import { outlinedInputClasses } from "@mui/material/OutlinedInput";
 import darkScrollbar from "@mui/material/darkScrollbar";
@@ -9,6 +7,12 @@ declare module "@mui/material/styles" {
     xs_sm: true;
     sm_md: true;
     md_lg: true;
+  }
+  interface Theme {
+    colorSchemes: {
+      light: { palette: Theme["palette"] };
+      dark: { palette: Theme["palette"] };
+    };
   }
 }
 

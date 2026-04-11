@@ -1,13 +1,14 @@
 "use client";
 
-import { Suspense, lazy, useCallback, useState } from "react";
+import { Suspense, lazy, useCallback, useState, startTransition } from "react";
 import { useGetPreviewShopsQuery } from "@/features/shops/shopsApiSlice";
 import { getUserRole } from "@ring/shared/enums/user";
-import { usePathname, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { LocaleType } from "@ring/shared/enums/locales";
 import { useLocale, useTranslations } from "next-intl";
 import { styled } from "@mui/material/styles";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import MenuIcon from "@mui/icons-material/Menu";
 import Store from "@mui/icons-material/Store";
 import UnfoldMore from "@mui/icons-material/UnfoldMore";
@@ -69,6 +70,7 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
   const roleMeta = role ? getUserRole(role) : null;
   const currLocale = useLocale();
   const pathname = usePathname();
+  const params = useParams();
   const router = useRouter();
 
   const [openSetting, setOpenSetting] = useState(false);
@@ -148,13 +150,19 @@ export default function NavBar({ open, setOpen }: NavBarProps) {
   }
 
   /**
-   * Lanaguage selection
+   * Change language
    * @param newLocale - The new locale to set
    */
   const handleChangeLanguage = (newLocale: string) => {
-    const segments = pathname.split("/");
-    segments[1] = newLocale;
-    router.push(segments.join("/"));
+    startTransition(() => {
+      router.replace(
+        // @ts-expect-error -- TypeScript will validate that only known `params`
+        // are used in combination with a given `pathname`. Since the two will
+        // always match for the current route, we can skip runtime checks.
+        { pathname, params },
+        { locale: newLocale }
+      );
+    });
   };
 
   const handleOpenLanguage = (event: React.MouseEvent<HTMLButtonElement>) => {

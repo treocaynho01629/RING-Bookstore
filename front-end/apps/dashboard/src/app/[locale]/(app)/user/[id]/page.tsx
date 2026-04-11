@@ -1,20 +1,30 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useGetUserQuery } from "@/features/users/usersApiSlice";
+import DetailUserContent from "@/components/user/DetailUserContent";
+import { CircularProgress, Box } from "@mui/material";
+import { notFound } from "next/navigation";
 
-// TODO: Migrate DetailAccount component from dashboard copy
-// This is a placeholder page - migrate the component when ready
-// Note: This route requires ROLE_ADMIN or ROLE_GUEST
 export default function DetailAccountPage() {
   const params = useParams();
   const id = params.id as string;
 
-  return (
-    <div>
-      <h1>User Detail</h1>
-      <p>User ID: {id}</p>
-      <p>This page needs to be migrated from the original Vite app.</p>
-    </div>
-  );
-}
+  const { data: account, isLoading, isError } = useGetUserQuery(Number(id), {
+    skip: !id || isNaN(Number(id)),
+  });
 
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (isError || (!account && id)) {
+    notFound();
+  }
+
+  return <DetailUserContent account={account ?? null} id={id} />;
+}

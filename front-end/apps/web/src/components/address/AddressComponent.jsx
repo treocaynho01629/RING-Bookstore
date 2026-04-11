@@ -244,6 +244,10 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
           phone: address.phone,
           city: address.city,
           address: address.address,
+          detail: address.detail,
+          provinceId: address.provinceId,
+          districtId: address.districtId,
+          wardCode: address.wardCode,
           type: address.type,
           isDefault,
         };
@@ -361,6 +365,10 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
           phone: address.phone,
           city: address.city,
           address: address.address,
+          detail: address.detail,
+          provinceId: address.provinceId,
+          districtId: address.districtId,
+          wardCode: address.wardCode,
           type: address.type,
           isDefault: false,
         };
@@ -396,6 +404,10 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
           phone: address.phone,
           city: address.city,
           address: address.address,
+          detail: address.detail,
+          provinceId: address.provinceId,
+          districtId: address.districtId,
+          wardCode: address.wardCode,
           type: address.type,
           isDefault: true,
         };
@@ -481,7 +493,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
           &nbsp;{t("address.title", { ns: "authenticated" })}
         </TitleContainer>
         <StyledAddButton onClick={() => handleOpen(null)}>
-          {t("address.add", { ns: "authenticated" })} <AddHome />
+          {t("address.add")} <AddHome />
         </StyledAddButton>
       </StyledDialogTitle>
       <DialogContent sx={{ p: { xs: 1, sm: 2, md: 0 }, mt: { xs: 1, md: 0 }, height: { xs: "100dvh", md: "auto" } }}>

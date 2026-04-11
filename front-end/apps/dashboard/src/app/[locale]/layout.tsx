@@ -6,10 +6,14 @@ import { locales } from "@ring/shared/enums/locales";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { options } from "@/lib/authOptions";
+import SnackbarProvider from "@ring/ui/SnackbarProvider";
 import ThemeContextProvider from "@ring/ui/ThemeContextProvider";
 import localFont from "next/font/local";
 import NextStoreProvider from "../NextStoreProvider";
 import AuthProvider from "../context/AuthProvider";
+import PendingOverlay from "@/components/layout/PendingOverlay";
+import "react-multi-carousel/lib/styles.css";
+import "simplebar-react/dist/simplebar.min.css";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -48,7 +52,12 @@ export default async function RootLayout({ children, params }: Readonly<RootLayo
           <NextStoreProvider>
             <AuthProvider session={session}>
               <AppRouterCacheProvider>
-                <ThemeContextProvider>{children}</ThemeContextProvider>
+                <ThemeContextProvider>
+                  <SnackbarProvider>
+                    <PendingOverlay />
+                    {children}
+                  </SnackbarProvider>
+                </ThemeContextProvider>
               </AppRouterCacheProvider>
             </AuthProvider>
           </NextStoreProvider>

@@ -11,6 +11,7 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LabelOff from "@mui/icons-material/LabelOff";
 import Skeleton from "@mui/material/Skeleton";
 import useCoupon from "../../hooks/useCoupon";
+import QuestionMark from "@mui/icons-material/QuestionMark";
 
 const Popover = lazy(() => import("@mui/material/Popover"));
 const CouponItem = lazy(() => import("./CouponItem"));
@@ -244,7 +245,7 @@ const CouponPreview = ({ shopId, scrollPosition }) => {
         const coupon = entities[id];
         const meta = getCouponType(coupon?.type);
         const criteria = getCouponCriteria(coupon?.criteria);
-        const Icon = iconList[meta?.icon];
+        const Icon = iconList[meta?.icon] ?? <QuestionMark />;
         const isSaved = savedCoupons?.indexOf(coupon?.code) != -1;
         const couponInfo = { ...coupon, meta, criteria, isSaved };
 
@@ -256,7 +257,7 @@ const CouponPreview = ({ shopId, scrollPosition }) => {
             onMouseEnter={(e) => handlePopover(e, couponInfo)}
           >
             <CouponIcon color={meta?.color}>
-              <Suspense fallback={null}>
+              <Suspense fallback={<QuestionMark />}>
                 <Icon />
               </Suspense>
             </CouponIcon>

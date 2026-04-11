@@ -209,7 +209,7 @@ const FiltersDisplay = memo(
         if (filters.rating != defaultFilters.rating) {
           content.push(
             <FilterChip key={"chip-rate"} onClick={scrollToRating}>
-              {t("review.label")}: {`${filters.rating < 5 ? t("from") : ""} ${filters.rating} ${t("review.stars")}`}
+              {t("review.label")}: {`${filters.rating}★`} {filters.rating < 5 && t("above")}
               <Close onClick={handleRemoveRating} />
             </FilterChip>
           );

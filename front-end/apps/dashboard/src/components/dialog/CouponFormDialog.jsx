@@ -11,17 +11,18 @@ import {
   Grid,
 } from "@mui/material";
 import { Check, Close as CloseIcon, Loyalty } from "@mui/icons-material";
-import { getCouponType } from "@ring/shared";
+import { CouponType } from "@ring/shared/models/couponType";
+import { couponTypeOptions } from "@ring/shared/enums/coupon";
 import { Title } from "../custom/Components";
 import { useGetPreviewShopsQuery } from "@/features/shops/shopsApiSlice";
 import { currencyFormat } from "@ring/shared/utils/convert";
 import { NumberFormatBase, NumericFormat } from "react-number-format";
 import { Instruction, DatePicker } from "@ring/ui";
 import { useCreateCouponMutation, useUpdateCouponMutation } from "@/features/coupons/couponsApiSlice";
+import { useTranslations } from "next-intl";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
-
-const CouponType = getCouponType();
+import usePendingModal from "@/hooks/usePendingModal";
 
 const NumericFormatCustom = forwardRef(function NumericFormatCustom(props, ref) {
   const { onChange, ...other } = props;
@@ -51,8 +52,9 @@ const NumericFormatCustom = forwardRef(function NumericFormatCustom(props, ref) 
 
 NumericFormatCustom.propTypes = { onChange: PropTypes.func.isRequired };
 
-const CouponFormDialog = ({ coupon = null, open, handleClose, shop, pending, setPending }) => {
-  //#region construct
+const CouponFormDialog = ({ coupon = null, open, handleClose, shop }) => {
+  const t = useTranslations();
+  const { open: pending, showPending, hidePending } = usePendingModal();
   const fullScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const [code, setCode] = useState("");
   const [attribute, setAttribute] = useState(0);
@@ -62,7 +64,7 @@ const CouponFormDialog = ({ coupon = null, open, handleClose, shop, pending, set
   const [expireDate, setExpireDate] = useState(dayjs());
   const [currShop, setCurrShop] = useState(shop ?? "");
   const [openShop, setOpenShop] = useState(false);
-  const [type, setType] = useState(Object.keys(CouponType)[0]);
+  const [type, setType] = useState(couponTypeOptions[0]?.value ?? CouponType.SHIPPING);
   const [err, setErr] = useState([]);
   const [errMsg, setErrMsg] = useState("");
 
@@ -98,7 +100,7 @@ const CouponFormDialog = ({ coupon = null, open, handleClose, shop, pending, set
     setDiscount(0);
     setUsage(0);
     setExpireDate(dayjs());
-    setType(Object.keys(CouponType)[0]);
+    setType(couponTypeOptions[0]?.value ?? CouponType.SHIPPING);
     setCurrShop(currShop);
     setErr([]);
     setErrMsg("");
@@ -127,7 +129,7 @@ const CouponFormDialog = ({ coupon = null, open, handleClose, shop, pending, set
     e.preventDefault();
     if (creating || updating || pending) return;
 
-    setPending(true);
+    showPending();
     const { enqueueSnackbar } = await import("notistack");
 
     //Set data
@@ -152,7 +154,7 @@ const CouponFormDialog = ({ coupon = null, open, handleClose, shop, pending, set
           enqueueSnackbar("Chỉnh sửa mã giảm giá thành công!", {
             variant: "success",
           });
-          setPending(false);
+          hidePending();
           handleCloseDialog();
         })
         .catch((err) => {
@@ -172,7 +174,7 @@ const CouponFormDialog = ({ coupon = null, open, handleClose, shop, pending, set
           enqueueSnackbar("Chỉnh sửa mã giảm giá thất bại!", {
             variant: "error",
           });
-          setPending(false);
+          hidePending();
         });
     } else {
       //Create
@@ -185,7 +187,7 @@ const CouponFormDialog = ({ coupon = null, open, handleClose, shop, pending, set
           enqueueSnackbar("Thêm mã giảm giá thành công!", {
             variant: "success",
           });
-          setPending(false);
+          hidePending();
         })
         .catch((err) => {
           console.error(err);
@@ -202,7 +204,7 @@ const CouponFormDialog = ({ coupon = null, open, handleClose, shop, pending, set
             setErrMsg("Thêm mã giảm giá thất bại!");
           }
           enqueueSnackbar("Thêm mã giảm giá thất bại!", { variant: "error" });
-          setPending(false);
+          hidePending();
         });
     }
   };
@@ -253,9 +255,9 @@ const CouponFormDialog = ({ coupon = null, open, handleClose, shop, pending, set
                 value={type}
                 onChange={(e) => setType(e.target.value)}
               >
-                {Object.values(CouponType).map((option) => (
+                {couponTypeOptions.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
-                    {option.label}
+                    {t(option.label)}
                   </MenuItem>
                 ))}
               </TextField>
@@ -264,7 +266,7 @@ const CouponFormDialog = ({ coupon = null, open, handleClose, shop, pending, set
               <Title>Chi tiết mã giảm giá</Title>
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              {type == CouponType.MIN_AMOUNT.value ? (
+              {type === CouponType.SHIPPING ? (
                 <NumericFormat
                   required
                   id="attribute"
