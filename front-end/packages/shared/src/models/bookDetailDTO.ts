@@ -25,7 +25,9 @@ export interface BookDetailDTO {
   shopName?: string;
   publisher?: PublisherDTO;
   category?: CategoryDTO;
-  size?: string;
+  length?: number;
+  width?: number;
+  height?: number;
   pages?: number;
   date?: string;
   language?: BookLanguage;

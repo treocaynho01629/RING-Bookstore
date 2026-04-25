@@ -24,37 +24,37 @@ import java.time.Duration;
 @Configuration
 public class RedisCacheConfig {
 
-        public RedisCacheConfiguration cacheConfiguration(Duration duration) {
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                                .registerModule(new JavaTimeModule())
-                                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                                .activateDefaultTyping(
-                                                BasicPolymorphicTypeValidator.builder()
-                                                                .allowIfSubType(Object.class)
-                                                                .build(),
-                                                ObjectMapper.DefaultTyping.EVERYTHING,
-                                                JsonTypeInfo.As.PROPERTY);
+    public RedisCacheConfiguration cacheConfiguration(Duration duration) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .activateDefaultTyping(
+                        BasicPolymorphicTypeValidator.builder()
+                                .allowIfSubType(Object.class)
+                                .build(),
+                        ObjectMapper.DefaultTyping.EVERYTHING,
+                        JsonTypeInfo.As.PROPERTY);
 
-                return RedisCacheConfiguration.defaultCacheConfig()
-                                .entryTtl(duration)
-                                .disableCachingNullValues()
-                                .serializeKeysWith(
-                                                RedisSerializationContext.SerializationPair.fromSerializer(
-                                                                new StringRedisSerializer()))
-                                .serializeValuesWith(
-                                                RedisSerializationContext.SerializationPair.fromSerializer(
-                                                                new GenericJackson2JsonRedisSerializer(mapper)));
-        }
+        return RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(duration)
+                .disableCachingNullValues()
+                .serializeKeysWith(
+                        RedisSerializationContext.SerializationPair.fromSerializer(
+                                new StringRedisSerializer()))
+                .serializeValuesWith(
+                        RedisSerializationContext.SerializationPair.fromSerializer(
+                                new GenericJackson2JsonRedisSerializer(mapper)));
+    }
 
-        @Bean
-        public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
-                RedisCacheConfiguration cacheConfig = cacheConfiguration(Duration.ofMinutes(10));
+    @Bean
+    public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+        RedisCacheConfiguration cacheConfig = cacheConfiguration(Duration.ofMinutes(10));
 
-                return RedisCacheManager.builder(redisConnectionFactory)
-                                .cacheDefaults(cacheConfig)
-                                .withCacheConfiguration(AppConstants.CALCULATE, cacheConfiguration(Duration.ofMinutes(1)))
-                                .withCacheConfiguration(AppConstants.ENUMS, cacheConfiguration(Duration.ofDays(1)))
-                                .build();
-        }
+        return RedisCacheManager.builder(redisConnectionFactory)
+                .cacheDefaults(cacheConfig)
+                .withCacheConfiguration(AppConstants.CALCULATE, cacheConfiguration(Duration.ofMinutes(1)))
+                .withCacheConfiguration(AppConstants.ENUMS, cacheConfiguration(Duration.ofDays(1)))
+                .build();
+    }
 }

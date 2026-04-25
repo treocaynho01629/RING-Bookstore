@@ -14,12 +14,11 @@ export const ghnApiSlice = apiWithEnum.injectEndpoints({
         validateStatus: (response, result) => response.status === 200 && !result?.isError,
       }),
       transformResponse: (responseData) => {
-        const { code, message, data } = responseData;
-        const loadedProvinces = data.map((province) => {
+        const loadedProvinces = responseData.map((province) => {
           province.id = province.ProvinceID;
           return province;
         });
-        return ghnAdapter.setAll({ ...ghnInitialState, code, message }, loadedProvinces);
+        return ghnAdapter.setAll({ ...ghnInitialState }, loadedProvinces);
       },
       providesTags: (result) =>
         result
@@ -32,12 +31,11 @@ export const ghnApiSlice = apiWithEnum.injectEndpoints({
         validateStatus: (response, result) => response.status === 200 && !result?.isError,
       }),
       transformResponse: (responseData) => {
-        const { code, message, data } = responseData;
-        const loadedDistricts = (data ?? []).map((district) => {
+        const loadedDistricts = responseData.map((district) => {
           district.id = district.DistrictID;
           return district;
         });
-        return ghnAdapter.setAll({ ...ghnInitialState, code, message }, loadedDistricts);
+        return ghnAdapter.setAll({ ...ghnInitialState }, loadedDistricts);
       },
       providesTags: (result) =>
         result
@@ -50,19 +48,27 @@ export const ghnApiSlice = apiWithEnum.injectEndpoints({
         validateStatus: (response, result) => response.status === 200 && !result?.isError,
       }),
       transformResponse: (responseData) => {
-        const { code, message, data } = responseData;
-        const loadedWards = (data ?? []).map((ward) => {
+        const loadedWards = responseData.map((ward) => {
           ward.id = ward.WardCode;
           return ward;
         });
-        return ghnAdapter.setAll({ ...ghnInitialState, code, message }, loadedWards);
+        return ghnAdapter.setAll({ ...ghnInitialState }, loadedWards);
       },
       providesTags: (result) =>
         result
           ? [...result.ids.map((id) => ({ type: "Ward", id })), { type: "Ward", id: "LIST" }]
           : [{ type: "Ward", id: "LIST" }],
     }),
+    calculateShippingFee: builder.mutation({
+      query: ({ request, ghnShopId }) => ({
+        url: `/api/ghn/shipping-fee?ghnShopId=${ghnShopId}`,
+        method: "POST",
+        credentials: "include",
+        body: request,
+      }),
+    }),
   }),
 });
 
-export const { useGetProvincesQuery, useGetDistrictsQuery, useGetWardsQuery } = ghnApiSlice;
+export const { useGetProvincesQuery, useGetDistrictsQuery, useGetWardsQuery, useCalculateShippingFeeMutation } =
+  ghnApiSlice;

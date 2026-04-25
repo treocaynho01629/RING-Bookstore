@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = { addresses: [], defaultAddress: null };
 
+// TODO: Update default address on fetch addresses, and clear all addresses when logout
 export const addressSlice = createSlice({
   name: "address",
   initialState,

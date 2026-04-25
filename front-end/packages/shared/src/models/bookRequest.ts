@@ -27,7 +27,12 @@ export interface BookRequest {
   cateId: number;
   /** @minimum 1 */
   weight: number;
-  size: string;
+  /** @minimum 1 */
+  length: number;
+  /** @minimum 1 */
+  width: number;
+  /** @minimum 1 */
+  height: number;
   /** @minimum 1 */
   pages: number;
   date?: string;

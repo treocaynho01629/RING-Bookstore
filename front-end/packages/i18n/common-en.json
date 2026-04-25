@@ -224,16 +224,43 @@
       "refunded": "Refunded"
     },
     "status": {
-      "shipping": "Shipping",
-      "completed": "Completed",
-      "refunded": "Refunded",
-      "canceled": "Canceled",
+      "completed": {
+        "ordered": "Order processed",
+        "paid": "Paid",
+        "picked": "Picked up from seller",
+        "delivered": "Delivered",
+        "done": "Completed",
+        "cancelled": "Cancelled",
+        "returned": "Returned to carrier",
+        "checked": "Checked by carrier",
+        "refunded": "Refunded"
+      },
+      "failed": {
+        "return": "Return failed",
+        "delivery": "Delivery failed",
+        "damage": "Damage",
+        "lost": "Lost",
+        "exception": "Order failed"
+      },
       "pending": {
-        "seller": "Pending",
+        "return": {
+          "waiting": "Awaiting return",
+          "returning": "Returning to the carrier",
+          "transporting": "Transporting to the carrier",
+          "sorting": "Sorting at the carrier"
+        },
+        "picking": "Picking up from seller",
+        "transporting": "Transporting to the carrier",
+        "sorting": "Sorting at the carrier",
+        "delivering": "Delivering to you",
+        "cod": "Collecting money",
+        "money": "Collecting money from seller",
         "payment": "Pending payment",
-        "return": "Pending return",
         "refund": "Pending refund"
-      }
+      },
+      "return": "Return order",
+      "cancel": "Cancel order",
+      "ready": "Ready to pick"
     }
   },
   "review": {

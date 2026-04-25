@@ -87,7 +87,6 @@ const UserContainer = styled.div`
 `;
 
 const Username = styled.span`
-  font-size: 16px;
   font-weight: 500;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -97,7 +96,6 @@ const Username = styled.span`
 const Name = styled.p`
   margin-top: -4px;
   margin-bottom: -2px;
-  font-size: 16px;
   font-weight: 400;
   color: ${({ theme }) => theme.vars.palette.text.secondary};
   text-overflow: ellipsis;
@@ -153,7 +151,7 @@ const EditButton = styled.span`
 const ItemText = styled.h3`
   position: relative;
   width: 100%;
-  font-size: 16px;
+  font-size: 14px;
   margin: 5px 0px;
   color: inherit;
   display: flex;

@@ -58,7 +58,7 @@ const CancelAndRefundDetailForm = ({ id, pending, setPending, handleClose, isRef
     const { enqueueSnackbar } = await import("notistack");
 
     if (isRefund) {
-      refund({ id, reason: value ? value : otherReason })
+      refund({ id, reason: value ? t(value, { ns: "authenticated" }) : otherReason })
         .unwrap()
         .then((data) => {
           enqueueSnackbar(t("message.success", { action: t("refund.order", { ns: "authenticated" }) }), {
@@ -80,7 +80,7 @@ const CancelAndRefundDetailForm = ({ id, pending, setPending, handleClose, isRef
           setPending(false);
         });
     } else {
-      cancel({ id, reason: value ? value : otherReason })
+      cancel({ id, reason: value ? t(value, { ns: "authenticated" }) : otherReason })
         .unwrap()
         .then((data) => {
           enqueueSnackbar(t("message.success", { action: t("cancel.order", { ns: "authenticated" }) }), {

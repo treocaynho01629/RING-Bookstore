@@ -27,7 +27,7 @@ public class AddressRequest {
     private String companyName;
 
     @NotBlank(message = "{validation.constraints.not.blank}")
-    @Pattern(regexp = "\\(?([0-9]{3})\\)?([ .-]?)([0-9]{3})\\2([0-9]{3})", message = "{validation.constraints.pattern}")
+    @Pattern(regexp = "\\(?([0-9]{4})\\)?([ .-]?)([0-9]{3})\\2([0-9]{3})", message = "{validation.constraints.pattern}")
     private String phone;
 
     @NotBlank(message = "{validation.constraints.not.blank}")

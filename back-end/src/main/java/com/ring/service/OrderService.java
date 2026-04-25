@@ -9,6 +9,7 @@ import com.ring.model.entity.PaymentInfo;
 import com.ring.model.enums.OrderStatus;
 import com.ring.model.enums.PaymentType;
 import jakarta.servlet.http.HttpServletRequest;
+import com.ring.dto.response.ghn.GHNOrderDetailResponse.GHNOrderDetail;
 import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
 import vn.payos.model.v2.paymentRequests.PaymentLink;
 
@@ -103,6 +104,16 @@ public interface OrderService {
      * @return the {@link OrderDetailDTO} object
      */
     OrderDetailDTO getOrderDetail(Long id,
+            Account user);
+
+    /**
+     * Retrieves GHN order detail information by ID.
+     *
+     * @param id   the ID of the order
+     * @param user the authenticated user
+     * @return the {@link GHNOrderDetail} object
+     */
+    GHNOrderDetail getGHNOrderDetail(Long id,
             Account user);
 
     /**
@@ -241,32 +252,4 @@ public interface OrderService {
      * @return a {@link SalesInfoDTO} object containing sales data
      */
     SalesInfoDTO getSales(Account user, Long shopId, Long bookId, LocalDate startDate, LocalDate endDate);
-
-    /**
-     * Calculates shipping fee.
-     *
-     * @param fromDistrictId Origin district ID
-     * @param fromWardCode   Origin ward code
-     * @param toDistrictId   Destination district ID
-     * @param toWardCode     Destination ward code
-     * @param serviceTypeId  Service type ID
-     * @param ghnShopId      GHN shop ID
-     * @param insuranceValue Insurance value in VND
-     * @param weight         Weight in grams
-     * @param length         Length in centimeters
-     * @param width          Width in centimeters
-     * @param height         Height in centimeters
-     * @return Shipping fee in VND
-     */
-    double calculateShippingFee(Integer fromDistrictId,
-            String fromWardCode,
-            Integer toDistrictId,
-            String toWardCode,
-            Integer serviceTypeId,
-            Integer ghnShopId,
-            Integer insuranceValue,
-            Integer weight,
-            Integer length,
-            Integer width,
-            Integer height);
 }

@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -96,9 +95,6 @@ public class OrderServiceTest extends AbstractServiceTest {
 
     @Mock
     private DashboardMapper dashMapper;
-
-    @Mock
-    private ApplicationEventPublisher eventPublisher;
 
     @Mock
     private GHNOrderIntegrationService ghnOrderIntegrationService;
@@ -1354,7 +1350,7 @@ public class OrderServiceTest extends AbstractServiceTest {
                 eq(""),
                 any(Pageable.class))).thenReturn(receipts);
         when(detailRepo.findAllByReceiptIds(anyList())).thenReturn(detailsList);
-        when(orderMapper.receiptsAndDetailsProjectionToReceiptDTOS(anyList(), anyList()))
+        when(orderMapper.receiptsToDTOs(anyList(), anyList()))
                 .thenReturn(expectedDTOS);
 
         // Then
@@ -1377,7 +1373,7 @@ public class OrderServiceTest extends AbstractServiceTest {
                 eq(""),
                 any(Pageable.class));
         verify(detailRepo, times(1)).findAllByReceiptIds(anyList());
-        verify(orderMapper, times(1)).receiptsAndDetailsProjectionToReceiptDTOS(anyList(), anyList());
+        verify(orderMapper, times(1)).receiptsToDTOs(anyList(), anyList());
     }
 
     @Test
@@ -1467,7 +1463,7 @@ public class OrderServiceTest extends AbstractServiceTest {
         when(detailRepo.findAllByUserId(anyLong(), any(), anyString(), any(Pageable.class)))
                 .thenReturn(details);
         when(itemRepo.findAllWithDetailIds(anyList())).thenReturn(itemsList);
-        when(orderMapper.ordersAndItemsProjectionToDTOS(anyList(), anyList())).thenReturn(expectedDTOS);
+        when(orderMapper.ordersToDTOs(anyList(), anyList())).thenReturn(expectedDTOS);
 
         // Then
         PagingResponse<OrderDTO> result = orderService.getOrdersByUser(account,
@@ -1479,7 +1475,7 @@ public class OrderServiceTest extends AbstractServiceTest {
         // Verify
         verify(detailRepo, times(1)).findAllByUserId(anyLong(), any(), anyString(), any(Pageable.class));
         verify(itemRepo, times(1)).findAllWithDetailIds(anyList());
-        verify(orderMapper, times(1)).ordersAndItemsProjectionToDTOS(anyList(), anyList());
+        verify(orderMapper, times(1)).ordersToDTOs(anyList(), anyList());
     }
 
     @Test
@@ -1570,7 +1566,8 @@ public class OrderServiceTest extends AbstractServiceTest {
 
     @Test
     public void whenGetAnalytics_ThenReturnsStatDTO() {
-        // NOTE: removed because OrderServiceImpl no longer exposes getAnalytics() in this branch.
+        // NOTE: removed because OrderServiceImpl no longer exposes getAnalytics() in
+        // this branch.
     }
 
     @Test

@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 
 export const StyledTableCell = styled(TableCell)`
   transition: opacity 0.2s ease;
+  font-size: 14px;
 
   &.${tableCellClasses.root} {
     border: none;
@@ -141,6 +142,10 @@ export const StyledTableRow = styled(TableRow)`
   position: relative;
   padding: 0;
 
+  .${tableCellClasses.body} {
+    padding: 2px 16px;
+  }
+
   &:after {
     content: "";
     position: absolute;
@@ -174,6 +179,16 @@ export const StyledTableRow = styled(TableRow)`
   &.bottom {
     &:after {
       border-top: none;
+    }
+  }
+
+  ${({ theme }) => theme.breakpoints.down("sm")} {
+    .${tableCellClasses.body} {
+      padding: 4px !important;
+    }
+
+    .${tableCellClasses.paddingCheckbox} {
+      padding: 0 !important;
     }
   }
 `;

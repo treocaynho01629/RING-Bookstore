@@ -90,12 +90,9 @@
     "your": "Your orders",
     "total": "Total",
     "id": "Order ID",
+    "code": "Tracking code",
     "search": "Search by order ID, shop name or product name",
     "pay": "Pay",
-    "receive": "Receive",
-    "completed": "Completed",
-    "cancelled": "Cancelled",
-    "refunded": "Refunded",
     "again": "Buy again",
     "note": "Note",
     "shipping": "Shipping info",
@@ -107,28 +104,54 @@
     },
     "cancel": {
       "label": "Cancel order",
-      "title": "Choose cancel order reason"
+      "title": "Choose cancel reason"
     },
     "refund": {
       "label": "Refund order",
-      "title": "Choose refund order reason"
+      "title": "Choose refund reason"
     },
     "confirm": {
       "label": "Confirm order",
       "confirmed": "Order confirmed",
       "message": "Confirm order {{id}}?"
     },
-    "status": {
-      "shipping": "Delivering to shipping carrier.",
-      "completed": "Thank you for your purchase!",
-      "cancelled": "Cancelled on {{date}} {{time}}.",
-      "refunded": "Refunded {{amount}} to your wallet on {{date}} {{time}}.",
+    "summary": {
+      "completed": {
+        "ordered": "Your order has been processed.",
+        "paid": "The order has been paid ({{amount}}).",
+        "picked": "Package has been picked up from the seller.",
+        "delivered": "Package has been delivered to the shipping carrier.",
+        "done": "Thank you for your purchase!",
+        "cancelled": "The order has been cancelled.",
+        "returned": "Package has been returned to the carrier.",
+        "checked": "Package has been checked by the carrier.",
+        "refunded": "The order has been refunded ({{amount}})."
+      },
+      "failed": {
+        "return": "The package failed to return.",
+        "delivery": "The package failed to be delivered.",
+        "damage": "The package has been damaged in the shipping process.",
+        "lost": "The package has been lost in the shipping process.",
+        "exception": "There was an issue with the order in the shipping process."
+      },
       "pending": {
-        "seller": "Awaiting for seller's shipment.",
-        "payment": "Awaiting for payment.",
-        "return": "Awaiting for return to carrier.",
-        "refund": "Pending refund."
-      }
+        "return": {
+          "waiting": "Awaiting for package to be returned to the carrier",
+          "returning": "Returning the package to the carrier",
+          "transporting": "Transporting the package to the carrier",
+          "sorting": "Sorting the package at the carrier"
+        },
+        "picking": "Picking up the package from the seller",
+        "transporting": "Transporting the package to the shipping carrier",
+        "sorting": "Sorting the package at the carrier",
+        "delivering": "Delivering the package to {{address}}",
+        "refund": "Refunding money to your account",
+        "cod": "Collecting money from your order",
+        "money": "Collecting money from the seller"
+      },
+      "return": "Return the order's package",
+      "cancel": "Cancel the order",
+      "ready": "The package is ready to pick up"
     },
     "reason": {
       "label": "Reason",

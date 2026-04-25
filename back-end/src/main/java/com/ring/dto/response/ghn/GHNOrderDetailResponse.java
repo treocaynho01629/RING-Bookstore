@@ -12,16 +12,14 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GHNOrderDetailResponse {
-    private Integer code;
-    private String message;
-    private List<Data> data;
+public class GHNOrderDetailResponse extends BaseGHNResponse {
+    private GHNOrderDetail data;
 
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class Data {
+    public static class GHNOrderDetail {
         @JsonProperty("order_code")
         private String orderCode;
 
@@ -30,23 +28,10 @@ public class GHNOrderDetailResponse {
 
         private String status;
 
-        @JsonProperty("to_name")
-        private String toName;
+        @JsonProperty("created_date")
+        private String createdDate;
 
-        @JsonProperty("to_phone")
-        private String toPhone;
-
-        @JsonProperty("to_address")
-        private String toAddress;
-
-        @JsonProperty("to_ward_code")
-        private String toWardCode;
-
-        @JsonProperty("to_district_id")
-        private Integer toDistrictId;
-
-        @JsonProperty("cod_amount")
-        private Integer codAmount;
+        private String leadtime;
 
         private List<Log> log;
     }
@@ -62,4 +47,3 @@ public class GHNOrderDetailResponse {
         private String updatedDate;
     }
 }
-

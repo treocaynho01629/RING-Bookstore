@@ -50,7 +50,7 @@ const AddressContent = styled.div`
 `;
 
 const Address = styled.span`
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.75em;
   margin-top: ${({ theme }) => theme.spacing(1)};
   color: ${({ theme }) => theme.vars.palette.text.secondary};

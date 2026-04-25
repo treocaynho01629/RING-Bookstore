@@ -1,6 +1,7 @@
 package com.ring.dto.request.ghn;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GHNFeeRequest {
+
     @JsonProperty("service_type_id")
     private Integer serviceTypeId;
 

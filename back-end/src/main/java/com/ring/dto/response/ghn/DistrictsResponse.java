@@ -1,5 +1,6 @@
 package com.ring.dto.response.ghn;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,9 +12,22 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class DistrictsResponse {
-    private Integer code;
-    private String message;
-    private List<DistrictResponse> data;
-}
+public class DistrictsResponse extends BaseGHNResponse {
+    private List<DistrictItemResponse> data;
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class DistrictItemResponse {
+
+        @JsonProperty("DistrictID")
+        private Integer districtID;
+
+        @JsonProperty("ProvinceID")
+        private Integer provinceID;
+
+        @JsonProperty("DistrictName")
+        private String districtName;
+    }
+}

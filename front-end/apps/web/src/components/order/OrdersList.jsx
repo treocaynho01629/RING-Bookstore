@@ -114,7 +114,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
     const { enqueueSnackbar } = await import("notistack");
 
     const ids = detail?.items?.map((item) => item.bookId);
-    getBought(ids) // Fetch books with new info
+    getBought(ids, true) // Fetch books with new info
       .unwrap()
       .then((books) => {
         const { ids, entities } = books;

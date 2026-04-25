@@ -42,7 +42,7 @@ const Logo = styled.img`
 `;
 //#endregion
 
-const PaymentComponent = ({ id }) => {
+const PaymentComponent = ({ id, checkoutUrl }) => {
   const { t, i18n } = useTranslation();
   const { mode } = useColorScheme();
   const initRef = useRef(false);
@@ -106,28 +106,36 @@ const PaymentComponent = ({ id }) => {
 
     setPending(true);
 
-    create({ token, source: "turnstile", id })
-      .unwrap()
-      .then((data) => {
-        handleOpenPayOS(data?.checkoutUrl);
-        initRef.current = true;
-        if (!data?.checkoutUrl) navigate("/error", { replace: true });
-      })
-      .catch((err) => {
-        console.error(err);
-        setErr(err);
-        if (!err?.status) {
-          setMessage(t("error.server.response"));
-        } else if (err?.status === 404) {
-          navigate("/error", { replace: true });
-        } else {
-          setMessage(err?.data?.message);
-        }
-        initRef.current = false;
-      })
-      .finally(() => {
-        setPending(false);
-      });
+    if (checkoutUrl) {
+      handleOpenPayOS(checkoutUrl);
+      initRef.current = true;
+      return;
+    } else if (id) {
+      create({ token, source: "turnstile", id })
+        .unwrap()
+        .then((data) => {
+          handleOpenPayOS(data?.checkoutUrl);
+          initRef.current = true;
+          if (!data?.checkoutUrl) navigate("/error", { replace: true });
+        })
+        .catch((err) => {
+          console.error(err);
+          setErr(err);
+          if (!err?.status) {
+            setMessage(t("error.server.response"));
+          } else if (err?.status === 404) {
+            navigate("/error", { replace: true });
+          } else {
+            setMessage(err?.data?.message);
+          }
+          initRef.current = false;
+        })
+        .finally(() => {
+          setPending(false);
+        });
+    } else {
+      navigate("/error", { replace: true });
+    }
   };
 
   /**

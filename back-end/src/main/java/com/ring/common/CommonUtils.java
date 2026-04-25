@@ -3,6 +3,7 @@ package com.ring.common;
 import com.ring.model.entity.Account;
 import com.ring.model.entity.Shop;
 import com.ring.model.enums.UserRole;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 

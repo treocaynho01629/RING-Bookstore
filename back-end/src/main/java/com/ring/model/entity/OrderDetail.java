@@ -34,6 +34,9 @@ public class OrderDetail extends Auditable {
     @Column(length = 100)
     private String orderCode;
 
+    @Column(length = 100)
+    private String clientOrderCode;
+
     @Column
     private Double totalPrice; // Product's price
 
@@ -52,6 +55,19 @@ public class OrderDetail extends Auditable {
 
     @Column
     private Integer shippingType;
+
+    /** Aggregated package weight for shipping (grams). */
+    @Column
+    private Integer weightGrams;
+
+    @Column
+    private Integer lengthCm;
+
+    @Column
+    private Integer widthCm;
+
+    @Column
+    private Integer heightCm;
 
     @Column(length = 300)
     @Nationalized

@@ -8,6 +8,7 @@ export { default as useOnView } from "./src/hooks/useOnView";
 export * from "./src/enums/address";
 export * from "./src/enums/book";
 export * from "./src/enums/coupon";
+export * from "./src/enums/ghn";
 export * from "./src/enums/image";
 export * from "./src/enums/order";
 export * from "./src/enums/payment";

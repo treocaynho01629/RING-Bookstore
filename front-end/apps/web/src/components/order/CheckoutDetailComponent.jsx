@@ -1,21 +1,27 @@
 import styled from "@emotion/styled";
 import { Suspense, lazy, useState, forwardRef } from "react";
-import { StyledDialogTitle } from "../custom/ProfileComponents";
+import { StyledDialogContent, StyledDialogTitle } from "../custom/ProfileComponents";
 import { getPaymentStatus } from "@ring/shared/enums/payment";
 import { PaymentStatus } from "@ring/shared/models/paymentStatus";
 import { PaymentType } from "@ring/shared/models/paymentType";
-import { idFormatter, timeFormatter, dateFormatter } from "@ring/shared/utils/convert";
+import { idFormatter, timeFormatter, dateFormatter, dateTimeFormatter } from "@ring/shared/utils/convert";
 import { Link } from "react-router";
 import { MobileExtendButton } from "@ring/ui/Components";
 import { useTranslation } from "react-i18next";
-import { StatusContent } from "../custom/OrderComponents";
+import {
+  StatusContent,
+  Title,
+  Name,
+  InfoText,
+  InfoContainer,
+  ContentWrapper,
+  SubTitle,
+  TitleStatusTag,
+} from "../custom/OrderComponents";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
-import Paper from "@mui/material/Paper";
 import CloseIcon from "@mui/icons-material/Close";
 import InboxIcon from "@mui/icons-material/Inbox";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
@@ -35,103 +41,12 @@ const TitleContainer = styled.div`
   align-items: center;
 `;
 
-const SubTitle = styled.span`
-  font-size: 16px;
-  font-weight: 400;
-  color: ${({ theme }) => theme.vars.palette.text.secondary};
-
-  ${({ theme }) => theme.breakpoints.down("sm")} {
-    display: none;
-  }
-`;
-
-const SubText = styled.p`
-  font-size: 16px;
-  color: ${({ theme }) => theme.vars.palette.text.secondary};
-  margin: ${({ theme }) => theme.spacing(1)} 0;
-`;
-
 const SummaryContainer = styled.div`
   border-top: 0.5px dashed ${({ theme }) => theme.vars.palette.divider};
   border-bottom: 0.5px dashed ${({ theme }) => theme.vars.palette.divider};
   padding: ${({ theme }) => theme.spacing(2)} 0;
 
   ${({ theme }) => theme.breakpoints.down("md")} {
-    display: none;
-  }
-`;
-
-const Title = styled.h3`
-  margin: 0 0 ${({ theme }) => theme.spacing(1)};
-  font-size: 16px;
-  font-weight: 450;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  text-align: center;
-
-  ${({ theme }) => theme.breakpoints.down("sm")} {
-    margin-left: ${({ theme }) => theme.spacing(1)};
-  }
-`;
-
-const Name = styled.p`
-  font-size: 17px;
-  font-weight: 450;
-  margin: 0 0 ${({ theme }) => theme.spacing(1)};
-
-  ${({ theme }) => theme.breakpoints.down("sm")} {
-    font-size: 15px;
-  }
-`;
-
-const ContentWrapper = styled.div`
-  padding: ${({ theme }) => theme.spacing(2)} 0;
-
-  ${({ theme }) => theme.breakpoints.down("sm")} {
-    padding: ${({ theme }) => theme.spacing(1)} 0;
-  }
-`;
-
-const InfoContainer = styled.div`
-  height: 100%;
-  border: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
-  padding: ${({ theme }) => theme.spacing(2)};
-
-  ${({ theme }) => theme.breakpoints.down("sm")} {
-    padding: ${({ theme }) => theme.spacing(1)};
-  }
-`;
-
-const InfoText = styled.span`
-  font-size: 16px;
-  line-height: 1.75em;
-  display: flex;
-  margin-top: ${({ theme }) => theme.spacing(0.5)};
-  color: ${({ theme }) => theme.vars.palette.text.secondary};
-
-  &.price {
-    margin: 0;
-  }
-
-  ${({ theme }) => theme.breakpoints.down("sm")} {
-    font-size: 14px;
-
-    &.price {
-      display: none;
-    }
-  }
-`;
-
-const StatusTag = styled(Typography)`
-  text-transform: uppercase;
-  font-size: 12px;
-  font-weight: 450;
-  border-radius: 20px;
-  border: 0.5px solid currentColor;
-  padding: ${({ theme }) => theme.spacing(0.5, 1)};
-
-  ${({ theme }) => theme.breakpoints.down("md_lg")} {
     display: none;
   }
 `;
@@ -290,60 +205,35 @@ const CheckoutDetailComponent = ({ checkout, pending, setPending, tabletMode, mo
           {!checkout ? <Skeleton variant="text" width={100} /> : idFormatter(checkout?.id)}
           &emsp;
           {!checkout ? (
-            <StatusTag color="secondary">{t("loading")}</StatusTag>
+            <TitleStatusTag color="secondary">{t("loading")}</TitleStatusTag>
           ) : (
-            <StatusTag color={paymentMeta?.color}>{t(paymentMeta?.label, { ns: "authenticated" })}</StatusTag>
+            <TitleStatusTag color={paymentMeta?.color}>{t(paymentMeta?.label, { ns: "authenticated" })}</TitleStatusTag>
           )}
         </TitleContainer>
         <SubTitle>
-          {!checkout ? <Skeleton variant="text" width={130} /> : `${timeFormatter(date)} ${dateFormatter(date)}`}
+          {!checkout ? <Skeleton variant="text" width={130} /> : dateTimeFormatter(date, i18n.language)}
         </SubTitle>
       </StyledDialogTitle>
-      <DialogContent sx={{ px: { xs: "0 !important", sm: 2, md: 0 }, mt: { xs: 1, md: 0 } }}>
-        <>
-          {!checkout ? (
-            <Skeleton
-              variant="rectangular"
-              sx={{
-                height: { xs: 71, md: 88 },
-                width: "90%",
-                mx: "auto",
-                my: 1,
-              }}
-            />
-          ) : (
-            <Paper elevation={3} sx={{ width: "90%", mx: "auto", my: 1 }}>
-              <StatusContent color={paymentMeta?.color}>
-                <StatusText>
-                  {t(paymentMeta?.label, { ns: "authenticated" })}
-                  <p>
-                    {t(stepContent?.summary, {
-                      ns: "authenticated",
-                      date: dateFormatter(stepContent?.date, i18n.language),
-                      time: timeFormatter(stepContent?.date, i18n.language),
-                    })}
-                  </p>
-                </StatusText>
-              </StatusContent>
-            </Paper>
-          )}
-        </>
+      <StyledDialogContent>
+        <StatusContent className="summary" color={paymentMeta?.color}>
+          <StatusText>
+            {!checkout ? <Skeleton variant="text" width={100} /> : t(paymentMeta?.label, { ns: "authenticated" })}
+            <p>
+              {!checkout ? (
+                <Skeleton variant="text" width={200} />
+              ) : (
+                t(stepContent?.summary, {
+                  ns: "authenticated",
+                  date: dateFormatter(stepContent?.date, i18n.language),
+                  time: timeFormatter(stepContent?.date, i18n.language),
+                })
+              )}
+            </p>
+          </StatusText>
+        </StatusContent>
         {!tabletMode && (
           <SummaryContainer>
-            <Box display="flex" justifyContent="space-between">
-              <Box>
-                <SubText>
-                  {!checkout ? (
-                    <Skeleton variant="text" width={280} />
-                  ) : (
-                    t(stepContent?.summary, {
-                      ns: "authenticated",
-                      date: dateFormatter(stepContent?.date, i18n.language),
-                      time: timeFormatter(stepContent?.date, i18n.language),
-                    })
-                  )}
-                </SubText>
-              </Box>
+            <Box display="flex" justifyContent="flex-end">
               <Box>
                 {!checkout ? (
                   <MainButton disabled variant="contained" color="secondary" size="large" fullWidth>
@@ -467,7 +357,7 @@ const CheckoutDetailComponent = ({ checkout, pending, setPending, tabletMode, mo
               </Link>
             )
           ))}
-      </DialogContent>
+      </StyledDialogContent>
       <Dialog
         maxWidth={"sm"}
         fullWidth

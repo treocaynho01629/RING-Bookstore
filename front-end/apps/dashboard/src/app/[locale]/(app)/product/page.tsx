@@ -481,7 +481,7 @@ const ManageProducts = () => {
                 <MenuItem
                   key={1}
                   onClick={() => {
-                    getBook(row.original.id)
+                    getBook(row.original.id, true)
                       .unwrap()
                       .then((book: BookDTO) => {
                         setContextProduct(book);

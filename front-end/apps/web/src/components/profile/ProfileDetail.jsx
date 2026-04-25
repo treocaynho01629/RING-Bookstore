@@ -102,7 +102,7 @@ const InfoStack = styled.td`
 
 const InfoStackContainer = styled.div`
   position: relative;
-  height: 52px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -237,7 +237,7 @@ const ProfileDetail = ({
       setErr([]);
 
       if (!IMAGE_EXTENSIONS.includes(fileExtension)) {
-        setErrMsg(t("validation.constraints.invalid", { field: "image", ns: "validation" }));
+        setErrMsg(t("validation.constraints.pattern", { field: t("image"), ns: "validation" }));
       } else if (fileSize > IMAGE_SIZE_LIMIT) {
         setErrMsg(t("validation.constraints.size.image", { max: IMAGE_SIZE_LIMIT_MB, ns: "validation" }));
       }

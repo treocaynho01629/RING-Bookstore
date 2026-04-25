@@ -10,6 +10,7 @@ import type { PaymentType } from "./paymentType";
 
 export interface OrderDetailDTO {
   orderId?: number;
+  orderCode?: string;
   name?: string;
   phone?: string;
   address?: string;
@@ -23,9 +24,7 @@ export interface OrderDetailDTO {
   totalDiscount?: number;
   shippingFee?: number;
   shippingDiscount?: number;
-  serviceTypeId?: number;
-  serviceId?: number;
-  serviceName?: string;
+  shippingType?: number;
   paymentType?: PaymentType;
   status?: OrderStatus;
   paymentStatus?: PaymentStatus;

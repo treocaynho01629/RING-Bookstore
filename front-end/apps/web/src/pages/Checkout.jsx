@@ -137,6 +137,7 @@ const StyledStepContent = styled(StepContent)(({ theme }) => ({
 
 const MAX_STEPS = 3;
 
+// TODO: Fix sometime calculate not working
 const Checkout = () => {
   //#region construct
   const { username } = useAuth();
@@ -528,7 +529,7 @@ const Checkout = () => {
       !defaultAddress?.phone ||
       !defaultAddress?.detail ||
       !defaultAddress?.address ||
-      !addressInfo?.provinceId ||
+      !defaultAddress?.provinceId ||
       !defaultAddress?.districtId ||
       !defaultAddress?.wardCode
     ) {
@@ -548,7 +549,7 @@ const Checkout = () => {
       .then((data) => {
         removeProducts(selected);
         if (payment == PaymentType.ONLINE_PAYMENT) {
-          navigate(`/payment/${data?.id}`, { replace: true });
+          navigate(`/payment?checkoutUrl=${data?.checkoutUrl}`, { replace: true });
         } else {
           navigate("/payment?state=success", { replace: true });
         }

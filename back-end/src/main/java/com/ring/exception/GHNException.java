@@ -1,9 +1,15 @@
 package com.ring.exception;
 
 import lombok.Getter;
+
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.client.HttpClientErrorException;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ring.common.AppConstants;
 
 /**
@@ -14,8 +20,8 @@ import com.ring.common.AppConstants;
 @ResponseStatus(code = HttpStatus.EXPECTATION_FAILED)
 public class GHNException extends RuntimeException {
 
-    private final HttpStatus status;
-    private final String error;
+    private HttpStatus status;
+    private String error;
     private String message;
 
     public GHNException() {
@@ -43,5 +49,24 @@ public class GHNException extends RuntimeException {
         this.status = status;
         this.error = error;
         this.message = message;
+    }
+
+    public GHNException(HttpClientErrorException exception) {
+        super();
+        try {
+            Map<String, Object> errorBody = new ObjectMapper().readValue(
+                    exception.getResponseBodyAsString(),
+                    new TypeReference<Map<String, Object>>() {
+                    });
+            this.status = HttpStatus.valueOf(exception.getStatusCode().value());
+            this.error = errorBody.get("codeMessageValue") != null ? errorBody.get("codeMessageValue").toString()
+                    : AppConstants.GHN_FAILED;
+            this.message = errorBody.get("message") != null ? errorBody.get("message").toString()
+                    : AppConstants.GHN_FAILED;
+        } catch (Exception e) {
+            this.status = HttpStatus.INTERNAL_SERVER_ERROR;
+            this.error = AppConstants.GHN_FAILED;
+            this.message = e.getMessage();
+        }
     }
 }

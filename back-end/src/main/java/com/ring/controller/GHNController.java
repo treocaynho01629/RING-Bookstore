@@ -9,22 +9,25 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ring.service.GHNService;
 import com.ring.common.GhnStatusMapper;
-import com.ring.dto.response.ghn.ProvincesResponse;
-import com.ring.dto.response.ghn.DistrictsResponse;
-import com.ring.dto.response.ghn.WardsResponse;
+import com.ring.dto.response.ghn.ProvincesResponse.ProvinceItemResponse;
+import com.ring.dto.response.ghn.DistrictsResponse.DistrictItemResponse;
+import com.ring.dto.response.ghn.WardsResponse.WardItemResponse;
 import com.ring.dto.request.ghn.GHNCreateStoreRequest;
 import com.ring.dto.request.ghn.GHNFeeRequest;
 import com.ring.dto.request.ghn.GHNGetStoresRequest;
 import com.ring.dto.response.ghn.GHNCreateStoreResponse;
-import com.ring.dto.response.ghn.GHNFeeResponse;
 import com.ring.dto.response.ghn.GHNGetStoresResponse;
 import com.ring.dto.response.ghn.GHNOrderStatusWebhookPayload;
+import com.ring.dto.response.ghn.GHNOrderDetailResponse.GHNOrderDetail;
 import com.ring.model.entity.OrderDetail;
 import com.ring.model.enums.OrderStatus;
 import com.ring.repository.OrderDetailRepository;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.apache.commons.lang3.StringUtils;
+import jakarta.validation.Valid;
+
+import java.util.List;
 
 /**
  * Controller named {@link GHNController} for handling GHN-related
@@ -50,8 +53,8 @@ public class GHNController {
      */
     @GetMapping("/provinces")
     @PreAuthorize("hasRole('USER') and hasAuthority('read:address')")
-    public ResponseEntity<ProvincesResponse> getProvinces() {
-        ProvincesResponse provinces = ghnService.getProvinces();
+    public ResponseEntity<List<ProvinceItemResponse>> getProvinces() {
+        List<ProvinceItemResponse> provinces = ghnService.getProvinces();
         return new ResponseEntity<>(provinces, HttpStatus.OK);
     }
 
@@ -63,8 +66,8 @@ public class GHNController {
      */
     @GetMapping("/districts")
     @PreAuthorize("hasRole('USER') and hasAuthority('read:address')")
-    public ResponseEntity<DistrictsResponse> getDistricts(@RequestParam("provinceId") Integer provinceId) {
-        DistrictsResponse districts = ghnService.getDistricts(provinceId);
+    public ResponseEntity<List<DistrictItemResponse>> getDistricts(@RequestParam("provinceId") Integer provinceId) {
+        List<DistrictItemResponse> districts = ghnService.getDistricts(provinceId);
         return new ResponseEntity<>(districts, HttpStatus.OK);
     }
 
@@ -76,19 +79,31 @@ public class GHNController {
      */
     @GetMapping("/wards")
     @PreAuthorize("hasRole('USER') and hasAuthority('read:address')")
-    public ResponseEntity<WardsResponse> getWards(@RequestParam("districtId") Integer districtId) {
-        WardsResponse wards = ghnService.getWards(districtId);
+    public ResponseEntity<List<WardItemResponse>> getWards(@RequestParam("districtId") Integer districtId) {
+        List<WardItemResponse> wards = ghnService.getWards(districtId);
         return new ResponseEntity<>(wards, HttpStatus.OK);
     }
 
     /**
-     * Calculate shipping fee.
+     * Gets GHN order detail by order code.
+     *
+     * @param orderCode order code
+     * @return GHN order detail.
      */
-    @PostMapping("/shipping/fee")
+    @GetMapping("/order/{orderCode}")
+    @PreAuthorize("hasRole('ADMIN') and hasAuthority('read:order')")
+    public ResponseEntity<GHNOrderDetail> getOrderDetail(@PathVariable("orderCode") String orderCode) {
+        GHNOrderDetail detail = ghnService.getOrderDetailByClientCode(orderCode);
+        return new ResponseEntity<>(detail, HttpStatus.OK);
+    }
+
+    @PostMapping("/shipping-fee")
     @PreAuthorize("hasRole('USER') and hasAuthority('read:order')")
-    public ResponseEntity<GHNFeeResponse> calculateFee(@RequestBody GHNFeeRequest request) {
-        GHNFeeResponse response = ghnService.calculateFee(request);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<Integer> calculateShippingFee(
+            @RequestBody @Valid GHNFeeRequest request,
+            @RequestParam(value = "ghnShopId", required = false) Integer ghnShopId) {
+        Integer shippingFee = ghnService.calculateFee(request, ghnShopId);
+        return new ResponseEntity<>(shippingFee, HttpStatus.OK);
     }
 
     /**
@@ -152,7 +167,8 @@ public class GHNController {
 
             detailRepo.save(detail);
         } catch (Exception ignored) {
-            // Always return 200 to avoid GHN retries; errors should be handled via logs/monitoring.
+            // Always return 200 to avoid GHN retries; errors should be handled via
+            // logs/monitoring.
         }
 
         return ResponseEntity.ok(Map.of("code", 200, "message", "received"));

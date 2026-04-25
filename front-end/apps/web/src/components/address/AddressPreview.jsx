@@ -5,7 +5,7 @@ import { MobileExtendButton } from "@ring/ui/Components";
 import { useTranslation } from "react-i18next";
 import { currencyFormat } from "@ring/shared/utils/convert";
 import { useGetMyAddressQuery } from "../../features/addresses/addressesApiSlice";
-import { useCalculateShippingFeeMutation } from "../../features/orders/ordersApiSlice";
+import { useCalculateShippingFeeMutation } from "../../features/ghn/ghnApiSlice";
 import useAuth from "../../hooks/useAuth";
 import useAddress from "../../hooks/useAddress";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
@@ -35,7 +35,7 @@ const PreviewContainer = styled.div`
 
 const DetailTitle = styled.h4`
   margin: 10px 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
 
   ${({ theme }) => theme.breakpoints.down("md")} {
@@ -97,17 +97,20 @@ const AddressPreview = ({ product, pending, setPending }) => {
   useEffect(() => {
     if (product && defaultAddress && !isCalculating) {
       calculateFee({
-        toDistrictId: defaultAddress?.districtId,
-        toWardCode: defaultAddress?.wardCode,
-        ghnShopId: product?.ghnShopId,
-        weight: product?.weight,
-        length: product?.length,
-        width: product?.width,
-        height: product?.height,
-        insuranceValue: product?.price,
+        request: {
+          to_district_id: defaultAddress?.districtId,
+          to_ward_code: defaultAddress?.wardCode,
+          weight: product?.weight,
+          length: product?.length,
+          width: product?.width,
+          height: product?.height,
+          insurance_value: product?.price,
+        },
+        ghnShopId: 1234, // TODO: replace with product?.ghnShopId
       })
+        .unwrap()
         .then((res) => {
-          setShippingFee(res.data);
+          setShippingFee(res);
         })
         .catch((err) => {
           console.error(err);

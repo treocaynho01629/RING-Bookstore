@@ -25,6 +25,10 @@
       "import": "./dist/src/enums/coupon.js",
       "require": "./dist/src/enums/coupon.cjs"
     },
+    "./enums/ghn": {
+      "import": "./dist/src/enums/ghn.js",
+      "require": "./dist/src/enums/ghn.cjs"
+    },
     "./enums/order": {
       "import": "./dist/src/enums/order.js",
       "require": "./dist/src/enums/order.cjs"

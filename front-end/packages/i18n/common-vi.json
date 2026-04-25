@@ -224,16 +224,43 @@
       "refunded": "Đổi trả"
     },
     "status": {
-      "shipping": "Đang giao",
-      "completed": "Đã giao",
-      "refunded": "Đã hoàn tiền",
-      "canceled": "Đã huỷ",
+      "completed": {
+        "ordered": "Đã đặt hàng",
+        "paid": "Đã thanh toán",
+        "picked": "Đã lấy hàng",
+        "delivered": "Đã giao",
+        "done": "Hoàn tất",
+        "cancelled": "Đã huỷ",
+        "returned": "Đã trả hàng",
+        "checked": "Đã kiểm hàng",
+        "refunded": "Đã hoàn tiền"
+      },
+      "failed": {
+        "return": "Trả hàng thất bại",
+        "delivery": "Giao hàng thất bại",
+        "damage": "Hàng hỏng",
+        "lost": "Hàng đã mất",
+        "exception": "Đơn hàng thất bại"
+      },
       "pending": {
-        "seller": "Đang chờ hàng",
+        "return": {
+          "waiting": "Chờ trả hàng",
+          "returning": "Đang trả hàng",
+          "transporting": "Đang trả hàng cho ĐVVC",
+          "sorting": "Đang lưu kho"
+        },
+        "picking": "Đang lấy hàng",
+        "transporting": "Đang vận chuyển tới ĐVVC",
+        "sorting": "Đang lưu kho",
+        "delivering": "Đang giao hàng",
+        "cod": "Thu hộ",
+        "money": "Thu tiền từ người bán",
         "payment": "Chờ thanh toán",
-        "return": "Chờ trả hàng",
         "refund": "Chờ hoàn tiền"
-      }
+      },
+      "return": "Trả hàng",
+      "cancel": "Huỷ đơn hàng",
+      "ready": "Chờ lấy hàng"
     }
   },
   "review": {

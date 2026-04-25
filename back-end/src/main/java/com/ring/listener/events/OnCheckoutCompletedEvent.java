@@ -1,7 +1,8 @@
 package com.ring.listener.events;
 
-import com.ring.dto.response.orders.ReceiptDTO;
+import com.ring.model.entity.OrderReceipt;
 import com.ring.model.enums.PaymentType;
+
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
@@ -14,19 +15,15 @@ public class OnCheckoutCompletedEvent extends ApplicationEvent {
 
     private final String username;
     private final String email;
-    private final Double productsTotal;
-    private final Double shippingFee;
-    private final PaymentType paymentMethod;
-    private final ReceiptDTO receipt;
+    private final OrderReceipt receipt;
+    private final PaymentType paymentType;
 
-    public OnCheckoutCompletedEvent(final String username, final String email, final Double productsTotal,
-            final Double shippingFee, final PaymentType paymentMethod, final ReceiptDTO receipt) {
+    public OnCheckoutCompletedEvent(final String username, final String email, final OrderReceipt receipt,
+            final PaymentType paymentType) {
         super(username);
         this.username = username;
         this.email = email;
-        this.productsTotal = productsTotal;
-        this.shippingFee = shippingFee;
-        this.paymentMethod = paymentMethod;
         this.receipt = receipt;
+        this.paymentType = paymentType;
     }
 }

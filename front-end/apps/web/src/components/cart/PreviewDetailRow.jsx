@@ -85,7 +85,8 @@ const ShippingContainer = styled.div`
 `;
 
 const OptionButton = styled.b`
-  font-size: 15px;
+  font-size: 14px;
+  padding: ${({ theme }) => theme.spacing(1, 0)};
   white-space: nowrap;
   width: 100%;
   display: flex;
@@ -139,7 +140,7 @@ const PriceContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  margin: ${({ theme }) => theme.spacing(0.5)} 0;
+  margin: ${({ theme }) => theme.spacing(1)} 0;
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
     justify-content: space-between;

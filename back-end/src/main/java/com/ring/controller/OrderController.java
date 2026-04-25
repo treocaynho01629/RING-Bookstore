@@ -11,6 +11,7 @@ import com.ring.model.entity.Account;
 import com.ring.model.enums.OrderStatus;
 import com.ring.model.enums.PaymentType;
 import com.ring.service.OrderService;
+import com.ring.dto.response.ghn.GHNOrderDetailResponse.GHNOrderDetail;
 import com.ring.service.impl.MessageService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -79,25 +80,6 @@ public class OrderController {
 
         CreatePaymentLinkResponse result = orderService.checkout(checkRequest, request, currUser);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
-    }
-
-    @PostMapping("/shipping-fee")
-    @PreAuthorize("hasRole('USER') and hasAuthority('read:order')")
-    public ResponseEntity<Double> calculateShippingFee(
-            @RequestBody @Valid ShippingFeeRequest request,
-            @CurrentAccount Account currUser) {
-        Double shippingFee = orderService.calculateShippingFee(request.getFromDistrictId(),
-                request.getFromWardCode(),
-                request.getToDistrictId(),
-                request.getToWardCode(),
-                request.getServiceTypeId(),
-                request.getGhnShopId(),
-                request.getInsuranceValue(),
-                request.getWeight(),
-                request.getLength(),
-                request.getWidth(),
-                request.getHeight());
-        return new ResponseEntity<>(shippingFee, HttpStatus.OK);
     }
 
     /**
@@ -209,6 +191,22 @@ public class OrderController {
 
         OrderDetailDTO order = orderService.getOrderDetail(id, currUser);
         return new ResponseEntity<>(order, HttpStatus.OK);
+    }
+
+    /**
+     * Gets GHN order detail by order code.
+     *
+     * @param id       order ID.
+     * @param currUser the current authenticated user
+     * @return GHN order detail.
+     */
+    @GetMapping("/ghn/{id}")
+    @PreAuthorize("hasRole('USER') and hasAuthority('read:order')")
+    public ResponseEntity<GHNOrderDetail> getGHNOrderDetail(
+            @PathVariable("id") Long id,
+            @CurrentAccount Account currUser) {
+        GHNOrderDetail detail = orderService.getGHNOrderDetail(id, currUser);
+        return new ResponseEntity<>(detail, HttpStatus.OK);
     }
 
     /**

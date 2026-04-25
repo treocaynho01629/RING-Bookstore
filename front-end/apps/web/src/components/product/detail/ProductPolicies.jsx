@@ -29,7 +29,6 @@ const PoliciesContainer = styled.div`
 
 const DetailTitle = styled.h4`
   margin: 10px 0;
-  font-size: 16px;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -40,7 +39,6 @@ const DetailTitle = styled.h4`
 `;
 
 const PolicyTitle = styled.span`
-  font-size: 15px;
   font-weight: 450;
   display: flex;
   align-items: center;

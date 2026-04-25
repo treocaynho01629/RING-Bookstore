@@ -584,7 +584,7 @@ const CartContent = () => {
    * Handle find similar products
    */
   const handleFindSimilar = async () => {
-    getBook({ id: contextProduct?.id })
+    getBook({ id: contextProduct?.id }, true)
       .unwrap()
       .then((book) => {
         navigate(

@@ -217,7 +217,7 @@ const AddressForm = ({
   const handleOpenAddress = useCallback(() => {
     if (step === "done") return;
     if (step === "province" && !provinces) {
-      getProvinces()
+      getProvinces({}, true)
         .unwrap()
         .catch((rejected) => console.error(rejected));
     }
@@ -246,7 +246,7 @@ const AddressForm = ({
         const provinceId = province?.ProvinceID ?? province?.id ?? null;
         setCurrAddress((prev) => ({ ...prev, provinceId, districtId: null, wardCode: null }));
         if (provinceId != null) {
-          getDistricts(provinceId)
+          getDistricts(provinceId, true)
             .unwrap()
             .catch((rejected) => console.error(rejected));
         }
@@ -262,7 +262,7 @@ const AddressForm = ({
         const districtId = district?.DistrictID ?? district?.id ?? null;
         setCurrAddress((prev) => ({ ...prev, provinceId, districtId, wardCode: null }));
         if (districtId != null) {
-          getWards(districtId)
+          getWards(districtId, true)
             .unwrap()
             .catch((rejected) => console.error(rejected));
         }
@@ -274,7 +274,7 @@ const AddressForm = ({
         const province = newArr[0];
         const district = newArr[1];
         const ward = newArr[2];
-        const address = `${ward?.WardName ?? ""}, ${district?.DistrictName ?? ""}, ${province?.ProvinceName ?? ""}`;
+        const address = `${province?.ProvinceName ?? ""}, ${district?.DistrictName ?? ""}, ${ward?.WardName ?? ""}`;
         setSelectedGhn({ province, district, ward });
         setCurrAddress((prev) => ({
           ...prev,
@@ -329,7 +329,7 @@ const AddressForm = ({
               <PatternFormat
                 label={
                   currAddress.phone && !validPhone
-                    ? t("validation.constraint.invalid", {
+                    ? t("validation.constraints.pattern", {
                         field: t("phone", { ns: "authenticated" }),
                         ns: "validation",
                       })
@@ -351,7 +351,7 @@ const AddressForm = ({
                     endAdornment: <PhoneIcon style={{ color: "gray" }} />,
                   },
                 }}
-                format="(+84) ### ### ###"
+                format="(+84) #### ### ###"
                 allowEmptyFormatting
                 customInput={TextField}
               />
@@ -407,7 +407,7 @@ const AddressForm = ({
                 openOnFocus
                 disableCloseOnSelect
                 freeSolo
-                inputValue={currAddress?.address}
+                inputValue={!wardList.length ? currAddress?.address : ""}
                 loading={loadingAddress}
                 options={options}
                 value={value}

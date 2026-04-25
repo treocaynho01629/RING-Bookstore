@@ -145,6 +145,7 @@ function Payment() {
   const [searchParams] = useSearchParams();
 
   const state = searchParams.get("state");
+  const checkoutUrl = searchParams.get("checkoutUrl");
 
   return (
     <Wrapper>
@@ -185,7 +186,7 @@ function Payment() {
                 </Link>
                 {t("cart.payment")}
               </SimpleTitle>
-              <PaymentComponent id={id} />
+              <PaymentComponent id={id} checkoutUrl={checkoutUrl} />
             </>
           )}
         </ContentContainer>

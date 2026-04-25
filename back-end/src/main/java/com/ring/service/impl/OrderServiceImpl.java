@@ -30,10 +30,12 @@ import com.ring.service.AddressService;
 import com.ring.service.OrderService;
 import com.ring.service.PaymentService;
 import com.ring.dto.request.ghn.GHNFeeRequest;
-import com.ring.dto.response.ghn.GHNFeeResponse;
 import com.ring.dto.response.ghn.GHNSwitchStatusResponse;
+import com.ring.dto.response.ghn.GHNOrderDetailResponse.GHNOrderDetail;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -71,6 +73,8 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServiceImpl implements OrderService {
 
+    private final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
+
     private final OrderReceiptRepository orderRepo;
     private final OrderDetailRepository detailRepo;
     private final OrderItemRepository itemRepo;
@@ -80,6 +84,7 @@ public class OrderServiceImpl implements OrderService {
     private final AddressRepository addressRepo;
     private final PaymentInfoRepository paymentRepo;
 
+    private final ApplicationEventPublisher eventPublisher;
     private final CouponService couponService;
     private final CaptchaService captchaService;
     private final PaymentService paymentService;
@@ -90,9 +95,6 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final CalculateMapper calculateMapper;
     private final CouponMapper couponMapper;
-
-    private final ApplicationEventPublisher eventPublisher;
-    private final GHNOrderIntegrationService ghnOrderIntegrationService;
 
     @Value("${ghn.default.service-type-id}")
     private Integer ghnDefaultServiceTypeId;
@@ -110,7 +112,7 @@ public class OrderServiceImpl implements OrderService {
     private Integer ghnDefaultHeightCm;
 
     @Value("${ghn.default.fallback-fee}")
-    private Double ghnDefaultFallbackFee;
+    private Integer ghnDefaultFallbackFee;
 
     @Cacheable(cacheNames = AppConstants.CALCULATE)
     public CalculateDTO calculate(CalculateRequest request, Account user) {
@@ -196,7 +198,7 @@ public class OrderServiceImpl implements OrderService {
         orderReceipt.setAddress(savedAddress);
 
         orderReceipt.setPayment(paymentInfo);
-        orderRepo.save(orderReceipt);
+        OrderReceipt savedOrderReceipt = orderRepo.save(orderReceipt);
 
         ReceiptDTO receiptDTO = orderMapper.orderToDTO(orderReceipt);
 
@@ -214,21 +216,15 @@ public class OrderServiceImpl implements OrderService {
 
                 orderRepo.save(orderReceipt);
             } catch (PaymentException ignored) {
-                // TODO: Handle payment exception
             }
         } else if (checkRequest.getPaymentMethod().equals(PaymentType.CASH)) {
             // Create GHN orders immediately for cash checkout
-            ghnOrderIntegrationService.createGhnOrdersForReceipt(orderReceipt.getId(), PaymentType.CASH);
+            eventPublisher.publishEvent(new OnCheckoutCompletedEvent(
+                    user.getUsername(),
+                    user.getEmail(),
+                    savedOrderReceipt,
+                    PaymentType.CASH));
         }
-
-        // Trigger email event
-        eventPublisher.publishEvent(new OnCheckoutCompletedEvent(
-                user.getUsername(),
-                user.getEmail(),
-                orderReceipt.getProductsPrice(),
-                orderReceipt.getShippingFee(),
-                checkRequest.getPaymentMethod(),
-                receiptDTO));
 
         return paymentLink;
     }
@@ -693,7 +689,7 @@ public class OrderServiceImpl implements OrderService {
         List<IOrder> details = detailRepo.findAllByReceiptIds(receiptIds);
 
         // Map
-        List<ReceiptDTO> ordersList = orderMapper.receiptsAndDetailsProjectionToReceiptDTOS(
+        List<ReceiptDTO> ordersList = orderMapper.receiptsToDTOs(
                 receipts.getContent(),
                 details);
         return new PagingResponse<>(
@@ -755,7 +751,7 @@ public class OrderServiceImpl implements OrderService {
         Page<IOrder> details = detailRepo.findAllByUserId(user.getId(), status, keyword, pageable);
         List<Long> orderIds = details.getContent().stream().map(IOrder::getId).collect(Collectors.toList());
         List<IOrderItem> items = itemRepo.findAllWithDetailIds(orderIds);
-        List<OrderDTO> ordersList = orderMapper.ordersAndItemsProjectionToDTOS(details.getContent(), items);
+        List<OrderDTO> ordersList = orderMapper.ordersToDTOs(details.getContent(), items);
         return new PagingResponse<>(
                 ordersList,
                 details.getTotalPages(),
@@ -792,9 +788,20 @@ public class OrderServiceImpl implements OrderService {
                     return new ResourceNotFoundException(errorMsg);
                 });
         List<IOrderItem> items = itemRepo.findAllWithDetailIds(List.of(detailProjection.getId()));
-        OrderDetailDTO detailDTO = orderMapper.orderDetailAndItemsProjectionToOrderDetailDTO(detailProjection,
-                items);
-        return detailDTO;
+
+        return orderMapper.detailsToDetailDTO(detailProjection, items);
+    }
+
+    public GHNOrderDetail getGHNOrderDetail(Long id, Account user) {
+
+        boolean isAdmin = CommonUtils.isAuthAdmin();
+        String orderCode = detailRepo.findOrderCodeById(id, isAdmin ? null : user.getId())
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable("label.ghn.order") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
+        return ghnService.getOrderDetail(orderCode);
     }
 
     @Transactional
@@ -811,8 +818,8 @@ public class OrderServiceImpl implements OrderService {
         List<IOrder> details = detailRepo.findAllByReceiptId(id);
         List<Long> orderIds = details.stream().map(IOrder::getId).collect(Collectors.toList());
         List<IOrderItem> items = itemRepo.findAllWithDetailIds(orderIds);
-        List<OrderDTO> ordersList = orderMapper.ordersAndItemsProjectionToDTOS(details, items);
-        CheckoutDetailDTO checkoutDTO = orderMapper.checkoutDetailAndDetailsDTOToCheckoutDetailDTO(
+        List<OrderDTO> ordersList = orderMapper.ordersToDTOs(details, items);
+        CheckoutDetailDTO checkoutDTO = orderMapper.checkDetailsToDTO(
                 checkoutProjection,
                 ordersList); // Map to DTO
         return checkoutDTO;
@@ -1253,11 +1260,12 @@ public class OrderServiceImpl implements OrderService {
         lengthCm = lengthCm > 0 ? lengthCm : ghnDefaultLengthCm;
         widthCm = widthCm > 0 ? widthCm : ghnDefaultWidthCm;
         heightCm = heightCm > 0 ? heightCm : ghnDefaultHeightCm;
+        orderDetail.setWeightGrams(weightGrams);
+        orderDetail.setLengthCm(lengthCm);
+        orderDetail.setWidthCm(widthCm);
+        orderDetail.setHeightCm(heightCm);
 
-        Address origin = shop.getAddress();
-        double shippingFee = calculateShippingFee(
-                origin.getDistrictId(),
-                origin.getWardCode(),
+        int shippingFee = calculateShippingFee(
                 address.getDistrictId(),
                 address.getWardCode(),
                 detail.getShippingType() != null ? detail.getShippingType() : ghnDefaultServiceTypeId,
@@ -1305,7 +1313,7 @@ public class OrderServiceImpl implements OrderService {
                 discountFromCoupon = couponService.applyCoupon(
                         shopCoupon.getCoupon(),
                         new CartStateRequest(detailTotal - discountDeal,
-                                shippingFee,
+                                (double) shippingFee,
                                 detailQuantity,
                                 shop.getId()),
                         user);
@@ -1366,7 +1374,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Assign computed totals and request metadata to detail.
         orderDetail.setTotalPrice(detailTotal);
-        orderDetail.setShippingFee(shippingFee);
+        orderDetail.setShippingFee((double) shippingFee);
         orderDetail.setDealDiscount(discountDeal);
         orderDetail.setDiscount(discountValue);
         orderDetail.setCouponDiscount(discountCoupon);
@@ -1400,9 +1408,7 @@ public class OrderServiceImpl implements OrderService {
      * @param height         Height in centimeters
      * @return Shipping fee in VND
      */
-    public double calculateShippingFee(
-            Integer fromDistrictId,
-            String fromWardCode,
+    private Integer calculateShippingFee(
             Integer toDistrictId,
             String toWardCode,
             Integer serviceTypeId,
@@ -1413,17 +1419,13 @@ public class OrderServiceImpl implements OrderService {
             Integer width,
             Integer height) {
 
-        double fee = ghnDefaultFallbackFee;
-
         // Destination validation
         if (toDistrictId == null || toWardCode == null) {
-            return fee;
+            return ghnDefaultFallbackFee;
         }
 
         GHNFeeRequest feeRequest = GHNFeeRequest.builder()
                 .serviceTypeId(serviceTypeId != null ? serviceTypeId : ghnDefaultServiceTypeId)
-                .fromDistrictId(fromDistrictId)
-                .fromWardCode(fromWardCode)
                 .toDistrictId(toDistrictId)
                 .toWardCode(toWardCode)
                 .weight(weight)
@@ -1433,10 +1435,8 @@ public class OrderServiceImpl implements OrderService {
                 .insuranceValue(insuranceValue)
                 .build();
 
-        GHNFeeResponse response = ghnService.calculateFee(feeRequest, null);
-        fee = response.getData().getTotal().doubleValue();
-
-        return fee;
+        Integer calculatedFee = ghnService.calculateFee(feeRequest, null);
+        return calculatedFee != null ? calculatedFee : ghnDefaultFallbackFee;
     }
 
     /**

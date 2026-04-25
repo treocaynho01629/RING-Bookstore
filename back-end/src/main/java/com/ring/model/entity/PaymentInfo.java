@@ -42,5 +42,8 @@ public class PaymentInfo {
     private String description;
 
     @Column
+    private LocalDateTime paidDate;
+
+    @Column
     private LocalDateTime expiredAt;
 }

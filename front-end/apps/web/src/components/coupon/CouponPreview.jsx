@@ -20,7 +20,7 @@ const CouponDialog = lazy(() => import("./CouponDialog"));
 //#region styled
 const DetailTitle = styled.h4`
   margin: 10px 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -175,7 +175,7 @@ const CouponTitle = styled.div`
 `;
 
 const MoreButton = styled.span`
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   display: flex;
   align-items: end;
@@ -188,9 +188,10 @@ const CouponMessage = styled.span`
   display: flex;
   align-items: center;
   color: ${({ theme }) => theme.vars.palette.text.secondary};
+  font-size: 14px;
 
   ${({ theme }) => theme.breakpoints.down("md")} {
-    font-size: 14px;
+    font-size: 13px;
   }
 `;
 //#endregion

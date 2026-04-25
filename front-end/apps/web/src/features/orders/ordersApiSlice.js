@@ -10,7 +10,7 @@ const initialState = ordersAdapter.getInitialState({
   totalPages: 0,
 });
 
-const apiWithEnum = apiSlice.enhanceEndpoints({ addTagTypes: ["Order", "Checkout"] });
+const apiWithEnum = apiSlice.enhanceEndpoints({ addTagTypes: ["Order", "Checkout", "GHNOrder"] });
 
 export const ordersApiSlice = apiWithEnum.injectEndpoints({
   endpoints: (builder) => ({
@@ -111,6 +111,15 @@ export const ordersApiSlice = apiWithEnum.injectEndpoints({
         return [{ type: "Order", id: "LIST" }];
       },
     }),
+    getGHNOrderDetail: builder.query({
+      query: (id) => ({
+        url: `/api/orders/ghn/${id}`,
+        validateStatus: (response, result) => {
+          return response.status === 200 && !result?.isError;
+        },
+      }),
+      providesTags: (result, error, id) => [{ type: "GHNOrder", id }],
+    }),
     calculate: builder.mutation({
       query: (currCart) => ({
         url: "/api/orders/calculate",
@@ -128,14 +137,6 @@ export const ordersApiSlice = apiWithEnum.injectEndpoints({
         body: { ...cart },
       }),
       invalidatesTags: [{ type: "Order", id: "LIST" }],
-    }),
-    calculateShippingFee: builder.mutation({
-      query: (request) => ({
-        url: "/api/orders/shipping-fee",
-        method: "POST",
-        credentials: "include",
-        body: { ...request },
-      }),
     }),
     cancelOrder: builder.mutation({
       query: ({ id, reason }) => ({
@@ -201,11 +202,11 @@ export const {
   useGetCheckoutDetailQuery,
   useCalculateMutation,
   useCheckoutMutation,
-  useCalculateShippingFeeMutation,
   useCancelOrderMutation,
   useCancelUnpaidOrdersMutation,
   useChangePaymentMethodMutation,
   useRefundOrderMutation,
   useConfirmOrderMutation,
   useCreatePaymentLinkMutation,
+  useGetGHNOrderDetailQuery,
 } = ordersApiSlice;

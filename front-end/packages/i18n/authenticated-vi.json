@@ -56,7 +56,7 @@
     },
     "payment": {
       "select": "Chọn hình thức thanh toán",
-      "update": "Thay đổi hình thức thanh toán",
+      "update": "Đổi hình thức thanh toán",
       "invalid": "Hình thức thanh toán không hợp lệ!"
     },
     "shipping": {
@@ -87,7 +87,8 @@
     "title": "Thanh toán đơn hàng",
     "your": "Đơn hàng của bạn",
     "total": "Thành tiền",
-    "id": "Mã vận đơn",
+    "id": "Mã đơn hàng",
+    "code": "Mã vận đơn",
     "search": "Tìm theo Mã, Tên Shop hoặc Tên sản phẩm",
     "pay": "Thanh toán",
     "receive": "Nhận hàng",
@@ -105,30 +106,54 @@
     },
     "cancel": {
       "label": "Huỷ đơn hàng",
-      "title": "Chọn lý do huỷ đơn hàng",
-      "summary": "Đã huỷ đơn hàng vào {{date}} {{time}}."
+      "title": "Lý do huỷ đơn hàng"
     },
     "refund": {
       "label": "Hoàn trả hàng",
-      "title": "Chọn lý do hoàn trả đơn hàng",
-      "summary": "Đã hoàn trả {{amount}} vào ví của bạn vào {{date}} {{time}}."
+      "title": "Lý do hoàn trả đơn hàng"
     },
     "confirm": {
       "label": "Xác nhận đơn hàng",
       "confirmed": "Đã nhận hàng",
-      "message": "Xác nhận đã nhận đơn hàng {{id}}?"
+      "message": "Xác nhận đã nhận đơn {{id}}?"
     },
-    "status": {
-      "shipping": "Đang giao hàng cho đơn vị vận chuyển.",
-      "completed": "Cảm ơn bạn vì đã mua hàng!",
-      "cancelled": "Đã huỷ đơn hàng vào {{date}} {{time}}.",
-      "refunded": "Đã hoàn trả {{amount}} vào ví của bạn vào {{date}} {{time}}.",
+    "summary": {
+      "completed": {
+        "ordered": "Đã xử lý đơn hàng.",
+        "paid": "Đã thanh toán ({{amount}}).",
+        "picked": "Đã lấy hàng từ người bán.",
+        "delivered": "Đã giao hàng tới đơn vị vận chuyển.",
+        "done": "Cảm ơn bạn đã mua hàng!",
+        "cancelled": "Đã huỷ đơn hàng.",
+        "returned": "Đã trả hàng cho đơn vị vận chuyển.",
+        "checked": "Đơn vị vận chuyển đã kiểm hàng.",
+        "refunded": "Đã hoàn tiền vào tài khoản ({{amount}})."
+      },
+      "failed": {
+        "return": "Đơn hàng hoàn trả thất bại.",
+        "delivery": "Đơn hàng giao hàng thất bại.",
+        "damage": "Đơn hàng đã bị hư hỏng trong quá trình vận chuyển.",
+        "lost": "Đơn hàng đã bị mất trong quá trình vận chuyển.",
+        "exception": "Đã có vấn đề xảy ra trong quá trình vận chuyển."
+      },
       "pending": {
-        "seller": "Đang chờ giao hàng từ shop.",
-        "payment": "Đang chờ thanh toán.",
-        "return": "Đang chờ hoàn trả hàng.",
-        "refund": "Đang chờ hoàn trả tiền."
-      }
+        "return": {
+          "waiting": "Chờ trả hàng cho đơn vị vận chuyển",
+          "returning": "Đang trả hàng cho đơn vị vận chuyển",
+          "transporting": "Đang vận chuyển hàng tới đơn vị vận chuyển",
+          "sorting": "Đang lưu kho tại đơn vị vận chuyển"
+        },
+        "picking": "Đang lấy hàng từ người bán",
+        "transporting": "Đang vận chuyển hàng tới đơn vị vận chuyển",
+        "sorting": "Đang lưu kho tại đơn vị vận chuyển",
+        "delivering": "Đang giao hàng đến {{address}}",
+        "refund": "Đang hoàn tiền vào tài khoản",
+        "cod": "Đang thu hộ tiền từ người nhận hàng",
+        "money": "Đang thu tiền từ người bán"
+      },
+      "return": "Trả hàng",
+      "cancel": "Huỷ đơn hàng",
+      "ready": "Sẵn sàng lấy hàng"
     },
     "reason": {
       "label": "Lý do",

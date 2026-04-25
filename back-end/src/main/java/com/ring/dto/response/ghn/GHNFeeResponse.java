@@ -9,9 +9,14 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GHNFeeResponse {
-    private Integer code;
-    private String message;
-    private GHNFeeDataResponse data;
-}
+public class GHNFeeResponse extends BaseGHNResponse {
+    private GHNFeeData data;
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class GHNFeeData {
+        private Integer total;
+    }
+}

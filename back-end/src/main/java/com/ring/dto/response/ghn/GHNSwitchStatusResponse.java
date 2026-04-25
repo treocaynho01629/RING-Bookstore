@@ -12,9 +12,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GHNSwitchStatusResponse {
-    private Integer code;
-    private String message;
+public class GHNSwitchStatusResponse extends BaseGHNResponse {
     private List<Data> data;
 
     @Getter
@@ -30,4 +28,3 @@ public class GHNSwitchStatusResponse {
         private String message;
     }
 }
-

@@ -86,7 +86,7 @@ const OrderReceiptDetails = ({ receipt, tabletMode }) => {
                   <>
                     <Link to={`/shop/${detail?.shopId}`}>
                       <Shop>
-                        <ShopTag>{t("partner")}</ShopTag>
+                        {detail?.shopVerified && <ShopTag>{t("partner")}</ShopTag>}
                         <Storefront />
                         &nbsp;{detail?.shopName}
                         <KeyboardArrowRight fontSize="small" />

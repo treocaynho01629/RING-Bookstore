@@ -56,10 +56,19 @@ public class BookRequest {
 
     @NotNull(message = "{validation.constraints.not.blank}")
     @Min(value = 1, message = "{validation.constraints.min}")
-    private Double weight;
+    private Short weight;
 
-    @NotBlank(message = "{validation.constraints.not.blank}")
-    private String size;
+    @NotNull(message = "{validation.constraints.not.blank}")
+    @Min(value = 1, message = "{validation.constraints.min}")
+    private Short length;
+
+    @NotNull(message = "{validation.constraints.not.blank}")
+    @Min(value = 1, message = "{validation.constraints.min}")
+    private Short width;
+
+    @NotNull(message = "{validation.constraints.not.blank}")
+    @Min(value = 1, message = "{validation.constraints.min}")
+    private Short height;
 
     @NotNull(message = "{validation.constraints.not.blank}")
     @Min(value = 1, message = "{validation.constraints.min}")

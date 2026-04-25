@@ -247,7 +247,7 @@ const ManageShops = () => {
                 <MenuItem
                   key={1}
                   onClick={() => {
-                    getShop(row.original.id)
+                    getShop(row.original.id, true)
                       .unwrap()
                       .then((shop: ShopDetailDTO) => {
                         setContextShop(shop);

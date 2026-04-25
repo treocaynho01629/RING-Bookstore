@@ -19,6 +19,12 @@ export const LogoImage = styled.img`
   height: 40px;
   padding: 4px;
 
+  ${({ theme }) =>
+    theme.applyStyles &&
+    theme.applyStyles("light", {
+      filter: `contrast(0.9)`,
+    })}
+
   &.contrast {
     filter: drop-shadow(0px -2000px 0 ${({ theme }) => theme.vars.palette.text.primary});
     transform: translateY(2000px);
@@ -164,6 +170,7 @@ export const Showmore = styled.div`
 `;
 
 export const Message = styled.span`
+  font-size: 14px;
   margin: 20px 0 40px;
   display: flex;
   flex-direction: column;

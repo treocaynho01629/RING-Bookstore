@@ -129,9 +129,12 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
                         a.companyName AS companyName,
                         a.address AS address,
                         a.detail AS detail,
+                        od.orderCode AS orderCode,
+                        od.clientOrderCode AS clientOrderCode,
                         od.note AS note,
                         a.phone AS phone,
                         od.createdDate AS orderedDate,
+                        p.paidDate AS paidDate,
                         od.lastModifiedDate AS date,
                         p.paymentType AS paymentType,
                         od.totalPrice AS totalPrice,
@@ -141,6 +144,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
                         od.discount AS discount,
                         od.status AS status,
                         s.id AS shopId,
+                        s.verified AS shopVerified,
                         s.name AS shopName,
                         p.status AS paymentStatus
                 FROM OrderDetail od
@@ -156,6 +160,15 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> 
                 GROUP BY o.id, s.id, od.id, a.id, p.id
             """)
     Optional<IOrderDetail> findOrderDetail(Long id, Long userId);
+
+    @Query("""
+                SELECT od.orderCode
+                FROM OrderDetail od
+                JOIN od.order o
+                WHERE od.id = :id
+                AND COALESCE(:userId) IS NULL OR o.user.id = :userId
+            """)
+    Optional<String> findOrderCodeById(Long id, Long userId);
 
     @Modifying
     @Query("""

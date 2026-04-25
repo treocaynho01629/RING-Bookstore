@@ -1,21 +1,22 @@
 package com.ring.service;
 
-import com.ring.dto.response.ghn.ProvincesResponse;
-import com.ring.dto.response.ghn.DistrictsResponse;
-import com.ring.dto.response.ghn.WardsResponse;
+import java.util.List;
+
+import com.ring.dto.response.ghn.ProvincesResponse.ProvinceItemResponse;
+import com.ring.dto.response.ghn.DistrictsResponse.DistrictItemResponse;
+import com.ring.dto.response.ghn.WardsResponse.WardItemResponse;
 import com.ring.dto.request.ghn.GHNFeeRequest;
 import com.ring.dto.request.ghn.GHNCreateStoreRequest;
 import com.ring.dto.request.ghn.GHNGetStoresRequest;
 import com.ring.dto.request.ghn.GHNCreateOrderRequest;
-import com.ring.dto.request.ghn.GHNOrderDetailByClientCodeRequest;
 import com.ring.dto.request.ghn.GHNOrderDetailRequest;
 import com.ring.dto.request.ghn.GHNSwitchStatusRequest;
 import com.ring.dto.request.ghn.GHNUpdateOrderRequest;
-import com.ring.dto.response.ghn.GHNFeeResponse;
 import com.ring.dto.response.ghn.GHNCreateStoreResponse;
 import com.ring.dto.response.ghn.GHNGetStoresResponse;
 import com.ring.dto.response.ghn.GHNBasicResponse;
-import com.ring.dto.response.ghn.GHNCreateOrderResponse;
+import com.ring.dto.response.ghn.GHNCreateOrderResponse.GHNCreateOrder;
+import com.ring.dto.response.ghn.GHNOrderDetailResponse.GHNOrderDetail;
 import com.ring.dto.response.ghn.GHNOrderDetailResponse;
 import com.ring.dto.response.ghn.GHNSwitchStatusResponse;
 
@@ -29,7 +30,7 @@ public interface GHNService {
      *
      * @return a list of provinces.
      */
-    ProvincesResponse getProvinces();
+    List<ProvinceItemResponse> getProvinces();
 
     /**
      * Retrieves all districts by province id from GHN.
@@ -37,7 +38,7 @@ public interface GHNService {
      * @param provinceId province id
      * @return a list of districts
      */
-    DistrictsResponse getDistricts(Integer provinceId);
+    List<DistrictItemResponse> getDistricts(Integer provinceId);
 
     /**
      * Retrieves all wards by district id from GHN.
@@ -45,16 +46,16 @@ public interface GHNService {
      * @param districtId district id
      * @return a list of wards
      */
-    WardsResponse getWards(Integer districtId);
+    List<WardItemResponse> getWards(Integer districtId);
 
     /**
      * Calculates shipping fee based on route and package.
      * 
      * @param request   Request parameters
      * @param ghnShopId GHN shop ID
-     * @return Shipping fee response
+     * @return Shipping fee
      */
-    GHNFeeResponse calculateFee(GHNFeeRequest request, Integer ghnShopId);
+    Integer calculateFee(GHNFeeRequest request, Integer ghnShopId);
 
     /**
      * Registers a new GHN store (pickup address).
@@ -78,23 +79,23 @@ public interface GHNService {
      * @param request Request parameters
      * @return Order creation response
      */
-    GHNCreateOrderResponse createOrder(GHNCreateOrderRequest request);
+    GHNCreateOrder createOrder(GHNCreateOrderRequest request);
 
     /**
      * Retrieves GHN order detail by GHN order code.
      * 
-     * @param request Request parameters
-     * @return Order detail response
+     * @param orderCode Order code
+     * @return GHN Order detail
      */
-    GHNOrderDetailResponse getOrderDetail(GHNOrderDetailRequest request);
+    GHNOrderDetail getOrderDetail(String orderCode);
 
     /**
      * Retrieves GHN order detail by client order code.
      * 
-     * @param request Request parameters
-     * @return Order detail response
+     * @param clientOrderCode Client order code
+     * @return GHN Order detail
      */
-    GHNOrderDetailResponse getOrderDetailByClientCode(GHNOrderDetailByClientCodeRequest request);
+    GHNOrderDetail getOrderDetailByClientCode(String clientOrderCode);
 
     /**
      * Updates GHN order information.

@@ -16,7 +16,7 @@ export interface AddressRequest {
    * @maxLength 250
    */
   companyName?: string;
-  /** @pattern \(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{3}) */
+  /** @pattern \(?([0-9]{4})\)?([ .-]?)([0-9]{3})\2([0-9]{3}) */
   phone: string;
   /**
    * @minLength 0

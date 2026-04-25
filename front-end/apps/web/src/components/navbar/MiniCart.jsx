@@ -17,7 +17,7 @@ const MiniCartContainer = styled.div`
 `;
 
 const CartTitle = styled.span`
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 450;
   text-transform: capitalize;
 `;
@@ -41,7 +41,6 @@ const ItemsContainer = styled.div`
 
 const ProductTitle = styled.span`
   width: 100%;
-  font-size: 14px;
   font-weight: 450;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -59,7 +58,6 @@ const ProductTitle = styled.span`
 
 const ProductPrice = styled.span`
   width: 100%;
-  font-size: 16px;
   font-weight: 400;
   color: ${({ theme }) => theme.vars.palette.primary.main};
   display: flex;

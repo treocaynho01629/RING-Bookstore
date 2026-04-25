@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { Skeleton, Typography } from "@mui/material";
+import { Button, Skeleton, Typography } from "@mui/material";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 
 export const ItemTitle = styled.p`
@@ -39,7 +39,6 @@ export const ItemTitle = styled.p`
 `;
 
 export const Shop = styled.b`
-  font-size: 15px;
   white-space: nowrap;
   display: flex;
   align-items: center;
@@ -82,12 +81,22 @@ export const HeadContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: ${({ theme }) => theme.spacing(2)};
+  padding: ${({ theme }) => theme.spacing(1.5)};
   border-bottom: 0.5px solid;
   border-color: ${({ theme }) => theme.vars.palette.action.focus};
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
     padding: ${({ theme }) => theme.spacing(1)};
+  }
+`;
+
+export const ContentWrapper = styled.div`
+  padding: ${({ theme }) => theme.spacing(2)} 0;
+  margin-bottom: ${({ theme }) => theme.spacing(1)};
+  border-bottom: 0.5px dashed ${({ theme }) => theme.vars.palette.divider};
+
+  ${({ theme }) => theme.breakpoints.down("sm")} {
+    padding: ${({ theme }) => theme.spacing(1)} 0;
   }
 `;
 
@@ -131,7 +140,7 @@ export const StyledSkeleton = styled(Skeleton)`
 `;
 
 export const ToggleArrow = styled.span`
-  color: white;
+  color: ${({ theme }) => theme.vars.palette.text.secondary};
   margin-left: ${({ theme }) => theme.spacing(1)};
   display: none;
   align-items: center;
@@ -180,7 +189,7 @@ export const BotContainer = styled.div`
 
 export const FinalPriceContainer = styled.div`
   width: 100%;
-  max-width: 400px;
+  max-width: 325px;
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
     max-width: 100%;
@@ -199,7 +208,7 @@ export const PriceRow = styled.div`
 `;
 
 export const PriceText = styled.span`
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 450;
   white-space: nowrap;
   color: ${({ theme, color }) => theme.vars.palette[color]?.main || theme.vars.palette.text.primary};
@@ -214,7 +223,7 @@ export const PriceText = styled.span`
   }
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
-    font-size: 14px;
+    font-size: 12px;
   }
 `;
 
@@ -238,7 +247,7 @@ export const PriceContainer = styled.div`
 `;
 
 export const Price = styled.p`
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 450;
   text-align: left;
   color: ${({ theme }) => theme.vars.palette.primary.main};
@@ -265,7 +274,7 @@ export const Discount = styled.p`
 `;
 
 export const Amount = styled.span`
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 350;
   color: ${({ theme }) => theme.vars.palette.text.secondary};
 
@@ -295,25 +304,141 @@ export const StatusTag = styled(Typography)`
   }
 `;
 
-export const StatusContent = styled.div`
-  background-color: ${({ theme, color }) =>
-    `color-mix(in srgb, ${theme.vars.palette[color]?.light || theme.vars.palette.primary.light}, 
-      transparent 70%)`};
-  color: ${({ theme, color }) => theme.vars.palette[color]?.main ?? theme.vars.palette.primary.main};
-  border: 0.5px solid;
-  border-color: currentColor;
-  padding: ${({ theme }) => theme.spacing(1, 2)};
-  font-weight: 500;
+export const SubTitle = styled.span`
+  font-size: 14px;
+  font-weight: 400;
+  color: ${({ theme }) => theme.vars.palette.text.secondary};
+
+  ${({ theme }) => theme.breakpoints.down("sm")} {
+    display: none;
+  }
+`;
+
+export const TitleStatusTag = styled(Typography)`
   text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 450;
+  border-radius: 20px;
+  border: 0.5px solid currentColor;
+  padding: ${({ theme }) => theme.spacing(0.5, 1)};
+
+  ${({ theme }) => theme.breakpoints.down("md_lg")} {
+    display: none;
+  }
+`;
+
+export const StatusContent = styled.div`
+  color: ${({ theme, color }) => theme.vars.palette[color]?.main ?? theme.vars.palette.primary.main};
+  border-top: 4px dashed ${({ theme, color }) => theme.vars.palette[color]?.main ?? theme.vars.palette.primary.main};
+  border-bottom: 0.5px dashed ${({ theme }) => theme.vars.palette.divider};
+  padding: ${({ theme }) => theme.spacing(1, 2, 2)};
+  font-weight: 450;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
 
+  &.summary {
+    cursor: default;
+  }
+
   p {
-    text-transform: none;
     font-size: 14px;
-    margin: ${({ theme }) => theme.spacing(1)} 0 0;
-    filter: brightness(0.9);
+    text-transform: none;
+    font-weight: 400;
+    margin: ${({ theme }) => theme.spacing(1, 0, 0)};
+    color: ${({ theme }) => theme.vars.palette.text.primary};
+  }
+
+  .subtitle {
+    font-size: 12px;
+    font-weight: 400;
+    color: ${({ theme }) => theme.vars.palette.text.secondary};
+  }
+
+  ${({ theme }) => theme.breakpoints.down("md")} {
+    margin-top: ${({ theme }) => theme.spacing(2)};
+    font-size: 14px;
+
+    p {
+      font-size: 13px;
+    }
+  }
+
+  ${({ theme }) => theme.breakpoints.down("sm")} {
+    margin-top: ${({ theme }) => theme.spacing(1)};
+  }
+`;
+
+export const SubText = styled.p`
+  font-size: 14px;
+  color: ${({ theme }) => theme.vars.palette.text.secondary};
+  margin: ${({ theme }) => theme.spacing(1)} 0;
+`;
+
+export const Title = styled.h3`
+  margin: 0 0 ${({ theme }) => theme.spacing(1)};
+  font-size: 16px;
+  font-weight: 450;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  text-align: center;
+
+  ${({ theme }) => theme.breakpoints.down("md")} {
+    font-size: 14px;
+  }
+
+  ${({ theme }) => theme.breakpoints.down("sm")} {
+    margin-left: ${({ theme }) => theme.spacing(1)};
+  }
+`;
+
+export const Name = styled.p`
+  font-size: 14px;
+  font-weight: 450;
+  margin: 0 0 ${({ theme }) => theme.spacing(1)};
+`;
+
+export const InfoContainer = styled.div`
+  padding: ${({ theme }) => theme.spacing(0.5, 1)};
+
+  &.note {
+    margin-top: ${({ theme }) => theme.spacing(2)};
+    padding-top: ${({ theme }) => theme.spacing(2)};
+    border-top: 0.5px dashed ${({ theme }) => theme.vars.palette.divider};
+  }
+
+  &.shipping-log {
+    ${({ theme }) => theme.breakpoints.down("md_lg")} {
+      margin-top: ${({ theme }) => theme.spacing(2)};
+      padding-top: ${({ theme }) => theme.spacing(2)};
+      border-top: 0.5px dashed ${({ theme }) => theme.vars.palette.divider};
+    }
+  }
+`;
+
+export const InfoText = styled.span`
+  font-size: 13px;
+  line-height: 1.75em;
+  display: flex;
+  margin-top: ${({ theme }) => theme.spacing(0.5)};
+  color: ${({ theme }) => theme.vars.palette.text.secondary};
+
+  ${({ theme }) => theme.breakpoints.down("sm")} {
+    font-size: 12px;
+
+    &.price {
+      display: none;
+    }
+  }
+`;
+
+export const MainButton = styled(Button)`
+  min-width: 200px;
+
+  ${({ theme }) => theme.breakpoints.down("md")} {
+    height: 100%;
   }
 `;

@@ -78,7 +78,7 @@ const ItemTitle = styled.p`
 `;
 
 const Shop = styled.b`
-  font-size: 15px;
+  font-size: 14px;
   white-space: nowrap;
   display: flex;
   align-items: center;
@@ -89,17 +89,18 @@ const Shop = styled.b`
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
     font-size: 14px;
-    margin: 8px 0;
+    margin: 0;
   }
 `;
 
 const CouponButton = styled.b`
-  font-size: 15px;
+  font-size: 14px;
   white-space: nowrap;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
+  height: 42px;
 
   span {
     max-width: 90vw;
@@ -112,6 +113,7 @@ const CouponButton = styled.b`
 
   ${({ theme }) => theme.breakpoints.down("sm")} {
     font-size: 14px;
+    height: auto;
     margin: 8px 0;
   }
 `;
@@ -130,7 +132,7 @@ const ItemAction = styled.div`
 `;
 
 const Price = styled.p`
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 450;
   text-align: left;
   color: ${({ theme }) => theme.vars.palette.primary.main};
@@ -446,7 +448,7 @@ const CartDetailRow = ({
         <StyledTableCell align="left" colSpan={5} component="th" id={shopLabelId} scope="row">
           <Link to={`/shop/${shop?.id}`}>
             <Shop>
-              <ShopTag>{t("partner")}</ShopTag>
+              {shop?.verified && <ShopTag>{t("partner")}</ShopTag>}
               <Storefront />
               &nbsp;{shop?.shopName}
               <KeyboardArrowRight fontSize="small" />

@@ -476,9 +476,9 @@ const CouponDialog = ({
         ? t("required.select")
         : "";
 
-  const savedEmpty = isSaved && saved?.pages[0]?.totalCount == 0 && !isFetchingNextSaved;
+  const savedEmpty = isSaved && saved?.pages[0]?.totalElements == 0 && !isFetchingNextSaved;
   const couponsEmpty =
-    !isSaved && data?.pages[0]?.totalCount == 0 && shipping?.pages[0]?.totalCount == 0 && !isFetchingNextShipping;
+    !isSaved && data?.pages[0]?.totalElements == 0 && shipping?.pages[0]?.totalElements == 0 && !isFetchingNextShipping;
   const errorFlag = isError || errorShipping || errorSaved;
 
   return (

@@ -84,6 +84,7 @@ const StyledSearchInput = styled(TextField)`
   }
 
   .${inputBaseClasses.input} {
+    font-size: 14px;
     width: 100%;
     background: ${({ theme }) => theme.vars.palette.background.paper};
   }
@@ -148,6 +149,7 @@ const ListItem = styled.li`
   padding: ${({ theme }) => theme.spacing(0.65, 1)};
   padding-right: 0;
   height: 36px;
+  font-size: 14px;
 
   &.alt {
     background-color: ${({ theme }) =>

@@ -158,6 +158,7 @@ export const StoreSuggest = styled.div`
   border: 0.5px solid ${({ theme }) => theme.vars.palette.success.main};
   background-color: ${({ theme }) => theme.vars.palette.background.paper};
   transition: all 0.2s ease;
+  font-size: 14px;
 
   @media (hover: hover) and (pointer: fine) {
     &:hover {

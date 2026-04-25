@@ -10,16 +10,14 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GHNCreateOrderResponse {
-    private Integer code;
-    private String message;
-    private Data data;
+public class GHNCreateOrderResponse extends GHNBasicResponse {
+    private GHNCreateOrder data;
 
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class Data {
+    public static class GHNCreateOrder {
         @JsonProperty("expected_delivery_time")
         private String expectedDeliveryTime;
 
@@ -34,31 +32,5 @@ public class GHNCreateOrderResponse {
 
         @JsonProperty("trans_type")
         private String transType;
-
-        private Fee fee;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Fee {
-        private Integer coupon;
-        private Integer insurance;
-
-        @JsonProperty("main_service")
-        private Integer mainService;
-
-        private Integer r2s;
-
-        @JsonProperty("return")
-        private Integer returnFee;
-
-        @JsonProperty("station_do")
-        private Integer stationDo;
-
-        @JsonProperty("station_pu")
-        private Integer stationPu;
     }
 }
-

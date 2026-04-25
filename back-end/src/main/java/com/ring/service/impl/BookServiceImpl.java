@@ -251,7 +251,9 @@ public class BookServiceImpl implements BookService {
         var bookDetail = BookDetail.builder()
                 .book(addedBook)
                 .bWeight(request.getWeight())
-                .size(request.getSize())
+                .bLength(request.getLength())
+                .bWidth(request.getWidth())
+                .bHeight(request.getHeight())
                 .pages(request.getPages())
                 .bLanguage(request.getLanguage())
                 .bDate(request.getDate())
@@ -337,7 +339,9 @@ public class BookServiceImpl implements BookService {
 
         // Set new details info
         currDetail.setBWeight(request.getWeight());
-        currDetail.setSize(request.getSize());
+        currDetail.setBLength(request.getLength());
+        currDetail.setBWidth(request.getWidth());
+        currDetail.setBHeight(request.getHeight());
         currDetail.setPages(request.getPages());
         currDetail.setBLanguage(request.getLanguage());
         currDetail.setBDate(request.getDate());

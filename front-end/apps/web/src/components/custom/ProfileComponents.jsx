@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { DialogTitle } from "@mui/material";
+import { DialogContent, DialogTitle } from "@mui/material";
 import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
 
 export const StyledDialogTitle = styled(DialogTitle)`
@@ -8,7 +8,7 @@ export const StyledDialogTitle = styled(DialogTitle)`
   flex-wrap: wrap;
   align-items: center;
   text-align: center;
-  font-size: 18px;
+  font-size: 16px;
   margin-bottom: ${({ theme }) => theme.spacing(2)};
   padding: ${({ theme }) => theme.spacing(1.5)} 0px;
   border-bottom: 0.5px solid ${({ theme }) => theme.vars.palette.divider};
@@ -23,7 +23,7 @@ export const StyledDialogTitle = styled(DialogTitle)`
   }
 
   ${({ theme }) => theme.breakpoints.down("md_lg")} {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   ${({ theme }) => theme.breakpoints.down("md")} {
@@ -33,6 +33,23 @@ export const StyledDialogTitle = styled(DialogTitle)`
     a {
       display: flex;
     }
+  }
+`;
+
+export const StyledDialogContent = styled(DialogContent)`
+  ${({ theme }) => theme.breakpoints.up("xs")} {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  ${({ theme }) => theme.breakpoints.up("sm")} {
+    padding-left: ${({ theme }) => theme.spacing(2)} !important;
+    padding-right: ${({ theme }) => theme.spacing(2)} !important;
+  }
+
+  ${({ theme }) => theme.breakpoints.up("md")} {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 `;
 

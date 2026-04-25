@@ -2,6 +2,7 @@ package com.ring.controller;
 
 import com.ring.config.CurrentAccount;
 import com.ring.dto.request.CouponRequest;
+import com.ring.dto.response.GenericResponse;
 import com.ring.dto.response.PagingResponse;
 import com.ring.dto.response.coupons.CouponDTO;
 import com.ring.dto.response.coupons.CouponDetailDTO;

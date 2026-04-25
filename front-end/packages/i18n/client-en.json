@@ -62,7 +62,7 @@
     "add": "Enter coupon code",
     "not.found": "No coupons found",
     "sale": "Discount",
-    "empty": "No discounts available for now"
+    "empty": "No discounts available"
   },
   "review": {
     "title": "Product reviews",

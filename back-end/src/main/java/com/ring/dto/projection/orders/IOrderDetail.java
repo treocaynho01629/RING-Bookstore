@@ -15,6 +15,10 @@ public interface IOrderDetail {
 
     Long getOrderId();
 
+    String getOrderCode();
+
+    String getClientOrderCode();
+
     String getName();
 
     String getCompanyName();
@@ -29,6 +33,8 @@ public interface IOrderDetail {
 
     LocalDateTime getOrderedDate();
 
+    LocalDateTime getPaidDate();
+
     LocalDateTime getDate();
 
     Double getTotalPrice();
@@ -39,11 +45,7 @@ public interface IOrderDetail {
 
     Double getDiscount();
 
-    Integer getServiceTypeId();
-
-    Integer getServiceId();
-
-    String getServiceName();
+    Integer getShippingType();
 
     PaymentType getPaymentType();
 
@@ -52,6 +54,8 @@ public interface IOrderDetail {
     PaymentStatus getPaymentStatus();
 
     Long getShopId();
+
+    Boolean getShopVerified();
 
     String getShopName();
 }

@@ -41,3 +41,22 @@ export const timeFormatter = (date: Date, locale: string = "en-GB"): string => {
     hour12: false,
   });
 };
+
+/**
+ * Format the date to date time ISO string.
+ * @param date - The date to format.
+ * @param locale - The locale to use.
+ * @returns The formatted date time ISO string.
+ */
+export const dateTimeFormatter = (date: Date, locale: string = "en-GB"): string => {
+  return date.toLocaleString(locale, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+    timeZone: "UTC",
+  });
+};

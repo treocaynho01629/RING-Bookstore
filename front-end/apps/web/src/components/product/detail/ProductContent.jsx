@@ -50,8 +50,8 @@ const ImageContainer = styled.div`
   }
 `;
 
-const BookTitle = styled.h2`
-  font-size: 22px;
+const ProductTitle = styled.h2`
+  font-size: 20px;
   font-weight: 450;
   line-height: normal;
   margin: 0 0 20px 0;
@@ -117,7 +117,6 @@ const StyledRating = styled(Rating)(({ theme }) => ({
 
 const UserInfoText = styled.strong`
   color: ${({ theme }) => theme.vars.palette.text.primary};
-  font-size: 15px;
 
   &.rate {
     color: inherit;
@@ -293,7 +292,7 @@ const ProductContent = ({ book, handleToggleReview, pending, setPending }) => {
           <Box className="product-main" display="flex" flexDirection={{ xs: "column-reverse", md: "column" }}>
             <Box className="product-title">
               {book ? (
-                <BookTitle>{book?.title}</BookTitle>
+                <ProductTitle>{book?.title}</ProductTitle>
               ) : (
                 <Box sx={{ margin: { xs: "10px 0", md: "0 0 20px" } }}>
                   <Skeleton variant="text" sx={{ fontSize: { xs: "16px", md: "22px" } }} />

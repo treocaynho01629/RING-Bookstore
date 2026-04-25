@@ -47,14 +47,14 @@ export default function CustomBreadcrumbs({ items, type = "default", loading = f
 
   return (
     <BreadcrumbsContainer className={type}>
-      <Breadcrumbs separator="›" aria-label={t("breadcrumbs")} maxItems={4}>
+      <Breadcrumbs separator="›" aria-label={t("breadcrumbs")} maxItems={4} sx={{ fontSize: "14px" }}>
         <StyledMainCrumb to={"/"}>{t("home")}</StyledMainCrumb>
         {items.map((item) => (
           <NavLink key={item.href} to={item.href} end={item.end}>
             {item.label}
           </NavLink>
         ))}
-        {loading && <Skeleton variant="text" sx={{ fontSize: "16px" }} width={200} />}
+        {loading && <Skeleton variant="text" sx={{ fontSize: "14px" }} width={200} />}
       </Breadcrumbs>
     </BreadcrumbsContainer>
   );

@@ -112,7 +112,7 @@ const OrderItem = ({ order, handleAddToCart, handleCancelOrder }) => {
       <HeadContainer>
         <Link to={`/shop/${order?.shopId}`}>
           <Shop>
-            <ShopTag>{t("partner")}</ShopTag>
+            {order?.shopVerified && <ShopTag>{t("partner")}</ShopTag>}
             <Storefront />
             &nbsp;{order?.shopName}
             <KeyboardArrowRight fontSize="small" />

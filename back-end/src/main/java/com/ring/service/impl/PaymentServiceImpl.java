@@ -3,7 +3,12 @@ package com.ring.service.impl;
 import com.ring.exception.HttpResponseException;
 import com.ring.exception.PaymentException;
 import com.ring.exception.ResourceNotFoundException;
+import com.ring.listener.events.OnCheckoutCompletedEvent;
+import com.ring.mapper.OrderMapper;
+import com.ring.model.entity.Account;
+import com.ring.model.entity.OrderReceipt;
 import com.ring.repository.OrderDetailRepository;
+import com.ring.repository.OrderReceiptRepository;
 import com.ring.repository.PaymentInfoRepository;
 import com.ring.model.entity.PaymentInfo;
 import com.ring.model.enums.PaymentStatus;
@@ -24,6 +29,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
 import vn.payos.PayOS;
@@ -52,9 +58,11 @@ public class PaymentServiceImpl implements PaymentService {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final PayOS payOS;
 
+    private final ApplicationEventPublisher eventPublisher;
+
     private final OrderDetailRepository detailRepo;
     private final PaymentInfoRepository paymentRepo;
-    private final GHNOrderIntegrationService ghnOrderIntegrationService;
+    private final OrderReceiptRepository orderRepo;
 
     private final MessageService messageService;
 
@@ -192,13 +200,27 @@ public class PaymentServiceImpl implements PaymentService {
 
         if (paymentInfo != null) {
             paymentInfo.setStatus(PaymentStatus.PAID);
+            paymentInfo.setPaidDate(LocalDateTime.now());
             paymentRepo.save(paymentInfo);
         }
 
         // Update details status
         detailRepo.confirmPaymentByOrderId(id);
 
-        // Create GHN orders after successful online payment
-        ghnOrderIntegrationService.createGhnOrdersForReceipt(id, PaymentType.ONLINE_PAYMENT);
+        // Create GHN orders after successful online payment; receipt email is sent
+        // after GHN creation
+        OrderReceipt order = orderRepo.findById(id)
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { new DefaultMessageSourceResolvable("label.order") });
+                    return new ResourceNotFoundException(errorMsg);
+                });
+        Account user = order.getUser();
+
+        eventPublisher.publishEvent(new OnCheckoutCompletedEvent(
+                user.getUsername(),
+                user.getEmail(),
+                order,
+                PaymentType.ONLINE_PAYMENT));
     }
 }

@@ -145,11 +145,14 @@ export default function ProductFilterDrawer({
   const handleOpenCates = () => {
     setOpenCate(true);
     if (!cates) {
-      getCategories({
-        include: "children",
-        page: 0,
-        size: 999,
-      })
+      getCategories(
+        {
+          include: "children",
+          page: 0,
+          size: 999,
+        },
+        true
+      )
         .unwrap()
         .catch((rejected) => console.error(rejected));
     }
@@ -176,7 +179,7 @@ export default function ProductFilterDrawer({
   const handleOpenShops = () => {
     setOpenShop(true);
     if (!shopsData) {
-      getShops()
+      getShops({}, true)
         .unwrap()
         .catch((err) => console.error(err));
     }
@@ -203,7 +206,7 @@ export default function ProductFilterDrawer({
   const handleOpenPubs = () => {
     setOpenPub(true);
     if (!publishers) {
-      getPublishers({ size: 100 })
+      getPublishers({ size: 100 }, true)
         .unwrap()
         .catch((err) => console.error(err));
     }

@@ -295,10 +295,13 @@ const ProductFormDialog = ({
   const handleOpenPubs = () => {
     setOpenPub(true);
     if (!pubs) {
-      getPublishers({
-        page: 0,
-        size: 100,
-      })
+      getPublishers(
+        {
+          page: 0,
+          size: 100,
+        },
+        true
+      )
         .unwrap()
         .catch((rejected) => console.error(rejected));
     }
@@ -314,11 +317,14 @@ const ProductFormDialog = ({
   const handleOpenCates = () => {
     setOpenCate(true);
     if (!cates) {
-      getCategories({
-        include: "children",
-        page: 0,
-        size: 999,
-      })
+      getCategories(
+        {
+          include: "children",
+          page: 0,
+          size: 999,
+        },
+        true
+      )
         .unwrap()
         .catch((rejected) => console.error(rejected));
     }

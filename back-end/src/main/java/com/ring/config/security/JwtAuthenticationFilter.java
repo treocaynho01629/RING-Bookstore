@@ -14,8 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -30,16 +30,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
     private final UserDetailsService userDetailsService;
     private final RequestMatcher proceedUrlPatterns = new OrRequestMatcher(
-            new AntPathRequestMatcher("/api/books/analytics", "GET"),
-            new AntPathRequestMatcher("/api/books/detail/**", "GET"));
+            new RegexRequestMatcher("^/api/books/analytics$", "GET"),
+            new RegexRequestMatcher("^/api/books/detail/.*$", "GET"));
     private final RequestMatcher excludeUrlPatterns = new OrRequestMatcher(
-            new AntPathRequestMatcher("/api/auth/**"),
-            new AntPathRequestMatcher("/api/books/**", "GET"),
-            new AntPathRequestMatcher("/api/publishers", "GET"),
-            new AntPathRequestMatcher("/api/categories", "GET"),
-            new AntPathRequestMatcher("/api/reviews/books", "GET"),
-            new AntPathRequestMatcher("/api/banners", "GET"),
-            new AntPathRequestMatcher("/api/v1/**", "GET"));
+            new RegexRequestMatcher("^/api/auth/.*$", null),
+            new RegexRequestMatcher("^/api/books/.*$", "GET"),
+            new RegexRequestMatcher("^/api/publishers$", "GET"),
+            new RegexRequestMatcher("^/api/categories$", "GET"),
+            new RegexRequestMatcher("^/api/reviews/books$", "GET"),
+            new RegexRequestMatcher("^/api/banners$", "GET"),
+            new RegexRequestMatcher("^/api/v1/.*$", "GET"));
 
     /**
      * Processes the HTTP request and performs bearer token authentication if a
