@@ -180,11 +180,11 @@ EnhancedTableHead.propTypes = {
 const CartContent = () => {
   const { t } = useTranslation();
   const { defaultAddress, setDefaultAddress } = useAddress();
-  const { cartProducts, removeProduct, clearCart, decreaseAmount, increaseAmount, changeAmount } = useCart();
-  const { estimateCart, syncCart } = useCheckout();
+  const { cartProducts, removeProduct, removeProducts, clearCart, decreaseAmount, increaseAmount, changeAmount } =
+    useCart();
+  const { estimateCart, updateCart } = useCheckout();
   const { username } = useAuth();
   const { confirm, ConfirmationDialog } = useConfirm(ConfirmDialog);
-  const calCount = useRef(0);
 
   const mobileMode = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const tabletMode = useMediaQuery((theme) => theme.breakpoints.down("md_lg"));
@@ -285,13 +285,22 @@ const CartContent = () => {
             }
 
             // Add items for that shop
-            detail.items.push(item);
+            detail.items.push({
+              id: item.id,
+              quantity: item.quantity,
+              price: item.price,
+              discount: item.discount,
+            });
           }
 
           return result;
         },
         {
-          address: defaultAddress,
+          address: {
+            provinceId: defaultAddress?.provinceId,
+            districtId: defaultAddress?.districtId,
+            wardCode: defaultAddress?.wardCode,
+          },
           coupon: coupon != "" ? coupon?.code : "",
           cart: [],
         }
@@ -317,6 +326,7 @@ const CartContent = () => {
 
   /**
    * Estimate price before receive calculated price from server
+   * @param {Object} cart - Cart object
    */
   const handleEstimate = useCallback(
     (cart) => {
@@ -329,20 +339,21 @@ const CartContent = () => {
 
   /**
    * Calculate price on server side
+   * @param {Object} cart - Cart object
    */
   const handleCalculate = useCallback(
     debounce(async (cart) => {
-      calCount.current++;
-
-      const skipCalculate =
-        calculating || cart == null || isEqual(prevPayload.current, cart) || !username || calCount.current == 3;
-      if (skipCalculate) return;
+      const skipCalculate = calculating || cart == null || isEqual(prevPayload.current, cart) || !username;
+      if (skipCalculate) {
+        prevPayload.current = null;
+        return;
+      }
 
       calculate(cart)
         .unwrap()
         .then((data) => {
           setCalculated(data);
-          handleSyncCart(data);
+          handleUpdateCart(data);
           prevPayload.current = cart;
         })
         .catch((err) => {
@@ -358,10 +369,11 @@ const CartContent = () => {
   );
 
   /**
-   * Sync cart between client and server
+   * Update cart between client and server
+   * @param {Object} cart - Cart object
    */
-  const handleSyncCart = (cart) => {
-    syncCart(
+  const handleUpdateCart = (cart) => {
+    updateCart(
       cart,
       setDiscount,
       setShopDiscount,
@@ -571,9 +583,7 @@ const CartContent = () => {
       if (selected.length == cartProducts.length) {
         clearCart();
       } else {
-        selected.forEach((id) => {
-          removeProduct(id);
-        });
+        removeProducts(selected);
       }
       handleCalculate.cancel();
       handleClearSelect();

@@ -48,7 +48,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Cacheable(cacheNames = AppConstants.USER_ADDRESS, key = "#user.id")
     public AddressDTO getMyAddress(Account user) {
-        IAddress address = addressRepo.findAddressByProfile(user.getProfile().getId());
+        IAddress address = addressRepo.findAddressByProfile(user.getProfile().getId()).orElse(null);
         return addressMapper.projectionToDTO(address);
     }
 

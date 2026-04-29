@@ -1,6 +1,5 @@
 import styled from "@emotion/styled";
 import { DialogContent, DialogTitle } from "@mui/material";
-import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
 
 export const StyledDialogTitle = styled(DialogTitle)`
   position: relative;
@@ -119,13 +118,6 @@ export const ToggleGroupContainer = styled.div`
   }
 `;
 
-export const StyledEmptyIcon = styled(EmptyIcon)`
-  height: 70px;
-  width: 70px;
-  margin: ${({ theme }) => theme.spacing(1)} 0;
-  fill: ${({ theme }) => theme.vars.palette.text.icon};
-`;
-
 export const PlaceholderContainer = styled.div`
   width: 100%;
   padding: ${({ theme }) => theme.spacing(16)};
@@ -136,5 +128,5 @@ export const LoadContainer = styled.div`
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin-bottom: ${({ theme }) => theme.spacing(2)};
+  margin: ${({ theme }) => theme.spacing(2, 0)};
 `;

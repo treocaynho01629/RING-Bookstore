@@ -63,7 +63,7 @@ const useCheckout = () => {
   };
 
   /**
-   * Sync client cart with server
+   * Update client cart with server response
    * @param {Object} cart - Cart object
    * @param {Function} setDiscount - Function to set discount
    * @param {Function} setShopDiscount - Function to set shop discount
@@ -76,7 +76,7 @@ const useCheckout = () => {
    * @param {Function} handleClearSelect - Function to handle clear select items
    * @returns {void}
    */
-  const syncCart = (
+  const updateCart = (
     cart,
     setDiscount,
     setShopDiscount,
@@ -166,7 +166,7 @@ const useCheckout = () => {
     if (isWarning && onWarning) onWarning(errorMsg);
   };
 
-  return { estimateCart, syncCart };
+  return { estimateCart, updateCart };
 };
 
 export default useCheckout;

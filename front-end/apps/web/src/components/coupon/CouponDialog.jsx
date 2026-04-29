@@ -178,7 +178,7 @@ const CouponDialog = ({
       showUsed: true,
       showExpired: true,
     },
-    { skip: !isSaved && !selectMode && savedCodes?.length > 0 }
+    { skip: !isSaved || !selectMode || !savedCodes?.length }
   );
 
   // Fetch coupon by code

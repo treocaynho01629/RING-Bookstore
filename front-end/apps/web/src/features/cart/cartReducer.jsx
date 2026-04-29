@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { clearAuth } from "@ring/redux/authActions";
 
 const initialState = { products: [] };
 
@@ -20,6 +21,9 @@ export const cartSlice = createSlice({
         state.products.push(action.payload);
       }
     },
+    replaceCart: (state, action) => {
+      state.products = action.payload;
+    },
     // Replace product in cart
     replaceInCart: (state, action) => {
       const item = state.products.find((item) => item.id === action.payload.id);
@@ -32,6 +36,7 @@ export const cartSlice = createSlice({
         item.discount = action.payload.discount;
         item.shopId = action.payload.shopId;
         item.shopName = action.payload.shopName;
+        item.quantity = action.payload.quantity ?? item.quantity;
       } else {
         // Put to cart if not already
         state.products.push(action.payload);
@@ -95,10 +100,14 @@ export const cartSlice = createSlice({
       state.products = [];
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(clearAuth, () => initialState);
+  },
 });
 
 export const {
   addToCart,
+  replaceCart,
   replaceInCart,
   increaseQuantity,
   decreaseQuantity,

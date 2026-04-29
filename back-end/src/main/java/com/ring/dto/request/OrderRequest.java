@@ -20,16 +20,16 @@ import java.util.List;
 @NoArgsConstructor
 public class OrderRequest {
 
-	@NotNull(message = "{validation.constraints.not.blank}")
-	@NotEmpty(message = "{validation.constraints.not.blank}")
-	private List<CartDetailRequest> cart;
+    @NotNull(message = "{validation.constraints.not.blank}")
+    @NotEmpty(message = "{validation.constraints.not.blank}")
+    private List<CartDetailRequest> cart;
 
-	private String coupon;
+    private String coupon;
 
-	@NotNull(message = "{validation.constraints.not.blank}")
-	private PaymentType paymentMethod;
+    @NotNull(message = "{validation.constraints.not.blank}")
+    private PaymentType paymentMethod;
 
-	@Valid
-	@NotNull(groups = AddressRequest.class)
-	private AddressRequest address;
+    @Valid
+    @NotNull(groups = AddressRequest.class)
+    private AddressRequest address;
 }

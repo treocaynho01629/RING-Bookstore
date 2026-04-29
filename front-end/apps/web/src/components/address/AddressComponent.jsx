@@ -7,12 +7,15 @@ import {
   useUpdateAddressMutation,
 } from "../../features/addresses/addressesApiSlice";
 import { CircularProgress, Dialog, ListItemIcon, ListItemText, Menu, MenuItem, DialogContent } from "@mui/material";
-import { AddHome, Delete, Home, KeyboardArrowLeft, LocationOn } from "@mui/icons-material";
-import { StyledDialogTitle } from "../custom/ProfileComponents";
-import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
 import { Link } from "react-router";
 import { Message } from "@ring/ui/Components";
 import { useTranslation } from "react-i18next";
+import { StyledDialogTitle } from "../custom/ProfileComponents";
+import AddHome from "@mui/icons-material/AddHome";
+import Delete from "@mui/icons-material/Delete";
+import Home from "@mui/icons-material/Home";
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import LocationOn from "@mui/icons-material/LocationOn";
 import useConfirm from "@ring/shared/useConfirm";
 import AddressItem from "./AddressItem";
 import useAddress from "../../hooks/useAddress";
@@ -47,13 +50,6 @@ const PlaceholderContainer = styled.div`
   ${({ theme }) => theme.breakpoints.down("md")} {
     min-height: 100dvh;
   }
-`;
-
-const StyledEmptyIcon = styled(EmptyIcon)`
-  height: 70px;
-  width: 70px;
-  margin: ${({ theme }) => theme.spacing(1)} 0;
-  fill: ${({ theme }) => theme.vars.palette.text.icon};
 `;
 
 const StyledAddButton = styled.span`
@@ -502,10 +498,7 @@ const AddressComponent = ({ pending, setPending, mobileMode }) => {
           {storedContent}
           {!isLoading && !isError && !data?.ids?.length && !storeAddresses?.length && (
             <MessageContainer>
-              <Message>
-                <StyledEmptyIcon />
-                {t("address.empty", { ns: "authenticated" })}
-              </Message>
+              <Message>{t("address.empty", { ns: "authenticated" })}</Message>
             </MessageContainer>
           )}
         </ContentContainer>

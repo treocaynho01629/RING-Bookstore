@@ -149,7 +149,6 @@ const Checkout = () => {
 
   const scrollRef = useRef(null);
   const prevPayload = useRef();
-  const calCount = useRef(0);
 
   const [activeStep, setActiveStep] = useState(0);
   const [payment, setPayment] = useState(Object.keys(PaymentType)[0]);
@@ -157,7 +156,7 @@ const Checkout = () => {
 
   // Cart
   const { cartProducts, removeProducts } = useCart();
-  const { estimateCart, syncCart } = useCheckout();
+  const { estimateCart, updateCart } = useCheckout();
   const [openWarning, setOpenWarning] = useState(undefined);
   const location = useLocation();
   const checkoutState = location.state?.checkoutState;
@@ -248,7 +247,7 @@ const Checkout = () => {
 
   /**
    * Get checkout cart
-   * @returns {Object}
+   * @returns {Object} - Cart object
    */
   const getCheckoutCart = () => {
     if (selected?.length > 0 && cartProducts.length > 0) {
@@ -275,7 +274,12 @@ const Checkout = () => {
             }
 
             // Add items for that shop
-            detail.items.push(item);
+            detail.items.push({
+              id: item.id,
+              quantity: item.quantity,
+              price: item.price,
+              discount: item.discount,
+            });
           }
 
           return result;
@@ -305,26 +309,26 @@ const Checkout = () => {
 
   /**
    * Handle calculate cart on server side
-   * @param {Object} cart
+   * @param {Object} cart - Cart object
    */
   const handleCalculate = useCallback(
     debounce(async (cart) => {
-      calCount.current++;
-
       const skipCalculate =
         calculating ||
         cart == null ||
         activeStep == 0 ||
         defaultAddress == null ||
-        (activeStep > 0 && isEqual(prevPayload.current, cart)) ||
-        calCount.current == 3;
-      if (skipCalculate) return;
+        (activeStep > 0 && isEqual(prevPayload.current, cart));
+      if (skipCalculate) {
+        prevPayload.current = null;
+        return;
+      }
 
       calculate(cart)
         .unwrap()
         .then((data) => {
           setCalculated(data);
-          handleSyncCart(data);
+          handleUpdateCart(data);
           prevPayload.current = cart;
         })
         .catch((err) => {
@@ -341,16 +345,16 @@ const Checkout = () => {
   );
 
   /**
-   * Sync checkout cart between client and server
-   * @param {Object} cart
+   * Update checkout cart between client and server
+   * @param {Object} cart - Cart object
    */
-  const handleSyncCart = (cart) => {
-    syncCart(cart, setDiscount, setShopDiscount, coupon, setCoupon, shopCoupon, setShopCoupon, handleOpenWarning);
+  const handleUpdateCart = (cart) => {
+    updateCart(cart, setDiscount, setShopDiscount, coupon, setCoupon, shopCoupon, setShopCoupon, handleOpenWarning);
   };
 
   /**
    * Separate cart by shop
-   * @returns {Object}
+   * @returns {Object} - Cart object
    */
   const reduceCart = () => {
     let selectedCart = cartProducts.filter((product) => selected?.includes(product.id));

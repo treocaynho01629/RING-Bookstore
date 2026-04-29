@@ -115,7 +115,6 @@ const ProductSimple = ({ book, scrollPosition }) => {
    * Handle add to cart
    */
   const handleAddToCart = () => {
-    console.log(book);
     addProduct(book, 1);
   };
 

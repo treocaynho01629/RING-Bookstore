@@ -25,14 +25,22 @@ type DialogProps = {
  */
 const useConfirm = (ConfirmDialog: React.ComponentType<DialogProps>) => {
   const [promise, setPromise] = useState<{ resolve: (value: boolean) => void } | null>(null);
-  const [options, setOptions] = useState<ConfirmParams>({ title: "", message: "", cancelText: "Cancel", confirmText: "Confirm" });
+  const [options, setOptions] = useState<ConfirmParams>({
+    title: "",
+    message: "",
+    cancelText: "Cancel",
+    confirmText: "Confirm",
+  });
 
-  const confirm = useCallback((title: string, message: string) => {
-    return new Promise<boolean>((resolve) => {
-      setPromise({ resolve });
-      setOptions({ title, message });
-    });
-  }, []);
+  const confirm = useCallback(
+    (title: string, message: string, cancelText: string = "Cancel", confirmText: string = "Confirm") => {
+      return new Promise<boolean>((resolve) => {
+        setPromise({ resolve });
+        setOptions({ title, message, cancelText, confirmText });
+      });
+    },
+    []
+  );
 
   const handleClose = () => {
     setPromise(null);

@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { clearAuth } from "@ring/redux/authActions";
 
 const initialState = { coupons: [] };
 
@@ -13,6 +14,9 @@ export const couponSlice = createSlice({
     removeCoupon: (state, action) => {
       state.coupons = state.coupons.filter((code) => code !== action.payload);
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(clearAuth, () => initialState);
   },
 });
 

@@ -19,7 +19,7 @@ public class AddressMapper {
      */
     public AddressDTO projectionToDTO(IAddress projection) {
 
-        Address address = projection.getAddress();
+        Address address = projection != null ? projection.getAddress() : new Address();
 
         return new AddressDTO(address.getId(),
                 address.getName(),
@@ -31,7 +31,7 @@ public class AddressMapper {
                 address.getDistrictId(),
                 address.getWardCode(),
                 address.getType(),
-                projection.getIsDefault());
+                projection != null ? projection.getIsDefault() : false);
     }
 
     /**

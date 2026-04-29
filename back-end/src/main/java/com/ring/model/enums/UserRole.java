@@ -6,7 +6,8 @@ import java.util.List;
 
 /**
  * Enum representing different user roles in the system as {@link UserRole}.
- * Each enum constant contains label, color, and a list of privileges associated with the role by default.
+ * Each enum constant contains label, color, and a list of privileges associated
+ * with the role by default.
  */
 @Getter
 public enum UserRole {
@@ -20,13 +21,16 @@ public enum UserRole {
                     PrivilegeType.CREATE_ADDRESS,
                     PrivilegeType.UPDATE_ADDRESS,
                     PrivilegeType.DELETE_ADDRESS,
+                    PrivilegeType.READ_CART,
+                    PrivilegeType.CREATE_CART,
+                    PrivilegeType.UPDATE_CART,
+                    PrivilegeType.DELETE_CART,
                     PrivilegeType.READ_ORDER,
                     PrivilegeType.WRITE_ORDER,
                     PrivilegeType.UPDATE_ORDER,
                     PrivilegeType.READ_REVIEW,
                     PrivilegeType.CREATE_REVIEW,
-                    PrivilegeType.UPDATE_REVIEW
-            )),
+                    PrivilegeType.UPDATE_REVIEW)),
     ROLE_SELLER("role.seller",
             "info",
             List.of(
@@ -58,8 +62,7 @@ public enum UserRole {
                     PrivilegeType.READ_REVIEW,
                     PrivilegeType.CREATE_REVIEW,
                     PrivilegeType.UPDATE_REVIEW,
-                    PrivilegeType.DELETE_REVIEW
-            )),
+                    PrivilegeType.DELETE_REVIEW)),
     ROLE_ADMIN("role.admin",
             "primary",
             List.of(
@@ -109,8 +112,7 @@ public enum UserRole {
                     PrivilegeType.READ_REVIEW,
                     PrivilegeType.CREATE_REVIEW,
                     PrivilegeType.UPDATE_REVIEW,
-                    PrivilegeType.DELETE_REVIEW
-            )),
+                    PrivilegeType.DELETE_REVIEW)),
 
     ROLE_GUEST("role.guest",
             "warning",
@@ -119,13 +121,13 @@ public enum UserRole {
                     PrivilegeType.READ_USER,
                     PrivilegeType.READ_PROFILE,
                     PrivilegeType.READ_ADDRESS,
+                    PrivilegeType.READ_CART,
                     PrivilegeType.READ_BANNER,
                     PrivilegeType.READ_COUPON,
                     PrivilegeType.READ_ORDER,
                     PrivilegeType.READ_SHOP,
                     PrivilegeType.READ_REVIEW,
-                    PrivilegeType.READ_ROLE
-            ));
+                    PrivilegeType.READ_ROLE));
 
     private final String label;
     private final String color;

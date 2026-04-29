@@ -2,13 +2,7 @@ import { Fragment, Suspense, useCallback, useState, useEffect, lazy } from "reac
 import { useGetMyReviewsScrollInfiniteQuery } from "../../features/reviews/reviewsApiSlice";
 import { Message } from "@ring/ui/Components";
 import { capitalize, debounce } from "lodash-es";
-import {
-  LoadContainer,
-  MessageContainer,
-  PlaceholderContainer,
-  StyledEmptyIcon,
-  StyledDialogTitle,
-} from "../custom/ProfileComponents";
+import { LoadContainer, MessageContainer, PlaceholderContainer, StyledDialogTitle } from "../custom/ProfileComponents";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import useAuth from "../../hooks/useAuth";
@@ -119,10 +113,7 @@ const ReviewsList = ({ mobileMode, tabletMode, pending, setPending }) => {
           })
         ) : (
           <MessageContainer>
-            <Message>
-              <StyledEmptyIcon />
-              {capitalize(t("message.empty", { item: t("review.label") }))}
-            </Message>
+            <Message>{capitalize(t("message.empty", { item: t("review.label") }))}</Message>
           </MessageContainer>
         )}
       </>

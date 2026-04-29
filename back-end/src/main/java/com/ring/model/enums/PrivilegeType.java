@@ -26,6 +26,11 @@ public enum PrivilegeType {
     UPDATE_ADDRESS("update:address", "update.address"),
     DELETE_ADDRESS("delete:address", "delete.address"),
 
+    READ_CART("read:cart", "read.cart"),
+    CREATE_CART("create:cart", "create.cart"),
+    UPDATE_CART("update:cart", "update.cart"),
+    DELETE_CART("delete:cart", "delete.cart"),
+
     READ_BANNER("read:banner", "read.banner"),
     CREATE_BANNER("create:banner", "create.banner"),
     UPDATE_BANNER("update:banner", "update.banner"),

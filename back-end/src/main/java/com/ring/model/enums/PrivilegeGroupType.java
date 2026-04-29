@@ -22,7 +22,7 @@ public enum PrivilegeGroupType {
                     PrivilegeType.CREATE_USER,
                     PrivilegeType.UPDATE_USER,
                     PrivilegeType.DELETE_USER)),
-    PROFILE_PRIVILEGE("profiles",
+    PROFILE_PRIVILEGE("profile",
             List.of(
                     PrivilegeType.READ_PROFILE,
                     PrivilegeType.UPDATE_PROFILE)),
@@ -32,6 +32,12 @@ public enum PrivilegeGroupType {
                     PrivilegeType.CREATE_ADDRESS,
                     PrivilegeType.UPDATE_ADDRESS,
                     PrivilegeType.DELETE_ADDRESS)),
+    CART_PRIVILEGE("carts",
+            List.of(
+                    PrivilegeType.READ_CART,
+                    PrivilegeType.CREATE_CART,
+                    PrivilegeType.UPDATE_CART,
+                    PrivilegeType.DELETE_CART)),
     BANNER_PRIVILEGE("banners",
             List.of(
                     PrivilegeType.READ_BANNER,

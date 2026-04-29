@@ -1,6 +1,5 @@
 package com.ring.dto.request;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -26,6 +25,5 @@ public class CalculateRequest {
 
     private String coupon;
 
-    @Valid
     private AddressRequest address;
 }

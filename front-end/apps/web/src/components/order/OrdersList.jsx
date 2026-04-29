@@ -3,7 +3,6 @@ import { useGetOrdersByUserScrollInfiniteQuery } from "../../features/orders/ord
 import {
   MainContainer,
   StyledDialogTitle,
-  StyledEmptyIcon,
   ToggleGroupContainer,
   MessageContainer,
   LoadContainer,
@@ -225,10 +224,7 @@ const OrdersList = ({ pending, setPending, mobileMode, tabletMode }) => {
       })
     ) : (
       <MessageContainer>
-        <Message>
-          <StyledEmptyIcon />
-          {capitalize(t("message.empty", { item: t("order.label") }))}
-        </Message>
+        <Message>{capitalize(t("message.empty", { item: t("order.label") }))}</Message>
       </MessageContainer>
     );
   } else if (isError) {

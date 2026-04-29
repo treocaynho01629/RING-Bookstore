@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { clearAuth } from "@ring/redux/authActions";
 
 const initialState = { addresses: [], defaultAddress: null };
 
@@ -36,6 +37,9 @@ export const addressSlice = createSlice({
     setStateDefaultAddress: (state, action) => {
       state.defaultAddress = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(clearAuth, () => initialState);
   },
 });
 

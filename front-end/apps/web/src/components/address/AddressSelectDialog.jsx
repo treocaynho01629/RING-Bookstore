@@ -7,7 +7,6 @@ import {
   useUpdateAddressMutation,
 } from "../../features/addresses/addressesApiSlice";
 import { useTranslation } from "react-i18next";
-import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
 import { Message } from "@ring/ui/Components";
 import useConfirm from "@ring/shared/useConfirm";
 import Dialog from "@mui/material/Dialog";
@@ -68,12 +67,6 @@ const PlaceholderContainer = styled.div`
   justify-content: center;
 `;
 
-const StyledEmptyIcon = styled(EmptyIcon)`
-  height: 70px;
-  width: 70px;
-  margin: ${({ theme }) => theme.spacing(1)} 0;
-  fill: ${({ theme }) => theme.vars.palette.text.icon};
-`;
 //#endregion
 
 const AddressSelectDialog = ({
@@ -595,7 +588,7 @@ const AddressSelectDialog = ({
                   size="large"
                   color="primary"
                   fullWidth
-                  onClick={() => handleOpen()}
+                  onClick={handleOpen}
                   aria-label={t("address.add")}
                 >
                   <AddHome />
@@ -604,10 +597,7 @@ const AddressSelectDialog = ({
               )}
               {!isLoading && !isError && !data?.ids?.length && !storeAddresses?.length && (
                 <MessageContainer>
-                  <Message>
-                    <StyledEmptyIcon />
-                    {t("address.empty", { ns: "authenticated" })}
-                  </Message>
+                  <Message>{t("address.empty", { ns: "authenticated" })}</Message>
                 </MessageContainer>
               )}
             </StyledSimpleBar>

@@ -93,7 +93,6 @@
       "import": "./dist/src/models/*.js",
       "require": "./dist/src/models/*.cjs"
     },
-    "./assets/empty": "./assets/empty.svg",
     "./assets/maintainance": "./assets/maintainance.svg"
   },
   "files": [

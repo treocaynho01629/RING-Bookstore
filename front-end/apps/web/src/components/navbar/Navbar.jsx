@@ -5,6 +5,7 @@ import { debounce } from "lodash-es";
 import { useColorScheme } from "@mui/material/styles";
 import { keyframes } from "@emotion/react";
 import { useTranslation } from "react-i18next";
+import { useGetMyCartQuery } from "../../features/cart/cartApiSlice";
 import Badge, { badgeClasses } from "@mui/material/Badge";
 import useAuth from "../../hooks/useAuth";
 import useLogout from "../../hooks/useLogout";
@@ -479,7 +480,6 @@ const PopoverComponents = ({ mode, setMode, cartProducts, username, image, handl
 const Navbar = () => {
   //#region construct
   const { t } = useTranslation();
-  const { cartProducts } = useCart();
   const location = useLocation();
   const showMenu = useMatch("/");
   const isTransparent = matchRoutes([{ path: "/" }, { path: "/product/*" }], location);
@@ -499,6 +499,13 @@ const Navbar = () => {
   // Other
   const { username, image } = useAuth();
   const signOut = useLogout();
+
+  // Cart
+  const { cartProducts } = useCart();
+  useGetMyCartQuery(undefined, {
+    skip: !username,
+    refetchOnMountOrArgChange: true,
+  });
 
   /**
    * Sign out

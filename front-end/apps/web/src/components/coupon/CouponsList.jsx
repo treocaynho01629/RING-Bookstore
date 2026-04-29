@@ -5,7 +5,6 @@ import {
   LoadContainer,
   PlaceholderContainer,
   MainContainer,
-  StyledEmptyIcon,
   ToggleGroupContainer,
 } from "../custom/ProfileComponents";
 import { Link, useSearchParams } from "react-router";
@@ -219,10 +218,7 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
       })
     ) : (
       <MessageContainer>
-        <Message>
-          <StyledEmptyIcon />
-          {capitalize(t("message.empty", { item: t("coupon.label") }))}
-        </Message>
+        <Message>{capitalize(t("message.empty", { item: t("coupon.label") }))}</Message>
       </MessageContainer>
     );
   } else if (isError) {
@@ -281,7 +277,7 @@ const CouponsList = ({ scrollPosition, mobileMode, tabletMode }) => {
               <CircularProgress size={30} color="primary" />
             </LoadContainer>
           )}
-          {!isLoading && !isFetching && !hasNextPage && (
+          {!isLoading && !isFetching && !hasNextPage && couponsContent?.length > 0 && (
             <Message color="warning">{capitalize(t("message.out", { item: t("coupon.label") }))}</Message>
           )}
         </MainContainer>

@@ -34,8 +34,6 @@ import com.ring.dto.response.ghn.GHNSwitchStatusResponse;
 import com.ring.dto.response.ghn.GHNOrderDetailResponse.GHNOrderDetail;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -72,8 +70,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class OrderServiceImpl implements OrderService {
-
-    private final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     private final OrderReceiptRepository orderRepo;
     private final OrderDetailRepository detailRepo;
@@ -120,7 +116,7 @@ public class OrderServiceImpl implements OrderService {
         // Get address for calculation
         AddressRequest addressRequest = request.getAddress();
         Address address = null;
-        if (addressRequest != null) {
+        if (addressRequest != null && addressRequest.getDistrictId() != null && addressRequest.getWardCode() != null) {
             address = Address.builder()
                     .districtId(addressRequest.getDistrictId())
                     .wardCode(addressRequest.getWardCode())

@@ -3,7 +3,6 @@ import { useState, lazy, Suspense, Fragment, memo, forwardRef } from "react";
 import { useGetReviewByBookIdQuery, useGetReviewsByBookIdQuery } from "../../features/reviews/reviewsApiSlice";
 import { Message, MobileExtendButton, Showmore, Title } from "@ring/ui/Components";
 import { numFormat } from "@ring/shared/utils/convert";
-import { ReactComponent as EmptyIcon } from "@ring/shared/assets/empty";
 import { useTranslation } from "react-i18next";
 import { ActionButtons } from "../product/detail/ProductAction";
 import { capitalize } from "lodash-es";
@@ -87,12 +86,6 @@ const Label = styled.span`
   }
 `;
 
-const StyledEmptyIcon = styled(EmptyIcon)`
-  height: 70px;
-  width: 70px;
-  margin: ${({ theme }) => theme.spacing(1)} 0;
-  fill: ${({ theme }) => theme.vars.palette.text.icon};
-`;
 //#endregion
 
 const Pagination = memo(AppPagination);
@@ -216,10 +209,7 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
             }
           })
         ) : (
-          <Message>
-            <StyledEmptyIcon />
-            {t("review.suggest")}
-          </Message>
+          <Message>{t("review.suggest")}</Message>
         )}
         {ids?.length > 0 && ids?.length < pagination.size && (
           <Message color="warning">{capitalize(t("message.out", { item: t("review.label") }))}</Message>
@@ -229,12 +219,7 @@ const ReviewComponent = ({ book, scrollIntoTab, tabletMode, pending, setPending,
   } else if (isError) {
     reviewsContent = <Message color="error">{error?.error || t("error.general")}</Message>;
   } else if (isUninitialized && productReviewsCount == 0) {
-    reviewsContent = (
-      <Message>
-        <StyledEmptyIcon />
-        {t("review.suggest")}
-      </Message>
-    );
+    reviewsContent = <Message>{t("review.suggest")}</Message>;
   }
 
   mainContent = (
