@@ -16,7 +16,6 @@ import com.ring.dto.response.ghn.GHNGetStoresResponse;
 import com.ring.dto.response.ghn.GHNBasicResponse;
 import com.ring.dto.response.ghn.GHNCreateOrderResponse.GHNCreateOrder;
 import com.ring.dto.response.ghn.GHNOrderDetailResponse.GHNOrderDetail;
-import com.ring.dto.response.ghn.GHNOrderDetailResponse;
 import com.ring.dto.response.ghn.GHNSwitchStatusResponse;
 
 /**

@@ -33,8 +33,11 @@ const DEFAULT_ADDRESS: AddressRequest = {
   name: "",
   companyName: "",
   phone: "",
-  city: "",
+  provinceId: -1,
+  districtId: -1,
+  wardCode: "",
   address: "",
+  detail: "",
   type: AddressType.OFFICE,
   isDefault: false,
 };
@@ -82,8 +85,11 @@ const ShopFormDialog = ({
         name: shop?.address?.name ?? "",
         companyName: shop?.address?.companyName ?? "",
         phone: shop?.address?.phone ?? "",
-        city: shop?.address?.city ?? "",
+        provinceId: -1,
+        districtId: -1,
+        wardCode: "",
         address: shop?.address?.address ?? "",
+        detail: "",
         type: (shop?.address?.type as AddressType) ?? AddressType.OFFICE,
         isDefault: shop?.address?.isDefault ?? false,
       });
@@ -250,7 +256,7 @@ const ShopFormDialog = ({
                 required
                 label={t("shop.form.city")}
                 fullWidth
-                value={address.city}
+                value={""}
                 onChange={(e) => setAddress((p) => ({ ...p, city: e.target.value }))}
                 error={!!err?.data?.errors?.["addressRequest.city"]}
                 helperText={err?.data?.errors?.["addressRequest.city"]}

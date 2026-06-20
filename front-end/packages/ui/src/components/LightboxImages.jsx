@@ -9,22 +9,30 @@ import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/thumbnails.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 
-const LightboxImages = ({ srcSetList, open, handleClose }) => {
+const LightboxImages = ({ src, open, handleClose }) => {
   const theme = useTheme();
   const mobileMode = useMediaQuery((theme) => theme.breakpoints.down("sm"));
-  const images = srcSetList?.map((srcSet, index) => {
-    return {
-      src: getImageSrc(srcSet, 450),
-      alt: `Image ${index + 1} of ${srcSetList?.length}`,
-      width: 600,
-      height: 600,
-      srcSet: Object.entries(srcSet).map(([key, value]) => ({
-        src: value,
-        width: +key,
-        height: +key,
-      })),
-      sizes: "(min-width: 450px) 450px, 100vw",
-    };
+  const images = src?.map((item, index) => {
+    if (Array.isArray(item)) {
+      return {
+        src: getImageSrc(item, 450),
+        alt: `Image ${index + 1} of ${src?.length}`,
+        width: 600,
+        height: 600,
+        srcSet: Object.entries(item).map(([key, value]) => ({
+          src: value,
+          width: +key,
+          height: +key,
+        })),
+      };
+    } else {
+      return {
+        src: item,
+        alt: `Image ${index + 1} of ${src?.length}`,
+        width: 600,
+        height: 600,
+      };
+    }
   });
 
   return (

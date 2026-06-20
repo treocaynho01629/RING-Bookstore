@@ -1,19 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { styled } from "@mui/material/styles";
-import { MenuItem, Paper, Skeleton, TextField, useTheme } from "@mui/material";
+import { styled, useTheme, type Theme } from "@mui/material/styles";
+import { MenuItem, Paper, Skeleton, TextField } from "@mui/material";
 import { SsidChart } from "@mui/icons-material";
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { TooltipProps } from "recharts";
 import { currencyFormat } from "@ring/shared";
 import { Title } from "../custom/Components";
@@ -72,17 +63,17 @@ interface YearsSelectProps {
   setYear: (year: number) => void;
 }
 
+interface SaleData {
+  value: number;
+  color: string;
+}
+
 function YearsSelect({ year, setYear }: YearsSelectProps) {
   const currYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currYear - i);
 
   return (
-    <TextField
-      select
-      size="small"
-      value={year}
-      onChange={(e) => setYear(Number(e.target.value))}
-    >
+    <TextField select size="small" value={year} onChange={(e) => setYear(Number(e.target.value))}>
       {years.map((y) => (
         <MenuItem key={`year-${y}`} value={y}>
           {y}
@@ -93,7 +84,9 @@ function YearsSelect({ year, setYear }: YearsSelectProps) {
 }
 
 interface CustomTooltipProps extends TooltipProps<number, string> {
-  theme: ReturnType<typeof useTheme>;
+  theme: Theme;
+  payload?: SaleData[];
+  label?: string;
 }
 
 function CustomTooltip({ active, payload, label, theme }: CustomTooltipProps) {
@@ -107,10 +100,10 @@ function CustomTooltip({ active, payload, label, theme }: CustomTooltipProps) {
   return (
     <TooltipContainer>
       <TooltipLabel>Tháng {label}</TooltipLabel>
-      <TooltipValue color={sales?.color as string}>
+      <TooltipValue color={sales?.color}>
         Doanh thu:&emsp;<span>{currencyFormat.format(salesVal)}</span>
       </TooltipValue>
-      <TooltipValue color={discount?.color as string}>
+      <TooltipValue color={discount?.color}>
         Giảm giá:&emsp;<span>{currencyFormat.format(-discountVal)}</span>
       </TooltipValue>
       <TooltipValue color={theme.palette.primary.main}>
@@ -143,7 +136,7 @@ export default function ChartSales({ shop, title }: ChartSalesProps) {
     shopId: shop ? String(shop) : undefined,
   });
 
-  const yearSales = data?.reduce<[number, number]>(
+  const yearSales = (data as ChartDTO[] | undefined)?.reduce<[number, number]>(
     (result, month) => {
       const d = month?.data;
       result[0] += d?.discount ?? 0;
@@ -153,7 +146,7 @@ export default function ChartSales({ shop, title }: ChartSalesProps) {
     [0, 0]
   );
 
-  const chartData = isLoading ? TEMP_DATA : data ?? TEMP_DATA;
+  const chartData = isLoading ? TEMP_DATA : (data ?? TEMP_DATA);
 
   return (
     <Paper

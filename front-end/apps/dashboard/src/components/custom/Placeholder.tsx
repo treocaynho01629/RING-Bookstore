@@ -1,8 +1,7 @@
+import Box, { type BoxProps } from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
-import Box from "@mui/material/Box";
 
-const Placeholder = (props) => {
-  const { children } = props;
+const Placeholder = ({ children, ...props }: BoxProps) => {
 
   return (
     <Box position="relative" width="100%" height="100%" {...props}>

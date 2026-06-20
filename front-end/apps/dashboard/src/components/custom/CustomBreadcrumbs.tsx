@@ -1,11 +1,12 @@
 import { styled } from "@mui/material/styles";
+import type { ComponentProps } from "react";
 import { useTranslations } from "next-intl";
 import { Home } from "@mui/icons-material";
 import { Link, usePathname } from "@/i18n/navigation";
+import { locales } from "@ring/shared/enums/locales";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Skeleton from "@mui/material/Skeleton";
 import MuiLink from "@mui/material/Link";
-import { locales } from "@ring/shared/enums/locales";
 
 //#region styled
 const StyledBreadcrumbs = styled(Breadcrumbs)`
@@ -23,6 +24,8 @@ const StyledBreadcrumbs = styled(Breadcrumbs)`
   }
 `;
 //#endregion
+
+type AppHref = ComponentProps<typeof Link>["href"];
 
 interface CustomBreadcrumbsProps {
   items: { label: string; href: string }[];
@@ -65,9 +68,9 @@ export default function CustomBreadcrumbs({ items, loading = false }: CustomBrea
       ) : (
         items.map((item) => (
           <MuiLink
-            key={item.href}
             component={Link}
-            href={item.href}
+            key={item.href}
+            href={item.href as AppHref}
             title={item.label}
             underline="hover"
             color="inherit"

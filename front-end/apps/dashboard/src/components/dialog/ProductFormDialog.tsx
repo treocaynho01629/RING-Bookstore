@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, forwardRef, useEffect, useMemo, type FormEvent, type ChangeEvent } from "react";
+import { useState, forwardRef, useEffect, useMemo, type ChangeEvent, SubmitEvent } from "react";
 import {
   TextField,
   Autocomplete,
@@ -8,7 +8,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Box,
   MenuItem,
   useMediaQuery,
   Button,
@@ -203,6 +202,7 @@ const ProductFormDialog = ({
           publicId,
           name: `image-${publicId}`,
           url: getImageSrc(srcSet as Record<number, string>, 120) ?? "",
+          srcSet: Object.entries(srcSet).map(([key, value]) => value),
         };
         return image;
       }) ?? []
@@ -227,7 +227,11 @@ const ProductFormDialog = ({
       setDescription(product?.description ?? DEFAULT_FORM.description);
       setWeight(product?.weight ?? DEFAULT_FORM.weight);
       setPages(product?.pages ?? DEFAULT_FORM.pages);
-      setSize(product?.size ?? DEFAULT_FORM.size);
+      const size =
+        product?.length && product?.width && product?.height
+          ? `${String(product?.length).padStart(2, "0")} x ${String(product?.width).padStart(2, "0")} x ${String(product?.height).padStart(2, "0")}`
+          : DEFAULT_FORM.size;
+      setSize(size);
       setAmount(product?.amount ?? DEFAULT_FORM.amount);
       setAuthor(product?.author ?? DEFAULT_FORM.author);
       setDate(product?.date ? dayjs(product?.date) : DEFAULT_FORM.date);
@@ -384,7 +388,11 @@ const ProductFormDialog = ({
     setPrice((prev) => ({ ...prev, discount: numVal }));
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  /**
+   * Handle submit form
+   * @param e - Event
+   */
+  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (creating || updating || pending) return;
 
@@ -392,6 +400,7 @@ const ProductFormDialog = ({
     const { enqueueSnackbar } = await import("notistack");
 
     // Set data
+    const [length, width, height] = size.split("x").map(Number);
     const formData = new FormData();
     const request: BookRequest = {
       price: price.price,
@@ -404,7 +413,9 @@ const ProductFormDialog = ({
       pubId: Number(pub),
       cateId: Number(cate),
       weight,
-      size,
+      length,
+      width,
+      height,
       pages,
       date: date.format("YYYY-MM-DD"),
       language: language as BookLanguage,
@@ -730,7 +741,7 @@ const ProductFormDialog = ({
                 required
                 id="size"
                 label={t("product.sale.size")}
-                format="### x ### x ###"
+                format="## x ## x ##"
                 fullWidth
                 variant="outlined"
                 value={size}

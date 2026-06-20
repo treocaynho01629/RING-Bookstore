@@ -93,10 +93,12 @@
     "@ring/shared": "*",
     "dayjs": "^1.11.20",
     "react-lazy-load-image-component": "^1.6.3",
+    "simplebar-react": "^3.3.2",
     "yet-another-react-lightbox": "^3.29.2"
   },
   "devDependencies": {
     "@ring/eslint-config": "*",
+    "@ring/typescript-config": "*",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "tsup": "^8.5.1",

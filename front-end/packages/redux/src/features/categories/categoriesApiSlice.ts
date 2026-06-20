@@ -25,7 +25,7 @@ export interface CategoriesQueryArgs {
 /** Query arg for infinite endpoint (filters only; page comes from pageParam). */
 export type CategoriesInfiniteQueryArgs = Omit<CategoriesQueryArgs, "page" | "loadMore">;
 
-interface CatesResponse {
+export interface CatesResponse {
   content: CateResponse[];
   empty: boolean;
   page: number;

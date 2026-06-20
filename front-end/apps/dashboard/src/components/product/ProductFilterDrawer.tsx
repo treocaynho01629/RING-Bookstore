@@ -179,7 +179,7 @@ export default function ProductFilterDrawer({
   const handleOpenShops = () => {
     setOpenShop(true);
     if (!shopsData) {
-      getShops({}, true)
+      getShops(undefined, true)
         .unwrap()
         .catch((err) => console.error(err));
     }

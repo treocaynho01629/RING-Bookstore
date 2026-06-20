@@ -392,7 +392,7 @@ export default function DetailProductContent({ product, id }: DetailProductConte
                 </TableRow>
                 <TableRow>
                   <InfoLabel>{t("product.sale.size")}</InfoLabel>
-                  <InfoValue>{product?.size || "-"}</InfoValue>
+                  <InfoValue>{"-"}</InfoValue>
                 </TableRow>
                 <TableRow>
                   <InfoLabel>{t("product.sale.weight")}</InfoLabel>

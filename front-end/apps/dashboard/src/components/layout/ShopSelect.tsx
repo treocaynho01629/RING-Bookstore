@@ -106,7 +106,10 @@ const ShopSelect = ({ open, anchorEl, handleClose, shop, setShop, clearShop, dat
       <Divider />
       <MenuItem
         component={Link}
-        href="/shop?add=true"
+        href={{
+          pathname: "/shop",
+          query: { add: "true" },
+        }}
         sx={{ px: 1, fontSize: 14 }}
         onClick={handleClose}
       >

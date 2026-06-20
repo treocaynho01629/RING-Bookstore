@@ -446,7 +446,6 @@ const ManageProducts = () => {
                 sorting,
                 showProgressBars: isFetching,
                 showAlertBanner: isError,
-                showProgressBars: isLoading,
               },
               enableStickyHeader: true,
               initialState: {

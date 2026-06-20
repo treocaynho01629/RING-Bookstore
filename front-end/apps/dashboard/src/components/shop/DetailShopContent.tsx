@@ -190,7 +190,7 @@ export default function DetailShopContent({ shop, id }: DetailShopContentProps) 
                 </TableRow>
                 <TableRow>
                   <InfoLabel>{t("shop.form.city")}</InfoLabel>
-                  <InfoValue>{shop?.address?.city || "-"}</InfoValue>
+                  <InfoValue>{"-"}</InfoValue>
                 </TableRow>
                 <TableRow>
                   <InfoLabel>{t("shop.form.address")}</InfoLabel>

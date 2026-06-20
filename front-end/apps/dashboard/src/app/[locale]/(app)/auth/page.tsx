@@ -33,7 +33,7 @@ const ManageAuthorities = () => {
   const { data: role, isLoading: loadingRole } = useGetRoleQuery(selectedRole, {
     skip: !selectedRole,
   });
-  const { data: privileges, isLoading: loadingPrivileges } = useGetPrivilegesQuery();
+  const { data: privileges, isLoading: loadingPrivileges } = useGetPrivilegesQuery({});
   const [updateRole, { isLoading: updating }] = useUpdateRoleMutation();
 
   useEffect(() => {

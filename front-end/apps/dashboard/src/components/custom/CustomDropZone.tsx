@@ -1,8 +1,20 @@
-import { useEffect, useMemo, useRef, useState, type Dispatch, type MouseEvent, type SetStateAction } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  lazy,
+  Suspense,
+  type Dispatch,
+  type MouseEvent,
+  type SetStateAction,
+} from "react";
 import { useDropzone, type FileRejection } from "react-dropzone";
-import { BrokenImage, Close, Delete, MoreVert, PermMedia, RestartAlt } from "@mui/icons-material";
+import { BrokenImage, Close, ConstructionOutlined, Delete, MoreVert, PermMedia, RestartAlt } from "@mui/icons-material";
 import { Button, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip, styled } from "@mui/material";
 import { useTranslations } from "next-intl";
+
+const LightboxImages = lazy(() => import("@ring/ui/LightboxImages"));
 
 type UploadFile = File & { preview?: string };
 
@@ -10,6 +22,7 @@ export type ExistingImage = {
   publicId?: string | undefined;
   name?: string;
   url?: string | null;
+  srcSet?: string[] | undefined;
 };
 
 type PreviewItem = {
@@ -17,6 +30,7 @@ type PreviewItem = {
   publicId?: string | undefined;
   name: string;
   url: string;
+  srcSet?: string[] | undefined;
   file?: File;
   isRemoved: boolean;
 };
@@ -123,6 +137,7 @@ const ThumbContainer = styled("aside")`
 `;
 
 const Thumb = styled("div")`
+  cursor: pointer;
   display: flex;
   border: 0.5px solid ${({ theme }) => theme.vars?.palette?.action?.focus};
   height: 80px;
@@ -243,6 +258,7 @@ const CustomDropZone = ({
   const [dropErrors, setDropErrors] = useState<string[]>([]);
   const [previews, setPreviews] = useState<PreviewItem[]>([]);
   const prevFilesRef = useRef<File[]>([]);
+  const [openPreview, setOpenPreview] = useState<boolean>(false);
   const toDropErrors = (rejections: readonly FileRejection[]) =>
     rejections.flatMap(({ file, errors }) =>
       errors.map(({ code }) => {
@@ -302,6 +318,7 @@ const CustomDropZone = ({
             publicId: image?.publicId ?? undefined,
             name: image?.name,
             url: image?.url ?? "",
+            srcSet: image?.srcSet ?? [],
             isRemoved: removePublicIds.indexOf(image?.publicId ?? "") !== -1,
           }))
         : [],
@@ -371,6 +388,7 @@ const CustomDropZone = ({
   };
 
   const actionItem = useMemo(() => previews.find((item) => item.key === menuItemKey) ?? null, [menuItemKey, previews]);
+  const previewSrc = useMemo(() => previews.map((item) => item.srcSet ?? item.url), [previews]);
 
   /**
    * Open the menu
@@ -453,8 +471,23 @@ const CustomDropZone = ({
     handleCloseMenu();
   };
 
+  /**
+   * Open the preview
+   */
+  const handleOpenPreview = () => {
+    setOpenPreview(true);
+  };
+
+  /**
+   * Close the preview
+   */
+  const handleClosePreview = () => {
+    setOpenPreview(false);
+  };
+
   const isActionMain = previews.findIndex((item) => item.key === actionItem?.key) === 0;
   const enableButtons = Boolean(actionItem && !isActionMain);
+  console.log(images);
 
   return (
     <StyledSection>
@@ -502,6 +535,7 @@ const CustomDropZone = ({
               >
                 <Thumb
                   className={`${item.publicId == undefined ? "file" : ""} ${index === 0 ? "main" : ""} ${item.isRemoved ? "remove" : ""}`}
+                  onClick={handleOpenPreview}
                 >
                   {index !== 0 && (
                     <StyledIconButton onClick={(e) => handleOpenMenu(e, item.key)}>
@@ -539,6 +573,11 @@ const CustomDropZone = ({
           <ListItemText>{actionItem?.isRemoved ? t("dropzone.restore") : t("dropzone.remove")}</ListItemText>
         </MenuItem>
       </Menu>
+      <Suspense fallback={null}>
+        {openPreview !== undefined && (
+          <LightboxImages {...{ src: previewSrc, open: openPreview, handleClose: handleClosePreview }} />
+        )}
+      </Suspense>
     </StyledSection>
   );
 };

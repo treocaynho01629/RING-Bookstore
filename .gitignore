@@ -1,6 +1,7 @@
-.env
+.env*
 .secrets
 .variables
 .vscode
+.vercel
 postgres-data
 tmp

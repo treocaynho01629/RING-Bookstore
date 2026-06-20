@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@ring/eslint-config": "*",
+    "@ring/typescript-config": "*",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "tsup": "^8.5.1",

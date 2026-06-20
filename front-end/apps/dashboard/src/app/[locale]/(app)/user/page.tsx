@@ -2,11 +2,7 @@
 
 import { useState, useMemo, lazy, Suspense } from "react";
 import { Delete, Edit, FilterAlt, Visibility } from "@mui/icons-material";
-import {
-  useGetUsersQuery,
-  useDeleteUserMutation,
-  useDeleteUsersMutation,
-} from "@/features/users/usersApiSlice";
+import { useGetUsersQuery, useDeleteUserMutation, useDeleteUsersMutation } from "@/features/users/usersApiSlice";
 import { MRT_ColumnDef, MRT_PaginationState, MRT_Row, MRT_SortingState, MRT_TableInstance } from "material-react-table";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
@@ -106,7 +102,14 @@ const ManageUsers = () => {
         header: t("general.id"),
         size: 80,
         Cell: ({ renderedCellValue, row }) => (
-          <MuiLink component={Link} href={`/user/${row.original.id}`} underline="hover">
+          <MuiLink
+            component={Link}
+            href={{
+              pathname: "/user/[id]",
+              params: { id: row.original.id },
+            }}
+            underline="hover"
+          >
             {idFormatter(Number(renderedCellValue))}
           </MuiLink>
         ),
@@ -142,9 +145,7 @@ const ManageUsers = () => {
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
             {(row.original.roles ?? []).map((role) => {
               const meta = getUserRole(role);
-              return (
-                <Chip key={role} size="small" color={meta?.color as any} label={t(meta?.label ?? role)} />
-              );
+              return <Chip key={role} size="small" color={meta?.color as any} label={t(meta?.label ?? role)} />;
             })}
             {(!row.original.roles || row.original.roles.length === 0) && "-"}
           </Box>
@@ -209,7 +210,10 @@ const ManageUsers = () => {
                 <MenuItem
                   key={0}
                   onClick={() => {
-                    router.push(`/user/${row.original.id}`);
+                    router.push({
+                      pathname: "/user/[id]",
+                      params: { id: row.original.id },
+                    });
                     closeMenu();
                   }}
                   sx={{ m: 0 }}
@@ -285,13 +289,7 @@ const ManageUsers = () => {
         }}
       />
       <Suspense fallback={null}>
-        {formOpen && (
-          <UserFormDialog
-            user={contextUser}
-            open={formOpen}
-            handleClose={handleCloseForm}
-          />
-        )}
+        {formOpen && <UserFormDialog user={contextUser} open={formOpen} handleClose={handleCloseForm} />}
       </Suspense>
     </Box>
   );

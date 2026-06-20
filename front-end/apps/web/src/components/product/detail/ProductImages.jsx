@@ -334,7 +334,7 @@ const ProductImages = ({ srcSetList, loadingLabel = "Loading..." }) => {
         />
       </ImgContainer>
       <Suspense fallback={null}>
-        {open !== undefined && <LightboxImages {...{ srcSetList, open, handleClose }} />}
+        {open !== undefined && <LightboxImages {...{ src: srcSetList, open, handleClose }} />}
       </Suspense>
     </>
   );

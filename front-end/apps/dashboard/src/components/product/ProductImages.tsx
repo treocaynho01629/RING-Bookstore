@@ -309,7 +309,7 @@ export default function ProductImages({ srcSetList, loadingLabel = "Loading...",
       </ImgContainer>
       <Suspense fallback={null}>
         {open !== undefined && (
-          <LightboxImages srcSetList={srcSetList ?? undefined} open={open} handleClose={handleClose} />
+          <LightboxImages src={srcSetList ?? undefined} open={open} handleClose={handleClose} />
         )}
       </Suspense>
     </>

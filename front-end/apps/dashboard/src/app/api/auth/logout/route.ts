@@ -9,19 +9,14 @@ export async function DELETE(request: NextRequest) {
     const refreshToken = token?.data.tokens.refresh;
 
     if (!refreshToken) {
-      return NextResponse.json(
-        { error: "No refresh token found" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "No refresh token found" }, { status: 401 });
     }
 
     const response = await logout(refreshToken);
     return response;
   } catch (error) {
     console.error("Logout API error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+``;

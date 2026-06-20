@@ -53,7 +53,10 @@ const ManageOrders = () => {
           row.original.id != null ? (
             <MuiLink
               component={Link}
-              href={`/order/${row.original.id}`}
+              href={{
+                pathname: '/order/[id]',
+                params: { id: row.original.id },
+              }}
               underline="hover"
               color="primary"
               onClick={(e) => e.stopPropagation()}
@@ -175,7 +178,10 @@ const ManageOrders = () => {
                   key={0}
                   onClick={() => {
                     if (row.original.id) {
-                      router.push(`/order/${row.original.id}`);
+                      router.push({
+                        pathname: "/order/[id]",
+                        params: { id: row.original.id },
+                      });
                     }
                     closeMenu();
                   }}

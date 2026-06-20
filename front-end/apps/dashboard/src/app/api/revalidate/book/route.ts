@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Book id is required" }, { status: 400 });
   }
 
-  revalidateTag(`book:${id}`);
+  revalidateTag(`book:${id}`, "max");
 
   const path = typeof body?.path === "string" ? body.path.trim() : "";
   if (path.startsWith("/")) {
