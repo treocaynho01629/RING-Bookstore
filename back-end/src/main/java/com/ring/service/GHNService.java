@@ -9,7 +9,6 @@ import com.ring.dto.request.ghn.GHNFeeRequest;
 import com.ring.dto.request.ghn.GHNCreateStoreRequest;
 import com.ring.dto.request.ghn.GHNGetStoresRequest;
 import com.ring.dto.request.ghn.GHNCreateOrderRequest;
-import com.ring.dto.request.ghn.GHNOrderDetailRequest;
 import com.ring.dto.request.ghn.GHNSwitchStatusRequest;
 import com.ring.dto.request.ghn.GHNUpdateOrderRequest;
 import com.ring.dto.response.ghn.GHNCreateStoreResponse;

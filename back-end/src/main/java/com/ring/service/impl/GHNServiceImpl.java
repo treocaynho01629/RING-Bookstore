@@ -56,7 +56,6 @@ public class GHNServiceImpl implements GHNService {
     private String url;
 
     private final RestTemplate restTemplate;
-    private final MessageService messageService;
 
     @Cacheable(cacheNames = AppConstants.PROVINCES)
     public List<ProvinceItemResponse> getProvinces() {

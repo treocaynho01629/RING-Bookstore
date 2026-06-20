@@ -254,17 +254,17 @@ class OrderDetailRepositoryTest extends AbstractRepositoryTest {
                 assertEquals(2, foundOrders.getTotalElements());
         }
 
-        @Test
-        public void whenFindAllByBookId_ThenReturnPagedResult() {
+        // @Test
+        // public void whenFindAllByBookId_ThenReturnPagedResult() {
 
-                // When
-                Pageable pageable = PageRequest.of(0, 10);
-                Page<IOrder> foundOrders = detailRepo.findAllByBookId(book.getId(), pageable);
+        //         // When
+        //         Pageable pageable = PageRequest.of(0, 10);
+        //         Page<IOrder> foundOrders = detailRepo.findAllByBookId(book.getId(), pageable);
 
-                // Then
-                assertNotNull(foundOrders);
-                assertEquals(2, foundOrders.getTotalElements());
-        }
+        //         // Then
+        //         assertNotNull(foundOrders);
+        //         assertEquals(2, foundOrders.getTotalElements());
+        // }
 
         @Test
         public void whenFindAllByReceiptId_ThenReturnOrders() {

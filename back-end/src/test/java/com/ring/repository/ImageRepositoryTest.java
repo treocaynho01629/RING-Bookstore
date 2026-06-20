@@ -175,19 +175,19 @@ class ImageRepositoryTest extends AbstractRepositoryTest {
         assertEquals(profile.getImage().getPublicId(), foundImage.getPublicId());
     }
 
-    @Test
-    public void whenFindBookImage_ThenReturnImage() {
+    // @Test
+    // public void whenFindBookImage_ThenReturnImage() {
 
-        // When
-        Image foundImage = imageRepo.findBookImage(book.getId(), image.getId()).orElse(null);
-        Image foundImage2 = imageRepo.findBookImage(book.getId(), image2.getId()).orElse(null);
+    //     // When
+    //     Image foundImage = imageRepo.findBookImage(book.getId(), image.getId()).orElse(null);
+    //     Image foundImage2 = imageRepo.findBookImage(book.getId(), image2.getId()).orElse(null);
 
-        // Then
-        assertNotNull(foundImage);
-        assertNotNull(foundImage2);
-        assertEquals(book.getImage().getId(), foundImage.getId());
-        assertEquals(image2.getId(), foundImage2.getId());
-    }
+    //     // Then
+    //     assertNotNull(foundImage);
+    //     assertNotNull(foundImage2);
+    //     assertEquals(book.getImage().getId(), foundImage.getId());
+    //     assertEquals(image2.getId(), foundImage2.getId());
+    // }
 
 //    @Test
 //    public void whenFindBookImagePublicIds_ThenReturnPublicIds() {

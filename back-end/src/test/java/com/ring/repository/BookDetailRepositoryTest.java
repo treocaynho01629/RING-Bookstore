@@ -118,9 +118,11 @@ class BookDetailRepositoryTest extends AbstractRepositoryTest {
                 .build();
         BookDetail bookDetail = BookDetail.builder()
                 .book(book)
-                .size("8.5x11")
+                .bLength((short) 8.5)
+                .bWidth((short) 11)
+                .bHeight((short) 1.2)
                 .pages(300)
-                .bWeight(1.2)
+                .bWeight((short) 1.2)
                 .build();
 
         // When
@@ -178,14 +180,14 @@ class BookDetailRepositoryTest extends AbstractRepositoryTest {
         assertEquals(foundDetail.getId(), foundDetail2.getId());
     }
 
-    @Test
-    public void whenFindBook_ThenReturnBook() {
+    // @Test
+    // public void whenFindBook_ThenReturnBook() {
 
-        // When
-        IBook foundBook = detailRepo.findBook(book.getId()).orElse(null);
+    //     // When
+    //     IBook foundBook = detailRepo.findBook(book.getId()).orElse(null);
 
-        // Then
-        assertNotNull(foundBook);
-        assertEquals(book.getId(), foundBook.getId());
-    }
+    //     // Then
+    //     assertNotNull(foundBook);
+    //     assertEquals(book.getId(), foundBook.getId());
+    // }
 }

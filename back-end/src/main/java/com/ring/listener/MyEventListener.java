@@ -166,7 +166,7 @@ public class MyEventListener {
             // Save GHN order code
             GHNCreateOrder response = ghnService.createOrder(request);
             detail.setOrderCode(response.getOrderCode());
-            detail.setClientOrderCode(detail.get);
+            detail.setClientOrderCode(detail.getClientOrderCode()); // TODO: Fix later
             detailRepo.save(detail);
         }
 

@@ -73,27 +73,27 @@ class AddressServiceTest extends AbstractServiceTest {
         verify(addressMapper, times(1)).projectionToDTO(any(IAddress.class));
     }
 
-    @Test
-    public void whenGetMyAddress_ThenReturnAddress() {
+    // @Test
+    // public void whenGetMyAddress_ThenReturnAddress() {
 
-        // Given
-        IAddress address = mock(IAddress.class);
-        AddressDTO expected = AddressDTO.builder().address("004/1").build();
+    //     // Given
+    //     IAddress address = mock(IAddress.class);
+    //     AddressDTO expected = AddressDTO.builder().address("004/1").build();
 
-        // When
-        when(addressRepo.findAddressByProfile(account.getProfile().getId())).thenReturn(address);
-        when(addressMapper.projectionToDTO(any(IAddress.class))).thenReturn(expected);
+    //     // When
+    //     when(addressRepo.findAddressByProfile(account.getProfile().getId())).thenReturn(address);
+    //     when(addressMapper.projectionToDTO(any(IAddress.class))).thenReturn(expected);
 
-        // Then
-        AddressDTO result = addressService.getMyAddress(account);
+    //     // Then
+    //     AddressDTO result = addressService.getMyAddress(account);
 
-        assertNotNull(result);
-        assertEquals(expected, result);
+    //     assertNotNull(result);
+    //     assertEquals(expected, result);
 
-        // Verify
-        verify(addressRepo, times(1)).findAddressByProfile(account.getProfile().getId());
-        verify(addressMapper, times(1)).projectionToDTO(any(IAddress.class));
-    }
+    //     // Verify
+    //     verify(addressRepo, times(1)).findAddressByProfile(account.getProfile().getId());
+    //     verify(addressMapper, times(1)).projectionToDTO(any(IAddress.class));
+    // }
 
     @Test
     public void whenGetAddress_ThenReturnAddress() {

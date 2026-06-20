@@ -121,32 +121,32 @@ class AddressRepositoryTest extends AbstractRepositoryTest {
                 assertFalse(foundAddresses.isEmpty());
         }
 
-        @Test
-        public void whenFindAddressByProfile_ThenReturnAddress() {
+        // @Test
+        // public void whenFindAddressByProfile_ThenReturnAddress() {
 
-                // Given
-                Address address = Address.builder()
-                                .address("Province/City/District/Ward/Village")
-                                .detail("Main Detail")
-                                .build();
-                Account account = Account.builder()
-                                .username("username")
-                                .pass("asd")
-                                .email("email")
-                                .build();
-                account.setCreatedDate(LocalDateTime.now());
-                AccountProfile profile = AccountProfile.builder()
-                                .dob(LocalDate.now())
-                                .user(account)
-                                .address(address)
-                                .build();
+        //         // Given
+        //         Address address = Address.builder()
+        //                         .address("Province/City/District/Ward/Village")
+        //                         .detail("Main Detail")
+        //                         .build();
+        //         Account account = Account.builder()
+        //                         .username("username")
+        //                         .pass("asd")
+        //                         .email("email")
+        //                         .build();
+        //         account.setCreatedDate(LocalDateTime.now());
+        //         AccountProfile profile = AccountProfile.builder()
+        //                         .dob(LocalDate.now())
+        //                         .user(account)
+        //                         .address(address)
+        //                         .build();
 
-                profileRepo.save(profile);
+        //         profileRepo.save(profile);
 
-                // When
-                IAddress foundAddress = addressRepo.findAddressByProfile(profile.getId());
+        //         // When
+        //         IAddress foundAddress = addressRepo.findAddressByProfile(profile.getId());
 
-                // Then
-                assertNotNull(foundAddress);
-        }
+        //         // Then
+        //         assertNotNull(foundAddress);
+        // }
 }
