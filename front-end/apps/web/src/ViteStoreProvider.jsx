@@ -47,6 +47,7 @@ const reducers = {
 };
 
 const devTools = import.meta.env.VITE_NODE_ENV === "development";
+const baseUrl = import.meta.env.VITE_API_URL;
 
 export default function ViteStoreProvider({ children }) {
   return (
@@ -54,6 +55,7 @@ export default function ViteStoreProvider({ children }) {
       {...{
         reducers,
         devTools,
+        baseUrl
       }}
     >
       {children}
