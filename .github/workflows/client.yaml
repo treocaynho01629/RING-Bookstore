@@ -6,6 +6,7 @@ env:
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   TURBO_TEAM: ${{ vars.VERCEL_TEAM }}
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:

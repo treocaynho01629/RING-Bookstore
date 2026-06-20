@@ -1,6 +1,7 @@
 name: Project RING! - Spring Boot CI/CD flow
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:

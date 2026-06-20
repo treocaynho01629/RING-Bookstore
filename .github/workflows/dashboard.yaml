@@ -7,6 +7,7 @@ env:
   TURBO_TEAM: ${{ vars.VERCEL_TEAM }}
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
