@@ -159,7 +159,7 @@ public class TokenServiceImpl implements TokenService {
                 .maxAge(tokenSettings.getRefreshTokenExpiration())
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("None")
+                .sameSite("Lax")
                 .build();
     }
 

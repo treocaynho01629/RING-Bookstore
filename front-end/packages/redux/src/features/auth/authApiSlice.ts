@@ -32,6 +32,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
       query: ({ token, source, credentials, persist }) => ({
         url: `/api/auth/authenticate?persist=${persist}`,
         method: "POST",
+        credentials: "include",
         headers: { response: token, source },
         body: { ...credentials },
       }),

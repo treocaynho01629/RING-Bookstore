@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import Turnstile from "@ring/auth/Turnstile";
 import PasswordInput from "@ring/ui/PasswordInput";
 import PasswordEvaluate from "../custom/PasswordEvaluate";
+import Box from "@mui/material/Box";
 
 const ResetTab = ({ resetToken, pending, setPending }) => {
   const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
@@ -31,6 +32,7 @@ const ResetTab = ({ resetToken, pending, setPending }) => {
 
   // Turnstile
   const [token, setToken] = useState("");
+  const [showTurnstile, setShowTurnstile] = useState(false);
 
   // Reset mutation
   const [reset, { isLoading: reseting }] = useResetMutation();
@@ -109,7 +111,10 @@ const ResetTab = ({ resetToken, pending, setPending }) => {
               : (err?.data?.errors?.newPass ?? t("change.new"))
           }
           size="small"
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            if (e.target.value) setShowTurnstile(true);
+          }}
           value={password}
           aria-invalid={validPass ? "false" : "true"}
           onFocus={() => setPassFocus(true)}
@@ -129,15 +134,17 @@ const ResetTab = ({ resetToken, pending, setPending }) => {
           error={(matchPass && !validMatch) || err?.data?.errors?.newPassRe}
         />
         <PasswordEvaluate {...{ password, onValid: (value) => setValidPass(value) }} />
-        <Turnstile
-          siteKey={turnstileSiteKey}
-          onSuccess={(turnstileToken) => setToken(turnstileToken)}
-          onExpire={() => setToken("")}
-          action="reset"
-          size="flexible"
-          theme={resolvedMode}
-          lang={i18n.language}
-        />
+        <Box sx={{ display: showTurnstile ? "block" : "none" }}>
+          <Turnstile
+            siteKey={turnstileSiteKey}
+            onSuccess={(turnstileToken) => setToken(turnstileToken)}
+            onExpire={() => setToken("")}
+            action="reset"
+            size="flexible"
+            theme={resolvedMode}
+            lang={i18n.language}
+          />
+        </Box>
         <div style={{ width: "100%" }}>
           <ConfirmButton
             variant="contained"

@@ -10,6 +10,7 @@ import { capitalize } from "lodash-es";
 import Turnstile from "@ring/auth/Turnstile";
 import PasswordInput from "@ring/ui/PasswordInput";
 import PasswordEvaluate from "../custom/PasswordEvaluate";
+import Box from "@mui/material/Box";
 
 const RegisterTab = ({ pending, setPending }) => {
   const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
@@ -44,6 +45,7 @@ const RegisterTab = ({ pending, setPending }) => {
 
   // Turnstile
   const [token, setToken] = useState("");
+  const [showTurnstile, setShowTurnstile] = useState(false);
 
   // Register mutation
   const [register, { isLoading }] = useRegisterMutation();
@@ -151,7 +153,10 @@ const RegisterTab = ({ pending, setPending }) => {
           autoComplete="username"
           size="small"
           ref={userRef}
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={(e) => {
+            setUsername(e.target.value);
+            if (e.target.value) setShowTurnstile(true);
+          }}
           value={username}
           aria-invalid={validName ? "false" : "true"}
           onFocus={() => setUserFocus(true)}
@@ -223,15 +228,17 @@ const RegisterTab = ({ pending, setPending }) => {
             error={(matchPass && !validMatch) || err?.data?.errors?.pass != null}
           />
         </Stack>
-        <Turnstile
-          siteKey={turnstileSiteKey}
-          onSuccess={(turnstileToken) => setToken(turnstileToken)}
-          onExpire={() => setToken("")}
-          action="register"
-          size="flexible"
-          theme={resolvedMode}
-          lang={i18n.language}
-        />
+        <Box sx={{ display: showTurnstile ? "block" : "none" }}>
+          <Turnstile
+            siteKey={turnstileSiteKey}
+            onSuccess={(turnstileToken) => setToken(turnstileToken)}
+            onExpire={() => setToken("")}
+            action="register"
+            size="flexible"
+            theme={resolvedMode}
+            lang={i18n.language}
+          />
+        </Box>
         <TermText>
           {t("protected")}
           <br />

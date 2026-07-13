@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { useState, lazy, Suspense } from "react";
-import { useParams } from "react-router";
+import { Navigate, useParams } from "react-router";
 import { keyframes } from "@emotion/react";
 import { Grow } from "@mui/material";
 import { TransitionGroup } from "react-transition-group";
@@ -148,7 +148,7 @@ function AuthPage() {
                   />
                 </ContentContainer>
               </Grow>
-            ) : (
+            ) : tab == "login" ? (
               <Grow key={"login"} in={tab == "login"}>
                 <ContentContainer>
                   <LoginTab
@@ -159,7 +159,7 @@ function AuthPage() {
                   />
                 </ContentContainer>
               </Grow>
-            )}
+            ) : <Navigate to="/missing" replace />}
           </Suspense>
         </TransitionGroup>
       </Container>

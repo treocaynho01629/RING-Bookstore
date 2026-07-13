@@ -21,6 +21,7 @@ import Checkbox from "@mui/material/Checkbox";
 import TextField from "@mui/material/TextField";
 import Logout from "@mui/icons-material/Logout";
 import PasswordInput from "@ring/ui/PasswordInput";
+import Box from "@mui/material/Box";
 
 const LoginTab = ({ pending, setPending }) => {
   const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
@@ -49,6 +50,7 @@ const LoginTab = ({ pending, setPending }) => {
   const [validPass, setValidPass] = useState(true);
 
   // Turnstile
+  const [showTurnstile, setShowTurnstile] = useState(false);
   const [token, setToken] = useState("");
 
   // Error
@@ -149,7 +151,10 @@ const LoginTab = ({ pending, setPending }) => {
           id="username"
           autoComplete="username"
           size="small"
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={(e) => {
+            setUsername(e.target.value);
+            if (e.target.value) setShowTurnstile(true);
+          }}
           value={username}
         />
         <PasswordInput
@@ -159,15 +164,17 @@ const LoginTab = ({ pending, setPending }) => {
           onChange={(e) => setPassword(e.target.value)}
           value={password}
         />
-        <Turnstile
-          siteKey={turnstileSiteKey}
-          onSuccess={(turnstileToken) => setToken(turnstileToken)}
-          onExpire={() => setToken("")}
-          action="login"
-          size="flexible"
-          theme={resolvedMode}
-          lang={i18n.language}
-        />
+        <Box sx={{ display: showTurnstile ? "block" : "none" }}>
+            <Turnstile
+            siteKey={turnstileSiteKey}
+            onSuccess={(turnstileToken) => setToken(turnstileToken)}
+            onExpire={() => setToken("")}
+            action="login"
+            size="flexible"
+            theme={resolvedMode}
+                lang={i18n.language}
+            />
+        </Box>
         <SimpleActionContainer className="persistCheck">
           <FormControlLabel
             control={

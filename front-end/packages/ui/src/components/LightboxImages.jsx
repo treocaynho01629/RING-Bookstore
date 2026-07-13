@@ -13,25 +13,25 @@ const LightboxImages = ({ src, open, handleClose }) => {
   const theme = useTheme();
   const mobileMode = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const images = src?.map((item, index) => {
-    if (Array.isArray(item)) {
-      return {
-        src: getImageSrc(item, 450),
-        alt: `Image ${index + 1} of ${src?.length}`,
-        width: 600,
-        height: 600,
-        srcSet: Object.entries(item).map(([key, value]) => ({
-          src: value,
-          width: +key,
-          height: +key,
-        })),
-      };
-    } else {
+    if (typeof item === "string") {
       return {
         src: item,
         alt: `Image ${index + 1} of ${src?.length}`,
         width: 600,
         height: 600,
       };
+    } else {
+        return {
+          src: getImageSrc(item, 450),
+          alt: `Image ${index + 1} of ${src?.length}`,
+          width: 600,
+          height: 600,
+          srcSet: Object.entries(item).map(([key, value]) => ({
+            src: value,
+            width: +key,
+            height: +key,
+          })),
+        };
     }
   });
 

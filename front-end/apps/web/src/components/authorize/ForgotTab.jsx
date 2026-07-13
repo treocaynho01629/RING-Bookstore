@@ -13,6 +13,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import MarkEmailReadOutlined from "@mui/icons-material/MarkEmailReadOutlined";
 import styled from "@emotion/styled";
+import Box from "@mui/material/Box";
 
 //#region styled
 const expand = keyframes`
@@ -78,6 +79,7 @@ const ForgotTab = ({ pending, setPending }) => {
 
   // Turnstile
   const [token, setToken] = useState("");
+  const [showTurnstile, setShowTurnstile] = useState(false);
 
   const [sendForgot, { isLoading: sending }] = useForgotMutation(); // Request forgot hook
 
@@ -152,22 +154,27 @@ const ForgotTab = ({ pending, setPending }) => {
               ? capitalize(t("validation.constraints.pattern", { ns: "validation", field: t("email.label") }))
               : err?.data?.errors?.email
           }
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (e.target.value) setShowTurnstile(true);
+          }}
           value={email}
           fullWidth
           size="small"
           sx={{ my: 1 }}
           error={(email && !validEmail) || err?.data?.errors?.email}
         />
-        <Turnstile
-          siteKey={turnstileSiteKey}
-          onSuccess={(turnstileToken) => setToken(turnstileToken)}
-          onExpire={() => setToken("")}
-          action="forgot"
-          size="flexible"
-          theme={resolvedMode}
-          lang={i18n.language}
-        />
+        <Box sx={{ display: showTurnstile ? "block" : "none" }}>
+          <Turnstile
+            siteKey={turnstileSiteKey}
+            onSuccess={(turnstileToken) => setToken(turnstileToken)}
+            onExpire={() => setToken("")}
+            action="forgot"
+            size="flexible"
+            theme={resolvedMode}
+            lang={i18n.language}
+          />
+        </Box>
         <ButtonContainer>
           <ConfirmButton
             sx={{ mr: 4 }}
