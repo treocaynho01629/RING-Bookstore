@@ -131,6 +131,7 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
     isLoading: loadRelated,
     isSuccess: doneRelated,
     isError: errorRelated,
+    isFetching: fetchRelated,
     isUninitialized,
   } = useGetBooksQuery(
     {
@@ -392,7 +393,8 @@ const ProductDetailContainer = ({ loading, book, tabletMode }) => {
           </Box>
           <ProductsScroll
             {...{
-              loading: loadRelated,
+              isLoading: loadRelated,
+              isFetching: fetchRelated,
               data: relatedBooks,
               isSuccess: doneRelated,
               isError: errorRelated,

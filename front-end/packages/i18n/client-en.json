@@ -1,7 +1,7 @@
 {
   "cart": {
     "label": "Cart",
-    "title": "Products in cart",
+    "title": "Shopping cart",
     "empty": "Cart is empty",
     "empty.description": "Your cart is empty",
     "checkout": "Checkout",

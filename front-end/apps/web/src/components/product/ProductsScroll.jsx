@@ -20,7 +20,7 @@ const SliderContainer = styled.div`
   -ms-overflow-style: none;
   scrollbar-width: none;
   display: flex;
-  flex-direction: ${({ direction }) => direction || "column"};
+  flex-direction: column;
   max-height: 950px;
   overflow-y: hidden;
 
@@ -49,7 +49,6 @@ const ProductsScroll = ({
   isFetching,
   isSuccess,
   isUninitialized = false,
-  direction,
   scrollPosition,
 }) => {
   let productsScroll;
@@ -84,7 +83,7 @@ const ProductsScroll = ({
           color={`${isError || isUninitialized ? "error" : "primary"}`}
         />
       )}
-      <SliderContainer direction={direction}>{productsScroll}</SliderContainer>
+      <SliderContainer>{productsScroll}</SliderContainer>
     </Container>
   );
 };
