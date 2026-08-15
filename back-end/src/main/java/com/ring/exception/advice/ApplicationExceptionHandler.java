@@ -7,6 +7,7 @@ import com.ring.exception.*;
 import com.ring.service.impl.MessageService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,7 @@ import java.util.Map;
  * It handles different types of exceptions and returns appropriate
  * {@link ExceptionResponse} for each.
  */
+@Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class ApplicationExceptionHandler {
@@ -44,6 +46,7 @@ public class ApplicationExceptionHandler {
     public ExceptionResponse handleAllException(Exception e) {
 
         String message = messageService.getMessage("exception.internal.server.error");
+        log.error(message, e);
 
         return new ExceptionResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -56,6 +59,7 @@ public class ApplicationExceptionHandler {
     public ExceptionResponse handleRuntimeException(RuntimeException e) {
 
         String message = messageService.getMessage("exception.internal.server.error");
+        log.error(message, e);
 
         return new ExceptionResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -76,6 +80,7 @@ public class ApplicationExceptionHandler {
         });
 
         String message = messageService.getMessage("exception.invalid.argument");
+        log.error(message, e);
 
         return new ExceptionResponse(
                 HttpStatus.BAD_REQUEST.value(),
@@ -94,6 +99,7 @@ public class ApplicationExceptionHandler {
         errorsMap.put(e.getRequestPartName(), errorMessage);
 
         String message = messageService.getMessage("exception.invalid.argument");
+        log.error(message, e);
 
         return new ExceptionResponse(
                 HttpStatus.BAD_REQUEST.value(),
@@ -106,6 +112,8 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(MissingRequestCookieException.class)
     public ExceptionResponse handleMissingCookie(MissingRequestCookieException e) {
 
+        log.error("Missing cookie", e);
+
         return new ExceptionResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 AppConstants.MISSING_COOKIE,
@@ -114,6 +122,8 @@ public class ApplicationExceptionHandler {
 
     @ExceptionHandler(HttpResponseException.class)
     public ResponseEntity<ExceptionResponse> handleResponseException(HttpResponseException e) {
+
+        log.error("Response exception", e);
 
         ExceptionResponse response = new ExceptionResponse(
                 e.getStatus().value(),
@@ -127,6 +137,8 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ExceptionResponse handleResourceNotFoundException(ResourceNotFoundException e) {
 
+        log.error("Resource not found", e);
+
         return new ExceptionResponse(
                 HttpStatus.NOT_FOUND.value(),
                 e.getError(),
@@ -137,6 +149,8 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(PaymentException.class)
     public ExceptionResponse handlePaymentException(PaymentException e) {
 
+        log.error("Payment exception", e);
+
         return new ExceptionResponse(
                 HttpStatus.PAYMENT_REQUIRED.value(),
                 e.getError(),
@@ -145,6 +159,8 @@ public class ApplicationExceptionHandler {
 
     @ExceptionHandler(GHNException.class)
     public ResponseEntity<ExceptionResponse> handleGHNException(GHNException e) {
+
+        log.error("GHN exception", e);
 
         ExceptionResponse response = new ExceptionResponse(
                 e.getStatus().value(),
@@ -158,6 +174,8 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(EntityOwnershipException.class)
     public ExceptionResponse handleEntityOwnershipException(EntityOwnershipException e) {
 
+        log.error("Entity ownership exception", e);
+
         return new ExceptionResponse(
                 HttpStatus.FORBIDDEN.value(),
                 e.getError(),
@@ -168,6 +186,8 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(ImageResizerException.class)
     public ExceptionResponse handleImageResizerException(ImageResizerException e) {
 
+        log.error("Image resizer failed", e);
+
         return new ExceptionResponse(
                 HttpStatus.EXPECTATION_FAILED.value(),
                 e.getError(),
@@ -177,6 +197,8 @@ public class ApplicationExceptionHandler {
     @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
     @ExceptionHandler(ImageUploadException.class)
     public ExceptionResponse handleImageUploadException(ImageUploadException e) {
+
+        log.error("Image upload failed", e);
 
         return new ExceptionResponse(
                 HttpStatus.EXPECTATION_FAILED.value(),
@@ -190,6 +212,7 @@ public class ApplicationExceptionHandler {
 
         String message = messageService.getMessage("exception.image.size",
                 new Object[] { e.getMaxUploadSize() / 1024 / 1024 });
+        log.error(message, e);
 
         return new ExceptionResponse(
                 e.getStatusCode().value(),
@@ -202,6 +225,7 @@ public class ApplicationExceptionHandler {
     public ExceptionResponse handleAuthorizationDeniedException(AuthorizationDeniedException e) {
 
         String message = messageService.getMessage("exception.authorization.failed");
+        log.error(message, e);
 
         return new ExceptionResponse(
                 HttpStatus.FORBIDDEN.value(),
@@ -213,6 +237,8 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ExceptionResponse handleBadCredentialsException(BadCredentialsException e) {
 
+        log.error("Bad credentials", e);
+
         return new ExceptionResponse(
                 HttpStatus.FORBIDDEN.value(),
                 AppConstants.AUTHORIZATION_FAILED,
@@ -222,6 +248,8 @@ public class ApplicationExceptionHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(TokenRefreshException.class)
     public ExceptionResponse handleTokenRefreshException(TokenRefreshException e) {
+
+        log.error("Token refresh failed", e);
 
         return new ExceptionResponse(
                 HttpStatus.FORBIDDEN.value(),
@@ -233,6 +261,8 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(ResetPasswordException.class)
     public ExceptionResponse handleResetPasswordException(ResetPasswordException e) {
 
+        log.error("Reset password failed", e);
+
         return new ExceptionResponse(
                 HttpStatus.FORBIDDEN.value(),
                 e.getError(),
@@ -242,6 +272,8 @@ public class ApplicationExceptionHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(CaptchaInvalidException.class)
     public ExceptionResponse handleInvalidCaptchaException(CaptchaInvalidException e) {
+
+        log.error("Invalid captcha", e);
 
         return new ExceptionResponse(
                 HttpStatus.FORBIDDEN.value(),
@@ -254,6 +286,7 @@ public class ApplicationExceptionHandler {
     public ExceptionResponse handleValidationException(HttpMessageNotReadableException e) {
 
         String message = messageService.getMessage("exception.invalid.argument");
+        log.error(message, e);
 
         if (e.getCause() instanceof InvalidFormatException ifx) {
             if (ifx.getTargetType() != null && ifx.getTargetType().isEnum()) {
@@ -277,6 +310,7 @@ public class ApplicationExceptionHandler {
     public ExceptionResponse handleUploadImageException(IOException e) {
 
         String message = messageService.getMessage("exception.image.upload");
+        log.error(message, e);
 
         return new ExceptionResponse(
                 HttpStatus.EXPECTATION_FAILED.value(),
