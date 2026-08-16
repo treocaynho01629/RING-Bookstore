@@ -156,7 +156,7 @@ public class TokenServiceImpl implements TokenService {
         return ResponseCookie
                 .from(AppConstants.REFRESH_TOKEN, value)
                 .path("/api/auth")
-                .maxAge(tokenSettings.getRefreshTokenExpiration())
+                .maxAge(tokenSettings.getRefreshTokenExpiration() / 1000) // Convert to seconds
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Lax")

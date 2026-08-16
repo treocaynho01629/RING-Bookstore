@@ -21,66 +21,67 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
-	private final AccountRepository accountRepo;
-	private final RefreshTokenRepository refreshTokenRepo;
+    private final AccountRepository accountRepo;
+    private final RefreshTokenRepository refreshTokenRepo;
 
-	private final TokenService tokenService;
-	private final MessageService messageService;
+    private final TokenService tokenService;
+    private final MessageService messageService;
 
-	public Account verifyRefreshToken(String token) {
+    @Transactional
+    public Account verifyRefreshToken(String token) {
 
-		// Check exists
-		if (token == null || token.isEmpty()) {
-			var errorMsg = messageService.getMessage("exception.invalid",
-					new Object[] { AppConstants.REFRESH_TOKEN_LABEL });
-			throw new HttpResponseException(HttpStatus.BAD_REQUEST,
-					AppConstants.INVALID_ARGUMENT,
-					errorMsg);
-		}
+        // Check exists
+        if (token == null || token.isEmpty()) {
+            var errorMsg = messageService.getMessage("exception.invalid",
+                    new Object[] { AppConstants.REFRESH_TOKEN_LABEL });
+            throw new HttpResponseException(HttpStatus.BAD_REQUEST,
+                    AppConstants.INVALID_ARGUMENT,
+                    errorMsg);
+        }
 
-		// Find user with token
-		String username = tokenService.extractRefreshUsername(token);
-		Account user = accountRepo.findByRefreshTokenAndUsername(token, username)
-				.orElseThrow(() -> {
-					var errorMsg = messageService.getMessage("exception.not.found",
-							new Object[] { AppConstants.REFRESH_TOKEN_LABEL });
-					return new ResourceNotFoundException(errorMsg);
-				});
+        // Find user with token
+        String username = tokenService.extractRefreshUsername(token);
+        Account user = accountRepo.findByRefreshTokenAndUsername(token, username)
+                .orElseThrow(() -> {
+                    var errorMsg = messageService.getMessage("exception.not.found",
+                            new Object[] { AppConstants.REFRESH_TOKEN_LABEL });
+                    return new ResourceNotFoundException(errorMsg);
+                });
 
-		// Verify token
-		if (username != null) {
-			if (!tokenService.isRefreshTokenValid(token, username)) { // Invalidate token
+        // Verify token
+        if (username != null) {
+            if (!tokenService.isRefreshTokenValid(token, username)) { // Invalidate token
 
-				// Remove token
-				refreshTokenRepo.deleteByRefreshToken(token);
-				var errorMsg = messageService.getMessage("exception.refresh.token.expired");
-				throw new TokenRefreshException(errorMsg);
-			}
-		}
+                // Remove token
+                refreshTokenRepo.deleteByRefreshToken(token);
+                var errorMsg = messageService.getMessage("exception.refresh.token.expired");
+                throw new TokenRefreshException(errorMsg);
+            }
+        }
 
-		return user;
-	}
+        return user;
+    }
 
-	@Transactional
-	public ResponseCookie generateRefreshCookie(Account user) {
+    @Transactional
+    public ResponseCookie generateRefreshCookie(Account user) {
 
-		String token = tokenService.generateRefreshToken(user); // New refresh token
-		RefreshToken refreshToken = RefreshToken.builder()
-				.refreshToken(token)
-				.user(user)
-				.build();
+        String token = tokenService.generateRefreshToken(user); // New refresh token
+        RefreshToken refreshToken = RefreshToken.builder()
+                .refreshToken(token)
+                .user(user)
+                .build();
 
-		// Set token
-		refreshTokenRepo.save(refreshToken);
-		return tokenService.generateRefreshCookie(token);
-	}
+        // Set token
+        refreshTokenRepo.save(refreshToken);
+        return tokenService.generateRefreshCookie(token);
+    }
 
-	@Transactional
-	public void clearRefreshToken(String token) {
-		refreshTokenRepo.deleteByRefreshToken(token);
-	}
+    @Transactional
+    public void clearRefreshToken(String token) {
+        refreshTokenRepo.deleteByRefreshToken(token);
+    }
 
-	public ResponseCookie clearRefreshCookie() {
-		return tokenService.clearRefreshCookie();
-	}
+    public ResponseCookie clearRefreshCookie() {
+        return tokenService.clearRefreshCookie();
+    }
 }
