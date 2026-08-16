@@ -9,7 +9,6 @@ import type {
   FetchBaseQueryArgs,
 } from "@reduxjs/toolkit/query";
 import type { RootState } from "./store";
-import { Mutex } from "async-mutex";
 
 // Base url
 let baseUrl: string = "";
@@ -17,8 +16,10 @@ export function setBaseUrl(newBaseUrl: string) {
   if (newBaseUrl) baseUrl = newBaseUrl;
 }
 
-// Mutex for preventing multiple requests
-const mutex = new Mutex();
+type BaseQueryResult = Awaited<ReturnType<typeof baseQuery>>;
+type RefreshOutcome = { ok: true } | { ok: false; result: BaseQueryResult };
+
+let refreshPromise: Promise<RefreshOutcome> | null = null;
 
 const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta> = async (
   args,
@@ -56,19 +57,14 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {
   return fetchBaseQuery(baseQueryParams)(args, api, extraOptions);
 };
 
-const baseQueryWithRefresh = async (args: FetchArgs, api: BaseQueryApi, extraOptions: {}) => {
-  // Wait until the mutex is available without locking it
-  await mutex.waitForUnlock();
-
-  let result = await baseQuery(args, api, extraOptions);
-
-  // Token expired
-  if (result?.meta?.response?.status === 401) {
-    // Checking whether the mutex is locked
-    if (!mutex.isLocked()) {
-      const release = await mutex.acquire();
+// Prevent multiple refresh token requests
+const ensureTokenRefreshed = async (
+  api: BaseQueryApi,
+  extraOptions: {}
+): Promise<RefreshOutcome> => {
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
       try {
-        // Auto refresh
         const refreshResult = await baseQuery(
           {
             url: "/api/auth/refresh-token",
@@ -80,16 +76,14 @@ const baseQueryWithRefresh = async (args: FetchArgs, api: BaseQueryApi, extraOpt
         );
         const { data, error } = refreshResult;
 
-        // Refresh succeed
         if (data) {
-          // Set new auth token
           const { token } = data as { token: string };
           api.dispatch(setAuth(token));
-          result = await baseQuery(args, api, extraOptions); // Refetch
+          return { ok: true };
+        }
 
-          // Refresh failed
-        } else if (error) {
-          // Logout
+        if (error) {
+        // Logout user
           await baseQuery(
             {
               url: "/api/auth/logout",
@@ -101,18 +95,29 @@ const baseQueryWithRefresh = async (args: FetchArgs, api: BaseQueryApi, extraOpt
           );
           api.dispatch(clearAuth());
           api.dispatch(apiSlice.util.resetApiState());
-
-          return refreshResult;
+          return { ok: false, result: refreshResult };
         }
+
+        return { ok: false, result: refreshResult };
       } finally {
-        // Release must be called once the mutex should be released again.
-        release();
+        refreshPromise = null;
       }
-    } else {
-      // Wait until the mutex is available without locking it
-      await mutex.waitForUnlock();
-      result = await baseQuery(args, api, extraOptions);
+    })();
+  }
+
+  return refreshPromise;
+};
+
+const baseQueryWithRefresh = async (args: FetchArgs, api: BaseQueryApi, extraOptions: {}) => {
+  let result = await baseQuery(args, api, extraOptions);
+
+  if (result?.meta?.response?.status === 401) {
+    const refresh = await ensureTokenRefreshed(api, extraOptions);
+    if (!refresh.ok) {
+      return refresh.result;
     }
+
+    result = await baseQuery(args, api, extraOptions);
   }
 
   return result;
