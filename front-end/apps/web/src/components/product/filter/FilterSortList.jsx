@@ -31,6 +31,7 @@ const FilterSortList = ({
   onChangePaginationMode,
 }) => {
   const { t } = useTranslation();
+  const isUnknownSort = !sortBooksBy.some((option) => option.value === pagination?.sortBy);
 
   /**
    * Change order by value
@@ -112,6 +113,7 @@ const FilterSortList = ({
                 {t(option.label)}
               </MenuItem>
             ))}
+            {isUnknownSort && <MenuItem value={pagination?.sortBy}>{t("search.sort.default")}</MenuItem>}
           </StyledInput>
           <StyledInput
             size="small"

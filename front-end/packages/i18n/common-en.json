@@ -294,7 +294,8 @@
       "favorite": "Favorite",
       "price": "Price",
       "in-stock": "In stock",
-      "featured": "Featured"
+      "featured": "Featured",
+      "default": "Most relevant"
     }
   },
   "pagination": {

@@ -294,7 +294,8 @@
       "favorite": "Yêu thích",
       "price": "Giá bán",
       "in-stock": "Còn hàng",
-      "featured": "Nổi bật"
+      "featured": "Nổi bật",
+      "default": "Phù hợp nhất"
     }
   },
   "pagination": {
